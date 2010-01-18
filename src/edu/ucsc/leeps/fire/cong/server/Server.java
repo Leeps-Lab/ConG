@@ -22,12 +22,12 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     }
 
     @Override
-    public void register(String name, String host) {
-        super.register(name, host);
+    public void register(String name, edu.ucsc.leeps.fire.client.ClientInterface client) {
+        super.register(name, client);
         clients.put(name, (ClientInterface)getClient(name));
         if (clients.size() >= 1) {
-            for (ClientInterface client : clients.values()) {
-                client.startTicking(60);
+            for (ClientInterface c : clients.values()) {
+                c.startTicking(60);
             }
         }
     }

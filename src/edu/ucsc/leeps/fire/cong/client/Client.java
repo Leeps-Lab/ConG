@@ -88,6 +88,6 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
 
     public static void main(String[] args) throws Exception {
         Client client = new Client();
-        Client.start(0, client, ServerInterface.class);
+        Client.start(0, client, ServerInterface.class, ClientInterface.class);
     }
 }
