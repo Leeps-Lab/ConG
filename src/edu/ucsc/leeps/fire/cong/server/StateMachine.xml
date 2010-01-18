@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml"
+       xmlns:trigger="http://leeps.ucsc.edu/FIRE"
+       version="1.0"
+       initialstate="waiting">
+    <state id="waiting">
+        <transition event="startPeriod" target="running" />
+    </state>
+    <state id="running">
+        <onentry>
+            <trigger:action name="startPeriod" />
+        </onentry>
+        <onexit>
+            <trigger:action name="endPeriod" />
+        </onexit>
+        <transition event="endPeriod" target="waiting"/>
+    </state>
+</scxml>
