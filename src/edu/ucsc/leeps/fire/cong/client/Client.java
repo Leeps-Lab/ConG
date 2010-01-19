@@ -1,9 +1,11 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
+import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import processing.core.PApplet;
+import processing.core.PFont;
 
 /**
  *
@@ -15,6 +17,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     private PEmbed embed;
     private ServerInterface server;
     private float percent, strategy;
+    private PeriodConfig periodConfig;
 
     @Override
     public void init(edu.ucsc.leeps.fire.server.ServerInterface server) {
@@ -31,17 +34,24 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         embed.addKeyListener(this);
     }
 
-    public void startTicking(int length) {
-        PeriodThread thread = new PeriodThread(this, length);
-        thread.start();
+    @Override
+    public void startPeriod() {
+        this.percent = 0;
+        super.startPeriod();
+    }
+
+    @Override
+    public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig _periodConfig) {
+        super.setPeriodConfig(_periodConfig);
+        this.periodConfig = (PeriodConfig) _periodConfig;
     }
 
     public void setStrategy(float strategy) {
         this.strategy = strategy;
     }
 
-    public void tick(float percent) {
-        this.percent = embed.width * percent;
+    public void tick(int secondsLeft) {
+        this.percent = embed.width * (secondsLeft / (float) periodConfig.getLength());
     }
 
     public void keyTyped(KeyEvent ke) {
@@ -63,10 +73,12 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     public class PEmbed extends PApplet {
 
         private int initWidth, initHeight;
+        private PFont font;
 
         public PEmbed(int initWidth, int initHeight) {
             this.initWidth = initWidth;
             this.initHeight = initHeight;
+            font = createFont("Mono", 12);
         }
 
         @Override

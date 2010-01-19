@@ -10,36 +10,37 @@ import java.util.Map;
  */
 public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerInterface {
 
-    Map<String, ClientInterface> clients;
+    private Map<String, ClientInterface> clients;
+    private PeriodConfig currentPeriodConfig;
 
     public Server() {
         super();
-        clients = new HashMap<String, ClientInterface>();
+        currentPeriodConfig = new PeriodConfig();
+        currentPeriodConfig.setInitialStrategy(0.5f);
+        currentPeriodConfig.setNumber(1);
+        currentPeriodConfig.setTimeConstrained(true);
+        currentPeriodConfig.setLength(60);
+        _currentPeriodConfig = currentPeriodConfig;
     }
 
     public void setStrategy(String name, float strategy) {
         clients.get(name).setStrategy(strategy);
     }
 
-    @Override
-    public void register(String name, edu.ucsc.leeps.fire.client.ClientInterface client) {
-        super.register(name, client);
-        clients.put(name, (ClientInterface)getClient(name));
-        if (clients.size() >= 1) {
-            for (ClientInterface c : clients.values()) {
-                c.startTicking(60);
-            }
-        }
-    }
-
-    @Override
-    public void unregister(String name) {
-        super.unregister(name);
-        clients.remove(name);
-    }
-
     public static void main(String[] args) throws Exception {
         Server server = new Server();
         Server.start(server, ClientInterface.class);
+    }
+
+    public boolean readyToStart() {
+        return clients.size() >= 1;
+    }
+
+    public void setClients(Map<String, edu.ucsc.leeps.fire.client.ClientInterface> _clients) {
+        clients = new HashMap<String, ClientInterface>();
+        for (String name : _clients.keySet()) {
+            ClientInterface client = (ClientInterface) _clients.get(name);
+            clients.put(name, client);
+        }
     }
 }

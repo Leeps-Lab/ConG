@@ -8,9 +8,7 @@ package edu.ucsc.leeps.fire.cong.client;
  *
  * @author jpettit
  */
-public interface ClientInterface {
-
-    public void startTicking(int length);
+public interface ClientInterface extends edu.ucsc.leeps.fire.client.ClientInterface {
 
     public void setStrategy(float strategy);
 }
