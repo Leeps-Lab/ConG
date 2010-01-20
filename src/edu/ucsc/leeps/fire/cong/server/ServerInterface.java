@@ -10,5 +10,5 @@ package edu.ucsc.leeps.fire.cong.server;
  */
 public interface ServerInterface {
 
-    public void setStrategy(String name, float strategy);
+    public void strategyChanged(String name);
 }

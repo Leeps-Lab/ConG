@@ -16,7 +16,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     private int width, height;
     private PEmbed embed;
     private ServerInterface server;
-    private float percent, strategy;
+    private float percent;
+    private float[] strategy;
     private PeriodConfig periodConfig;
 
     @Override
@@ -30,7 +31,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         setSize(embed.getSize());
         add(embed);
         percent = -1;
-        strategy = 0;
+        strategy = new float[] {0, 0};
         embed.addKeyListener(this);
     }
 
@@ -46,12 +47,16 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         this.periodConfig = (PeriodConfig) _periodConfig;
     }
 
-    public void setStrategy(float strategy) {
+    public float[] getStrategy() {
+        return strategy;
+    }
+
+    public void setStrategy(float[] strategy) {
         this.strategy = strategy;
     }
 
     public void tick(int secondsLeft) {
-        this.percent = embed.width * (secondsLeft / (float) periodConfig.length);
+        this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
     }
 
     public void keyTyped(KeyEvent ke) {
@@ -60,9 +65,11 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     public void keyPressed(KeyEvent ke) {
         if (ke.isActionKey()) {
             if (ke.getKeyCode() == KeyEvent.VK_UP) {
-                server.setStrategy(getClientName(), strategy + 0.01f);
+                strategy[0] += 0.01f;
+                server.strategyChanged(getClientName());
             } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
-                server.setStrategy(getClientName(), strategy - 0.01f);
+                strategy[0] -= 0.01f;
+                server.strategyChanged(getClientName());
             }
         }
     }
@@ -93,7 +100,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
             fill(0);
             stroke(0);
             if (percent >= 0) {
-                ellipse(percent, 20 + ((1 - strategy) * (height - 40)), 10, 10);
+                ellipse(percent, 20 + ((1 - strategy[0]) * (height - 40)), 10, 10);
+                ellipse(percent, 20 + ((1 - strategy[1]) * (height - 40)), 10, 10);
             }
         }
     }

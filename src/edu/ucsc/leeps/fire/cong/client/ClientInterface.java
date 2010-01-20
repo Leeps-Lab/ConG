@@ -10,5 +10,7 @@ package edu.ucsc.leeps.fire.cong.client;
  */
 public interface ClientInterface extends edu.ucsc.leeps.fire.client.ClientInterface {
 
-    public void setStrategy(float strategy);
+    public void setStrategy(float[] strategy);
+
+    public float[] getStrategy();
 }

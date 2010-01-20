@@ -14,7 +14,8 @@ import edu.ucsc.leeps.fire.cong.server.Server;
 public class Main {
     
     public static void main(String[] args) throws Exception {
-        Server.main(new String[]{"localhost", "localhost"});
+        Server.main(new String[]{"localhost", "localhost", "configs/test.csv"});
         Client.main(new String[]{"player1", "localhost"});
+        Client.main(new String[]{"player2", "localhost"});
     }
 }

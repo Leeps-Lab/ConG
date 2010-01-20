@@ -11,4 +11,6 @@ package edu.ucsc.leeps.fire.cong.server;
 public class PeriodConfig extends edu.ucsc.leeps.fire.server.PeriodConfig {
 
     public float initialStrategy;
+    public PayoffFunction payoffFunction;
+    public StrategySetGenerator strategySetGenerator;
 }
