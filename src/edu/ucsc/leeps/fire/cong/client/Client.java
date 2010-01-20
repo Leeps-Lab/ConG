@@ -51,7 +51,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     public void tick(int secondsLeft) {
-        this.percent = embed.width * (secondsLeft / (float) periodConfig.getLength());
+        this.percent = embed.width * (secondsLeft / (float) periodConfig.length);
     }
 
     public void keyTyped(KeyEvent ke) {
@@ -100,6 +100,10 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
 
     public static void main(String[] args) throws Exception {
         Client client = new Client();
-        Client.start(0, client, ServerInterface.class, ClientInterface.class);
+        if (args.length == 2) {
+            Client.start(args[0], args[1], client, ServerInterface.class, ClientInterface.class);
+        } else {
+            Client.start(client, ServerInterface.class, ClientInterface.class);
+        }
     }
 }

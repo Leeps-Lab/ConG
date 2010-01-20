@@ -10,13 +10,5 @@ package edu.ucsc.leeps.fire.cong.server;
  */
 public class PeriodConfig extends edu.ucsc.leeps.fire.server.PeriodConfig {
 
-    private float initialStrategy;
-
-    public float getInitialStrategy() {
-        return initialStrategy;
-    }
-
-    public void setInitialStrategy(float initialStrategy) {
-        this.initialStrategy = initialStrategy;
-    }
+    public float initialStrategy;
 }

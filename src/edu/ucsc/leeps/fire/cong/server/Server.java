@@ -11,16 +11,10 @@ import java.util.Map;
 public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerInterface {
 
     private Map<String, ClientInterface> clients;
-    private PeriodConfig currentPeriodConfig;
 
     public Server() {
-        super();
-        currentPeriodConfig = new PeriodConfig();
-        currentPeriodConfig.setInitialStrategy(0.5f);
-        currentPeriodConfig.setNumber(1);
-        currentPeriodConfig.setTimeConstrained(true);
-        currentPeriodConfig.setLength(60);
-        _currentPeriodConfig = currentPeriodConfig;
+        super(PeriodConfig.class);
+        clients = new HashMap<String, ClientInterface>();
     }
 
     public void setStrategy(String name, float strategy) {
@@ -29,7 +23,13 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
 
     public static void main(String[] args) throws Exception {
         Server server = new Server();
-        Server.start(server, ClientInterface.class);
+        String serverHost = null;
+        String clientHost = null;
+        if (args.length == 2) {
+            serverHost = args[0];
+            clientHost = args[1];
+        }
+        Server.start(serverHost, clientHost, server);
     }
 
     public boolean readyToStart() {
@@ -37,7 +37,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     }
 
     public void setClients(Map<String, edu.ucsc.leeps.fire.client.ClientInterface> _clients) {
-        clients = new HashMap<String, ClientInterface>();
+        clients.clear();
         for (String name : _clients.keySet()) {
             ClientInterface client = (ClientInterface) _clients.get(name);
             clients.put(name, client);
