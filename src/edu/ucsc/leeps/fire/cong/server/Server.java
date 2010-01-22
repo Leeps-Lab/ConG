@@ -44,10 +44,10 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         return clients.size() >= 1;
     }
 
-    public void setClients(Map<String, edu.ucsc.leeps.fire.client.ClientInterface> _clients) {
+    public void setClients(Map<String, edu.ucsc.leeps.fire.client.ClientInterface> superClients) {
         clients.clear();
-        for (String name : _clients.keySet()) {
-            ClientInterface client = (ClientInterface) _clients.get(name);
+        for (String name : superClients.keySet()) {
+            ClientInterface client = (ClientInterface) superClients.get(name);
             clients.put(name, client);
         }
     }

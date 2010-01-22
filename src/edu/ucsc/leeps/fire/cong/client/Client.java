@@ -42,9 +42,9 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     @Override
-    public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig _periodConfig) {
-        super.setPeriodConfig(_periodConfig);
-        this.periodConfig = (PeriodConfig) _periodConfig;
+    public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
+        super.setPeriodConfig(superPeriodConfig);
+        this.periodConfig = (PeriodConfig) superPeriodConfig;
     }
 
     public float[] getStrategy() {
