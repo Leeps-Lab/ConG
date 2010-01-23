@@ -2,7 +2,6 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 
 /**
@@ -19,12 +18,17 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         clients = new HashMap<String, ClientInterface>();
     }
 
+    @Override
     public void strategyChanged(String name) {
-        ClientInterface client = clients.get(name);
-        client.setStrategy(
-                periodConfig.strategySetGenerator.getStrategy(
-                client,
-                new LinkedList<ClientInterface>(clients.values())));
+        float populationAverage = 0;
+        for (ClientInterface client : clients.values()) {
+            float strategy = client.getPercent_A();
+            populationAverage += strategy;
+        }
+        populationAverage /= clients.size();
+        for (ClientInterface client : clients.values()) {
+            client.setPercent_a(populationAverage);
+        }
     }
 
     public static void main(String[] args) throws Exception {
@@ -40,10 +44,12 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         Server.start(serverHost, clientHost, configPath, server);
     }
 
+    @Override
     public boolean readyToStart() {
         return clients.size() >= 1;
     }
 
+    @Override
     public void setClients(Map<String, edu.ucsc.leeps.fire.client.ClientInterface> superClients) {
         clients.clear();
         for (String name : superClients.keySet()) {
@@ -52,9 +58,9 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         }
     }
 
-    public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig _periodConfig) {
-        periodConfig = (PeriodConfig) _periodConfig;
+    @Override
+    public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
+        periodConfig = (PeriodConfig) superPeriodConfig;
         periodConfig.payoffFunction = new HomotopyPayoffFunction();
-        periodConfig.strategySetGenerator = new PopulationIncludeGenerator();
     }
 }

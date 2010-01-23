@@ -17,7 +17,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     private PEmbed embed;
     private ServerInterface server;
     private float percent;
-    private float[] strategy;
+    private float percent_A, percent_a;
     private PeriodConfig periodConfig;
 
     @Override
@@ -31,7 +31,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         setSize(embed.getSize());
         add(embed);
         percent = -1;
-        strategy = new float[] {0, 0};
+        percent_A = percent_a = 0;
         embed.addKeyListener(this);
     }
 
@@ -47,33 +47,49 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         this.periodConfig = (PeriodConfig) superPeriodConfig;
     }
 
-    public float[] getStrategy() {
-        return strategy;
+    @Override
+    public void setPercent_A(float percent_A) {
+        this.percent_A = percent_A;
     }
 
-    public void setStrategy(float[] strategy) {
-        this.strategy = strategy;
+    @Override
+    public void setPercent_a(float percent_a) {
+        this.percent_a = percent_a;
     }
 
+    @Override
+    public float getPercent_A() {
+        return percent_A;
+    }
+
+    @Override
     public void tick(int secondsLeft) {
         this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
     }
 
+    @Override
+    public void quickTick(int millisLeft) {
+        this.percent = embed.width * (1 - (millisLeft / ((float) periodConfig.length * 1000)));
+    }
+
+    @Override
     public void keyTyped(KeyEvent ke) {
     }
 
+    @Override
     public void keyPressed(KeyEvent ke) {
         if (ke.isActionKey()) {
             if (ke.getKeyCode() == KeyEvent.VK_UP) {
-                strategy[0] += 0.01f;
+                percent_A += 0.01f;
                 server.strategyChanged(getClientName());
             } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
-                strategy[0] -= 0.01f;
+                percent_A -= 0.01f;
                 server.strategyChanged(getClientName());
             }
         }
     }
 
+    @Override
     public void keyReleased(KeyEvent ke) {
     }
 
@@ -100,8 +116,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
             fill(0);
             stroke(0);
             if (percent >= 0) {
-                ellipse(percent, 20 + ((1 - strategy[0]) * (height - 40)), 10, 10);
-                ellipse(percent, 20 + ((1 - strategy[1]) * (height - 40)), 10, 10);
+                ellipse(percent, 20 + ((1 - percent_A) * (height - 40)), 10, 10);
+                ellipse(percent, 20 + ((1 - percent_a) * (height - 40)), 10, 10);
             }
         }
     }
