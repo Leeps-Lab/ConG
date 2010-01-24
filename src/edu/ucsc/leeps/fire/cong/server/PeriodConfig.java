@@ -12,4 +12,5 @@ public class PeriodConfig extends edu.ucsc.leeps.fire.server.PeriodConfig {
 
     public float initialStrategy;
     public TwoStrategyPayoffFunction payoffFunction;
+    public Class homotopy = HomotopyPayoffFunction.class;
 }

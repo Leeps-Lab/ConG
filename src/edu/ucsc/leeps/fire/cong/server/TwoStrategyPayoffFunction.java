@@ -9,6 +9,4 @@ import java.util.List;
 public interface TwoStrategyPayoffFunction {
 
     public int getPayoff(float percent, float A, float a);
-
-    public void setParameters(List<Float> parameters);
 }

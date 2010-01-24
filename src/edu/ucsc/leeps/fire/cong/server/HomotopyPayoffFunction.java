@@ -14,8 +14,8 @@ import java.util.List;
 public class HomotopyPayoffFunction implements TwoStrategyPayoffFunction, Serializable {
 
     private float maxPercent;
-    private float AaStart, AaEnd;
-    private float Ab, Ba, Bb;
+    public float AaStart, AaEnd;
+    public float Ab, Ba, Bb;
     private int numParameters = 6;
 
     @Override
@@ -34,17 +34,5 @@ public class HomotopyPayoffFunction implements TwoStrategyPayoffFunction, Serial
 
     public int getNumParameters() {
         return numParameters;
-    }
-
-    @Override
-    public void setParameters(List<Float> parameters) {
-        if (parameters.size() == numParameters) {
-            maxPercent = parameters.remove(0);
-            AaStart = parameters.remove(0);
-            AaEnd = parameters.remove(0);
-            Ab = parameters.remove(0);
-            Ba = parameters.remove(0);
-            Bb = parameters.remove(0);
-        }
     }
 }
