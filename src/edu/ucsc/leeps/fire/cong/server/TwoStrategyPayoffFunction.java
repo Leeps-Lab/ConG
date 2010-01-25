@@ -1,12 +1,13 @@
 package edu.ucsc.leeps.fire.cong.server;
 
-import java.util.List;
-
 /**
  *
  * @author jpettit
  */
 public interface TwoStrategyPayoffFunction {
 
-    public int getPayoff(float percent, float A, float a);
+    public int getPayoff(
+            float percent,
+            float A, float B,
+            float a, float b);
 }

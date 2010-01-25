@@ -21,16 +21,38 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     @Override
     public void strategyChanged(String name) {
         float populationAverage = 0;
-        for (ClientInterface client : clients.values()) {
-            float[] strategy = client.getStrategyAB();
-            populationAverage += strategy[0];
-        }
-        populationAverage /= clients.size();
-        for (ClientInterface client : clients.values()) {
-            float[] strategy = client.getStrategyAB();
-            client.setStrategyAB(
-                    strategy[0], strategy[1],
-                    populationAverage, 1 - populationAverage);
+        if (periodConfig.twoStrategyPayoffFunction != null) {
+            for (ClientInterface client : clients.values()) {
+                float[] strategy = client.getStrategyAB();
+                populationAverage += strategy[0];
+            }
+            populationAverage /= clients.size();
+            for (ClientInterface client : clients.values()) {
+                float[] strategy = client.getStrategyAB();
+                client.setStrategyAB(
+                        strategy[0], strategy[1],
+                        populationAverage, 1 - populationAverage);
+            }
+        } else if (periodConfig.RPSDPayoffFunction != null) {
+            float r, p, s, d;
+            r = p = s = d = 0;
+            for (ClientInterface client : clients.values()) {
+                float[] strategy = client.getStrategyRPSD();
+                r += strategy[0];
+                p += strategy[1];
+                s += strategy[2];
+                d += strategy[3];
+            }
+            r /= clients.size();
+            p /= clients.size();
+            s /= clients.size();
+            d /= clients.size();
+            for (ClientInterface client : clients.values()) {
+                float[] strategy = client.getStrategyRPSD();
+                client.setStrategyRPSD(
+                        strategy[0], strategy[1], strategy[2], strategy[3],
+                        r, p, s, d);
+            }
         }
     }
 
@@ -64,6 +86,8 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     @Override
     public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
         periodConfig = (PeriodConfig) superPeriodConfig;
-        periodConfig.payoffFunction = new HomotopyPayoffFunction();
+        periodConfig.twoStrategyPayoffFunction = new HomotopyPayoffFunction();
+        periodConfig.twoStrategyPayoffFunction = null;
+        periodConfig.RPSDPayoffFunction = new RPSDPayoffFunction();
     }
 }

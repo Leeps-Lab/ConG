@@ -91,8 +91,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
 
     @Override
     public void setStrategyRPSD(
-            float R, float P, float S, boolean D,
-            float r, float p, float s, boolean d) {
+            float R, float P, float S, float D,
+            float r, float p, float s, float d) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
