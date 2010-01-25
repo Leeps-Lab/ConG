@@ -48,21 +48,6 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     @Override
-    public void setPercent_A(float percent_A) {
-        this.percent_A = percent_A;
-    }
-
-    @Override
-    public void setPercent_a(float percent_a) {
-        this.percent_a = percent_a;
-    }
-
-    @Override
-    public float getPercent_A() {
-        return percent_A;
-    }
-
-    @Override
     public void tick(int secondsLeft) {
         this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
     }
@@ -91,6 +76,29 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
 
     @Override
     public void keyReleased(KeyEvent ke) {
+    }
+
+    @Override
+    public void setStrategyAB(float A, float B, float a, float b) {
+        this.percent_A = A;
+        this.percent_a = a;
+    }
+
+    @Override
+    public float[] getStrategyAB() {
+        return new float[]{percent_A, 1 - percent_A};
+    }
+
+    @Override
+    public void setStrategyRPSD(
+            float R, float P, float S, boolean D,
+            float r, float p, float s, boolean d) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public float[] getStrategyRPSD() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public class PEmbed extends PApplet {

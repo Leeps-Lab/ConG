@@ -22,12 +22,15 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     public void strategyChanged(String name) {
         float populationAverage = 0;
         for (ClientInterface client : clients.values()) {
-            float strategy = client.getPercent_A();
-            populationAverage += strategy;
+            float[] strategy = client.getStrategyAB();
+            populationAverage += strategy[0];
         }
         populationAverage /= clients.size();
         for (ClientInterface client : clients.values()) {
-            client.setPercent_a(populationAverage);
+            float[] strategy = client.getStrategyAB();
+            client.setStrategyAB(
+                    strategy[0], strategy[1],
+                    populationAverage, 1 - populationAverage);
         }
     }
 
