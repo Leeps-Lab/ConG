@@ -66,10 +66,10 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         if (ke.isActionKey()) {
             if (ke.getKeyCode() == KeyEvent.VK_UP) {
                 percent_A += 0.01f;
-                server.strategyChanged(getClientName());
+                server.strategyChanged(getFullName());
             } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
                 percent_A -= 0.01f;
-                server.strategyChanged(getClientName());
+                server.strategyChanged(getFullName());
             }
         }
     }
@@ -132,8 +132,10 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
 
     public static void main(String[] args) throws Exception {
         Client client = new Client();
-        if (args.length == 2) {
-            Client.start(args[0], args[1], client, ServerInterface.class, ClientInterface.class);
+        if (args.length == 3) {
+            Client.start(
+                    args[0], args[1], args[2],
+                    client, ServerInterface.class, ClientInterface.class);
         } else {
             Client.start(client, ServerInterface.class, ClientInterface.class);
         }

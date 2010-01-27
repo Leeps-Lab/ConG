@@ -18,8 +18,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         clients = new HashMap<String, ClientInterface>();
     }
 
-    @Override
-    public void strategyChanged(String name) {
+    private void doPopulationIncludeStrategyChanged() {
         float populationAverage = 0;
         if (periodConfig.twoStrategyPayoffFunction != null) {
             for (ClientInterface client : clients.values()) {
@@ -54,6 +53,11 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
                         r, p, s, d);
             }
         }
+    }
+
+    @Override
+    public void strategyChanged(String name) {
+        doPopulationIncludeStrategyChanged();
     }
 
     public static void main(String[] args) throws Exception {
