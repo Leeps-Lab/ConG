@@ -87,7 +87,15 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
         periodConfig = (PeriodConfig) superPeriodConfig;
         periodConfig.twoStrategyPayoffFunction = new HomotopyPayoffFunction();
-        periodConfig.twoStrategyPayoffFunction = null;
-        periodConfig.RPSDPayoffFunction = new RPSDPayoffFunction();
+        //periodConfig.twoStrategyPayoffFunction = null;
+        //periodConfig.RPSDPayoffFunction = new RPSDPayoffFunction();
+    }
+
+    @Override
+    public void endPeriod() {
+        for (ClientInterface client : clients.values()) {
+            client.setPeriodPoints(periodConfig.number);
+        }
+        super.endPeriod();
     }
 }

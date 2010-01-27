@@ -1,10 +1,12 @@
 package edu.ucsc.leeps.fire.cong.server;
 
+import java.io.Serializable;
+
 /**
  *
  * @author jpettit
  */
-public class RPSDPayoffFunction {
+public class RPSDPayoffFunction implements Serializable {
 
     public float Rr, Rp, Rs, Rd,
             Pr, Pp, Ps, Pd,
