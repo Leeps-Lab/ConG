@@ -14,21 +14,23 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private final int R = 0;
     private final int P = 1;
     private final int S = 2;
+    private final int D = 3;
     private float sideLength;
     private Marker rock, paper, scissors;
     private float maxDist;
-    private Marker current, planned;
+    private Marker current, planned, opponent;
     private float[] plannedDist;
     private float[] plannedStrat;
-
-    // current played strategies stored here (R, P, S)
+    // current played strategies stored here (R, P, S, D)
+    // D can only be 1 or 0
     private float[] playedStrat;
-    
+    // average of opponents' strategies
+    private float[] opponentStrat;
     private Slider[] stratSlider;
     private boolean mouseInTriangle;
     private TwoStrategySelector playOrDefer;
-    private boolean isPlaying;
     private Color rColor, pColor, sColor;
+    private boolean active;
 
     public RPSDisplay(float x, float y, int width, int height, PApplet applet) {
         super(x, y, width, height);
@@ -36,14 +38,17 @@ public class RPSDisplay extends Sprite implements MouseListener {
         mouseInTriangle = false;
         plannedDist = new float[3];
         plannedStrat = new float[3];
-        playedStrat = new float[3];
+        playedStrat = new float[4];
+        opponentStrat = new float[4];
         for (int i = R; i <= S; i++) {
             plannedDist[i] = 0f;
             plannedStrat[i] = 0f;
             playedStrat[i] = 0f;
+            opponentStrat[i] = 0f;
         }
 
-        isPlaying = false;
+        playedStrat[D] = 1.0f;
+        opponentStrat[D] = 1.0f;
 
         stratSlider = new Slider[3];
 
@@ -69,9 +74,11 @@ public class RPSDisplay extends Sprite implements MouseListener {
         // set up strategy markers
         current = new Marker(0, 0, false, MARKER_RADIUS + 2);
         current.setColor(50, 255, 50);
-        planned = new Marker(0, 0, true, MARKER_RADIUS);
+        planned = new Marker(0, 0, false, MARKER_RADIUS);
         planned.setAlpha(140);
         planned.setColor(25, 255, 25);
+        opponent = new Marker(0, 0, false, MARKER_RADIUS);
+        opponent.setColor(200, 40, 40);
 
         // set up Sliders
         stratSlider[R] = new Slider(50, width - 50, height / 2 + 50,
@@ -80,6 +87,8 @@ public class RPSDisplay extends Sprite implements MouseListener {
                 pColor, pLabel);
         stratSlider[S] = new Slider(50, width - 50, height / 2 + 150,
                 sColor, sLabel);
+
+        active = false;
 
         applet.addMouseListener(this);
     }
@@ -91,8 +100,6 @@ public class RPSDisplay extends Sprite implements MouseListener {
         float mouseX = applet.mouseX - origin.x;
         float mouseY = applet.mouseY - origin.y;
 
-        applet.background(255);
-
         applet.stroke(0);
         applet.strokeWeight(3);
         applet.line(rock.x, rock.y, paper.x, paper.y);
@@ -102,58 +109,60 @@ public class RPSDisplay extends Sprite implements MouseListener {
         paper.draw(applet);
         scissors.draw(applet);
 
-        calculatePlannedDist(mouseX - rock.x, rock.y - mouseY);
+        if (active) {
+            calculatePlannedDist(mouseX - rock.x, rock.y - mouseY);
 
-        if (plannedDist[R] <= maxDist && plannedDist[R] >= 0 && plannedDist[P] <= maxDist && plannedDist[P] >= 0 && plannedDist[S] <= maxDist && plannedDist[S] >= 0) {
+            if (plannedDist[R] <= maxDist && plannedDist[R] >= 0 && plannedDist[P] <= maxDist && plannedDist[P] >= 0 && plannedDist[S] <= maxDist && plannedDist[S] >= 0) {
 
-            mouseInTriangle = true;
-        } else {
-            mouseInTriangle = false;
-        }
-
-        if (mouseInTriangle) {
-            calculatePlannedStrats();
-            applet.noCursor();
-            planned.show();
-            planned.update(mouseX, mouseY);
-
-            for (int i = R; i <= S; i++) {
-                stratSlider[i].showPlan();
+                mouseInTriangle = true;
+            } else {
+                mouseInTriangle = false;
             }
-            stratSlider[R].setPlan(plannedStrat[R]);
-            stratSlider[P].setPlan(plannedStrat[P]);
-            stratSlider[S].setPlan(plannedStrat[S]);
-        } else {
-            planned.hide();
-            for (int i = R; i <= S; i++) {
-                stratSlider[i].hidePlan();
+
+            if (mouseInTriangle) {
+                calculatePlannedStrats();
+                applet.noCursor();
+                planned.show();
+                planned.update(mouseX, mouseY);
+
+                for (int i = R; i <= S; i++) {
+                    stratSlider[i].showPlan();
+                }
+                stratSlider[R].setPlan(plannedStrat[R]);
+                stratSlider[P].setPlan(plannedStrat[P]);
+                stratSlider[S].setPlan(plannedStrat[S]);
+            } else {
+                planned.hide();
+                for (int i = R; i <= S; i++) {
+                    stratSlider[i].hidePlan();
+                }
+                applet.cursor();
             }
-            applet.cursor();
-        }
 
-        if (!mouseInTriangle && applet.mousePressed) {
-            for (int i = R; i <= S; i++) {
-                if (stratSlider[i].isGrabbed()) {
-                    if (applet.keyPressed && applet.key == PApplet.CODED && applet.keyCode == PApplet.CONTROL) {
+            if (!mouseInTriangle && applet.mousePressed) {
+                for (int i = R; i <= S; i++) {
+                    if (stratSlider[i].isGrabbed()) {
+                        if (applet.keyPressed && applet.key == PApplet.CODED && applet.keyCode == PApplet.CONTROL) {
 
-                        float currentPos = stratSlider[i].getSliderPos();
-                        if (applet.mouseX > applet.pmouseX) {
-                            stratSlider[i].moveSlider(currentPos + stratSlider[i].getLength() / 300f);
-                        } else if (applet.mouseX < applet.pmouseX) {
-                            stratSlider[i].moveSlider(currentPos - stratSlider[i].getLength() / 300f);
+                            float currentPos = stratSlider[i].getSliderPos();
+                            if (applet.mouseX > applet.pmouseX) {
+                                stratSlider[i].moveSlider(currentPos + stratSlider[i].getLength() / 300f);
+                            } else if (applet.mouseX < applet.pmouseX) {
+                                stratSlider[i].moveSlider(currentPos - stratSlider[i].getLength() / 300f);
+                            }
+                        } else {
+                            stratSlider[i].moveSlider(mouseX);
                         }
-                    } else {
-                        stratSlider[i].moveSlider(mouseX);
+
+                        balanceStratValues(i, stratSlider[i].getStratValue());
+                        float[] coords = calculateStratCoords(playedStrat[R],
+                                playedStrat[P],
+                                playedStrat[S]);
+
+                        current.update(coords[0], coords[1]);
+
+                        break;
                     }
-
-                    balanceStratValues(i, stratSlider[i].getStratValue());
-                    float[] coords = calculateStratCoords(playedStrat[R],
-                            playedStrat[P],
-                            playedStrat[S]);
-
-                    current.update(coords[0], coords[1]);
-
-                    break;
                 }
             }
         }
@@ -161,6 +170,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         playOrDefer.draw(applet);
         planned.draw(applet);
         current.draw(applet);
+        opponent.draw(applet);
         for (int i = R; i <= S; i++) {
             stratSlider[i].draw(applet);
         }
@@ -168,65 +178,70 @@ public class RPSDisplay extends Sprite implements MouseListener {
         applet.popMatrix();
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
-        float mouseX = e.getX() - origin.x;
-        float mouseY = e.getY() - origin.y;
-        if (mouseInTriangle) {
-            calculatePlayedStrats(mouseX - rock.x, rock.y - mouseY);
-            current.update(mouseX, mouseY);
-            current.show();
+        if (active) {
+            float mouseX = e.getX() - origin.x;
+            float mouseY = e.getY() - origin.y;
+            if (mouseInTriangle) {
+                calculatePlayedStrats(mouseX - rock.x, rock.y - mouseY);
+                current.update(mouseX, mouseY);
+                current.show();
 
-            stratSlider[R].setStratValue(playedStrat[R]);
-            stratSlider[P].setStratValue(playedStrat[P]);
-            stratSlider[S].setStratValue(playedStrat[S]);
+                stratSlider[R].setStratValue(playedStrat[R]);
+                stratSlider[P].setStratValue(playedStrat[P]);
+                stratSlider[S].setStratValue(playedStrat[S]);
 
-            if (!isPlaying) {
-                isPlaying = true;
-                playOrDefer.chooseStrategyOne();
-            }
-        } else if (playOrDefer.mouseOnAButton(e.getX(), e.getY())) {
-            playOrDefer.pressButton();
-            if (playOrDefer.getSelection() == 1) {
-                if (!isPlaying) {
-                    isPlaying = true;
-                    for (int i = R; i <= S; i++) {
-                        playedStrat[i] = .33f;
-                        stratSlider[i].setStratValue(.33f);
+                if (playedStrat[D] == 1.0f) {
+                    playedStrat[D] = 0f;
+                    playOrDefer.chooseStrategyOne();
+                }
+            } else if (playOrDefer.mouseOnAButton(e.getX(), e.getY())) {
+                playOrDefer.pressButton();
+                if (playOrDefer.getSelection() == 1) {
+                    if (playedStrat[D] == 1.0f) {
+                        playedStrat[D] = 0f;
+                        for (int i = R; i <= S; i++) {
+                            playedStrat[i] = .33f;
+                            stratSlider[i].setStratValue(.33f);
+                        }
+                        float[] coords = calculateStratCoords(.33f, .33f, .33f);
+                        current.update(coords[0], coords[1]);
+                        current.show();
                     }
-                    float[] coords = calculateStratCoords(.33f, .33f, .33f);
-                    current.update(coords[0], coords[1]);
-                    current.show();
+                } else {
+                    if (playedStrat[D] == 0f) {
+                        playedStrat[D] = 1.0f;
+
+                        current.hide();
+                        for (int i = R; i <= S; i++) {
+                            playedStrat[i] = 0f;
+                            stratSlider[i].setStratValue(0f);
+                        }
+
+                    }
                 }
             } else {
-                if (isPlaying) {
-                    isPlaying = false;
-
-                    current.hide();
-                    for (int i = R; i <= S; i++) {
-                        playedStrat[i] = 0f;
-                        stratSlider[i].setStratValue(0f);
+                for (int i = 0; i < stratSlider.length; i++) {
+                    if (stratSlider[i].mouseOnHandle(mouseX, mouseY)) {
+                        stratSlider[i].grab();
+                        if (playedStrat[D] == 1.0f) {
+                            playedStrat[D] = 0f;
+                            current.show();
+                            playOrDefer.chooseStrategyOne();
+                        }
+                        break;
                     }
-
-                }
-            }
-        } else {
-            for (int i = 0; i < stratSlider.length; i++) {
-                if (stratSlider[i].mouseOnHandle(mouseX, mouseY)) {
-                    stratSlider[i].grab();
-                    if (!isPlaying) {
-                        isPlaying = true;
-                        current.show();
-                        playOrDefer.chooseStrategyOne();
-                    }
-                    break;
                 }
             }
         }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
         for (int i = 0; i < stratSlider.length; i++) {
             if (stratSlider[i].isGrabbed()) {
@@ -236,10 +251,82 @@ public class RPSDisplay extends Sprite implements MouseListener {
         }
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
+    }
+
+    public void setPlayerRPSD(float newR, float newP, float newS, float newD) {
+        playedStrat[R] = newR;
+        playedStrat[P] = newP;
+        playedStrat[S] = newS;
+        playedStrat[D] = newD;
+
+        for (int i = R; i <= S; i++) {
+            stratSlider[i].setStratValue(playedStrat[i]);
+        }
+
+        if (newD == 1.0f) {
+            current.hide();
+        } else {
+            current.show();
+            float[] coords = calculateStratCoords(newR, newP, newS);
+            current.update(coords[0], coords[1]);
+        }
+    }
+
+    public void setOpponentRPSD(float oppR, float oppP, float oppS, float oppD) {
+        opponentStrat[R] = oppR;
+        opponentStrat[P] = oppP;
+        opponentStrat[S] = oppS;
+        opponentStrat[D] = oppD;
+
+        if (oppD == 1.0f) {
+            opponent.hide();
+        } else {
+            opponent.show();
+            float[] coords = calculateStratCoords(oppR, oppP, oppS);
+            opponent.update(coords[0], coords[1]);
+            opponent.setAlpha(1.0f - oppD);
+        }
+    }
+
+    public float[] getPlayerRPSD() {
+        return playedStrat;
+    }
+
+    public void activate() {
+        active = true;
+    }
+
+    public void pause() {
+        active = false;
+    }
+
+    public void reset() {
+        active = false;
+        for (int i = R; i <= S; i++) {
+            plannedDist[i] = 0f;
+            plannedStrat[i] = 0f;
+            playedStrat[i] = 0f;
+            opponentStrat[i] = 0f;
+            stratSlider[i].setStratValue(0f);
+        }
+
+        playedStrat[D] = 1.0f;
+        opponentStrat[D] = 1.0f;
+        playOrDefer.chooseStrategyTwo();
+
+        current.hide();
+        planned.hide();
+        opponent.hide();
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     // calculate playedR, playedP, playedS from x, y
@@ -294,11 +381,11 @@ public class RPSDisplay extends Sprite implements MouseListener {
     }
 
     // calculate x, y coordinates given r, p, s values
-    private float[] calculateStratCoords(float R, float P, float S) {
+    private float[] calculateStratCoords(float r, float p, float s) {
         float[] coords = new float[2];
 
-        coords[0] = rock.x + (maxDist * P) / PApplet.sin(PApplet.PI / 3) + maxDist * S * PApplet.tan(PApplet.PI / 6);
-        coords[1] = rock.y - maxDist * S;
+        coords[0] = rock.x + (maxDist * p) / PApplet.sin(PApplet.PI / 3) + maxDist * s * PApplet.tan(PApplet.PI / 6);
+        coords[1] = rock.y - maxDist * s;
 
         return coords;
     }

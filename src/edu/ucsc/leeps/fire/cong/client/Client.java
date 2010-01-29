@@ -23,6 +23,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     private ClientConfig clientConfig;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
+    private RPSDisplay rpsd;
 
     @Override
     public void init(edu.ucsc.leeps.fire.server.ServerInterface server) {
@@ -39,12 +40,30 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         embed.addKeyListener(this);
         countdown = new Countdown(10, 20);
         pointsDisplay = new PointsDisplay(750, 20);
+        rpsd = new RPSDisplay(100, 100, 200, 500, embed);
     }
 
     @Override
     public void startPeriod() {
         this.percent = 0;
+        rpsd.activate();
         super.startPeriod();
+    }
+
+    @Override
+    public void endPeriod() {
+        rpsd.reset();
+        super.endPeriod();
+    }
+
+    @Override
+    public void pause() {
+        if (rpsd.isActive()) {
+            rpsd.pause();
+        } else {
+            rpsd.activate();
+        }
+        super.pause();
     }
 
     @Override
@@ -119,12 +138,13 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     public void setStrategyRPSD(
             float R, float P, float S, float D,
             float r, float p, float s, float d) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        rpsd.setPlayerRPSD(R, P, S, D);
+        rpsd.setOpponentRPSD(r, p, s, d);
     }
 
     @Override
     public float[] getStrategyRPSD() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return rpsd.getPlayerRPSD();
     }
 
     public class PEmbed extends PApplet {
@@ -150,12 +170,15 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
             background(255);
             fill(0);
             stroke(0);
-            if (percent >= 0) {
-                ellipse(percent, 20 + ((1 - percent_A) * (height - 40)), 10, 10);
-                ellipse(percent, 20 + ((1 - percent_a) * (height - 40)), 10, 10);
-            }
+//            if (percent >= 0) {
+//                ellipse(percent, 20 + ((1 - percent_A) * (height - 40)), 10, 10);
+//                ellipse(percent, 20 + ((1 - percent_a) * (height - 40)), 10, 10);
+//            }
+
+            rpsd.draw(embed);
             countdown.draw(embed);
-            pointsDisplay.draw(embed);
+
+            //pointsDisplay.draw(embed);
         }
     }
 

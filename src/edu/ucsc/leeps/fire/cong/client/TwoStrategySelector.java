@@ -47,12 +47,13 @@ public class TwoStrategySelector extends Sprite {
             mouseOver = circularIsHit(mouseX, mouseY);
         }
 
+        @Override
         public void draw(PApplet applet) {
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
             setScreenLocation(applet);
-            
+
             applet.ellipseMode(PApplet.CENTER);
 
             // draw button
@@ -75,7 +76,7 @@ public class TwoStrategySelector extends Sprite {
             // draw label
             applet.fill(0);
             applet.textAlign(PApplet.CENTER);
-            applet.text(label, 0, 0 + height);
+            applet.text(label, 0, 4 + height);
             applet.popMatrix();
         }
     }
