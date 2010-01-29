@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.server.ClientConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
 import java.awt.event.KeyEvent;
@@ -19,13 +20,16 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     private float percent;
     private float percent_A, percent_a;
     private PeriodConfig periodConfig;
+    private ClientConfig clientConfig;
+    private Countdown countdown;
+    private PointsDisplay pointsDisplay;
 
     @Override
     public void init(edu.ucsc.leeps.fire.server.ServerInterface server) {
         this.server = (ServerInterface) server;
         removeAll();
-        width = 400;
-        height = 400;
+        width = 800;
+        height = 600;
         embed = new PEmbed(width, height);
         embed.init();
         setSize(embed.getSize());
@@ -33,6 +37,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         percent = -1;
         percent_A = percent_a = 0;
         embed.addKeyListener(this);
+        countdown = new Countdown(10, 20);
+        pointsDisplay = new PointsDisplay(750, 20);
     }
 
     @Override
@@ -45,11 +51,25 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
         super.setPeriodConfig(superPeriodConfig);
         this.periodConfig = (PeriodConfig) superPeriodConfig;
+        //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
+    }
+
+    @Override
+    public void setPeriodPoints(float periodPoints) {
+        super.setPeriodPoints(periodPoints);
+        pointsDisplay.setPeriodPoints(periodPoints);
+    }
+
+    @Override
+    public void addToPeriodPoints(float points) {
+        super.addToPeriodPoints(points);
+        pointsDisplay.setPeriodPoints(periodPoints);
     }
 
     @Override
     public void tick(int secondsLeft) {
         this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
+        countdown.setSecondsLeft(secondsLeft);
     }
 
     @Override
@@ -58,18 +78,24 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     @Override
+    public void setActionsEnabled(boolean enabled) {
+    }
+
+    @Override
     public void keyTyped(KeyEvent ke) {
     }
 
     @Override
     public void keyPressed(KeyEvent ke) {
-        if (ke.isActionKey()) {
-            if (ke.getKeyCode() == KeyEvent.VK_UP) {
-                percent_A += 0.01f;
-                server.strategyChanged(getFullName());
-            } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
-                percent_A -= 0.01f;
-                server.strategyChanged(getFullName());
+        if (periodIsRunning()) {
+            if (ke.isActionKey()) {
+                if (ke.getKeyCode() == KeyEvent.VK_UP) {
+                    percent_A += 0.01f;
+                    server.strategyChanged(getFullName());
+                } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
+                    percent_A -= 0.01f;
+                    server.strategyChanged(getFullName());
+                }
             }
         }
     }
@@ -109,13 +135,14 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         public PEmbed(int initWidth, int initHeight) {
             this.initWidth = initWidth;
             this.initHeight = initHeight;
-            font = createFont("Mono", 12);
         }
 
         @Override
         public void setup() {
             size(initWidth, initHeight, PApplet.P2D);
             smooth();
+            font = createFont("Mono", 12);
+            textFont(font);
         }
 
         @Override
@@ -127,6 +154,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
                 ellipse(percent, 20 + ((1 - percent_A) * (height - 40)), 10, 10);
                 ellipse(percent, 20 + ((1 - percent_a) * (height - 40)), 10, 10);
             }
+            countdown.draw(embed);
+            pointsDisplay.draw(embed);
         }
     }
 

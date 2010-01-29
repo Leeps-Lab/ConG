@@ -17,7 +17,7 @@ public class HomotopyPayoffFunction implements TwoStrategyPayoffFunction, Serial
     public float Ab, Ba, Bb;
 
     @Override
-    public int getPayoff(
+    public float getPayoff(
             float percent,
             float A, float B,
             float a, float b) {
@@ -27,6 +27,6 @@ public class HomotopyPayoffFunction implements TwoStrategyPayoffFunction, Serial
         } else {
             Aa = AaStart + ((1 - percent) * (AaEnd - AaStart));
         }
-        return Math.round(A * (a * Aa + b * Ab) + B * (a * Ba + b * Bb));
+        return A * (a * Aa + b * Ab) + B * (a * Ba + b * Bb);
     }
 }

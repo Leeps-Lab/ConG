@@ -6,7 +6,7 @@ package edu.ucsc.leeps.fire.cong.server;
  */
 public interface TwoStrategyPayoffFunction {
 
-    public int getPayoff(
+    public float getPayoff(
             float percent,
             float A, float B,
             float a, float b);
