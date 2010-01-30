@@ -29,7 +29,7 @@ public abstract class Sprite {
 
         public void setScreenLocation(PApplet applet) {
             PMatrix2D matrix = new PMatrix2D();
-            applet.g.getMatrix(matrix);
+            applet.getMatrix(matrix);
             screenLocation.x = matrix.m02;
             screenLocation.y = matrix.m12;
         }

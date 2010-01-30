@@ -170,15 +170,9 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
             background(255);
             fill(0);
             stroke(0);
-//            if (percent >= 0) {
-//                ellipse(percent, 20 + ((1 - percent_A) * (height - 40)), 10, 10);
-//                ellipse(percent, 20 + ((1 - percent_a) * (height - 40)), 10, 10);
-//            }
-
             rpsd.draw(embed);
             countdown.draw(embed);
-
-            //pointsDisplay.draw(embed);
+            pointsDisplay.draw(embed);
         }
     }
 

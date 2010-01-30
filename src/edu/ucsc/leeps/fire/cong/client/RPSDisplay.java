@@ -1,11 +1,13 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import processing.core.PApplet;
 
-public class RPSDisplay extends Sprite implements MouseListener {
+public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
 
     public String rLabel = "Rock";
     public String pLabel = "Paper";
@@ -91,6 +93,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         active = false;
 
         applet.addMouseListener(this);
+        applet.addKeyListener(this);
     }
 
     @Override
@@ -458,5 +461,24 @@ public class RPSDisplay extends Sprite implements MouseListener {
         for (int i = R; i <= S; i++) {
             stratSlider[i].setStratValue(playedStrat[i]);
         }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent ke) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent ke) {
+        if (ke.isActionKey()) {
+            if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
+                // FIXME
+            } else if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
+                // FIXME
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent ke) {
     }
 }
