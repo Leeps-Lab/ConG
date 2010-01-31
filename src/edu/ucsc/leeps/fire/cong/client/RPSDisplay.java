@@ -262,6 +262,44 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
     public void mouseExited(MouseEvent e) {
     }
 
+    @Override
+    public void keyTyped(KeyEvent ke) {
+    }
+
+    @Override
+    public void keyPressed(KeyEvent ke) {
+        if (ke.isActionKey() && active) {
+            if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
+                if (playedStrat[D] == 1.0f) {
+                    playedStrat[D] = 0f;
+                    for (int i = R; i <= S; i++) {
+                        playedStrat[i] = .33f;
+                        stratSlider[i].setStratValue(.33f);
+                    }
+                    float[] coords = calculateStratCoords(.33f, .33f, .33f);
+                    current.update(coords[0], coords[1]);
+                    current.show();
+                    playOrDefer.chooseStrategyOne();
+                }
+            } else if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
+                if (playedStrat[D] == 0f) {
+                    playedStrat[D] = 1.0f;
+
+                    current.hide();
+                    for (int i = R; i <= S; i++) {
+                        playedStrat[i] = 0f;
+                        stratSlider[i].setStratValue(0f);
+                    }
+                    playOrDefer.chooseStrategyTwo();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent ke) {
+    }
+
     public void setPlayerRPSD(float newR, float newP, float newS, float newD) {
         playedStrat[R] = newR;
         playedStrat[P] = newP;
@@ -461,24 +499,5 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
         for (int i = R; i <= S; i++) {
             stratSlider[i].setStratValue(playedStrat[i]);
         }
-    }
-
-    @Override
-    public void keyTyped(KeyEvent ke) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent ke) {
-        if (ke.isActionKey()) {
-            if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
-                // FIXME
-            } else if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
-                // FIXME
-            }
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent ke) {
     }
 }
