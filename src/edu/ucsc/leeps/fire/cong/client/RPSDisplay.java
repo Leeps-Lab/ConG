@@ -167,11 +167,6 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
                         }
 
                         balanceStratValues(i, stratSlider[i].getStratValue());
-                        float[] coords = calculateStratCoords(playedStrat[R],
-                                playedStrat[P],
-                                playedStrat[S]);
-
-                        current.update(coords[0], coords[1]);
 
                         break;
                     }
@@ -201,41 +196,15 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
             float mouseY = e.getY() - origin.y;
             if (mouseInTriangle) {
                 calculatePlayedStrats(mouseX - rock.x, rock.y - mouseY);
-                current.update(mouseX, mouseY);
-                current.show();
-
-                stratSlider[R].setStratValue(playedStrat[R]);
-                stratSlider[P].setStratValue(playedStrat[P]);
-                stratSlider[S].setStratValue(playedStrat[S]);
-
-                if (playedStrat[D] == 1.0f) {
-                    playedStrat[D] = 0f;
-                    playOrDefer.chooseStrategyOne();
-                }
-                server.strategyChanged(client.getFullName());
             } else if (playOrDefer.mouseOnAButton(e.getX(), e.getY())) {
                 playOrDefer.pressButton();
                 if (playOrDefer.getSelection() == 1) {
                     if (playedStrat[D] == 1.0f) {
-                        playedStrat[D] = 0f;
-                        for (int i = R; i <= S; i++) {
-                            playedStrat[i] = .33f;
-                            stratSlider[i].setStratValue(.33f);
-                        }
-                        float[] coords = calculateStratCoords(.33f, .33f, .33f);
-                        current.update(coords[0], coords[1]);
-                        current.show();
+                        setPlayerRPSD(.33f, .33f, .33f, 0f);
                     }
                 } else {
                     if (playedStrat[D] == 0f) {
-                        playedStrat[D] = 1.0f;
-
-                        current.hide();
-                        for (int i = R; i <= S; i++) {
-                            playedStrat[i] = 0f;
-                            stratSlider[i].setStratValue(0f);
-                        }
-
+                        setPlayerRPSD(0f, 0f, 0f, 1.0f);
                     }
                 }
             } else {
@@ -281,25 +250,12 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
         if (ke.isActionKey() && active) {
             if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
                 if (playedStrat[D] == 1.0f) {
-                    playedStrat[D] = 0f;
-                    for (int i = R; i <= S; i++) {
-                        playedStrat[i] = .33f;
-                        stratSlider[i].setStratValue(.33f);
-                    }
-                    float[] coords = calculateStratCoords(.33f, .33f, .33f);
-                    current.update(coords[0], coords[1]);
-                    current.show();
+                    setPlayerRPSD(.33f, .33f, .33f, 0f);
                     playOrDefer.chooseStrategyOne();
                 }
             } else if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
                 if (playedStrat[D] == 0f) {
-                    playedStrat[D] = 1.0f;
-
-                    current.hide();
-                    for (int i = R; i <= S; i++) {
-                        playedStrat[i] = 0f;
-                        stratSlider[i].setStratValue(0f);
-                    }
+                    setPlayerRPSD(0f, 0f, 0f, 1.0f);
                     playOrDefer.chooseStrategyTwo();
                 }
             }
@@ -327,6 +283,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
             float[] coords = calculateStratCoords(newR, newP, newS);
             current.update(coords[0], coords[1]);
         }
+        server.strategyChanged(client.getFullName());
     }
 
     public void setOpponentRPSD(float r, float p, float s, float d) {
@@ -381,7 +338,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
 
     // calculate playedR, playedP, playedS from x, y
     private void calculatePlayedStrats(float x, float y) {
-        playedStrat[S] = y / maxDist;
+        float newS = y / maxDist;
 
         // constant factor for determining distance
         float epsilon = y + (1 / PApplet.sqrt(3)) * x;
@@ -391,9 +348,14 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
         float deltaY = y - .75f * epsilon;
         float distP = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
 
-        playedStrat[P] = distP / maxDist;
+        float newP = distP / maxDist;
 
-        playedStrat[R] = 1 - playedStrat[S] - playedStrat[P];
+        float newR = 1 - newS - newP;
+
+        if (playedStrat[D] == 1.0f) {
+            playOrDefer.chooseStrategyOne();
+        }
+        setPlayerRPSD(newR, newP, newS, 0f);
     }
 
     // calculate plannedDist entries
@@ -443,6 +405,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
     // balance other strat values when using sliders
     private void balanceStratValues(int strat, float value) {
         float pValue, deltaV, percentR, percentP, percentS;
+        float newR, newP, newS;
         switch (strat) {
             case R:
                 pValue = playedStrat[R];
@@ -458,9 +421,10 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
                     percentS = .50f;
                 }
 
-                playedStrat[R] = value;
-                playedStrat[P] = (PStotal - deltaV) * percentP;
-                playedStrat[S] = 1 - playedStrat[R] - playedStrat[P];
+                newR = value;
+                newP = (PStotal - deltaV) * percentP;
+                newS = 1 - newR - newP;
+                setPlayerRPSD(newR, newP, newS, 0f);
                 break;
 
             case P:
@@ -477,9 +441,10 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
                     percentS = .50f;
                 }
 
-                playedStrat[P] = value;
-                playedStrat[R] = (RStotal - deltaV) * percentR;
-                playedStrat[S] = 1 - playedStrat[R] - playedStrat[P];
+                newP = value;
+                newR = (RStotal - deltaV) * percentR;
+                newS = 1 - newR - newP;
+                setPlayerRPSD(newR, newP, newS, 0f);
                 break;
 
             case S:
@@ -496,17 +461,14 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
                     percentP = .50f;
                 }
 
-                playedStrat[S] = value;
-                playedStrat[R] = (RPtotal - deltaV) * percentR;
-                playedStrat[P] = 1 - playedStrat[R] - playedStrat[S];
+                newS = value;
+                newR = (RPtotal - deltaV) * percentR;
+                newP = 1 - newR - newS;
+                setPlayerRPSD(newR, newP, newS, 0f);
                 break;
 
             default:
                 throw new RuntimeException("RPSD Error: strat value " + "out of bounds in balanceStratValues()");
-        }
-
-        for (int i = R; i <= S; i++) {
-            stratSlider[i].setStratValue(playedStrat[i]);
         }
     }
 }
