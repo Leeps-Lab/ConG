@@ -18,5 +18,6 @@ public class Main {
         "configs/test.csv"});
         Client.main(new String[]{"Player", "One", "localhost"});
         Client.main(new String[]{"Player", "Two", "localhost"});
+        Client.main(new String[]{"Player", "Three", "localhost"});
     }
 }

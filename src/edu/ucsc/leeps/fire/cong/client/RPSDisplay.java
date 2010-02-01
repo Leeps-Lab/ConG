@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -33,9 +34,18 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
     private TwoStrategySelector playOrDefer;
     private Color rColor, pColor, sColor;
     private boolean active;
+    private ServerInterface server;
+    private ClientInterface client;
 
-    public RPSDisplay(float x, float y, int width, int height, PApplet applet) {
+    public RPSDisplay(
+            float x, float y, int width, int height,
+            PApplet applet,
+            ServerInterface server,
+            ClientInterface client) {
         super(x, y, width, height);
+
+        this.server = server;
+        this.client = client;
 
         mouseInTriangle = false;
         plannedDist = new float[3];
@@ -116,7 +126,6 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
             calculatePlannedDist(mouseX - rock.x, rock.y - mouseY);
 
             if (plannedDist[R] <= maxDist && plannedDist[R] >= 0 && plannedDist[P] <= maxDist && plannedDist[P] >= 0 && plannedDist[S] <= maxDist && plannedDist[S] >= 0) {
-
                 mouseInTriangle = true;
             } else {
                 mouseInTriangle = false;
@@ -203,6 +212,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
                     playedStrat[D] = 0f;
                     playOrDefer.chooseStrategyOne();
                 }
+                server.strategyChanged(client.getFullName());
             } else if (playOrDefer.mouseOnAButton(e.getX(), e.getY())) {
                 playOrDefer.pressButton();
                 if (playOrDefer.getSelection() == 1) {
@@ -319,19 +329,18 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
         }
     }
 
-    public void setOpponentRPSD(float oppR, float oppP, float oppS, float oppD) {
-        opponentStrat[R] = oppR;
-        opponentStrat[P] = oppP;
-        opponentStrat[S] = oppS;
-        opponentStrat[D] = oppD;
+    public void setOpponentRPSD(float r, float p, float s, float d) {
+        opponentStrat[R] = r;
+        opponentStrat[P] = p;
+        opponentStrat[S] = s;
+        opponentStrat[D] = d;
 
-        if (oppD == 1.0f) {
+        if (d == 1.0f) {
             opponent.hide();
         } else {
             opponent.show();
-            float[] coords = calculateStratCoords(oppR, oppP, oppS);
+            float[] coords = calculateStratCoords(r, p, s);
             opponent.update(coords[0], coords[1]);
-            opponent.setAlpha(1.0f - oppD);
         }
     }
 

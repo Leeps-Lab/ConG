@@ -24,6 +24,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
     private RPSDisplay rpsd;
+    private Chart chart;
 
     @Override
     public void init(edu.ucsc.leeps.fire.server.ServerInterface server) {
@@ -40,7 +41,11 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         embed.addKeyListener(this);
         countdown = new Countdown(10, 20);
         pointsDisplay = new PointsDisplay(750, 20);
-        rpsd = new RPSDisplay(100, 100, 200, 500, embed);
+        rpsd = new RPSDisplay(
+                10, 100, 200, 500,
+                embed,
+                this.server, this);
+        chart = new Chart(250, 100, 500, 400, false);
     }
 
     @Override
@@ -93,7 +98,9 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
 
     @Override
     public void quickTick(int millisLeft) {
-        this.percent = embed.width * (1 - (millisLeft / ((float) periodConfig.length * 1000)));
+        this.percent = (1 - (millisLeft / ((float) periodConfig.length * 1000)));
+        chart.currentPercent = this.percent;
+        //chart.updateLines();
     }
 
     @Override
@@ -106,17 +113,20 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
 
     @Override
     public void keyPressed(KeyEvent ke) {
+        /*
         if (periodIsRunning()) {
-            if (ke.isActionKey()) {
-                if (ke.getKeyCode() == KeyEvent.VK_UP) {
-                    percent_A += 0.01f;
-                    server.strategyChanged(getFullName());
-                } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
-                    percent_A -= 0.01f;
-                    server.strategyChanged(getFullName());
-                }
-            }
+        if (ke.isActionKey()) {
+        if (ke.getKeyCode() == KeyEvent.VK_UP) {
+        percent_A += 0.01f;
+        server.strategyChanged(getFullName());
+        } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
+        percent_A -= 0.01f;
+        server.strategyChanged(getFullName());
         }
+        }
+        }
+         *
+         */
     }
 
     @Override
@@ -171,6 +181,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
             fill(0);
             stroke(0);
             rpsd.draw(embed);
+            chart.draw(embed);
             countdown.draw(embed);
             pointsDisplay.draw(embed);
         }

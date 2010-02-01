@@ -13,13 +13,13 @@ public class Line extends Sprite {
     public ArrayList<FPoint> points;
     public int maxSize = 500;
 
-    public Line(int x, int y, int width, int height) {
+    public Line(int x, int y, int width, int height, float weight, Color color, int alpha) {
         super(x, y, width, height);
         visible = true;
-        color = Color.BLACK;
-        weight = 1.5f;
         scale = 1;
-        alpha = 255;
+        this.color = color;
+        this.weight = weight;
+        this.alpha = alpha;
         points = new ArrayList<FPoint>();
     }
 

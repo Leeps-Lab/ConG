@@ -81,18 +81,19 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
             population.averageStrategy_r = 0;
             population.averageStrategy_p = 0;
             population.averageStrategy_s = 0;
-            population.averageStrategy_d = 0;
+            int numPlaying = 0;
             for (ClientInterface client : population.members) {
                 float[] strategy = client.getStrategyRPSD();
                 population.averageStrategy_r += strategy[0];
                 population.averageStrategy_p += strategy[1];
                 population.averageStrategy_s += strategy[2];
-                population.averageStrategy_d += strategy[3];
+                if (strategy[3] == 0.0) {
+                    numPlaying++;
+                }
             }
-            population.averageStrategy_r /= clients.size();
-            population.averageStrategy_p /= clients.size();
-            population.averageStrategy_s /= clients.size();
-            population.averageStrategy_d /= clients.size();
+            population.averageStrategy_r /= numPlaying;
+            population.averageStrategy_p /= numPlaying;
+            population.averageStrategy_s /= numPlaying;
             for (ClientInterface client : population.members) {
                 float[] strategy = client.getStrategyRPSD();
                 client.setStrategyRPSD(
@@ -100,7 +101,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
                         population.averageStrategy_r,
                         population.averageStrategy_p,
                         population.averageStrategy_s,
-                        population.averageStrategy_d);
+                        0);
                 lastStrategies.put(client, strategy);
             }
         }
@@ -153,8 +154,8 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         homotopyPayoffFunction.Ba = 50;
         homotopyPayoffFunction.Bb = 50;
         periodConfig.twoStrategyPayoffFunction = homotopyPayoffFunction;
-        //periodConfig.twoStrategyPayoffFunction = null;
-        //periodConfig.RPSDPayoffFunction = new RPSDPayoffFunction();
+        periodConfig.twoStrategyPayoffFunction = null;
+        periodConfig.RPSDPayoffFunction = new RPSDPayoffFunction();
     }
 
     @Override
