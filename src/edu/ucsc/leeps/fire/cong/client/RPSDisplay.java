@@ -201,10 +201,12 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
                 if (playOrDefer.getSelection() == 1) {
                     if (playedStrat[D] == 1.0f) {
                         setPlayerRPSD(.33f, .33f, .33f, 0f);
+                        server.strategyChanged(client.getFullName());
                     }
                 } else {
                     if (playedStrat[D] == 0f) {
                         setPlayerRPSD(0f, 0f, 0f, 1.0f);
+                        server.strategyChanged(client.getFullName());
                     }
                 }
             } else {
@@ -251,11 +253,13 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
             if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
                 if (playedStrat[D] == 1.0f) {
                     setPlayerRPSD(.33f, .33f, .33f, 0f);
+                    server.strategyChanged(client.getFullName());
                     playOrDefer.chooseStrategyOne();
                 }
             } else if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
                 if (playedStrat[D] == 0f) {
                     setPlayerRPSD(0f, 0f, 0f, 1.0f);
+                    server.strategyChanged(client.getFullName());
                     playOrDefer.chooseStrategyTwo();
                 }
             }
@@ -283,7 +287,6 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
             float[] coords = calculateStratCoords(newR, newP, newS);
             current.update(coords[0], coords[1]);
         }
-        server.strategyChanged(client.getFullName());
     }
 
     public void setOpponentRPSD(float r, float p, float s, float d) {
@@ -356,6 +359,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
             playOrDefer.chooseStrategyOne();
         }
         setPlayerRPSD(newR, newP, newS, 0f);
+        server.strategyChanged(client.getFullName());
     }
 
     // calculate plannedDist entries
@@ -470,5 +474,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
             default:
                 throw new RuntimeException("RPSD Error: strat value " + "out of bounds in balanceStratValues()");
         }
+
+        server.strategyChanged(client.getFullName());
     }
 }
