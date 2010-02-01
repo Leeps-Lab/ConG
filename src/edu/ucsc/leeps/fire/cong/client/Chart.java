@@ -22,7 +22,6 @@ public class Chart extends Sprite {
     final static Color R_PAYOFF_COLOR = new Color(255, 25, 25);
     final static Color P_PAYOFF_COLOR = new Color(25, 25, 255);
     final static Color S_PAYOFF_COLOR = new Color(255, 0, 255);
-    final static Color D_PAYOFF_COLOR = new Color(50, 50, 50);
     // Variables to modify that manipulate the chart
     public float currentPercent;
     public float maxPayoff;
@@ -38,7 +37,6 @@ public class Chart extends Sprite {
     public float currentRPayoff;
     public float currentPPayoff;
     public float currentSPayoff;
-    public float currentDPayoff;
     // Private controls accessed through public methods
     private Line actualPayoff;
     // Two strategy
@@ -52,7 +50,6 @@ public class Chart extends Sprite {
     private Line actualRPayoff;
     private Line actualPPayoff;
     private Line actualSPayoff;
-    private Line actualDPayoff;
 
     public Chart(int x, int y, int width, int height, boolean inTwoStrategyMode) {
         super(x, y, width, height);
@@ -70,7 +67,6 @@ public class Chart extends Sprite {
         actualRPayoff = new Line(0, 0, width, height, 1.5f, R_PAYOFF_COLOR, 255);
         actualPPayoff = new Line(0, 0, width, height, 1.5f, P_PAYOFF_COLOR, 255);
         actualSPayoff = new Line(0, 0, width, height, 1.5f, S_PAYOFF_COLOR, 255);
-        actualDPayoff = new Line(0, 0, width, height, 1.5f, D_PAYOFF_COLOR, 255);
         this.inTwoStrategyMode = inTwoStrategyMode;
     }
 
@@ -120,14 +116,20 @@ public class Chart extends Sprite {
         applet.stroke(0);
         applet.strokeWeight(2);
         applet.rect(0, 0, width, height);
-        actualAPayoff.draw(applet);
-        actualBPayoff.draw(applet);
-        futureAPayoff.draw(applet);
-        futureBPayoff.draw(applet);
-        actualAaPayoff.draw(applet);
-        actualBbPayoff.draw(applet);
-        futureAaPayoff.draw(applet);
-        futureBbPayoff.draw(applet);
+        if (inTwoStrategyMode) {
+            actualAPayoff.draw(applet);
+            actualBPayoff.draw(applet);
+            futureAPayoff.draw(applet);
+            futureBPayoff.draw(applet);
+            actualAaPayoff.draw(applet);
+            actualBbPayoff.draw(applet);
+            futureAaPayoff.draw(applet);
+            futureBbPayoff.draw(applet);
+        } else {
+            actualRPayoff.draw(applet);
+            actualPPayoff.draw(applet);
+            actualSPayoff.draw(applet);
+        }
         actualPayoff.draw(applet);
         //drawAxis(applet);
         applet.popMatrix();
@@ -172,11 +174,10 @@ public class Chart extends Sprite {
     }
 
     public void addRPSDActualPayoffPoints() {
-        addPoint(actualPayoff, currentPercent, currentPayoff);
+        //addPoint(actualPayoff, currentPercent, currentPayoff);
         addPoint(actualRPayoff, currentPercent, currentRPayoff);
         addPoint(actualPPayoff, currentPercent, currentPPayoff);
         addPoint(actualSPayoff, currentPercent, currentSPayoff);
-        addPoint(actualDPayoff, currentPercent, currentDPayoff);
     }
 
     public void addPoint(Line line, float x, float y) {

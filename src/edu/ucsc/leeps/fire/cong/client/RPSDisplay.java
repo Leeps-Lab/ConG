@@ -1,14 +1,13 @@
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.server.RPSPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import java.awt.Color;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import processing.core.PApplet;
 
-public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
+public class RPSDisplay extends Sprite implements MouseListener {
 
     public String rLabel = "Rock";
     public String pLabel = "Paper";
@@ -17,7 +16,6 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
     private final int R = 0;
     private final int P = 1;
     private final int S = 2;
-    private final int D = 3;
     private float sideLength;
     private Marker rock, paper, scissors;
     private float maxDist;
@@ -31,11 +29,11 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
     private float[] opponentStrat;
     private Slider[] stratSlider;
     private boolean mouseInTriangle;
-    private TwoStrategySelector playOrDefer;
     private Color rColor, pColor, sColor;
-    private boolean active;
+    private boolean enabled;
     private ServerInterface server;
     private ClientInterface client;
+    private RPSPayoffFunction payoffFunction;
 
     public RPSDisplay(
             float x, float y, int width, int height,
@@ -50,8 +48,8 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
         mouseInTriangle = false;
         plannedDist = new float[3];
         plannedStrat = new float[3];
-        playedStrat = new float[4];
-        opponentStrat = new float[4];
+        playedStrat = new float[3];
+        opponentStrat = new float[3];
         for (int i = R; i <= S; i++) {
             plannedDist[i] = 0f;
             plannedStrat[i] = 0f;
@@ -59,18 +57,11 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
             opponentStrat[i] = 0f;
         }
 
-        playedStrat[D] = 1.0f;
-        opponentStrat[D] = 1.0f;
-
         stratSlider = new Slider[3];
 
         rColor = new Color(255, 25, 25);
         pColor = new Color(25, 25, 255);
         sColor = new Color(255, 0, 255);
-
-        playOrDefer = new TwoStrategySelector(width / 6, 0, (2 * width) / 3, 60,
-                "Play", "Defer");
-        playOrDefer.chooseStrategyTwo();
 
         sideLength = width - 10;
         maxDist = (PApplet.sqrt(3) / 2f) * sideLength;
@@ -100,16 +91,20 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
         stratSlider[S] = new Slider(50, width - 50, height / 2 + 150,
                 sColor, sLabel);
 
-        active = false;
+        setEnabled(false);
 
         applet.addMouseListener(this);
-        applet.addKeyListener(this);
+    }
+
+    public void setPayoffFunction(RPSPayoffFunction payoffFunction) {
+        this.payoffFunction = payoffFunction;
     }
 
     @Override
     public void draw(PApplet applet) {
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
+
         float mouseX = applet.mouseX - origin.x;
         float mouseY = applet.mouseY - origin.y;
 
@@ -122,7 +117,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
         paper.draw(applet);
         scissors.draw(applet);
 
-        if (active) {
+        if (enabled) {
             calculatePlannedDist(mouseX - rock.x, rock.y - mouseY);
 
             if (plannedDist[R] <= maxDist && plannedDist[R] >= 0 && plannedDist[P] <= maxDist && plannedDist[P] >= 0 && plannedDist[S] <= maxDist && plannedDist[S] >= 0) {
@@ -174,7 +169,6 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
             }
         }
 
-        playOrDefer.draw(applet);
         planned.draw(applet);
         current.draw(applet);
         opponent.draw(applet);
@@ -191,33 +185,15 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (active) {
+        if (enabled) {
             float mouseX = e.getX() - origin.x;
             float mouseY = e.getY() - origin.y;
             if (mouseInTriangle) {
                 calculatePlayedStrats(mouseX - rock.x, rock.y - mouseY);
-            } else if (playOrDefer.mouseOnAButton(e.getX(), e.getY())) {
-                playOrDefer.pressButton();
-                if (playOrDefer.getSelection() == 1) {
-                    if (playedStrat[D] == 1.0f) {
-                        setPlayerRPSD(.33f, .33f, .33f, 0f);
-                        server.strategyChanged(client.getFullName());
-                    }
-                } else {
-                    if (playedStrat[D] == 0f) {
-                        setPlayerRPSD(0f, 0f, 0f, 1.0f);
-                        server.strategyChanged(client.getFullName());
-                    }
-                }
             } else {
                 for (int i = 0; i < stratSlider.length; i++) {
                     if (stratSlider[i].mouseOnHandle(mouseX, mouseY)) {
                         stratSlider[i].grab();
-                        if (playedStrat[D] == 1.0f) {
-                            playedStrat[D] = 0f;
-                            current.show();
-                            playOrDefer.chooseStrategyOne();
-                        }
                         break;
                     }
                 }
@@ -243,81 +219,48 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
     public void mouseExited(MouseEvent e) {
     }
 
-    @Override
-    public void keyTyped(KeyEvent ke) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent ke) {
-        if (ke.isActionKey() && active) {
-            if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
-                if (playedStrat[D] == 1.0f) {
-                    setPlayerRPSD(.33f, .33f, .33f, 0f);
-                    server.strategyChanged(client.getFullName());
-                    playOrDefer.chooseStrategyOne();
-                }
-            } else if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
-                if (playedStrat[D] == 0f) {
-                    setPlayerRPSD(0f, 0f, 0f, 1.0f);
-                    server.strategyChanged(client.getFullName());
-                    playOrDefer.chooseStrategyTwo();
-                }
-            }
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent ke) {
-    }
-
-    public void setPlayerRPSD(float newR, float newP, float newS, float newD) {
+    public void setPlayerRPS(float newR, float newP, float newS) {
         playedStrat[R] = newR;
         playedStrat[P] = newP;
         playedStrat[S] = newS;
-        playedStrat[D] = newD;
 
         for (int i = R; i <= S; i++) {
             stratSlider[i].setStratValue(playedStrat[i]);
         }
 
-        if (newD == 1.0f) {
-            current.hide();
-        } else {
-            current.show();
-            float[] coords = calculateStratCoords(newR, newP, newS);
-            current.update(coords[0], coords[1]);
-        }
+        float[] coords = calculateStratCoords(newR, newP, newS);
+        current.update(coords[0], coords[1]);
     }
 
-    public void setOpponentRPSD(float r, float p, float s, float d) {
+    public void setOpponentRPS(float r, float p, float s) {
         opponentStrat[R] = r;
         opponentStrat[P] = p;
         opponentStrat[S] = s;
-        opponentStrat[D] = d;
-
-        if (d == 1.0f) {
-            opponent.hide();
-        } else {
-            opponent.show();
-            float[] coords = calculateStratCoords(r, p, s);
-            opponent.update(coords[0], coords[1]);
-        }
+        float[] coords = calculateStratCoords(r, p, s);
+        opponent.update(coords[0], coords[1]);
     }
 
-    public float[] getPlayerRPSD() {
+    public float[] getPlayerRPS() {
         return playedStrat;
     }
 
-    public void activate() {
-        active = true;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+        if (enabled) {
+            current.show();
+            opponent.show();
+        } else {
+            current.hide();
+            opponent.hide();
+        }
     }
 
     public void pause() {
-        active = false;
+        setEnabled(false);
     }
 
     public void reset() {
-        active = false;
+        setEnabled(false);
         for (int i = R; i <= S; i++) {
             plannedDist[i] = 0f;
             plannedStrat[i] = 0f;
@@ -326,17 +269,13 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
             stratSlider[i].setStratValue(0f);
         }
 
-        playedStrat[D] = 1.0f;
-        opponentStrat[D] = 1.0f;
-        playOrDefer.chooseStrategyTwo();
-
         current.hide();
         planned.hide();
         opponent.hide();
     }
 
-    public boolean isActive() {
-        return active;
+    public boolean isEnabled() {
+        return enabled;
     }
 
     // calculate playedR, playedP, playedS from x, y
@@ -355,10 +294,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
 
         float newR = 1 - newS - newP;
 
-        if (playedStrat[D] == 1.0f) {
-            playOrDefer.chooseStrategyOne();
-        }
-        setPlayerRPSD(newR, newP, newS, 0f);
+        setPlayerRPS(newR, newP, newS);
         server.strategyChanged(client.getFullName());
     }
 
@@ -428,7 +364,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
                 newR = value;
                 newP = (PStotal - deltaV) * percentP;
                 newS = 1 - newR - newP;
-                setPlayerRPSD(newR, newP, newS, 0f);
+                setPlayerRPS(newR, newP, newS);
                 break;
 
             case P:
@@ -448,7 +384,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
                 newP = value;
                 newR = (RStotal - deltaV) * percentR;
                 newS = 1 - newR - newP;
-                setPlayerRPSD(newR, newP, newS, 0f);
+                setPlayerRPS(newR, newP, newS);
                 break;
 
             case S:
@@ -468,7 +404,7 @@ public class RPSDisplay extends Sprite implements MouseListener, KeyListener {
                 newS = value;
                 newR = (RPtotal - deltaV) * percentR;
                 newP = 1 - newR - newS;
-                setPlayerRPSD(newR, newP, newS, 0f);
+                setPlayerRPS(newR, newP, newS);
                 break;
 
             default:

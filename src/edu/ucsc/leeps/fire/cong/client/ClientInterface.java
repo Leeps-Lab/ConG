@@ -14,9 +14,9 @@ public interface ClientInterface extends edu.ucsc.leeps.fire.client.ClientInterf
 
     public float[] getStrategyAB();
 
-    public void setStrategyRPSD(
-            float R, float P, float S, float D,
-            float r, float p, float s, float d);
+    public void setStrategyRPS(
+            float R, float P, float S,
+            float r, float p, float s);
     
-    public float[] getStrategyRPSD();
+    public float[] getStrategyRPS();
 }

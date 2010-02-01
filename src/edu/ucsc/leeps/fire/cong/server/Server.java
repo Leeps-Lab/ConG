@@ -45,14 +45,13 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
                     points *= inStrategyTime / 1000f;
                 }
                 client.addToPeriodPoints(points);
-            } else if (periodConfig.RPSDPayoffFunction != null) {
+            } else if (periodConfig.RPSPayoffFunction != null) {
                 float[] last = lastStrategies.get(client);
-                float points = periodConfig.RPSDPayoffFunction.getPayoff(
-                        last[0], last[1], last[2], last[3],
+                float points = periodConfig.RPSPayoffFunction.getPayoff(
+                        last[0], last[1], last[2],
                         population.averageStrategy_r,
                         population.averageStrategy_p,
-                        population.averageStrategy_s,
-                        population.averageStrategy_d);
+                        population.averageStrategy_s);
                 if (!periodConfig.pointsPerSecond) {
                     points *= percentInStrategyTime;
                 } else {
@@ -77,31 +76,26 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
                         population.averageStrategy_a, 1 - population.averageStrategy_a);
                 lastStrategies.put(client, strategy);
             }
-        } else if (periodConfig.RPSDPayoffFunction != null) {
+        } else if (periodConfig.RPSPayoffFunction != null) {
             population.averageStrategy_r = 0;
             population.averageStrategy_p = 0;
             population.averageStrategy_s = 0;
-            int numPlaying = 0;
             for (ClientInterface client : population.members) {
-                float[] strategy = client.getStrategyRPSD();
+                float[] strategy = client.getStrategyRPS();
                 population.averageStrategy_r += strategy[0];
                 population.averageStrategy_p += strategy[1];
                 population.averageStrategy_s += strategy[2];
-                if (strategy[3] == 0.0) {
-                    numPlaying++;
-                }
             }
-            population.averageStrategy_r /= numPlaying;
-            population.averageStrategy_p /= numPlaying;
-            population.averageStrategy_s /= numPlaying;
+            population.averageStrategy_r /= population.members.size();
+            population.averageStrategy_p /= population.members.size();
+            population.averageStrategy_s /= population.members.size();
             for (ClientInterface client : population.members) {
-                float[] strategy = client.getStrategyRPSD();
-                client.setStrategyRPSD(
-                        strategy[0], strategy[1], strategy[2], strategy[3],
+                float[] strategy = client.getStrategyRPS();
+                client.setStrategyRPS(
+                        strategy[0], strategy[1], strategy[2],
                         population.averageStrategy_r,
                         population.averageStrategy_p,
-                        population.averageStrategy_s,
-                        0);
+                        population.averageStrategy_s);
                 lastStrategies.put(client, strategy);
             }
         }
@@ -146,6 +140,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     @Override
     public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
         periodConfig = (PeriodConfig) superPeriodConfig;
+        periodConfig.length = 120;
         periodConfig.pointsPerSecond = false;
         HomotopyPayoffFunction homotopyPayoffFunction = new HomotopyPayoffFunction();
         homotopyPayoffFunction.AaStart = 10;
@@ -155,7 +150,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         homotopyPayoffFunction.Bb = 50;
         periodConfig.twoStrategyPayoffFunction = homotopyPayoffFunction;
         periodConfig.twoStrategyPayoffFunction = null;
-        periodConfig.RPSDPayoffFunction = new RPSDPayoffFunction();
+        periodConfig.RPSPayoffFunction = new RPSPayoffFunction();
     }
 
     @Override
@@ -189,9 +184,9 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
             if (periodConfig.twoStrategyPayoffFunction != null) {
                 client.setStrategyAB(0, 1, 0, 1);
                 lastStrategies.put(client, new float[]{0});
-            } else if (periodConfig.RPSDPayoffFunction != null) {
-                client.setStrategyRPSD(0, 0, 0, 1, 0, 0, 0, 1);
-                lastStrategies.put(client, new float[]{0, 0, 0, 1});
+            } else if (periodConfig.RPSPayoffFunction != null) {
+                client.setStrategyRPS(0.33f, 0.33f, 0.33f, 0.33f, 0.33f, 0.33f);
+                lastStrategies.put(client, new float[]{0.33f, 0.33f, 0.33f});
             }
             lastStrategyChangeTimes.put(client, periodStartTime);
         }

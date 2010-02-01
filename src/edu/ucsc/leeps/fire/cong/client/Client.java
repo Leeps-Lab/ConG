@@ -23,7 +23,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     private ClientConfig clientConfig;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
-    private RPSDisplay rpsd;
+    private RPSDisplay rps;
     private Chart chart;
 
     @Override
@@ -41,32 +41,34 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         embed.addKeyListener(this);
         countdown = new Countdown(10, 20);
         pointsDisplay = new PointsDisplay(750, 20);
-        rpsd = new RPSDisplay(
+        rps = new RPSDisplay(
                 10, 100, 200, 500,
                 embed,
-                this.server, this);
+                this.server,
+                this);
         chart = new Chart(250, 100, 500, 400, false);
+        chart.maxPayoff = 1.0f;
     }
 
     @Override
     public void startPeriod() {
         this.percent = 0;
-        rpsd.activate();
+        rps.setEnabled(true);
         super.startPeriod();
     }
 
     @Override
     public void endPeriod() {
-        rpsd.reset();
+        rps.reset();
         super.endPeriod();
     }
 
     @Override
     public void pause() {
-        if (rpsd.isActive()) {
-            rpsd.pause();
+        if (rps.isEnabled()) {
+            rps.pause();
         } else {
-            rpsd.activate();
+            rps.setEnabled(true);
         }
         super.pause();
     }
@@ -76,6 +78,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         super.setPeriodConfig(superPeriodConfig);
         this.periodConfig = (PeriodConfig) superPeriodConfig;
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
+        rps.setPayoffFunction(this.periodConfig.RPSPayoffFunction);
     }
 
     @Override
@@ -100,7 +103,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     public void quickTick(int millisLeft) {
         this.percent = (1 - (millisLeft / ((float) periodConfig.length * 1000)));
         chart.currentPercent = this.percent;
-        //chart.updateLines();
+        chart.updateLines();
     }
 
     @Override
@@ -145,16 +148,24 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     @Override
-    public void setStrategyRPSD(
-            float R, float P, float S, float D,
-            float r, float p, float s, float d) {
-        rpsd.setPlayerRPSD(R, P, S, D);
-        rpsd.setOpponentRPSD(r, p, s, d);
+    public void setStrategyRPS(
+            float R, float P, float S,
+            float r,  float p,  float s) {
+        rps.setPlayerRPS(R, P, S);
+        rps.setOpponentRPS(r, p, s);
+        chart.currentRPayoff = r;
+        chart.currentPPayoff = p;
+        chart.currentSPayoff = s;
     }
 
     @Override
-    public float[] getStrategyRPSD() {
-        return rpsd.getPlayerRPSD();
+    public int getQuickTickInterval() {
+        return 100;
+    }
+
+    @Override
+    public float[] getStrategyRPS() {
+        return rps.getPlayerRPS();
     }
 
     public class PEmbed extends PApplet {
@@ -180,7 +191,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
             background(255);
             fill(0);
             stroke(0);
-            rpsd.draw(embed);
+            rps.draw(embed);
             chart.draw(embed);
             countdown.draw(embed);
             pointsDisplay.draw(embed);

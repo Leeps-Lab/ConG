@@ -36,9 +36,9 @@ public class Line extends Sprite {
             }
             points.add(p1);
         }
-        while (points.size() > maxSize) {
-            points.remove(0);
-        }
+        //while (points.size() > maxSize) {
+        //    points.remove(0);
+        //}
     }
 
     // TODO: error/range checking
