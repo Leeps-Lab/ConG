@@ -3,8 +3,6 @@ package edu.ucsc.leeps.fire.cong.client;
 import edu.ucsc.leeps.fire.cong.server.ClientConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import processing.core.PApplet;
 import processing.core.PFont;
 
@@ -12,17 +10,17 @@ import processing.core.PFont;
  *
  * @author jpettit
  */
-public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientInterface, KeyListener {
+public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientInterface {
 
     private int width, height;
     private PEmbed embed;
     private ServerInterface server;
     private float percent;
-    private float percent_A, percent_a;
     private PeriodConfig periodConfig;
     private ClientConfig clientConfig;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
+    private BiMatrixDisplay bimatrix;
     private RPSDisplay rps;
     private Chart chart;
 
@@ -37,10 +35,11 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         setSize(embed.getSize());
         add(embed);
         percent = -1;
-        percent_A = percent_a = 0;
-        embed.addKeyListener(this);
         countdown = new Countdown(10, 20);
         pointsDisplay = new PointsDisplay(750, 20);
+        bimatrix = new BiMatrixDisplay(
+                10, 100, embed,
+                this.server, this);
         rps = new RPSDisplay(
                 10, 100, 200, 500,
                 embed,
@@ -78,6 +77,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         super.setPeriodConfig(superPeriodConfig);
         this.periodConfig = (PeriodConfig) superPeriodConfig;
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
+        bimatrix.setPayoffFunction(this.periodConfig.twoStrategyPayoffFunction);
         rps.setPayoffFunction(this.periodConfig.RPSPayoffFunction);
     }
 
@@ -104,6 +104,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         this.percent = (1 - (millisLeft / ((float) periodConfig.length * 1000)));
         chart.currentPercent = this.percent;
         chart.updateLines();
+        bimatrix.currentPercent = this.percent;
+        bimatrix.updateHeatmap();
     }
 
     @Override
@@ -111,46 +113,22 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     @Override
-    public void keyTyped(KeyEvent ke) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent ke) {
-        /*
-        if (periodIsRunning()) {
-        if (ke.isActionKey()) {
-        if (ke.getKeyCode() == KeyEvent.VK_UP) {
-        percent_A += 0.01f;
-        server.strategyChanged(getFullName());
-        } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
-        percent_A -= 0.01f;
-        server.strategyChanged(getFullName());
-        }
-        }
-        }
-         *
-         */
-    }
-
-    @Override
-    public void keyReleased(KeyEvent ke) {
-    }
-
-    @Override
     public void setStrategyAB(float A, float B, float a, float b) {
-        this.percent_A = A;
-        this.percent_a = a;
+        bimatrix.percent_A = A;
+        bimatrix.percent_a = a;
+        chart.currentAPayoff = a;
+        chart.currentBPayoff = b;
     }
 
     @Override
     public float[] getStrategyAB() {
-        return new float[]{percent_A, 1 - percent_A};
+        return new float[]{bimatrix.percent_A, 1 - bimatrix.percent_A};
     }
 
     @Override
     public void setStrategyRPS(
             float R, float P, float S,
-            float r,  float p,  float s) {
+            float r, float p, float s) {
         rps.setPlayerRPS(R, P, S);
         rps.setOpponentRPS(r, p, s);
         chart.currentRPayoff = r;
@@ -191,6 +169,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
             background(255);
             fill(0);
             stroke(0);
+            bimatrix.draw(embed);
             rps.draw(embed);
             chart.draw(embed);
             countdown.draw(embed);

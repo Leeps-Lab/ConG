@@ -17,16 +17,22 @@ public class HomotopyPayoffFunction implements TwoStrategyPayoffFunction, Serial
     public float Ab, Ba, Bb;
 
     @Override
+    public float getMax() {
+        return Math.max(AaStart, Math.max(AaEnd, Math.max(Ab, Math.max(Ba, Bb))));
+    }
+
+    @Override
+    public float getMin() {
+        return Math.min(AaStart, Math.max(AaEnd, Math.max(Ab, Math.max(Ba, Bb))));
+    }
+
+    @Override
     public float getPayoff(
             float percent,
             float A, float B,
             float a, float b) {
         float Aa;
-        if (percent <= maxPercent) {
-            Aa = AaStart + (percent * (AaEnd - AaStart));
-        } else {
-            Aa = AaStart + ((1 - percent) * (AaEnd - AaStart));
-        }
+        Aa = AaStart + (percent * (AaEnd - AaStart));
         return A * (a * Aa + b * Ab) + B * (a * Ba + b * Bb);
     }
 }

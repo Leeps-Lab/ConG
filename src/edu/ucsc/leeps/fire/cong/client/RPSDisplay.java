@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 public class RPSDisplay extends Sprite implements MouseListener {
 
@@ -33,7 +34,10 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private boolean enabled;
     private ServerInterface server;
     private ClientInterface client;
+    private PApplet applet;
     private RPSPayoffFunction payoffFunction;
+    private PGraphics heatmap;
+    private boolean visible = false;
 
     public RPSDisplay(
             float x, float y, int width, int height,
@@ -94,14 +98,31 @@ public class RPSDisplay extends Sprite implements MouseListener {
         setEnabled(false);
 
         applet.addMouseListener(this);
+        this.applet = applet;
     }
 
     public void setPayoffFunction(RPSPayoffFunction payoffFunction) {
-        this.payoffFunction = payoffFunction;
+        if (payoffFunction == null) {
+            visible = false;
+            return;
+        } else {
+            visible = true;
+            this.payoffFunction = payoffFunction;
+            heatmap = calculateHeatmap(applet);
+        }
     }
 
     @Override
     public void draw(PApplet applet) {
+        if (!visible) {
+            return;
+        }
+
+        if (heatmap != null) {
+            applet.image(heatmap, origin.x + rock.x, origin.y + scissors.y);
+        }
+
+
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
 
@@ -175,7 +196,6 @@ public class RPSDisplay extends Sprite implements MouseListener {
         for (int i = R; i <= S; i++) {
             stratSlider[i].draw(applet);
         }
-
         applet.popMatrix();
     }
 
@@ -298,6 +318,24 @@ public class RPSDisplay extends Sprite implements MouseListener {
         server.strategyChanged(client.getFullName());
     }
 
+    private float[] translate(float x, float y) {
+        float newS = y / maxDist;
+
+        // constant factor for determining distance
+        float epsilon = y + (1 / PApplet.sqrt(3)) * x;
+
+        // calculate distance from paper 3D axis
+        float deltaX = x - (PApplet.sqrt(3) / 4) * epsilon;
+        float deltaY = y - .75f * epsilon;
+        float distP = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
+
+        float newP = distP / maxDist;
+
+        float newR = 1 - newS - newP;
+
+        return new float[]{newR, newP, newS};
+    }
+
     // calculate plannedDist entries
     private void calculatePlannedDist(float x, float y) {
         plannedDist[S] = y;
@@ -408,9 +446,34 @@ public class RPSDisplay extends Sprite implements MouseListener {
                 break;
 
             default:
-                throw new RuntimeException("RPSD Error: strat value " + "out of bounds in balanceStratValues()");
+                throw new RuntimeException("RPS Error: strat value " + "out of bounds in balanceStratValues()");
         }
 
         server.strategyChanged(client.getFullName());
+    }
+
+    private PGraphics calculateHeatmap(PApplet applet) {
+        int w = Math.round(paper.x - rock.x);
+        int h = Math.round(rock.y - scissors.y);
+        PGraphics g = applet.createGraphics(w, h, PApplet.P2D);
+        g.beginDraw();
+        g.loadPixels();
+        for (int x = 0; x < g.width; x++) {
+            for (int y = 0; y < g.height; y++) {
+                int i = y * g.width + x;
+                float[] coords = translate(x, g.height - y);
+                if (coords[0] >= 0 && coords[1] >= 0 && coords[2] >= 0) {
+                    float u = payoffFunction.getPayoff(
+                            coords[0], coords[1], coords[2],
+                            coords[0], coords[1], coords[2]) / 100f;
+                    g.pixels[i] = applet.color(u * 255, 0, 0);
+                } else {
+                    g.pixels[i] = applet.color(255, 255, 255);
+                }
+            }
+        }
+        g.updatePixels();
+        g.endDraw();
+        return g;
     }
 }
