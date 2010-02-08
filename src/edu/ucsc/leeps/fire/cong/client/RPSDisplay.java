@@ -39,6 +39,9 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private PGraphics heatmap;
     private boolean visible = false;
 
+    // points for droplines
+    FPoint rDrop, pDrop, sDrop;
+
     public RPSDisplay(
             float x, float y, int width, int height,
             PApplet applet,
@@ -102,6 +105,10 @@ public class RPSDisplay extends Sprite implements MouseListener {
                 pColor, pLabel);
         stratSlider[S] = new Slider(50, width - 50, height / 3 + 150,
                 sColor, sLabel);
+
+        rDrop = new FPoint();
+        pDrop = new FPoint();
+        sDrop = new FPoint(0, rock.y);
 
         setEnabled(false);
 
@@ -226,6 +233,23 @@ public class RPSDisplay extends Sprite implements MouseListener {
         }
 
         planned.draw(applet);
+
+        if(current.visible) {
+            calculateDropLinePoints(current.x - rock.x, rock.y - current.y);
+            applet.strokeWeight(1);
+            applet.stroke(255);
+            applet.line(current.x, current.y, rDrop.x, rDrop.y);
+            applet.line(current.x, current.y, pDrop.x, pDrop.y);
+            applet.line(current.x, current.y, sDrop.x, sDrop.y);
+        }
+
+        current.setLabel(payoffFunction.getPayoff(playedStrat[R],
+                                                    playedStrat[P],
+                                                    playedStrat[S],
+                                                    opponentStrat[R],
+                                                    opponentStrat[P],
+                                                    opponentStrat[S]));
+        
         current.draw(applet);
         opponent.draw(applet);
         for (int i = R; i <= S; i++) {
@@ -377,22 +401,39 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private float[] translate(float x, float y) {
         float newS = y / maxDist;
 
-        // constant factor for determining distance
-        float epsilon = y + (1 / PApplet.sqrt(3)) * x;
+        // constant factors for determining distances
+        float epsilon1 = y + (1 / PApplet.sqrt(3)) * x;
+        float epsilon2 = y - (1 / PApplet.sqrt(3)) * x;
 
         // calculate distance from paper 3D axis
-        float deltaX = x - (PApplet.sqrt(3) / 4) * epsilon;
-        float deltaY = y - .75f * epsilon;
-        float distP = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
+        float deltaX = x - (PApplet.sqrt(3) / 4) * epsilon1;
+        float deltaY = y - .75f * epsilon1;
+        float newP;
+        if (deltaX < 0 && deltaY > 0) {
+            newP = -1;
+        } else {
+            float distP = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
+            newP = distP / maxDist;
+        }
 
-        float newP = distP / maxDist;
-
-        float newR = 1 - newS - newP;
+        // calculate distance from rock 3D axis
+        deltaX = x - .75f * sideLength + (PApplet.sqrt(3) / 4) * epsilon2;
+        deltaY = y - (PApplet.sqrt(3) / 4) * sideLength - .75f * epsilon2;
+        float newR;
+        if (deltaX > 0 && deltaY > 0) {
+            newR = -1;
+        } else {
+            newR = 1 - newS - newP;
+        }
 
         return new float[]{newR, newP, newS};
     }
 
     // calculate plannedDist entries
+    /*
+     * Modifies plannedDist array. Array is invalid if any of the entries
+     * are -1.
+     */
     private void calculatePlannedDist(float x, float y) {
         plannedDist[S] = y;
 
@@ -531,5 +572,18 @@ public class RPSDisplay extends Sprite implements MouseListener {
         g.updatePixels();
         g.endDraw();
         return g;
+    }
+
+    private void calculateDropLinePoints(float x, float y) {
+        sDrop.x = current.x;
+
+        float epsilon1 = y + (1 / PApplet.sqrt(3)) * x;
+        float epsilon2 = y - (1 / PApplet.sqrt(3)) * x;
+
+        pDrop.x = (PApplet.sqrt(3) / 4) * epsilon1;
+        pDrop.y = .75f * epsilon1;
+
+        rDrop.x = .75f * sideLength + (PApplet.sqrt(3) / 4) * epsilon2;
+        rDrop.y = (PApplet.sqrt(3) / 4) * sideLength - .75f * epsilon2;
     }
 }

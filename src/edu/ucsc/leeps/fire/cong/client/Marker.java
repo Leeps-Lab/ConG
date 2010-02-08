@@ -142,6 +142,11 @@ public class Marker extends FPoint {
                 applet.rectMode(PApplet.CENTER);
                 applet.fill(255);
                 float textWidth = applet.textWidth(label);
+                if (textWidth > 16 && labelMode == LEFT) {
+                    labelCoords.x = this.x - radius - textWidth / 2;
+                } else if (textWidth > 16 && labelMode == RIGHT) {
+                    labelCoords.x = this.x + radius + textWidth / 2;
+                }
                 float textHeight = applet.textAscent() + applet.textDescent();
                 applet.rect(labelCoords.x, labelCoords.y, textWidth, textHeight);
                 applet.textAlign(PApplet.CENTER, PApplet.CENTER);
