@@ -237,7 +237,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         if(current.visible) {
             calculateDropLinePoints(current.x - rock.x, rock.y - current.y);
             applet.strokeWeight(1);
-            applet.stroke(255);
+            applet.stroke(0, 255, 255);
             applet.line(current.x, current.y, rDrop.x, rDrop.y);
             applet.line(current.x, current.y, pDrop.x, pDrop.y);
             applet.line(current.x, current.y, sDrop.x, sDrop.y);
