@@ -38,7 +38,6 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private RPSPayoffFunction payoffFunction;
     private PGraphics heatmap;
     private boolean visible = false;
-
     // points for droplines
     FPoint rDrop, pDrop, sDrop;
 
@@ -123,7 +122,6 @@ public class RPSDisplay extends Sprite implements MouseListener {
         } else {
             visible = true;
             this.payoffFunction = payoffFunction;
-            heatmap = calculateHeatmap(applet);
         }
     }
 
@@ -234,7 +232,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
 
         planned.draw(applet);
 
-        if(current.visible) {
+        if (current.visible) {
             calculateDropLinePoints(current.x - rock.x, rock.y - current.y);
             applet.strokeWeight(1);
             applet.stroke(0, 255, 255);
@@ -244,12 +242,12 @@ public class RPSDisplay extends Sprite implements MouseListener {
         }
 
         current.setLabel(payoffFunction.getPayoff(playedStrat[R],
-                                                    playedStrat[P],
-                                                    playedStrat[S],
-                                                    opponentStrat[R],
-                                                    opponentStrat[P],
-                                                    opponentStrat[S]));
-        
+                playedStrat[P],
+                playedStrat[S],
+                opponentStrat[R],
+                opponentStrat[P],
+                opponentStrat[S]));
+
         current.draw(applet);
         opponent.draw(applet);
         for (int i = R; i <= S; i++) {
@@ -549,29 +547,30 @@ public class RPSDisplay extends Sprite implements MouseListener {
         server.strategyChanged(client.getFullName());
     }
 
-    private PGraphics calculateHeatmap(PApplet applet) {
-        int w = Math.round(paper.x - rock.x);
-        int h = Math.round(rock.y - scissors.y);
-        PGraphics g = applet.createGraphics(w, h, PApplet.P2D);
-        g.beginDraw();
-        g.loadPixels();
-        for (int x = 0; x < g.width; x++) {
-            for (int y = 0; y < g.height; y++) {
-                int i = y * g.width + x;
-                float[] coords = translate(x, g.height - y);
-                if (coords[0] >= 0 && coords[1] >= 0 && coords[2] >= 0) {
-                    float u = payoffFunction.getPayoff(
-                            coords[0], coords[1], coords[2],
-                            coords[0], coords[1], coords[2]) / 100f;
-                    g.pixels[i] = applet.color(u * 255, 0, 0);
-                } else {
-                    g.pixels[i] = applet.color(255, 255, 255);
+    public void updateHeatmap() {
+        if (payoffFunction != null) {
+            int w = Math.round(paper.x - rock.x);
+            int h = Math.round(rock.y - scissors.y);
+            heatmap = applet.createGraphics(w, h, PApplet.P2D);
+            heatmap.beginDraw();
+            heatmap.loadPixels();
+            for (int x = 0; x < heatmap.width; x++) {
+                for (int y = 0; y < heatmap.height; y++) {
+                    int i = y * heatmap.width + x;
+                    float[] coords = translate(x, heatmap.height - y);
+                    if (coords[0] >= 0 && coords[1] >= 0 && coords[2] >= 0) {
+                        float u = payoffFunction.getPayoff(
+                                coords[0], coords[1], coords[2],
+                                opponentStrat[0], opponentStrat[1], opponentStrat[2]) / 100f;
+                        heatmap.pixels[i] = applet.color(u * 255, 0, 0);
+                    } else {
+                        heatmap.pixels[i] = applet.color(255, 255, 255);
+                    }
                 }
             }
+            heatmap.updatePixels();
+            heatmap.endDraw();
         }
-        g.updatePixels();
-        g.endDraw();
-        return g;
     }
 
     private void calculateDropLinePoints(float x, float y) {

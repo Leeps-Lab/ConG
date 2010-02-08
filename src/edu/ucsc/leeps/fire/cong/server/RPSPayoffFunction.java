@@ -28,7 +28,7 @@ public class RPSPayoffFunction implements Serializable {
             float R, float P, float S,
             float r, float p, float s) {
         return R * (Rr * r + Rp * p + Rs * s)
-                + P * (Rr * r + Rp * p + Rs * s)
-                + S * (Rr * r + Rp * p + Rs * s);
+                + P * (Pr * r + Pp * p + Ps * s)
+                + S * (Sr * r + Sp * p + Ss * s);
     }
 }

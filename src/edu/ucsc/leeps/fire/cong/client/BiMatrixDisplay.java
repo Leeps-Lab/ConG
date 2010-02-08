@@ -90,16 +90,18 @@ public class BiMatrixDisplay extends Sprite implements MouseListener {
     }
 
     public void updateHeatmap() {
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                float tmpA, tmpB, tmpa, tmpb;
-                tmpA = 1 - (y / (float) height);
-                tmpB = 1 - tmpA;
-                tmpa = 1 - (x / (float) width);
-                tmpb = 1 - tmpa;
-                float u = payoffFunction.getPayoff(currentPercent, tmpA, tmpB, tmpa, tmpb);
-                float heat = u / payoffFunction.getMax();
-                heatmap[x][y] = heat;
+        if (payoffFunction != null) {
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    float tmpA, tmpB, tmpa, tmpb;
+                    tmpA = 1 - (y / (float) height);
+                    tmpB = 1 - tmpA;
+                    tmpa = 1 - (x / (float) width);
+                    tmpb = 1 - tmpa;
+                    float u = payoffFunction.getPayoff(currentPercent, tmpA, tmpB, tmpa, tmpb);
+                    float heat = u / payoffFunction.getMax();
+                    heatmap[x][y] = heat;
+                }
             }
         }
     }

@@ -106,6 +106,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         chart.updateLines();
         bimatrix.currentPercent = this.percent;
         bimatrix.updateHeatmap();
+        rps.updateHeatmap();
     }
 
     @Override
