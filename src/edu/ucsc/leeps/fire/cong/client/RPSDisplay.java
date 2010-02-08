@@ -70,17 +70,25 @@ public class RPSDisplay extends Sprite implements MouseListener {
         sideLength = width - 10;
         maxDist = (PApplet.sqrt(3) / 2f) * sideLength;
 
-        rock = new Marker(5, height / 2, true, 10);
+        rock = new Marker(5, height / 3, true, 10);
         rock.setColor(rColor);
+        rock.setLabel("R");
+        rock.setLabelMode(Marker.BOTTOM);
         paper = new Marker(rock.x + sideLength, rock.y, true, 10);
         paper.setColor(pColor);
+        paper.setLabel("P");
+        paper.setLabelMode(Marker.BOTTOM);
         scissors = new Marker(rock.x + sideLength / 2,
                 rock.y - (int) maxDist, true, 10);
         scissors.setColor(sColor);
+        scissors.setLabel("S");
+        scissors.setLabelMode(Marker.TOP);
 
         // set up strategy markers
         current = new Marker(0, 0, false, MARKER_RADIUS + 2);
         current.setColor(50, 255, 50);
+        current.setLabel("$$");
+        current.setLabelMode(Marker.BOTTOM);
         planned = new Marker(0, 0, false, MARKER_RADIUS);
         planned.setAlpha(140);
         planned.setColor(25, 255, 25);
@@ -88,11 +96,11 @@ public class RPSDisplay extends Sprite implements MouseListener {
         opponent.setColor(200, 40, 40);
 
         // set up Sliders
-        stratSlider[R] = new Slider(50, width - 50, height / 2 + 50,
+        stratSlider[R] = new Slider(50, width - 50, height / 3 + 50,
                 rColor, rLabel);
-        stratSlider[P] = new Slider(50, width - 50, height / 2 + 100,
+        stratSlider[P] = new Slider(50, width - 50, height / 3 + 100,
                 pColor, pLabel);
-        stratSlider[S] = new Slider(50, width - 50, height / 2 + 150,
+        stratSlider[S] = new Slider(50, width - 50, height / 3 + 150,
                 sColor, sLabel);
 
         setEnabled(false);
@@ -130,7 +138,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         float mouseY = applet.mouseY - origin.y;
 
         applet.stroke(0);
-        applet.strokeWeight(3);
+        applet.strokeWeight(2);
         applet.line(rock.x, rock.y, paper.x, paper.y);
         applet.line(rock.x, rock.y, scissors.x, scissors.y);
         applet.line(scissors.x, scissors.y, paper.x, paper.y);
@@ -148,18 +156,35 @@ public class RPSDisplay extends Sprite implements MouseListener {
             }
 
             if (mouseInTriangle) {
-                calculatePlannedStrats();
                 applet.noCursor();
-                planned.show();
-                planned.update(mouseX, mouseY);
+                if (current.isGrabbed()) {
+                    calculatePlayedStrats(mouseX - rock.x, rock.y - mouseY);
+                    current.update(mouseX, mouseY);
+                    if (playedStrat[S] < 0.2f) {
+                        if (playedStrat[R] > playedStrat[P]) {
+                            current.setLabelMode(Marker.RIGHT);
+                        } else {
+                            current.setLabelMode(Marker.LEFT);
+                        }
+                    } else {
+                        current.setLabelMode(Marker.BOTTOM);
+                    }
+                } else {
+                    calculatePlannedStrats();
+                    planned.show();
+                    planned.update(mouseX, mouseY);
 
-                for (int i = R; i <= S; i++) {
-                    stratSlider[i].showPlan();
+                    for (int i = R; i <= S; i++) {
+                        stratSlider[i].showPlan();
+                    }
+                    stratSlider[R].setPlan(plannedStrat[R]);
+                    stratSlider[P].setPlan(plannedStrat[P]);
+                    stratSlider[S].setPlan(plannedStrat[S]);
                 }
-                stratSlider[R].setPlan(plannedStrat[R]);
-                stratSlider[P].setPlan(plannedStrat[P]);
-                stratSlider[S].setPlan(plannedStrat[S]);
             } else {
+                if (current.isGrabbed()) {
+                    current.release();
+                }
                 planned.hide();
                 for (int i = R; i <= S; i++) {
                     stratSlider[i].hidePlan();
@@ -183,6 +208,16 @@ public class RPSDisplay extends Sprite implements MouseListener {
                         }
 
                         balanceStratValues(i, stratSlider[i].getStratValue());
+
+                        if (playedStrat[S] < 0.2f) {
+                            if (playedStrat[R] > playedStrat[P]) {
+                                current.setLabelMode(Marker.RIGHT);
+                            } else {
+                                current.setLabelMode(Marker.LEFT);
+                            }
+                        } else {
+                            current.setLabelMode(Marker.BOTTOM);
+                        }
 
                         break;
                     }
@@ -210,6 +245,20 @@ public class RPSDisplay extends Sprite implements MouseListener {
             float mouseY = e.getY() - origin.y;
             if (mouseInTriangle) {
                 calculatePlayedStrats(mouseX - rock.x, rock.y - mouseY);
+                if (playedStrat[S] < 0.2f) {
+                    if (playedStrat[R] > playedStrat[P]) {
+                        current.setLabelMode(Marker.RIGHT);
+                    } else {
+                        current.setLabelMode(Marker.LEFT);
+                    }
+                } else {
+                    current.setLabelMode(Marker.BOTTOM);
+                }
+                current.grab();
+                planned.hide();
+                for (int i = 0; i < stratSlider.length; i++) {
+                    stratSlider[i].hidePlan();
+                }
             } else {
                 for (int i = 0; i < stratSlider.length; i++) {
                     if (stratSlider[i].mouseOnHandle(mouseX, mouseY)) {
@@ -223,10 +272,16 @@ public class RPSDisplay extends Sprite implements MouseListener {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        for (int i = 0; i < stratSlider.length; i++) {
-            if (stratSlider[i].isGrabbed()) {
-                stratSlider[i].release();
-                break;
+        if (mouseInTriangle) {
+            if (current.isGrabbed()) {
+                current.release();
+            }
+        } else {
+            for (int i = 0; i < stratSlider.length; i++) {
+                if (stratSlider[i].isGrabbed()) {
+                    stratSlider[i].release();
+                    break;
+                }
             }
         }
     }
@@ -287,6 +342,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
             playedStrat[i] = 0f;
             opponentStrat[i] = 0f;
             stratSlider[i].setStratValue(0f);
+            stratSlider[i].hidePlan();
         }
 
         current.hide();

@@ -41,7 +41,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
                 10, 100, embed,
                 this.server, this);
         rps = new RPSDisplay(
-                10, 100, 200, 500,
+                10, 100, 200, 600,
                 embed,
                 this.server,
                 this);
