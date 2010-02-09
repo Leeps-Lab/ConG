@@ -97,6 +97,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     public void tick(int secondsLeft) {
         this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
         countdown.setSecondsLeft(secondsLeft);
+        bimatrix.update();
+        rps.update();
     }
 
     @Override
@@ -105,8 +107,6 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         chart.currentPercent = this.percent;
         chart.updateLines();
         bimatrix.currentPercent = this.percent;
-        bimatrix.updateHeatmap();
-        rps.updateHeatmap();
     }
 
     @Override

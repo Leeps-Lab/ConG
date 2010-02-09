@@ -6,7 +6,6 @@ import java.awt.Color;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import processing.core.PApplet;
-import processing.core.PGraphics;
 
 public class RPSDisplay extends Sprite implements MouseListener {
 
@@ -36,7 +35,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private ClientInterface client;
     private PApplet applet;
     private RPSPayoffFunction payoffFunction;
-    private PGraphics heatmap;
+    private HeatmapHelper heatmap;
     private boolean visible = false;
     // points for droplines
     FPoint rDrop, pDrop, sDrop;
@@ -112,6 +111,10 @@ public class RPSDisplay extends Sprite implements MouseListener {
         setEnabled(false);
 
         applet.addMouseListener(this);
+        heatmap = new HeatmapHelper(applet,
+                (int)(paper.x - rock.x), (int)(rock.y - scissors.y),
+                0xFF0000FF, 0xFFFFFF00, 0xFF00FF00);
+        heatmap.setRPSDisplay(this);
         this.applet = applet;
     }
 
@@ -125,14 +128,24 @@ public class RPSDisplay extends Sprite implements MouseListener {
         }
     }
 
+    public RPSPayoffFunction getPayoffFunction() {
+        return payoffFunction;
+    }
+
+    public void update() {
+        if (visible) {
+            heatmap.updateRPSHeatmap(opponentStrat[0], opponentStrat[1], opponentStrat[2]);
+        }
+    }
+
     @Override
     public void draw(PApplet applet) {
         if (!visible) {
             return;
         }
 
-        if (heatmap != null) {
-            applet.image(heatmap, origin.x + rock.x, origin.y + scissors.y);
+        if (heatmap.getHeatmap() != null) {
+            applet.image(heatmap.getHeatmap(), origin.x + rock.x, origin.y + scissors.y);
         }
 
 
@@ -396,7 +409,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         server.strategyChanged(client.getFullName());
     }
 
-    private float[] translate(float x, float y) {
+    public float[] translate(float x, float y) {
         float newS = y / maxDist;
 
         // constant factors for determining distances
@@ -545,32 +558,6 @@ public class RPSDisplay extends Sprite implements MouseListener {
         }
 
         server.strategyChanged(client.getFullName());
-    }
-
-    public void updateHeatmap() {
-        if (payoffFunction != null) {
-            int w = Math.round(paper.x - rock.x);
-            int h = Math.round(rock.y - scissors.y);
-            heatmap = applet.createGraphics(w, h, PApplet.P2D);
-            heatmap.beginDraw();
-            heatmap.loadPixels();
-            for (int x = 0; x < heatmap.width; x++) {
-                for (int y = 0; y < heatmap.height; y++) {
-                    int i = y * heatmap.width + x;
-                    float[] coords = translate(x, heatmap.height - y);
-                    if (coords[0] >= 0 && coords[1] >= 0 && coords[2] >= 0) {
-                        float u = payoffFunction.getPayoff(
-                                coords[0], coords[1], coords[2],
-                                opponentStrat[0], opponentStrat[1], opponentStrat[2]) / 100f;
-                        heatmap.pixels[i] = applet.color(u * 255, 0, 0);
-                    } else {
-                        heatmap.pixels[i] = applet.color(255, 255, 255);
-                    }
-                }
-            }
-            heatmap.updatePixels();
-            heatmap.endDraw();
-        }
     }
 
     private void calculateDropLinePoints(float x, float y) {

@@ -140,7 +140,6 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     @Override
     public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
         periodConfig = (PeriodConfig) superPeriodConfig;
-        periodConfig.length = 60;
         periodConfig.pointsPerSecond = false;
         HomotopyPayoffFunction homotopyPayoffFunction = new HomotopyPayoffFunction();
         homotopyPayoffFunction.AaStart = 10;

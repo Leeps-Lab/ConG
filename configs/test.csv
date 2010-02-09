@@ -1,9 +1,9 @@
-period, length, paid, time constrained, initialStrategy, payoffFunction, threshold, Aa_start, Aa_end, Aa, Ab, Ba, Bb
-1, 20, yes, yes, 0.1, homotopy, '', 40, 100, '', 0, 0, 50
-2, 20, yes, yes, 0.2, homotopy, '', 30, 100, '', 0, 0, 50
-3, 20, yes, yes, 0.3, homotopy, '', 20, 100, '', 0, 0, 50
-4, 20, yes, yes, 0.4, homotopy, '', 10, 100, '', 0, 0, 50
-5, 20, yes, yes, 0.5, homotopy, '', 0, 100, '', 0, 0, 50
-5, 20, yes, yes, 0.6, threshold, 0.8, '', '', 80, 0, 0, 50
-5, 20, yes, yes, 0.7, threshold, 0.9, '', '', 80, 0, 0, 50
-5, 20, yes, yes, 0.8, threshold, 0.8, '', '', 80, 0, 0, 50
+period, length, paid, time constrained, initialStrategy, twoStrategyPayoffFunction, Aa_start, Aa_end, Ab, Ba, Bb, RPSPayoffFunction, Rr, Rp, Rs, Pr, Pp, Ps, Sr, Sp, Ss
+1, 60, yes, yes, 0.1, homotopy, 40, 100, 0, 0, 50, '', '', '', '', '', '', '', '', '', ''
+2, 20, yes, yes, 0.2, homotopy, 30, 100, 0, 0, 50, '', '', '', '', '', '', '', '', '', ''
+3, 30, yes, yes, 0.3, homotopy, 20, 100, 0, 0, 50, '', '', '', '', '', '', '', '', '', ''
+4, 40, yes, yes, 0.4, homotopy, 10, 100, 0, 0, 50, '', '', '', '', '', '', '', '', '', ''
+5, 50, yes, yes, 0.5, homotopy, 0, 100, 0, 0, 50, '', '', '', '', '', '', '', '', '', ''
+6, 60, yes, yes, 0.6, '', '', '', '', '', '', rps, '1', '0', '0', '0', '1', '0', '0', '1', '0', '1'
+7, 50, yes, yes, 0.7, '', '', '', '', '', '', rps, '1', '0', '0', '0', '1', '0', '0', '1', '0', '1'
+8, 40, yes, yes, 0.8, '', '', '', '', '', '', rps, '1', '0', '0', '0', '1', '0', '0', '1', '0', '1'

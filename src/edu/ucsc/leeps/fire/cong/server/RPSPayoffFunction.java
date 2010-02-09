@@ -24,6 +24,14 @@ public class RPSPayoffFunction implements Serializable {
         Ss = 0;
     }
 
+    public float getMin() {
+        return 0;
+    }
+
+    public float getMax() {
+        return 100;
+    }
+
     public float getPayoff(
             float R, float P, float S,
             float r, float p, float s) {
