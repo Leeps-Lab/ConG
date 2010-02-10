@@ -163,6 +163,17 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     }
 
     @Override
+    public void tick(int secondsLeft) {
+        super.tick(secondsLeft);
+        logger.tickLog.commit();
+    }
+
+    @Override
+    public void quickTick(int millisLeft) {
+        super.quickTick(millisLeft);
+    }
+    
+    @Override
     public void endPeriod() {
         super.endPeriod();
     }
