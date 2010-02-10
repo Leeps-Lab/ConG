@@ -14,6 +14,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
 
     private Map<String, ClientInterface> clients;
     private PeriodConfig periodConfig;
+    private TickLog tickLog;
     private List<Population> populations;
     private Map<String, Population> populationMap;
     private long periodStartTime;
@@ -21,7 +22,8 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     private Map<ClientInterface, float[]> lastStrategies;
 
     public Server() {
-        super(PeriodConfig.class);
+        super(PeriodConfig.class, TickLog.class);
+        tickLog = (TickLog) logger.tickLog;
         clients = new HashMap<String, ClientInterface>();
     }
 
@@ -165,14 +167,25 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     @Override
     public void tick(int secondsLeft) {
         super.tick(secondsLeft);
-        logger.tickLog.commit();
+        for (Population population : populations) {
+            tickLog.population = populations.indexOf(population) + 1;
+            if (periodConfig.twoStrategyPayoffFunction != null) {
+                tickLog.avgA = population.averageStrategy_a;
+                tickLog.avgB = 1 - tickLog.avgA;
+            } else if (periodConfig.RPSPayoffFunction != null) {
+                tickLog.avgR = population.averageStrategy_r;
+                tickLog.avgP = population.averageStrategy_p;
+                tickLog.avgS = population.averageStrategy_s;
+            }
+            logger.tickLog.commit();
+        }
     }
 
     @Override
     public void quickTick(int millisLeft) {
         super.quickTick(millisLeft);
     }
-    
+
     @Override
     public void endPeriod() {
         super.endPeriod();

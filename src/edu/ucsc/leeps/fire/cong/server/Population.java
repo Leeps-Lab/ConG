@@ -20,7 +20,6 @@ public class Population {
     public float averageStrategy_r;
     public float averageStrategy_p;
     public float averageStrategy_s;
-    public float averageStrategy_d;
 
     public Population() {
         members = new LinkedList<ClientInterface>();
