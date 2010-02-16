@@ -37,8 +37,8 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private RPSPayoffFunction payoffFunction;
     private HeatmapHelper heatmap;
     private boolean visible = false;
-    // points for droplines
-    FPoint rDrop, pDrop, sDrop;
+    // Markers for droplines
+    Marker rDrop, pDrop, sDrop;
 
     public RPSDisplay(
             float x, float y, int width, int height,
@@ -104,9 +104,20 @@ public class RPSDisplay extends Sprite implements MouseListener {
         stratSlider[S] = new Slider(50, width - 50, height / 3 + 150,
                 sColor, sLabel);
 
-        rDrop = new FPoint();
-        pDrop = new FPoint();
-        sDrop = new FPoint(0, rock.y);
+        // set up dropline Markers
+        rDrop = new Marker(0, 0, true, MARKER_RADIUS);
+        rDrop.setColor(rColor);
+        rDrop.setLabel("R");
+        rDrop.setLabelMode(Marker.RIGHT);
+        pDrop = new Marker(0, 0, true, MARKER_RADIUS);
+        pDrop.setColor(pColor);
+        pDrop.setLabel("P");
+        pDrop.setLabelMode(Marker.LEFT);
+        sDrop = new Marker(0, rock.y, true, MARKER_RADIUS);
+        sDrop.setColor(sColor);
+        sDrop.setLabel("S");
+        sDrop.setLabelMode(Marker.BOTTOM);
+
 
         setEnabled(false);
 
@@ -178,15 +189,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
                 if (current.isGrabbed()) {
                     calculatePlayedStrats(mouseX - rock.x, rock.y - mouseY);
                     current.update(mouseX, mouseY);
-                    if (playedStrat[S] < 0.2f) {
-                        if (playedStrat[R] > playedStrat[P]) {
-                            current.setLabelMode(Marker.RIGHT);
-                        } else {
-                            current.setLabelMode(Marker.LEFT);
-                        }
-                    } else {
-                        current.setLabelMode(Marker.BOTTOM);
-                    }
+                    adjustLabels();
                 } else {
                     calculatePlannedStrats();
                     planned.show();
@@ -246,7 +249,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         planned.draw(applet);
 
         if (current.visible) {
-            calculateDropLinePoints(current.x - rock.x, rock.y - current.y);
+            calculateDropLinePoints();
             applet.strokeWeight(1);
             applet.stroke(0, 255, 255);
             applet.line(current.x, current.y, rDrop.x, rDrop.y);
@@ -261,6 +264,14 @@ public class RPSDisplay extends Sprite implements MouseListener {
                 opponentStrat[P],
                 opponentStrat[S]));
 
+        rDrop.setLabel(playedStrat[R]);
+        pDrop.setLabel(playedStrat[P]);
+        sDrop.setLabel(playedStrat[S]);
+
+
+        rDrop.draw(applet);
+        pDrop.draw(applet);
+        sDrop.draw(applet);
         current.draw(applet);
         opponent.draw(applet);
         for (int i = R; i <= S; i++) {
@@ -280,15 +291,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
             float mouseY = e.getY() - origin.y;
             if (mouseInTriangle) {
                 calculatePlayedStrats(mouseX - rock.x, rock.y - mouseY);
-                if (playedStrat[S] < 0.2f) {
-                    if (playedStrat[R] > playedStrat[P]) {
-                        current.setLabelMode(Marker.RIGHT);
-                    } else {
-                        current.setLabelMode(Marker.LEFT);
-                    }
-                } else {
-                    current.setLabelMode(Marker.BOTTOM);
-                }
+                adjustLabels();
                 current.grab();
                 planned.hide();
                 for (int i = 0; i < stratSlider.length; i++) {
@@ -359,9 +362,15 @@ public class RPSDisplay extends Sprite implements MouseListener {
         if (enabled) {
             current.show();
             opponent.show();
+            rDrop.show();
+            pDrop.show();
+            sDrop.show();
         } else {
             current.hide();
             opponent.hide();
+            rDrop.hide();
+            pDrop.hide();
+            sDrop.hide();
         }
     }
 
@@ -383,10 +392,31 @@ public class RPSDisplay extends Sprite implements MouseListener {
         current.hide();
         planned.hide();
         opponent.hide();
+        rDrop.hide();
+        pDrop.hide();
+        sDrop.hide();
     }
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    private void adjustLabels() {
+        if (playedStrat[S] < 0.2f) {
+            if (playedStrat[R] > playedStrat[P]) {
+                current.setLabelMode(Marker.RIGHT);
+                pDrop.setLabelMode(Marker.TOP);
+                rDrop.setLabelMode(Marker.RIGHT);
+            } else {
+                current.setLabelMode(Marker.LEFT);
+                pDrop.setLabelMode(Marker.LEFT);
+                rDrop.setLabelMode(Marker.TOP);
+            }
+        } else {
+            current.setLabelMode(Marker.BOTTOM);
+            pDrop.setLabelMode(Marker.LEFT);
+            rDrop.setLabelMode(Marker.RIGHT);
+        }
     }
 
     // calculate playedR, playedP, playedS from x, y
@@ -560,16 +590,16 @@ public class RPSDisplay extends Sprite implements MouseListener {
         server.strategyChanged(client.getFullName());
     }
 
-    private void calculateDropLinePoints(float x, float y) {
-        sDrop.x = current.x;
+    private void calculateDropLinePoints() {
+        sDrop.update(current.x, rock.y);
 
-        float epsilon1 = y + (1 / PApplet.sqrt(3)) * x;
-        float epsilon2 = y - (1 / PApplet.sqrt(3)) * x;
+        float x, y;
+        x = current.x - maxDist * playedStrat[P] * PApplet.cos(PApplet.PI / 6);
+        y = current.y - maxDist * playedStrat[P] * PApplet.sin(PApplet.PI / 6);
+        pDrop.update(x, y);
 
-        pDrop.x = (PApplet.sqrt(3) / 4) * epsilon1;
-        pDrop.y = .75f * epsilon1;
-
-        rDrop.x = .75f * sideLength + (PApplet.sqrt(3) / 4) * epsilon2;
-        rDrop.y = (PApplet.sqrt(3) / 4) * sideLength - .75f * epsilon2;
+        x = current.x + maxDist * playedStrat[R] * PApplet.cos(PApplet.PI / 6);
+        y = current.y - maxDist * playedStrat[R] * PApplet.sin(PApplet.PI / 6);
+        rDrop.update(x, y);
     }
 }
