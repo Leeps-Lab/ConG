@@ -249,7 +249,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         planned.draw(applet);
 
         if (current.visible) {
-            calculateDropLinePoints();
+            updateDropLines();
             applet.strokeWeight(1);
             applet.stroke(0, 255, 255);
             applet.line(current.x, current.y, rDrop.x, rDrop.y);
@@ -401,6 +401,8 @@ public class RPSDisplay extends Sprite implements MouseListener {
         return enabled;
     }
 
+    // adjust the labeling modes of the Markers depending on the
+    // current strategies being played.
     private void adjustLabels() {
         if (playedStrat[S] < 0.2f) {
             if (playedStrat[R] > playedStrat[P]) {
@@ -590,7 +592,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         server.strategyChanged(client.getFullName());
     }
 
-    private void calculateDropLinePoints() {
+    private void updateDropLines() {
         sDrop.update(current.x, rock.y);
 
         float x, y;
