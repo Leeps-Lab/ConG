@@ -19,7 +19,8 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private float sideLength;
     private Marker rock, paper, scissors;
     private float maxDist;
-    private Marker current, planned, opponent;
+    private MovingMarker current;
+    private Marker planned, opponent;
     private float[] plannedDist;
     private float[] plannedStrat;
     // current played strategies stored here (R, P, S, D)
@@ -38,7 +39,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private HeatmapHelper heatmap;
     private boolean visible = false;
     // Markers for droplines
-    Marker rDrop, pDrop, sDrop;
+    private Marker rDrop, pDrop, sDrop;
 
     public RPSDisplay(
             float x, float y, int width, int height,
@@ -86,7 +87,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         scissors.setLabelMode(Marker.TOP);
 
         // set up strategy markers
-        current = new Marker(0, 0, false, MARKER_RADIUS + 2);
+        current = new MovingMarker(0, 0, false, MARKER_RADIUS + 2, 1f);
         current.setColor(50, 255, 50);
         current.setLabel("$$");
         current.setLabelMode(Marker.BOTTOM);
@@ -103,6 +104,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
                 pColor, pLabel, 1f);
         stratSlider[S] = new Slider(50, width - 50, height / 3 + 150,
                 sColor, sLabel, 1f);
+        
 
         // set up dropline Markers
         rDrop = new Marker(0, 0, true, MARKER_RADIUS);
@@ -187,9 +189,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
             if (mouseInTriangle) {
                 applet.noCursor();
                 if (current.isGrabbed()) {
-                    calculatePlayedStrats(mouseX - rock.x, rock.y - mouseY);
                     current.update(mouseX, mouseY);
-                    adjustLabels();
                 } else {
                     calculatePlannedStrats();
                     planned.show();
@@ -230,15 +230,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
 
                         balanceStratValues(i, stratSlider[i].getStratValue());
 
-                        if (playedStrat[S] < 0.2f) {
-                            if (playedStrat[R] > playedStrat[P]) {
-                                current.setLabelMode(Marker.RIGHT);
-                            } else {
-                                current.setLabelMode(Marker.LEFT);
-                            }
-                        } else {
-                            current.setLabelMode(Marker.BOTTOM);
-                        }
+                        adjustLabels();
 
                         break;
                     }
@@ -264,6 +256,12 @@ public class RPSDisplay extends Sprite implements MouseListener {
                 opponentStrat[P],
                 opponentStrat[S]));
 
+        current.update();
+        if (enabled) {
+            calculatePlayedStrats(current.x - rock.x, rock.y - current.y);
+        }
+        adjustLabels();
+
         rDrop.setLabel(playedStrat[R]);
         pDrop.setLabel(playedStrat[P]);
         sDrop.setLabel(playedStrat[S]);
@@ -277,6 +275,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         for (int i = R; i <= S; i++) {
             stratSlider[i].draw(applet);
         }
+        
         applet.popMatrix();
     }
 
@@ -290,7 +289,6 @@ public class RPSDisplay extends Sprite implements MouseListener {
             float mouseX = e.getX() - origin.x;
             float mouseY = e.getY() - origin.y;
             if (mouseInTriangle) {
-                calculatePlayedStrats(mouseX - rock.x, rock.y - mouseY);
                 adjustLabels();
                 current.grab();
                 planned.hide();
@@ -342,7 +340,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         }
 
         float[] coords = calculateStratCoords(newR, newP, newS);
-        current.update(coords[0], coords[1]);
+        current.setLocation(coords[0], coords[1]);
     }
 
     public void setOpponentRPS(float r, float p, float s) {
@@ -437,8 +435,15 @@ public class RPSDisplay extends Sprite implements MouseListener {
 
         float newR = 1 - newS - newP;
 
-        setPlayerRPS(newR, newP, newS);
-        server.strategyChanged(client.getFullName());
+        playedStrat[R] = newR;
+        playedStrat[P] = newP;
+        playedStrat[S] = newS;
+
+        for (int i = R; i <= S; i++) {
+            stratSlider[i].setStratValue(playedStrat[i]);
+        }
+        
+        //server.strategyChanged(client.getFullName());
     }
 
     public float[] translate(float x, float y) {
@@ -603,5 +608,27 @@ public class RPSDisplay extends Sprite implements MouseListener {
         x = current.x + maxDist * playedStrat[R] * PApplet.cos(PApplet.PI / 6);
         y = current.y - maxDist * playedStrat[R] * PApplet.sin(PApplet.PI / 6);
         rDrop.update(x, y);
+    }
+
+    private class UpdateThread extends Thread {
+
+        public volatile boolean running = true;
+
+
+        public long updateRate = 100;
+
+        @Override
+        public void run() {
+            while (running) {
+                // do stuff
+
+                try {
+                    sleep(updateRate);
+                } catch (InterruptedException e) {
+                    running = false;
+                }
+            }
+        }
+
     }
 }

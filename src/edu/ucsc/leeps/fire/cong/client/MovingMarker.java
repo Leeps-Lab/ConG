@@ -76,8 +76,8 @@ public class MovingMarker extends Marker {
         target.x = x;
         target.y = y;
 
-        float deltaX = target.x - x;
-        float deltaY = target.y - y;
+        float deltaX = target.x - this.x;
+        float deltaY = target.y - this.y;
 
         float dist = PApplet.sqrt(deltaX * deltaX + deltaY * deltaY);
         float scale = speed / dist;
