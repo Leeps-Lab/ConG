@@ -23,7 +23,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
 
     public Server() {
         super(PeriodConfig.class, TickLog.class);
-        tickLog = (TickLog) logger.tickLog;
+        tickLog = new TickLog();
         clients = new HashMap<String, ClientInterface>();
     }
 
@@ -177,7 +177,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
                 tickLog.avgP = population.averageStrategy_p;
                 tickLog.avgS = population.averageStrategy_s;
             }
-            logger.tickLog.commit();
+            tickLog.commit();
         }
     }
 

@@ -59,15 +59,12 @@ public class BiMatrixDisplay extends Sprite implements MouseListener {
     }
 
     private void drawOutline() {
-        applet.pushMatrix();
-        applet.translate(origin.x, origin.y);
         applet.fill(255);
         applet.noStroke();
         applet.rect(0, 0, width, height);
         applet.noFill();
         applet.stroke(0);
         applet.rect(0, 0, width, height);
-        applet.popMatrix();
     }
 
     private void drawHover() {
@@ -78,7 +75,7 @@ public class BiMatrixDisplay extends Sprite implements MouseListener {
             applet.ellipse(origin.x + percent_a * width, applet.mouseY, 10, 10);
             applet.fill(0);
             float u = heatmap.getPayoff((int) (percent_a * width), (int) (applet.mouseY - origin.y));
-            String label = String.format("%.0f", payoffFunction.getMax() * u);
+            String label = String.format("%.0f", u);
             float tW = applet.textWidth(label);
             float tH = applet.textAscent() + applet.textDescent();
             float tX = origin.x + percent_a * width;
@@ -91,15 +88,13 @@ public class BiMatrixDisplay extends Sprite implements MouseListener {
     }
 
     private void drawCurrentStrategies() {
-        applet.pushMatrix();
-        applet.translate(origin.x, origin.y);
         applet.stroke(0);
         applet.noFill();
         applet.line(0, (1 - percent_A) * height, width, (1 - percent_A) * height);
         applet.line(percent_a * width, 0, percent_a * width, height);
         applet.fill(0);
         applet.ellipse(percent_a * width, (1 - percent_A) * height, 10, 10);
-        applet.popMatrix();
+
     }
 
     @Override
@@ -107,14 +102,18 @@ public class BiMatrixDisplay extends Sprite implements MouseListener {
         if (!visible) {
             return;
         }
+        applet.pushMatrix();
+        applet.translate(origin.x, origin.y);
 
         drawOutline();
 
         applet.image(heatmap.getHeatmap(), 0, 0);
 
-        drawHover();
-
         drawCurrentStrategies();
+
+        applet.popMatrix();
+
+        drawHover();
     }
 
     private boolean inRect(int x, int y) {
