@@ -4,12 +4,12 @@ import java.awt.Color;
 import processing.core.PApplet;
 
 public class Marker extends FPoint {
-    private float R, G, B, alpha;
-    private float radius;
-    private String label;
-    private FPoint labelCoords;
-    private int labelMode;
-    private boolean grabbed;
+    protected float R, G, B, alpha;
+    protected float radius;
+    protected String label;
+    protected FPoint labelCoords;
+    protected int labelMode;
+    protected boolean grabbed;
 
     public static final int NONE = 0;
     public static final int TOP = 1;
@@ -150,7 +150,7 @@ public class Marker extends FPoint {
                 float textHeight = applet.textAscent() + applet.textDescent();
                 applet.rect(labelCoords.x, labelCoords.y, textWidth, textHeight);
                 applet.textAlign(PApplet.CENTER, PApplet.CENTER);
-                applet.fill(0);
+                applet.fill(0, 0, 0, alpha);
                 applet.text(label, labelCoords.x, labelCoords.y);
             }
             applet.noStroke();

@@ -98,11 +98,11 @@ public class RPSDisplay extends Sprite implements MouseListener {
 
         // set up Sliders
         stratSlider[R] = new Slider(50, width - 50, height / 3 + 50,
-                rColor, rLabel);
+                rColor, rLabel, 1f);
         stratSlider[P] = new Slider(50, width - 50, height / 3 + 100,
-                pColor, pLabel);
+                pColor, pLabel, 1f);
         stratSlider[S] = new Slider(50, width - 50, height / 3 + 150,
-                sColor, sLabel);
+                sColor, sLabel, 1f);
 
         // set up dropline Markers
         rDrop = new Marker(0, 0, true, MARKER_RADIUS);

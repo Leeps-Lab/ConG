@@ -7,7 +7,7 @@ public class Slider {
 
     private final int HANDLE_WIDTH = 10;
     private final int HANDLE_HEIGHT = 25;
-    private final String FORMAT = "%3.2f";
+    private final String FORMAT = "%4.2f";
     private float sliderStart, sliderEnd, sliderY;
     private float length;
     private float sliderPos;
@@ -18,9 +18,10 @@ public class Slider {
     private float R, G, B;
     private String label, stratLabel, plannedLabel;
     private boolean grabbed;
+    private float maxValue;
 
     // Constructor ////////////////
-    public Slider(float x1, float x2, float y, Color C, String label) {
+    public Slider(float x1, float x2, float y, Color C, String label, float maxValue) {
         if (x2 < x1) {
             throw new RuntimeException("Invalid Slider coordinates " + "(x2 < x1)");
         }
@@ -45,6 +46,7 @@ public class Slider {
         plannedLabel = String.format(FORMAT, plannedValue);
 
         grabbed = false;
+        this.maxValue = maxValue;
     }
 
     // Methods ///////////////////
@@ -67,9 +69,13 @@ public class Slider {
 
     // Manipulation ///////
     public void setStratValue(float newStrat) {
+        if (newStrat > maxValue || newStrat < 0) {
+            throw new RuntimeException("Error: strategy value out of range.");
+        }
+        
         stratValue = newStrat;
 
-        sliderPos = sliderStart + length * stratValue;
+        sliderPos = sliderStart + length * stratValue / maxValue;
         stratLabel = String.format(FORMAT, stratValue);
     }
 
@@ -82,7 +88,7 @@ public class Slider {
             sliderPos = x;
         }
 
-        stratValue = (sliderPos - sliderStart) / length;
+        stratValue = maxValue * (sliderPos - sliderStart) / length;
         stratLabel = String.format(FORMAT, stratValue);
     }
 
@@ -97,7 +103,7 @@ public class Slider {
     public void setPlan(float plannedStrat) {
         plannedValue = plannedStrat;
 
-        plannedPos = sliderStart + length * plannedValue;
+        plannedPos = sliderStart + length * plannedValue / maxValue;
         plannedLabel = String.format(FORMAT, plannedValue);
     }
 
