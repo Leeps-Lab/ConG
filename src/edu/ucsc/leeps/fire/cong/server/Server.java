@@ -154,13 +154,14 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     }
 
     @Override
-    public void startPeriod() {
-        super.startPeriod();
+    public void initPeriod() {
+        super.initPeriod();
         lastStrategyChangeTimes = new HashMap<ClientInterface, Long>();
         lastStrategies = new HashMap<ClientInterface, float[]>();
         periodStartTime = System.currentTimeMillis();
         initPopulations();
         initStrategies();
+        startPeriod();
     }
 
     @Override
