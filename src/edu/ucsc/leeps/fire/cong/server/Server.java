@@ -93,8 +93,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
             population.averageStrategy_s /= population.members.size();
             for (ClientInterface client : population.members) {
                 float[] strategy = client.getStrategyRPS();
-                client.setStrategyRPS(
-                        strategy[0], strategy[1], strategy[2],
+                client.setOpponentRPS(
                         population.averageStrategy_r,
                         population.averageStrategy_p,
                         population.averageStrategy_s);
@@ -208,7 +207,8 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
                 client.setStrategyAB(0, 1, 0, 1);
                 lastStrategies.put(client, new float[]{0});
             } else if (periodConfig.RPSPayoffFunction != null) {
-                client.setStrategyRPS(0.33f, 0.33f, 0.33f, 0.33f, 0.33f, 0.33f);
+                client.setStrategyRPS(0.33f, 0.33f, 0.33f);
+                client.setOpponentRPS(0.33f, 0.33f, 0.33f);
                 lastStrategies.put(client, new float[]{0.33f, 0.33f, 0.33f});
             }
             lastStrategyChangeTimes.put(client, periodStartTime);

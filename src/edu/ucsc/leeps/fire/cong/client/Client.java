@@ -126,11 +126,13 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         return new float[]{bimatrix.percent_A, 1 - bimatrix.percent_A};
     }
 
-    @Override
     public void setStrategyRPS(
-            float R, float P, float S,
-            float r, float p, float s) {
+            float R, float P, float S) {
         rps.setPlayerRPS(R, P, S);
+    }
+
+    public void setOpponentRPS(
+            float r, float p, float s) {
         rps.setOpponentRPS(r, p, s);
         chart.currentRPayoff = r;
         chart.currentPPayoff = p;
