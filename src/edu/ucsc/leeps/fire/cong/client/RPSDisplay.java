@@ -443,7 +443,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
             stratSlider[i].setStratValue(playedStrat[i]);
         }
         
-        //server.strategyChanged(client.getFullName());
+        server.strategyChanged(client.getFullName());
     }
 
     public float[] translate(float x, float y) {
@@ -608,27 +608,5 @@ public class RPSDisplay extends Sprite implements MouseListener {
         x = current.x + maxDist * playedStrat[R] * PApplet.cos(PApplet.PI / 6);
         y = current.y - maxDist * playedStrat[R] * PApplet.sin(PApplet.PI / 6);
         rDrop.update(x, y);
-    }
-
-    private class UpdateThread extends Thread {
-
-        public volatile boolean running = true;
-
-
-        public long updateRate = 100;
-
-        @Override
-        public void run() {
-            while (running) {
-                // do stuff
-
-                try {
-                    sleep(updateRate);
-                } catch (InterruptedException e) {
-                    running = false;
-                }
-            }
-        }
-
     }
 }
