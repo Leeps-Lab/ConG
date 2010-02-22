@@ -4,6 +4,8 @@
  */
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.server.RPSPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;
 import processing.core.PApplet;
 
@@ -14,10 +16,13 @@ import processing.core.PApplet;
 public class Chart extends Sprite {
 
     final static Color MY_PAYOFF_COLOR = new Color(20, 200, 20);
-    private boolean inTwoStrategyMode;
     // Two strategies
     final static Color A_PAYOFF_COLOR = new Color(200, 50, 50);
     final static Color B_PAYOFF_COLOR = new Color(50, 50, 200);
+    final static Color Aa_PAYOFF_COLOR = new Color(200, 50, 50);
+    final static Color Ab_PAYOFF_COLOR = new Color(50, 50, 200);
+    final static Color Ba_PAYOFF_COLOR = new Color(200, 50, 50);
+    final static Color Bb_PAYOFF_COLOR = new Color(50, 50, 200);
     // RPSD
     final static Color R_PAYOFF_COLOR = new Color(255, 25, 25);
     final static Color P_PAYOFF_COLOR = new Color(25, 25, 255);
@@ -27,13 +32,21 @@ public class Chart extends Sprite {
     public float maxPayoff;
     public float currentPayoff;
     // Two strategy
-    public float currentAPayoff;
-    public float currentBPayoff;
-    public float currentAaPayoff;
-    public float currentBbPayoff;
-    public Line futureAPayoff;
-    public Line futureBPayoff;
+    private float percent_A;
+    private float percent_B;
+    private float percent_a;
+    private float percent_b;
+    private TwoStrategyPayoffFunction twoStrategyPayoffFunction;
+    private float currentAPayoff;
+    private float currentBPayoff;
+    private float currentAaPayoff;
+    private float currentAbPayoff;
+    private float currentBaPayoff;
+    private float currentBbPayoff;
+    private Line futureAPayoff;
+    private Line futureBPayoff;
     // RPSD
+    private RPSPayoffFunction RPSPayoffFunction;
     public float currentRPayoff;
     public float currentPPayoff;
     public float currentSPayoff;
@@ -43,6 +56,8 @@ public class Chart extends Sprite {
     private Line actualAPayoff;
     private Line actualBPayoff;
     private Line actualAaPayoff;
+    private Line actualAbPayoff;
+    private Line actualBaPayoff;
     private Line actualBbPayoff;
     private Line futureAaPayoff;
     private Line futureBbPayoff;
@@ -51,7 +66,7 @@ public class Chart extends Sprite {
     private Line actualPPayoff;
     private Line actualSPayoff;
 
-    public Chart(int x, int y, int width, int height, boolean inTwoStrategyMode) {
+    public Chart(int x, int y, int width, int height) {
         super(x, y, width, height);
         actualPayoff = new Line(0, 0, width, height, 1f, MY_PAYOFF_COLOR, 255);
         // Two strategy
@@ -59,15 +74,16 @@ public class Chart extends Sprite {
         actualBPayoff = new Line(0, 0, width, height, 1.5f, B_PAYOFF_COLOR, 150);
         futureAPayoff = new Line(0, 0, width, height, 1.0f, A_PAYOFF_COLOR, 100);
         futureBPayoff = new Line(0, 0, width, height, 1.0f, B_PAYOFF_COLOR, 100);
-        actualAaPayoff = new Line(0, 0, width, height, 0.5f, A_PAYOFF_COLOR, 255);
-        actualBbPayoff = new Line(0, 0, width, height, 0.5f, B_PAYOFF_COLOR, 255);
+        actualAaPayoff = new Line(0, 0, width, height, 0.5f, Aa_PAYOFF_COLOR, 255);
+        actualAbPayoff = new Line(0, 0, width, height, 0.5f, Ab_PAYOFF_COLOR, 255);
+        actualBaPayoff = new Line(0, 0, width, height, 0.5f, Ba_PAYOFF_COLOR, 255);
+        actualBbPayoff = new Line(0, 0, width, height, 0.5f, Bb_PAYOFF_COLOR, 255);
         futureAaPayoff = new Line(0, 0, width, height, 0.5f, A_PAYOFF_COLOR, 255);
         futureBbPayoff = new Line(0, 0, width, height, 0.5f, B_PAYOFF_COLOR, 255);
         // RPSD
         actualRPayoff = new Line(0, 0, width, height, 1.5f, R_PAYOFF_COLOR, 255);
         actualPPayoff = new Line(0, 0, width, height, 1.5f, P_PAYOFF_COLOR, 255);
         actualSPayoff = new Line(0, 0, width, height, 1.5f, S_PAYOFF_COLOR, 255);
-        this.inTwoStrategyMode = inTwoStrategyMode;
     }
 
     private void drawAxis(PApplet applet) {
@@ -116,16 +132,18 @@ public class Chart extends Sprite {
         applet.stroke(0);
         applet.strokeWeight(2);
         applet.rect(0, 0, width, height);
-        if (inTwoStrategyMode) {
+        if (twoStrategyPayoffFunction != null) {
             actualAPayoff.draw(applet);
             actualBPayoff.draw(applet);
             futureAPayoff.draw(applet);
             futureBPayoff.draw(applet);
             actualAaPayoff.draw(applet);
+            actualAbPayoff.draw(applet);
+            actualBaPayoff.draw(applet);
             actualBbPayoff.draw(applet);
             futureAaPayoff.draw(applet);
             futureBbPayoff.draw(applet);
-        } else {
+        } else if (RPSPayoffFunction != null) {
             actualRPayoff.draw(applet);
             actualPPayoff.draw(applet);
             actualSPayoff.draw(applet);
@@ -156,28 +174,53 @@ public class Chart extends Sprite {
 
     public void updateLines() {
         if (currentPercent < 1.0) {
-            if (inTwoStrategyMode) {
+            addPoint(actualPayoff, currentPercent, currentPayoff);
+            if (twoStrategyPayoffFunction != null) {
                 addTwoStrategyActualPayoffPoints();
-            } else {
+            } else if (RPSPayoffFunction != null) {
                 addRPSDActualPayoffPoints();
             }
         }
     }
 
-    public void addTwoStrategyActualPayoffPoints() {
-        addPoint(actualPayoff, currentPercent, currentPayoff);
+    private void addTwoStrategyActualPayoffPoints() {
         addPoint(actualAPayoff, currentPercent, currentAPayoff);
         addPoint(actualBPayoff, currentPercent, currentBPayoff);
 
         addPoint(actualAaPayoff, currentPercent, currentAaPayoff);
+        addPoint(actualAbPayoff, currentPercent, currentAbPayoff);
+        addPoint(actualBaPayoff, currentPercent, currentBaPayoff);
         addPoint(actualBbPayoff, currentPercent, currentBbPayoff);
     }
 
-    public void addRPSDActualPayoffPoints() {
-        //addPoint(actualPayoff, currentPercent, currentPayoff);
+    private void addRPSDActualPayoffPoints() {
         addPoint(actualRPayoff, currentPercent, currentRPayoff);
         addPoint(actualPPayoff, currentPercent, currentPPayoff);
         addPoint(actualSPayoff, currentPercent, currentSPayoff);
+    }
+
+    public void updateStrategyAB(float A, float B, float a, float b) {
+        percent_A = A;
+        percent_B = B;
+        percent_a = a;
+        percent_b = b;
+        if (twoStrategyPayoffFunction != null) {
+            currentPayoff = twoStrategyPayoffFunction.getPayoff(currentPercent, A, B, a, b);
+            currentAPayoff = a;
+            currentBPayoff = b;
+            currentAaPayoff = twoStrategyPayoffFunction.getPayoff(currentPercent, 1, 0, 1, 0);
+            currentAbPayoff = twoStrategyPayoffFunction.getPayoff(currentPercent, 1, 0, 0, 1);
+            currentBaPayoff = twoStrategyPayoffFunction.getPayoff(currentPercent, 0, 1, 1, 0);
+            currentBbPayoff = twoStrategyPayoffFunction.getPayoff(currentPercent, 0, 1, 0, 1);
+        }
+    }
+
+    public void setTwoStrategyPayoffFunction(TwoStrategyPayoffFunction twoStrategyPayoffFunction) {
+        this.twoStrategyPayoffFunction = twoStrategyPayoffFunction;
+    }
+
+    public void setRPSPayoffFunction(RPSPayoffFunction RPSPayoffFunction) {
+        this.RPSPayoffFunction = RPSPayoffFunction;
     }
 
     public void addPoint(Line line, float x, float y) {

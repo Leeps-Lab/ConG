@@ -45,7 +45,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
                 embed,
                 this.server,
                 this);
-        chart = new Chart(250, 100, 500, 400, false);
+        chart = new Chart(250, 100, 500, 400);
         chart.maxPayoff = 1.0f;
     }
 
@@ -77,8 +77,10 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         super.setPeriodConfig(superPeriodConfig);
         this.periodConfig = (PeriodConfig) superPeriodConfig;
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
-        bimatrix.setPayoffFunction(this.periodConfig.twoStrategyPayoffFunction);
-        rps.setPayoffFunction(this.periodConfig.RPSPayoffFunction);
+        bimatrix.setPayoffFunction(periodConfig.twoStrategyPayoffFunction);
+        chart.setTwoStrategyPayoffFunction(periodConfig.twoStrategyPayoffFunction);
+        chart.setRPSPayoffFunction(periodConfig.RPSPayoffFunction);
+        rps.setPayoffFunction(periodConfig.RPSPayoffFunction);
     }
 
     @Override
@@ -117,8 +119,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     public void setStrategyAB(float A, float B, float a, float b) {
         bimatrix.percent_A = A;
         bimatrix.percent_a = a;
-        chart.currentAPayoff = a;
-        chart.currentBPayoff = b;
+        chart.updateStrategyAB(A, B, a, b);
     }
 
     @Override
