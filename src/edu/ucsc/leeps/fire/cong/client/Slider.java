@@ -8,6 +8,7 @@ public class Slider {
     private final int HANDLE_WIDTH = 10;
     private final int HANDLE_HEIGHT = 25;
     private final String FORMAT = "%4.2f";
+    private final float ERROR_MARGIN = .01f;
     private float sliderStart, sliderEnd, sliderY;
     private float length;
     private float sliderPos;
@@ -69,7 +70,7 @@ public class Slider {
 
     // Manipulation ///////
     public void setStratValue(float newStrat) {
-        if (newStrat > maxValue || newStrat < 0) {
+        if (newStrat > maxValue + ERROR_MARGIN || newStrat < -ERROR_MARGIN) {
             throw new RuntimeException("Error: strategy value out of range.");
         }
         
