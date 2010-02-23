@@ -27,6 +27,25 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         clients = new HashMap<String, ClientInterface>();
     }
 
+    private void doTwoStrategyPayoffUpdate(
+            ClientInterface client,
+            float percent, float percent_a, float inStrategyTime, float percentInStrategyTime) {
+        float[] last = lastStrategies.get(client);
+        float points = periodConfig.twoStrategyPayoffFunction.getPayoff(
+                percent,
+                last[0], 1 - last[0],
+                percent_a, 1 - percent_a);
+        if (!periodConfig.pointsPerSecond) {
+            points *= percentInStrategyTime;
+        } else {
+            points *= inStrategyTime / 1000f;
+        }
+        client.addToPeriodPoints(points);
+    }
+
+    private void doPairStrategyChanged(String name, long timestamp) {
+    }
+
     private void doPopulationIncludeStrategyChanged(String name, long timestamp) {
         Population population = populationMap.get(name);
         // update clients with payoff information for last strategy
@@ -143,14 +162,14 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         periodConfig = (PeriodConfig) superPeriodConfig;
         periodConfig.pointsPerSecond = false;
         HomotopyPayoffFunction homotopyPayoffFunction = new HomotopyPayoffFunction();
-        homotopyPayoffFunction.AaStart = 10;
+        homotopyPayoffFunction.AaStart = 100;
         homotopyPayoffFunction.AaEnd = 100;
         homotopyPayoffFunction.Ab = 0;
-        homotopyPayoffFunction.Ba = 50;
-        homotopyPayoffFunction.Bb = 50;
-        //periodConfig.twoStrategyPayoffFunction = homotopyPayoffFunction;
-        periodConfig.twoStrategyPayoffFunction = null;
-        periodConfig.RPSPayoffFunction = new RPSPayoffFunction();
+        homotopyPayoffFunction.Ba = 0;
+        homotopyPayoffFunction.Bb = 900;
+        periodConfig.twoStrategyPayoffFunction = homotopyPayoffFunction;
+        //periodConfig.twoStrategyPayoffFunction = null;
+        //periodConfig.RPSPayoffFunction = new RPSPayoffFunction();
     }
 
     @Override
