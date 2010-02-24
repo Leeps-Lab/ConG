@@ -33,6 +33,7 @@ public class RPSPayoffFunction implements Serializable {
     }
 
     public float getPayoff(
+            float percent,
             float R, float P, float S,
             float r, float p, float s) {
         return R * (Rr * r + Rp * p + Rs * s)

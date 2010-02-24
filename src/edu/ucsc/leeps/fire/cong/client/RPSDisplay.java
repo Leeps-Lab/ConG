@@ -38,6 +38,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private RPSPayoffFunction payoffFunction;
     private HeatmapHelper heatmap;
     private boolean visible = false;
+    public float currentPercent;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
 
@@ -104,7 +105,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
                 pColor, pLabel, 1f);
         stratSlider[S] = new Slider(50, width - 50, height / 3 + 150,
                 sColor, sLabel, 1f);
-        
+
 
         // set up dropline Markers
         rDrop = new Marker(0, 0, true, MARKER_RADIUS);
@@ -120,14 +121,14 @@ public class RPSDisplay extends Sprite implements MouseListener {
         sDrop.setLabel("S");
         sDrop.setLabelMode(Marker.BOTTOM);
 
-
         setEnabled(false);
 
         applet.addMouseListener(this);
         heatmap = new HeatmapHelper(applet,
-                (int)(paper.x - rock.x), (int)(rock.y - scissors.y),
+                (int) (paper.x - rock.x), (int) (rock.y - scissors.y),
                 0xFF0000FF, 0xFFFFFF00, 0xFF00FF00);
         heatmap.setRPSDisplay(this);
+        currentPercent = 0f;
         this.applet = applet;
     }
 
@@ -147,7 +148,9 @@ public class RPSDisplay extends Sprite implements MouseListener {
 
     public void update() {
         if (visible) {
-            heatmap.updateRPSHeatmap(opponentStrat[0], opponentStrat[1], opponentStrat[2]);
+            heatmap.updateRPSHeatmap(
+                    currentPercent,
+                    opponentStrat[0], opponentStrat[1], opponentStrat[2]);
         }
     }
 
@@ -249,7 +252,10 @@ public class RPSDisplay extends Sprite implements MouseListener {
             applet.line(current.x, current.y, sDrop.x, sDrop.y);
         }
 
-        current.setLabel(payoffFunction.getPayoff(playedStrat[R],
+        current.setLabel(
+                payoffFunction.getPayoff(
+                currentPercent,
+                playedStrat[R],
                 playedStrat[P],
                 playedStrat[S],
                 opponentStrat[R],
@@ -275,7 +281,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         for (int i = R; i <= S; i++) {
             stratSlider[i].draw(applet);
         }
-        
+
         applet.popMatrix();
     }
 
@@ -442,7 +448,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
         for (int i = R; i <= S; i++) {
             stratSlider[i].setStratValue(playedStrat[i]);
         }
-        
+
         server.strategyChanged(client.getFullName());
     }
 

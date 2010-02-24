@@ -4,8 +4,7 @@
  */
 package edu.ucsc.leeps.fire.cong.client;
 
-import edu.ucsc.leeps.fire.cong.server.RPSPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
 import java.awt.Color;
 import processing.core.PApplet;
 
@@ -29,14 +28,14 @@ public class Chart extends Sprite {
     final static Color S_PAYOFF_COLOR = new Color(255, 0, 255);
     // Variables to modify that manipulate the chart
     public float currentPercent;
-    public float maxPayoff;
-    public float currentPayoff;
+    private PeriodConfig periodConfig;
+    private float currentPayoff;
+    private float maxPayoff;
     // Two strategy
     private float percent_A;
     private float percent_B;
     private float percent_a;
     private float percent_b;
-    private TwoStrategyPayoffFunction twoStrategyPayoffFunction;
     private float currentAPayoff;
     private float currentBPayoff;
     private float currentAaPayoff;
@@ -46,10 +45,9 @@ public class Chart extends Sprite {
     private Line futureAPayoff;
     private Line futureBPayoff;
     // RPSD
-    private RPSPayoffFunction RPSPayoffFunction;
-    public float currentRPayoff;
-    public float currentPPayoff;
-    public float currentSPayoff;
+    private float currentRPayoff;
+    private float currentPPayoff;
+    private float currentSPayoff;
     // Private controls accessed through public methods
     private Line actualPayoff;
     // Two strategy
@@ -132,23 +130,25 @@ public class Chart extends Sprite {
         applet.stroke(0);
         applet.strokeWeight(2);
         applet.rect(0, 0, width, height);
-        if (twoStrategyPayoffFunction != null) {
-            actualAPayoff.draw(applet);
-            actualBPayoff.draw(applet);
-            futureAPayoff.draw(applet);
-            futureBPayoff.draw(applet);
-            actualAaPayoff.draw(applet);
-            actualAbPayoff.draw(applet);
-            actualBaPayoff.draw(applet);
-            actualBbPayoff.draw(applet);
-            futureAaPayoff.draw(applet);
-            futureBbPayoff.draw(applet);
-        } else if (RPSPayoffFunction != null) {
-            actualRPayoff.draw(applet);
-            actualPPayoff.draw(applet);
-            actualSPayoff.draw(applet);
+        if (periodConfig != null) {
+            if (periodConfig.twoStrategyPayoffFunction != null) {
+                actualAPayoff.draw(applet);
+                actualBPayoff.draw(applet);
+                futureAPayoff.draw(applet);
+                futureBPayoff.draw(applet);
+                actualAaPayoff.draw(applet);
+                actualAbPayoff.draw(applet);
+                actualBaPayoff.draw(applet);
+                actualBbPayoff.draw(applet);
+                futureAaPayoff.draw(applet);
+                futureBbPayoff.draw(applet);
+            } else if (periodConfig.RPSPayoffFunction != null) {
+                actualRPayoff.draw(applet);
+                actualPPayoff.draw(applet);
+                actualSPayoff.draw(applet);
+            }
+            actualPayoff.draw(applet);
         }
-        actualPayoff.draw(applet);
         //drawAxis(applet);
         applet.popMatrix();
     }
@@ -175,10 +175,10 @@ public class Chart extends Sprite {
     public void updateLines() {
         if (currentPercent < 1.0) {
             addPoint(actualPayoff, currentPercent, currentPayoff);
-            if (twoStrategyPayoffFunction != null) {
+            if (periodConfig.twoStrategyPayoffFunction != null) {
                 addTwoStrategyActualPayoffPoints();
-            } else if (RPSPayoffFunction != null) {
-                addRPSDActualPayoffPoints();
+            } else if (periodConfig.RPSPayoffFunction != null) {
+                addRPSActualPayoffPoints();
             }
         }
     }
@@ -193,34 +193,72 @@ public class Chart extends Sprite {
         addPoint(actualBbPayoff, currentPercent, currentBbPayoff);
     }
 
-    private void addRPSDActualPayoffPoints() {
+    private void addRPSActualPayoffPoints() {
         addPoint(actualRPayoff, currentPercent, currentRPayoff);
         addPoint(actualPPayoff, currentPercent, currentPPayoff);
         addPoint(actualSPayoff, currentPercent, currentSPayoff);
     }
 
-    public void updateStrategyAB(float A, float B, float a, float b) {
-        percent_A = A;
-        percent_B = B;
-        percent_a = a;
-        percent_b = b;
-        if (twoStrategyPayoffFunction != null) {
-            currentPayoff = twoStrategyPayoffFunction.getPayoff(currentPercent, A, B, a, b);
-            currentAPayoff = a;
-            currentBPayoff = b;
-            currentAaPayoff = twoStrategyPayoffFunction.getPayoff(currentPercent, 1, 0, 1, 0);
-            currentAbPayoff = twoStrategyPayoffFunction.getPayoff(currentPercent, 1, 0, 0, 1);
-            currentBaPayoff = twoStrategyPayoffFunction.getPayoff(currentPercent, 0, 1, 1, 0);
-            currentBbPayoff = twoStrategyPayoffFunction.getPayoff(currentPercent, 0, 1, 0, 1);
+    private void twoStrategyChanged() {
+        currentPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(
+                currentPercent, percent_A, percent_B, percent_a, percent_b);
+        currentAPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(
+                currentPercent, 1, 0, percent_a, percent_b);
+        currentBPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(
+                currentPercent, 0, 1, percent_a, percent_b);
+        currentAaPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(currentPercent, 1, 0, 1, 0);
+        currentAbPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(currentPercent, 1, 0, 0, 1);
+        currentBaPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(currentPercent, 0, 1, 1, 0);
+        currentBbPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(currentPercent, 0, 1, 0, 1);
+    }
+
+    private void threeStrategyChanged() {
+        // FIXME
+    }
+
+    private void strategyChanged() {
+        if (periodConfig.twoStrategyPayoffFunction != null) {
+            twoStrategyChanged();
+        } else if (periodConfig.RPSPayoffFunction != null) {
+            threeStrategyChanged();
+        } else {
+            assert false;
         }
     }
 
-    public void setTwoStrategyPayoffFunction(TwoStrategyPayoffFunction twoStrategyPayoffFunction) {
-        this.twoStrategyPayoffFunction = twoStrategyPayoffFunction;
+    public void setMyStrategy(float[] s) {
+        if (periodConfig.twoStrategyPayoffFunction != null) {
+            percent_A = s[0];
+            percent_B = 1 - percent_A;
+        } else if (periodConfig.RPSPayoffFunction != null) {
+            // FIXME
+        } else {
+            assert false;
+        }
+        strategyChanged();
     }
 
-    public void setRPSPayoffFunction(RPSPayoffFunction RPSPayoffFunction) {
-        this.RPSPayoffFunction = RPSPayoffFunction;
+    public void setOpponentStrategy(float[] s) {
+        if (periodConfig.twoStrategyPayoffFunction != null) {
+            percent_a = s[0];
+            percent_b = 1 - percent_a;
+        } else if (periodConfig.RPSPayoffFunction != null) {
+            // FIXME
+        } else {
+            assert false;
+        }
+        strategyChanged();
+    }
+
+    public void setPeriodConfig(PeriodConfig periodConfig) {
+        this.periodConfig = periodConfig;
+        if (periodConfig.twoStrategyPayoffFunction != null) {
+            maxPayoff = periodConfig.twoStrategyPayoffFunction.getMax();
+        } else if (periodConfig.RPSPayoffFunction != null) {
+            maxPayoff = periodConfig.RPSPayoffFunction.getMax();
+        } else {
+            assert false;
+        }
     }
 
     public void addPoint(Line line, float x, float y) {

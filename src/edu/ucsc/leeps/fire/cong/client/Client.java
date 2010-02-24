@@ -46,7 +46,6 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
                 this.server,
                 this);
         chart = new Chart(250, 100, 500, 400);
-        chart.maxPayoff = 1.0f;
     }
 
     @Override
@@ -78,9 +77,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         this.periodConfig = (PeriodConfig) superPeriodConfig;
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
         bimatrix.setPayoffFunction(periodConfig.twoStrategyPayoffFunction);
-        chart.setTwoStrategyPayoffFunction(periodConfig.twoStrategyPayoffFunction);
-        chart.setRPSPayoffFunction(periodConfig.RPSPayoffFunction);
         rps.setPayoffFunction(periodConfig.RPSPayoffFunction);
+        chart.setPeriodConfig(periodConfig);
     }
 
     @Override
@@ -109,45 +107,50 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         chart.currentPercent = this.percent;
         chart.updateLines();
         bimatrix.currentPercent = this.percent;
+        rps.currentPercent = this.percent;
     }
 
     @Override
     public void setActionsEnabled(boolean enabled) {
+        rps.setEnabled(enabled);
     }
 
-    @Override
-    public void setStrategyAB(float A, float B, float a, float b) {
-        bimatrix.percent_A = A;
-        bimatrix.percent_a = a;
-        chart.updateStrategyAB(A, B, a, b);
+    public float[] getStrategy() {
+        if (periodConfig.twoStrategyPayoffFunction != null) {
+            return new float[]{bimatrix.percent_A, 1 - bimatrix.percent_A};
+        } else if (periodConfig.RPSPayoffFunction != null) {
+            return rps.getPlayerRPS();
+        } else {
+            assert false;
+            return new float[]{};
+        }
     }
 
-    @Override
-    public float[] getStrategyAB() {
-        return new float[]{bimatrix.percent_A, 1 - bimatrix.percent_A};
+    public void setMyStrategy(float[] s) {
+        if (periodConfig.twoStrategyPayoffFunction != null) {
+            bimatrix.percent_A = s[0];
+        } else if (periodConfig.RPSPayoffFunction != null) {
+            rps.setPlayerRPS(s[0], s[1], s[2]);
+        } else {
+            assert false;
+        }
+        chart.setMyStrategy(s);
     }
 
-    public void setStrategyRPS(
-            float R, float P, float S) {
-        rps.setPlayerRPS(R, P, S);
+    public void setOpponentStrategy(float[] s) {
+        if (periodConfig.twoStrategyPayoffFunction != null) {
+            bimatrix.percent_a = s[0];
+        } else if (periodConfig.RPSPayoffFunction != null) {
+            rps.setOpponentRPS(s[0], s[1], s[2]);
+        } else {
+            assert false;
+        }
+        chart.setOpponentStrategy(s);
     }
-
-    public void setOpponentRPS(
-            float r, float p, float s) {
-        rps.setOpponentRPS(r, p, s);
-        chart.currentRPayoff = r;
-        chart.currentPPayoff = p;
-        chart.currentSPayoff = s;
-    }
-
+    
     @Override
     public int getQuickTickInterval() {
         return 100;
-    }
-
-    @Override
-    public float[] getStrategyRPS() {
-        return rps.getPlayerRPS();
     }
 
     public class PEmbed extends PApplet {

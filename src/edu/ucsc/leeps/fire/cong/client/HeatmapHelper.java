@@ -100,7 +100,9 @@ public class HeatmapHelper {
         buffer.updatePixels();
     }
 
-    public void updateRPSHeatmap(float r, float p, float s) {
+    public void updateRPSHeatmap(
+            float currentPercent,
+            float r, float p, float s) {
         RPSPayoffFunction payoffFunction = rpsDisplay.getPayoffFunction();
         buffer = applet.createGraphics(width, height, PApplet.P2D);
         buffer.loadPixels();
@@ -108,7 +110,8 @@ public class HeatmapHelper {
             for (int y = 0; y < height; y++) {
                 float[] RPS = rpsDisplay.translate(x, height - y);
                 if (RPS[0] >= 0 && RPS[1] >= 0 && RPS[2] >= 0) {
-                    float u = payoffFunction.getPayoff(RPS[0], RPS[1], RPS[2], r, p, s);
+                    float u = payoffFunction.getPayoff(currentPercent,
+                            RPS[0], RPS[1], RPS[2], r, p, s);
                     payoff[x][y] = u;
                     buffer.pixels[y * width + x] = getRGB(u / payoffFunction.getMax());
                 } else {
