@@ -5,6 +5,8 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyHomotopyPayoffFunction;
 import java.awt.Color;
 import processing.core.PApplet;
 
@@ -131,7 +133,7 @@ public class Chart extends Sprite {
         applet.strokeWeight(2);
         applet.rect(0, 0, width, height);
         if (periodConfig != null) {
-            if (periodConfig.twoStrategyPayoffFunction != null) {
+            if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
                 actualAPayoff.draw(applet);
                 actualBPayoff.draw(applet);
                 futureAPayoff.draw(applet);
@@ -142,7 +144,7 @@ public class Chart extends Sprite {
                 actualBbPayoff.draw(applet);
                 futureAaPayoff.draw(applet);
                 futureBbPayoff.draw(applet);
-            } else if (periodConfig.RPSPayoffFunction != null) {
+            } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 actualRPayoff.draw(applet);
                 actualPPayoff.draw(applet);
                 actualSPayoff.draw(applet);
@@ -175,10 +177,10 @@ public class Chart extends Sprite {
     public void updateLines() {
         if (currentPercent < 1.0) {
             addPoint(actualPayoff, currentPercent, currentPayoff);
-            if (periodConfig.twoStrategyPayoffFunction != null) {
+            if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
                 addTwoStrategyActualPayoffPoints();
-            } else if (periodConfig.RPSPayoffFunction != null) {
-                addRPSActualPayoffPoints();
+            } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                addThreeStrategyActualPayoffPoints();
             }
         }
     }
@@ -193,23 +195,37 @@ public class Chart extends Sprite {
         addPoint(actualBbPayoff, currentPercent, currentBbPayoff);
     }
 
-    private void addRPSActualPayoffPoints() {
+    private void addThreeStrategyActualPayoffPoints() {
         addPoint(actualRPayoff, currentPercent, currentRPayoff);
         addPoint(actualPPayoff, currentPercent, currentPPayoff);
         addPoint(actualSPayoff, currentPercent, currentSPayoff);
     }
 
     private void twoStrategyChanged() {
-        currentPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(
-                currentPercent, percent_A, percent_B, percent_a, percent_b);
-        currentAPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(
-                currentPercent, 1, 0, percent_a, percent_b);
-        currentBPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(
-                currentPercent, 0, 1, percent_a, percent_b);
-        currentAaPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(currentPercent, 1, 0, 1, 0);
-        currentAbPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(currentPercent, 1, 0, 0, 1);
-        currentBaPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(currentPercent, 0, 1, 1, 0);
-        currentBbPayoff = periodConfig.twoStrategyPayoffFunction.getPayoff(currentPercent, 0, 1, 0, 1);
+        currentPayoff = periodConfig.payoffFunction.getPayoff(
+                currentPercent,
+                new float[]{percent_A, percent_B},
+                new float[]{percent_a, percent_b});
+        currentAPayoff = periodConfig.payoffFunction.getPayoff(
+                currentPercent,
+                new float[]{1, 0},
+                new float[]{percent_a, percent_b});
+        currentBPayoff = periodConfig.payoffFunction.getPayoff(
+                currentPercent,
+                new float[]{0, 1},
+                new float[]{percent_a, percent_b});
+        currentAaPayoff = periodConfig.payoffFunction.getPayoff(currentPercent,
+                new float[]{1, 0},
+                new float[]{1, 0});
+        currentAbPayoff = periodConfig.payoffFunction.getPayoff(currentPercent,
+                new float[]{1, 0},
+                new float[]{0, 1});
+        currentBaPayoff = periodConfig.payoffFunction.getPayoff(currentPercent,
+                new float[]{0, 1},
+                new float[]{1, 0});
+        currentBbPayoff = periodConfig.payoffFunction.getPayoff(currentPercent,
+                new float[]{0, 1},
+                new float[]{0, 1});
     }
 
     private void threeStrategyChanged() {
@@ -217,9 +233,9 @@ public class Chart extends Sprite {
     }
 
     private void strategyChanged() {
-        if (periodConfig.twoStrategyPayoffFunction != null) {
+        if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
             twoStrategyChanged();
-        } else if (periodConfig.RPSPayoffFunction != null) {
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             threeStrategyChanged();
         } else {
             assert false;
@@ -227,10 +243,10 @@ public class Chart extends Sprite {
     }
 
     public void setMyStrategy(float[] s) {
-        if (periodConfig.twoStrategyPayoffFunction != null) {
+        if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
             percent_A = s[0];
             percent_B = 1 - percent_A;
-        } else if (periodConfig.RPSPayoffFunction != null) {
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             // FIXME
         } else {
             assert false;
@@ -239,10 +255,10 @@ public class Chart extends Sprite {
     }
 
     public void setOpponentStrategy(float[] s) {
-        if (periodConfig.twoStrategyPayoffFunction != null) {
+        if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
             percent_a = s[0];
             percent_b = 1 - percent_a;
-        } else if (periodConfig.RPSPayoffFunction != null) {
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             // FIXME
         } else {
             assert false;
@@ -252,13 +268,7 @@ public class Chart extends Sprite {
 
     public void setPeriodConfig(PeriodConfig periodConfig) {
         this.periodConfig = periodConfig;
-        if (periodConfig.twoStrategyPayoffFunction != null) {
-            maxPayoff = periodConfig.twoStrategyPayoffFunction.getMax();
-        } else if (periodConfig.RPSPayoffFunction != null) {
-            maxPayoff = periodConfig.RPSPayoffFunction.getMax();
-        } else {
-            assert false;
-        }
+        maxPayoff = periodConfig.payoffFunction.getMax();
     }
 
     public void addPoint(Line line, float x, float y) {

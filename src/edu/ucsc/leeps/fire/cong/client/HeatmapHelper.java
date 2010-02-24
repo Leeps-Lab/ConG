@@ -4,8 +4,8 @@
  */
 package edu.ucsc.leeps.fire.cong.client;
 
-import edu.ucsc.leeps.fire.cong.server.RPSPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 
@@ -15,8 +15,8 @@ import processing.core.PGraphics;
  */
 public class HeatmapHelper {
 
-    private TwoStrategyPayoffFunction twoStrategyPayoffFunction;
-    private RPSDisplay rpsDisplay;
+    private PayoffFunction payoffFunction;
+    private ThreeStrategySelector threeStrategySelector;
     private int width, height;
     private int lowColor, midColor, highColor;
     private float[][] payoff;
@@ -32,20 +32,18 @@ public class HeatmapHelper {
         this.lowColor = lowColor;
         this.midColor = midColor;
         this.highColor = highColor;
-        this.twoStrategyPayoffFunction = null;
-        this.rpsDisplay = null;
+        this.payoffFunction = null;
+        this.threeStrategySelector = null;
         this.payoff = new float[width][height];
         this.applet = applet;
     }
 
-    public void setTwoStrategyPayoffFunction(TwoStrategyPayoffFunction twoStrategyPayoffFunction) {
-        this.twoStrategyPayoffFunction = twoStrategyPayoffFunction;
-        this.rpsDisplay = null;
+    public void setPayoffFunction(PayoffFunction payoffFunction) {
+        this.payoffFunction = payoffFunction;
     }
 
-    public void setRPSDisplay(RPSDisplay rpsDisplay) {
-        this.twoStrategyPayoffFunction = null;
-        this.rpsDisplay = rpsDisplay;
+    public void setThreeStrategySelector(ThreeStrategySelector threeStrategySelector) {
+        this.threeStrategySelector = threeStrategySelector;
     }
 
     // Chooses whether to interpolate between low and mid, or low and high
@@ -92,26 +90,29 @@ public class HeatmapHelper {
                 tmpB = 1 - tmpA;
                 tmpa = 1 - (x / (float) width);
                 tmpb = 1 - tmpa;
-                float u = twoStrategyPayoffFunction.getPayoff(currentPercent, tmpA, tmpB, tmpa, tmpb);
+                float u = payoffFunction.getPayoff(
+                        currentPercent,
+                        new float[]{tmpA, tmpB},
+                        new float[]{tmpa, tmpb});
                 payoff[x][y] = u;
-                buffer.pixels[y * width + x] = getRGB(u / twoStrategyPayoffFunction.getMax());
+                buffer.pixels[y * width + x] = getRGB(u / payoffFunction.getMax());
             }
         }
         buffer.updatePixels();
     }
 
-    public void updateRPSHeatmap(
+    public void updateThreeStrategyHeatmap(
             float currentPercent,
             float r, float p, float s) {
-        RPSPayoffFunction payoffFunction = rpsDisplay.getPayoffFunction();
         buffer = applet.createGraphics(width, height, PApplet.P2D);
         buffer.loadPixels();
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                float[] RPS = rpsDisplay.translate(x, height - y);
+                float[] RPS = threeStrategySelector.translate(x, height - y);
                 if (RPS[0] >= 0 && RPS[1] >= 0 && RPS[2] >= 0) {
-                    float u = payoffFunction.getPayoff(currentPercent,
-                            RPS[0], RPS[1], RPS[2], r, p, s);
+                    float u = payoffFunction.getPayoff(
+                            currentPercent,
+                            RPS, new float[]{r, p, s});
                     payoff[x][y] = u;
                     buffer.pixels[y * width + x] = getRGB(u / payoffFunction.getMax());
                 } else {

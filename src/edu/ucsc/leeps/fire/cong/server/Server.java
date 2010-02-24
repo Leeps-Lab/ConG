@@ -61,15 +61,14 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
         periodConfig = (PeriodConfig) superPeriodConfig;
         periodConfig.pointsPerSecond = false;
-        HomotopyPayoffFunction homotopyPayoffFunction = new HomotopyPayoffFunction();
+        TwoStrategyHomotopyPayoffFunction homotopyPayoffFunction = new TwoStrategyHomotopyPayoffFunction();
         homotopyPayoffFunction.AaStart = 100;
         homotopyPayoffFunction.AaEnd = 100;
         homotopyPayoffFunction.Ab = 0;
         homotopyPayoffFunction.Ba = 0;
         homotopyPayoffFunction.Bb = 900;
-        periodConfig.twoStrategyPayoffFunction = homotopyPayoffFunction;
-        //periodConfig.twoStrategyPayoffFunction = null;
-        //periodConfig.RPSPayoffFunction = new RPSPayoffFunction();
+        periodConfig.payoffFunction = homotopyPayoffFunction;
+        //periodConfig.payoffFunction = new RPSPayoffFunction();
         for (ClientInterface client : clients.values()) {
             client.setPeriodConfig(periodConfig);
         }
@@ -110,10 +109,12 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
 
     private void initStrategies(long periodStartTime) {
         for (ClientInterface client : clients.values()) {
-            if (periodConfig.twoStrategyPayoffFunction != null) {
+            if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
                 client.setMyStrategy(new float[]{0});
-            } else if (periodConfig.RPSPayoffFunction != null) {
+            } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 client.setMyStrategy(new float[]{0.33f, 0.33f, 0.33f});
+            } else {
+                assert false;
             }
         }
         for (Population population : populations) {

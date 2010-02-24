@@ -4,9 +4,9 @@
  */
 package edu.ucsc.leeps.fire.cong.client;
 
-import edu.ucsc.leeps.fire.cong.server.HomotopyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyHomotopyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import processing.core.PApplet;
@@ -15,10 +15,10 @@ import processing.core.PApplet;
  *
  * @author jpettit
  */
-public class BiMatrixDisplay extends Sprite implements MouseListener {
+public class TwoStrategySelector extends Sprite implements MouseListener {
 
     private PApplet applet;
-    private HomotopyPayoffFunction payoffFunction;
+    private PayoffFunction payoffFunction;
     private ServerInterface server;
     private ClientInterface client;
     public float percent_A, percent_a;
@@ -26,7 +26,7 @@ public class BiMatrixDisplay extends Sprite implements MouseListener {
     private boolean visible = false;
     public float currentPercent;
 
-    public BiMatrixDisplay(
+    public TwoStrategySelector(
             int x, int y,
             PApplet applet,
             ServerInterface server,
@@ -39,15 +39,15 @@ public class BiMatrixDisplay extends Sprite implements MouseListener {
         applet.addMouseListener(this);
     }
 
-    public void setPayoffFunction(TwoStrategyPayoffFunction payoffFunction) {
+    public void setPayoffFunction(PayoffFunction payoffFunction) {
         if (payoffFunction == null
-                || payoffFunction.getClass() != HomotopyPayoffFunction.class) {
+                || payoffFunction.getClass() != TwoStrategyHomotopyPayoffFunction.class) {
             visible = false;
             return;
         } else {
             visible = true;
-            this.payoffFunction = (HomotopyPayoffFunction) payoffFunction;
-            heatmap.setTwoStrategyPayoffFunction(payoffFunction);
+            this.payoffFunction = payoffFunction;
+            heatmap.setPayoffFunction(payoffFunction);
             heatmap.updateTwoStrategyHeatmap(currentPercent);
         }
     }

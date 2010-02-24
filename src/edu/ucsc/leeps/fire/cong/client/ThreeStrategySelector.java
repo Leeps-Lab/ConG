@@ -1,13 +1,13 @@
 package edu.ucsc.leeps.fire.cong.client;
 
-import edu.ucsc.leeps.fire.cong.server.RPSPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import java.awt.Color;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import processing.core.PApplet;
 
-public class RPSDisplay extends Sprite implements MouseListener {
+public class ThreeStrategySelector extends Sprite implements MouseListener {
 
     public String rLabel = "Rock";
     public String pLabel = "Paper";
@@ -35,14 +35,14 @@ public class RPSDisplay extends Sprite implements MouseListener {
     private ServerInterface server;
     private ClientInterface client;
     private PApplet applet;
-    private RPSPayoffFunction payoffFunction;
+    private PayoffFunction payoffFunction;
     private HeatmapHelper heatmap;
     private boolean visible = false;
     public float currentPercent;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
 
-    public RPSDisplay(
+    public ThreeStrategySelector(
             float x, float y, int width, int height,
             PApplet applet,
             ServerInterface server,
@@ -127,28 +127,25 @@ public class RPSDisplay extends Sprite implements MouseListener {
         heatmap = new HeatmapHelper(applet,
                 (int) (paper.x - rock.x), (int) (rock.y - scissors.y),
                 0xFF0000FF, 0xFFFFFF00, 0xFF00FF00);
-        heatmap.setRPSDisplay(this);
+        heatmap.setThreeStrategySelector(this);
         currentPercent = 0f;
         this.applet = applet;
     }
 
-    public void setPayoffFunction(RPSPayoffFunction payoffFunction) {
+    public void setPayoffFunction(PayoffFunction payoffFunction) {
         if (payoffFunction == null) {
             visible = false;
             return;
         } else {
             visible = true;
             this.payoffFunction = payoffFunction;
+            heatmap.setPayoffFunction(payoffFunction);
         }
-    }
-
-    public RPSPayoffFunction getPayoffFunction() {
-        return payoffFunction;
     }
 
     public void update() {
         if (visible) {
-            heatmap.updateRPSHeatmap(
+            heatmap.updateThreeStrategyHeatmap(
                     currentPercent,
                     opponentStrat[0], opponentStrat[1], opponentStrat[2]);
         }
@@ -252,15 +249,7 @@ public class RPSDisplay extends Sprite implements MouseListener {
             applet.line(current.x, current.y, sDrop.x, sDrop.y);
         }
 
-        current.setLabel(
-                payoffFunction.getPayoff(
-                currentPercent,
-                playedStrat[R],
-                playedStrat[P],
-                playedStrat[S],
-                opponentStrat[R],
-                opponentStrat[P],
-                opponentStrat[S]));
+        current.setLabel(payoffFunction.getPayoff(currentPercent, playedStrat, opponentStrat));
 
         current.update();
         if (enabled) {

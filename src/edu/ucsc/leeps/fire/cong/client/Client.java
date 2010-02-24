@@ -20,8 +20,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     private ClientConfig clientConfig;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
-    private BiMatrixDisplay bimatrix;
-    private RPSDisplay rps;
+    private TwoStrategySelector bimatrix;
+    private ThreeStrategySelector simplex;
     private Chart chart;
 
     @Override
@@ -37,10 +37,10 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         percent = -1;
         countdown = new Countdown(10, 20);
         pointsDisplay = new PointsDisplay(750, 20);
-        bimatrix = new BiMatrixDisplay(
+        bimatrix = new TwoStrategySelector(
                 10, 100, embed,
                 this.server, this);
-        rps = new RPSDisplay(
+        simplex = new ThreeStrategySelector(
                 10, 100, 200, 600,
                 embed,
                 this.server,
@@ -51,22 +51,22 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     @Override
     public void startPeriod() {
         this.percent = 0;
-        rps.setEnabled(true);
+        simplex.setEnabled(true);
         super.startPeriod();
     }
 
     @Override
     public void endPeriod() {
-        rps.reset();
+        simplex.reset();
         super.endPeriod();
     }
 
     @Override
     public void pause() {
-        if (rps.isEnabled()) {
-            rps.pause();
+        if (simplex.isEnabled()) {
+            simplex.pause();
         } else {
-            rps.setEnabled(true);
+            simplex.setEnabled(true);
         }
         super.pause();
     }
@@ -76,8 +76,8 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         super.setPeriodConfig(superPeriodConfig);
         this.periodConfig = (PeriodConfig) superPeriodConfig;
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
-        bimatrix.setPayoffFunction(periodConfig.twoStrategyPayoffFunction);
-        rps.setPayoffFunction(periodConfig.RPSPayoffFunction);
+        bimatrix.setPayoffFunction(periodConfig.payoffFunction);
+        simplex.setPayoffFunction(periodConfig.payoffFunction);
         chart.setPeriodConfig(periodConfig);
     }
 
@@ -98,7 +98,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
         countdown.setSecondsLeft(secondsLeft);
         bimatrix.update();
-        rps.update();
+        simplex.update();
     }
 
     @Override
@@ -107,19 +107,19 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         chart.currentPercent = this.percent;
         chart.updateLines();
         bimatrix.currentPercent = this.percent;
-        rps.currentPercent = this.percent;
+        simplex.currentPercent = this.percent;
     }
 
     @Override
     public void setActionsEnabled(boolean enabled) {
-        rps.setEnabled(enabled);
+        simplex.setEnabled(enabled);
     }
 
     public float[] getStrategy() {
-        if (periodConfig.twoStrategyPayoffFunction != null) {
+        if (periodConfig.payoffFunction instanceof TwoStrategySelector) {
             return new float[]{bimatrix.percent_A, 1 - bimatrix.percent_A};
-        } else if (periodConfig.RPSPayoffFunction != null) {
-            return rps.getPlayerRPS();
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategySelector) {
+            return simplex.getPlayerRPS();
         } else {
             assert false;
             return new float[]{};
@@ -127,10 +127,10 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     public void setMyStrategy(float[] s) {
-        if (periodConfig.twoStrategyPayoffFunction != null) {
+        if (periodConfig.payoffFunction instanceof TwoStrategySelector) {
             bimatrix.percent_A = s[0];
-        } else if (periodConfig.RPSPayoffFunction != null) {
-            rps.setPlayerRPS(s[0], s[1], s[2]);
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategySelector) {
+            simplex.setPlayerRPS(s[0], s[1], s[2]);
         } else {
             assert false;
         }
@@ -138,10 +138,10 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     public void setOpponentStrategy(float[] s) {
-        if (periodConfig.twoStrategyPayoffFunction != null) {
+        if (periodConfig.payoffFunction instanceof TwoStrategySelector) {
             bimatrix.percent_a = s[0];
-        } else if (periodConfig.RPSPayoffFunction != null) {
-            rps.setOpponentRPS(s[0], s[1], s[2]);
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategySelector) {
+            simplex.setOpponentRPS(s[0], s[1], s[2]);
         } else {
             assert false;
         }
@@ -177,7 +177,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
             fill(0);
             stroke(0);
             bimatrix.draw(embed);
-            rps.draw(embed);
+            simplex.draw(embed);
             chart.draw(embed);
             countdown.draw(embed);
             pointsDisplay.draw(embed);
