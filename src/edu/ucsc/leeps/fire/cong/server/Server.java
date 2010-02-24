@@ -15,7 +15,6 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     private Map<String, ClientInterface> clients;
     private PeriodConfig periodConfig;
     private TickLog tickLog;
-    private List<Population> populations;
     private Map<String, Population> populationMap;
     private long periodStartTime;
     private Map<ClientInterface, Long> lastStrategyChangeTimes;
@@ -27,27 +26,9 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         clients = new HashMap<String, ClientInterface>();
     }
 
-    private void doTwoStrategyPayoffUpdate(
-            ClientInterface client,
-            float percent, float percent_a, float inStrategyTime, float percentInStrategyTime) {
-        float[] last = lastStrategies.get(client);
-        float points = periodConfig.twoStrategyPayoffFunction.getPayoff(
-                percent,
-                last[0], 1 - last[0],
-                percent_a, 1 - percent_a);
-        if (!periodConfig.pointsPerSecond) {
-            points *= percentInStrategyTime;
-        } else {
-            points *= inStrategyTime / 1000f;
-        }
-        client.addToPeriodPoints(points);
-    }
-
-    private void doPairStrategyChanged(String name, long timestamp) {
-    }
-
+    /*
     private void doPopulationIncludeStrategyChanged(String name, long timestamp) {
-        Population population = populationMap.get(name);
+        SinglePopulationInclude population = populationMap.get(name);
         // update clients with payoff information for last strategy
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
@@ -123,11 +104,13 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
             lastStrategyChangeTimes.put(client, timestamp);
         }
     }
+         *
+         */
 
     @Override
     public void strategyChanged(String name) {
         long timestamp = System.currentTimeMillis();
-        doPopulationIncludeStrategyChanged(name, timestamp);
+        populationMap.get(name).strategyChanged(name, timestamp);
     }
 
     public static void main(String[] args) throws Exception {
@@ -186,18 +169,6 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     @Override
     public void tick(int secondsLeft) {
         super.tick(secondsLeft);
-        for (Population population : populations) {
-            tickLog.population = populations.indexOf(population) + 1;
-            if (periodConfig.twoStrategyPayoffFunction != null) {
-                tickLog.avgA = population.averageStrategy_a;
-                tickLog.avgB = 1 - tickLog.avgA;
-            } else if (periodConfig.RPSPayoffFunction != null) {
-                tickLog.avgR = population.averageStrategy_r;
-                tickLog.avgP = population.averageStrategy_p;
-                tickLog.avgS = population.averageStrategy_s;
-            }
-            tickLog.commit();
-        }
     }
 
     @Override
@@ -211,14 +182,19 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     }
 
     private void initPopulations() {
-        populations = new LinkedList<Population>();
+        List<Population> populations = new LinkedList<Population>();
         populationMap = new HashMap<String, Population>();
-        Population population = new Population();
+        // Split players into populations here and hand off to periodConfig
+        // population constructors.
+        /*
+        SinglePopulationInclude population = new SinglePopulationInclude();
         populations.add(population);
         for (ClientInterface client : clients.values()) {
             population.members.add(client);
             populationMap.put(client.getFullName(), population);
         }
+         *
+         */
     }
 
     private void initStrategies() {
@@ -233,8 +209,11 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
             }
             lastStrategyChangeTimes.put(client, periodStartTime);
         }
-        for (Population population : populations) {
+        /*
+        for (SinglePopulationInclude population : populations) {
             population.lastEvalTime = periodStartTime;
         }
+         *
+         */
     }
 }
