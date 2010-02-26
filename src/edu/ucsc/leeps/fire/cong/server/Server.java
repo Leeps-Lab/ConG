@@ -15,13 +15,17 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     private Map<String, ClientInterface> clients;
     private PeriodConfig periodConfig;
     private TickLog tickLog;
+    private EventLog eventLog;
     private List<Population> populations;
     private Map<String, Population> membership;
 
     public Server() {
         super(PeriodConfig.class, TickLog.class);
         tickLog = new TickLog();
+        eventLog = new EventLog();
         clients = new HashMap<String, ClientInterface>();
+        addLog(tickLog);
+        addLog(eventLog);
     }
 
     @Override
@@ -61,7 +65,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
         periodConfig = (PeriodConfig) superPeriodConfig;
         periodConfig.pointsPerSecond = false;
-        TwoStrategyHomotopyPayoffFunction homotopyPayoffFunction = new TwoStrategyHomotopyPayoffFunction();
+        TwoStrategyPayoffFunction homotopyPayoffFunction = new TwoStrategyPayoffFunction();
         homotopyPayoffFunction.AaStart = 100;
         homotopyPayoffFunction.AaEnd = 100;
         homotopyPayoffFunction.Ab = 0;
@@ -72,6 +76,10 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         for (ClientInterface client : clients.values()) {
             client.setPeriodConfig(periodConfig);
         }
+        // This should be the FIRST thing done in setPeriodConfig.
+        // But, it assumes the periodConfig is valid. Because configuration is
+        // incomplete, ours needs the addition of a payoffFunction.
+        super.setPeriodConfig(superPeriodConfig);
     }
 
     @Override
@@ -86,6 +94,11 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     @Override
     public void tick(int secondsLeft) {
         super.tick(secondsLeft);
+        tickLog.secondsLeft = secondsLeft;
+        for (Population population : populations) {
+            tickLog.population = population;
+            tickLog.commit();
+        }
     }
 
     @Override
@@ -109,7 +122,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
 
     private void initStrategies(long periodStartTime) {
         for (ClientInterface client : clients.values()) {
-            if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
+            if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 client.setMyStrategy(new float[]{0});
             } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 client.setMyStrategy(new float[]{0.33f, 0.33f, 0.33f});

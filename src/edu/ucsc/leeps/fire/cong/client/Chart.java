@@ -6,7 +6,7 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyHomotopyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;
 import processing.core.PApplet;
 
@@ -133,7 +133,7 @@ public class Chart extends Sprite {
         applet.strokeWeight(2);
         applet.rect(0, 0, width, height);
         if (periodConfig != null) {
-            if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
+            if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 actualAPayoff.draw(applet);
                 actualBPayoff.draw(applet);
                 futureAPayoff.draw(applet);
@@ -177,7 +177,7 @@ public class Chart extends Sprite {
     public void updateLines() {
         if (currentPercent < 1.0) {
             addPoint(actualPayoff, currentPercent, currentPayoff);
-            if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
+            if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 addTwoStrategyActualPayoffPoints();
             } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 addThreeStrategyActualPayoffPoints();
@@ -233,7 +233,7 @@ public class Chart extends Sprite {
     }
 
     private void strategyChanged() {
-        if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             twoStrategyChanged();
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             threeStrategyChanged();
@@ -243,7 +243,7 @@ public class Chart extends Sprite {
     }
 
     public void setMyStrategy(float[] s) {
-        if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_A = s[0];
             percent_B = 1 - percent_A;
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
@@ -255,7 +255,7 @@ public class Chart extends Sprite {
     }
 
     public void setOpponentStrategy(float[] s) {
-        if (periodConfig.payoffFunction instanceof TwoStrategyHomotopyPayoffFunction) {
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_a = s[0];
             percent_b = 1 - percent_a;
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {

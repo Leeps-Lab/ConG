@@ -10,7 +10,7 @@ import java.io.Serializable;
  *
  * @author jpettit
  */
-public class TwoStrategyHomotopyPayoffFunction implements PayoffFunction, Serializable {
+public class TwoStrategyPayoffFunction implements PayoffFunction, Serializable {
 
     private float maxPercent;
     public float AaStart, AaEnd;

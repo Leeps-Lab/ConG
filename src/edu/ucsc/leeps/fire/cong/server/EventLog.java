@@ -8,16 +8,16 @@ import edu.ucsc.leeps.fire.server.Log;
 
 /**
  *
- * @author jpettit
+ * @author dev
  */
-public class TickLog extends Log {
+public class EventLog extends Log {
 
-    public long secondsLeft;
-    public Population population;
+    public int subjectId;
+    public float[] strategy;
 
-    public TickLog() {
+    public EventLog() {
         try {
-            init("ticks");
+            init("events");
         } catch (Exception ex) {
             ex.printStackTrace();
         }

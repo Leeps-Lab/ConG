@@ -13,6 +13,6 @@ public class PeriodConfig extends edu.ucsc.leeps.fire.server.PeriodConfig {
     public float initialStrategy;
     public boolean pointsPerSecond;
     public PayoffFunction payoffFunction;
-    public static final Class homotopy = TwoStrategyHomotopyPayoffFunction.class;
+    public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
 }

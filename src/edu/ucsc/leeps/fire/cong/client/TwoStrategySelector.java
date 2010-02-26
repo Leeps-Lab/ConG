@@ -5,7 +5,7 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyHomotopyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -40,16 +40,13 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
     }
 
     public void setPayoffFunction(PayoffFunction payoffFunction) {
-        if (payoffFunction == null
-                || payoffFunction.getClass() != TwoStrategyHomotopyPayoffFunction.class) {
-            visible = false;
-            return;
-        } else {
-            visible = true;
-            this.payoffFunction = payoffFunction;
-            heatmap.setPayoffFunction(payoffFunction);
-            heatmap.updateTwoStrategyHeatmap(currentPercent);
-        }
+        this.payoffFunction = payoffFunction;
+        heatmap.setPayoffFunction(payoffFunction);
+        heatmap.updateTwoStrategyHeatmap(currentPercent);
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 
     public void update() {

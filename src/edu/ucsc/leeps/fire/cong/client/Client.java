@@ -3,6 +3,8 @@ package edu.ucsc.leeps.fire.cong.client;
 import edu.ucsc.leeps.fire.cong.server.ClientConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import processing.core.PApplet;
 import processing.core.PFont;
 
@@ -78,6 +80,13 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
         bimatrix.setPayoffFunction(periodConfig.payoffFunction);
         simplex.setPayoffFunction(periodConfig.payoffFunction);
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            bimatrix.setVisible(true);
+            simplex.setVisible(false);
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            bimatrix.setVisible(false);
+            simplex.setVisible(true);
+        }
         chart.setPeriodConfig(periodConfig);
     }
 
@@ -116,9 +125,9 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     public float[] getStrategy() {
-        if (periodConfig.payoffFunction instanceof TwoStrategySelector) {
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             return new float[]{bimatrix.percent_A, 1 - bimatrix.percent_A};
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategySelector) {
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             return simplex.getPlayerRPS();
         } else {
             assert false;
@@ -127,9 +136,9 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     public void setMyStrategy(float[] s) {
-        if (periodConfig.payoffFunction instanceof TwoStrategySelector) {
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.percent_A = s[0];
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategySelector) {
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setPlayerRPS(s[0], s[1], s[2]);
         } else {
             assert false;
@@ -138,9 +147,9 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     public void setOpponentStrategy(float[] s) {
-        if (periodConfig.payoffFunction instanceof TwoStrategySelector) {
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.percent_a = s[0];
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategySelector) {
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setOpponentRPS(s[0], s[1], s[2]);
         } else {
             assert false;

@@ -132,15 +132,13 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         this.applet = applet;
     }
 
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
     public void setPayoffFunction(PayoffFunction payoffFunction) {
-        if (payoffFunction == null) {
-            visible = false;
-            return;
-        } else {
-            visible = true;
-            this.payoffFunction = payoffFunction;
-            heatmap.setPayoffFunction(payoffFunction);
-        }
+        this.payoffFunction = payoffFunction;
+        heatmap.setPayoffFunction(payoffFunction);
     }
 
     public void update() {
