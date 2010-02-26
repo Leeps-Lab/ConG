@@ -71,8 +71,8 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         homotopyPayoffFunction.Ab = 0;
         homotopyPayoffFunction.Ba = 0;
         homotopyPayoffFunction.Bb = 900;
-        periodConfig.payoffFunction = homotopyPayoffFunction;
-        //periodConfig.payoffFunction = new RPSPayoffFunction();
+        //periodConfig.payoffFunction = homotopyPayoffFunction;
+        periodConfig.payoffFunction = new ThreeStrategyPayoffFunction();
         for (ClientInterface client : clients.values()) {
             client.setPeriodConfig(periodConfig);
         }

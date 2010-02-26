@@ -45,7 +45,7 @@ public class SinglePopulationInclude implements Population {
         for (ClientInterface client : members) {
             lastStrategies.put(client, client.getStrategy());
         }
-        updateStrategies();
+        updateStrategies(periodConfig);
     }
 
     private void updatePayoffs(
@@ -63,14 +63,25 @@ public class SinglePopulationInclude implements Population {
         client.addToPeriodPoints(points);
     }
 
-    private void updateStrategies() {
-        averageStrategy = new float[1];
-        averageStrategy[0] = 0;
+    private void updateStrategies(PeriodConfig periodConfig) {
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            averageStrategy = new float[1];
+            averageStrategy[0] = 0;
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            averageStrategy = new float[3];
+            averageStrategy[0] = 0;
+            averageStrategy[1] = 0;
+            averageStrategy[2] = 0;
+        }
         for (ClientInterface client : members) {
             float[] strategy = client.getStrategy();
-            averageStrategy[0] += strategy[0];
+            for (int i = 0; i < averageStrategy.length; i++) {
+                averageStrategy[i] += strategy[i];
+            }
         }
-        averageStrategy[0] /= members.size();
+        for (int i = 0; i < averageStrategy.length; i++) {
+            averageStrategy[i] /= members.size();
+        }
         for (ClientInterface client : members) {
             client.setOpponentStrategy(averageStrategy);
             lastStrategies.put(client, client.getStrategy());
@@ -87,6 +98,6 @@ public class SinglePopulationInclude implements Population {
                     client, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
         }
         lastEvalTime = timestamp;
-        updateStrategies();
+        updateStrategies(periodConfig);
     }
 }

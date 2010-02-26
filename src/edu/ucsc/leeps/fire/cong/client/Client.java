@@ -78,12 +78,12 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         super.setPeriodConfig(superPeriodConfig);
         this.periodConfig = (PeriodConfig) superPeriodConfig;
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
-        bimatrix.setPayoffFunction(periodConfig.payoffFunction);
-        simplex.setPayoffFunction(periodConfig.payoffFunction);
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            bimatrix.setPayoffFunction(periodConfig.payoffFunction);
             bimatrix.setVisible(true);
             simplex.setVisible(false);
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            simplex.setPayoffFunction(periodConfig.payoffFunction);
             bimatrix.setVisible(false);
             simplex.setVisible(true);
         }
