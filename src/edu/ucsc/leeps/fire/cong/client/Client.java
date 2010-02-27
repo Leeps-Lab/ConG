@@ -124,7 +124,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         simplex.setEnabled(enabled);
     }
 
-    public float[] getStrategy() {
+    public synchronized float[] getStrategy() {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             return new float[]{bimatrix.percent_A, 1 - bimatrix.percent_A};
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
@@ -135,7 +135,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         }
     }
 
-    public void setMyStrategy(float[] s) {
+    public synchronized void setMyStrategy(float[] s) {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.percent_A = s[0];
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
@@ -146,7 +146,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
         chart.setMyStrategy(s);
     }
 
-    public void setOpponentStrategy(float[] s) {
+    public synchronized void setOpponentStrategy(float[] s) {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.percent_a = s[0];
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {

@@ -12,6 +12,7 @@ import edu.ucsc.leeps.fire.server.Log;
  */
 public class EventLog extends Log {
 
+    public long timestamp;
     public int subjectId;
     public float[] strategy;
 

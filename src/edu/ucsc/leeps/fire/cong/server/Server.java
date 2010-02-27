@@ -29,9 +29,13 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     }
 
     @Override
-    public void strategyChanged(String name) {
+    public synchronized void strategyChanged(String name) {
         long timestamp = System.currentTimeMillis();
         membership.get(name).strategyChanged(name, timestamp, periodConfig);
+        eventLog.timestamp = timestamp;
+        eventLog.subjectId = clients.get(name).getID();
+        eventLog.strategy = clients.get(name).getStrategy();
+        eventLog.commit();
     }
 
     public static void main(String[] args) throws Exception {
