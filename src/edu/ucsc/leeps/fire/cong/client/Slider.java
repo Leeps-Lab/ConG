@@ -13,12 +13,13 @@ public class Slider {
     private float length;
     private float sliderPos;
     private float stratValue;
-    private boolean planning;
-    private float plannedPos;
-    private float plannedValue;
+    private boolean ghosting;
+    private float ghostPos;
+    private float ghostValue;
     private float R, G, B;
-    private String label, stratLabel, plannedLabel;
+    private String label, stratLabel, ghostLabel;
     private boolean grabbed;
+    private boolean ghostGrabbed;
     private float maxValue;
 
     // Constructor ////////////////
@@ -38,15 +39,16 @@ public class Slider {
         sliderPos = x1;
         stratValue = 0;
 
-        planning = false;
-        plannedPos = x1;
-        plannedValue = 0;
+        ghosting = false;
+        ghostPos = x1;
+        ghostValue = 0;
 
         this.label = label;
         stratLabel = String.format(FORMAT, stratValue);
-        plannedLabel = String.format(FORMAT, plannedValue);
+        ghostLabel = String.format(FORMAT, ghostValue);
 
         grabbed = false;
+        ghostGrabbed = false;
         this.maxValue = maxValue;
     }
 
@@ -56,8 +58,16 @@ public class Slider {
         return stratValue;
     }
 
+    public float getGhostValue() {
+        return ghostValue;
+    }
+
     public float getSliderPos() {
         return sliderPos;
+    }
+
+    public float getGhostPos() {
+        return ghostPos;
     }
 
     public float getLength() {
@@ -66,6 +76,10 @@ public class Slider {
 
     public boolean isGrabbed() {
         return grabbed;
+    }
+
+    public boolean isGhostGrabbed() {
+        return ghostGrabbed;
     }
 
     // Manipulation ///////
@@ -93,19 +107,32 @@ public class Slider {
         stratLabel = String.format(FORMAT, stratValue);
     }
 
-    public void showPlan() {
-        planning = true;
+    public void showGhost() {
+        ghosting = true;
     }
 
-    public void hidePlan() {
-        planning = false;
+    public void hideGhost() {
+        ghosting = false;
     }
 
-    public void setPlan(float plannedStrat) {
-        plannedValue = plannedStrat;
+    public void setGhostValue(float ghostVal) {
+        ghostValue = ghostVal;
 
-        plannedPos = sliderStart + length * plannedValue / maxValue;
-        plannedLabel = String.format(FORMAT, plannedValue);
+        ghostPos = sliderStart + length * ghostValue / maxValue;
+        ghostLabel = String.format(FORMAT, ghostValue);
+    }
+
+    public void moveGhost(float x) {
+        if (x < sliderStart) {
+            ghostPos = sliderStart;
+        } else if (x > sliderEnd) {
+            ghostPos = sliderEnd;
+        } else {
+            ghostPos = x;
+        }
+
+        ghostValue = maxValue * (ghostPos - sliderStart) / length;
+        ghostLabel = String.format(FORMAT, ghostValue);
     }
 
     public void grab() {
@@ -116,8 +143,20 @@ public class Slider {
         grabbed = false;
     }
 
+    public void grabGhost() {
+        ghostGrabbed = true;
+    }
+
+    public void releaseGhost() {
+        ghostGrabbed = false;
+    }
+
     public boolean mouseOnHandle(float mouseX, float mouseY) {
         return (mouseX < sliderPos + HANDLE_WIDTH / 2 && mouseX > sliderPos - HANDLE_WIDTH / 2 && mouseY < sliderY + HANDLE_HEIGHT / 2 && mouseY > sliderY - HANDLE_HEIGHT / 2);
+    }
+
+    public boolean mouseOnGhost(float mouseX, float mouseY) {
+        return (mouseX < ghostPos + HANDLE_WIDTH / 2 && mouseX > ghostPos - HANDLE_WIDTH / 2 && mouseY < sliderY + HANDLE_HEIGHT / 2 && mouseY > sliderY - HANDLE_HEIGHT / 2);
     }
 
     public void draw(PApplet applet) {
@@ -135,12 +174,12 @@ public class Slider {
         applet.text(label, sliderStart - 50, sliderY + 2);
         applet.text(stratLabel, sliderEnd + 10, sliderY + 2);
 
-        if (planning) {
+        if (ghosting) {
             applet.fill(R, G, B, 125);
-            applet.rect(plannedPos, sliderY, HANDLE_WIDTH, HANDLE_HEIGHT);
+            applet.rect(ghostPos, sliderY, HANDLE_WIDTH, HANDLE_HEIGHT);
 
             applet.fill(120);
-            applet.text(plannedLabel, sliderEnd + 10, sliderY + 20);
+            applet.text(ghostLabel, sliderEnd + 10, sliderY + 20);
         }
     }
 }

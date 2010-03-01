@@ -21,10 +21,10 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     private float maxDist;
     private MovingMarker current;
     private Marker planned, opponent;
-    private float[] plannedDist;
+    private float[] axisDistance;
     private float[] plannedStrat;
-    // current played strategies stored here (R, P, S, D)
-    // D can only be 1 or 0
+    private float[] targetStrat;
+    // current played strategies stored here (R, P, S)
     private float[] playedStrat;
     // average of opponents' strategies
     private float[] opponentStrat;
@@ -41,6 +41,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     public float currentPercent;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
+    private Marker pRDrop, pPDrop, pSDrop;
 
     public ThreeStrategySelector(
             float x, float y, int width, int height,
@@ -53,13 +54,15 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         this.client = client;
 
         mouseInTriangle = false;
-        plannedDist = new float[3];
+        axisDistance = new float[3];
         plannedStrat = new float[3];
+        targetStrat = new float[3];
         playedStrat = new float[3];
         opponentStrat = new float[3];
         for (int i = R; i <= S; i++) {
-            plannedDist[i] = 0f;
+            axisDistance[i] = 0f;
             plannedStrat[i] = 0f;
+            targetStrat[i] = 0f;
             playedStrat[i] = 0f;
             opponentStrat[i] = 0f;
         }
@@ -112,14 +115,34 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         rDrop.setColor(rColor);
         rDrop.setLabel("R");
         rDrop.setLabelMode(Marker.RIGHT);
+
+        pRDrop = new Marker(0, 0, true, MARKER_RADIUS);
+        pRDrop.setColor(rColor);
+        pRDrop.setAlpha(150);
+        pRDrop.setLabel("R");
+        pRDrop.setLabelMode(Marker.RIGHT);
+
         pDrop = new Marker(0, 0, true, MARKER_RADIUS);
         pDrop.setColor(pColor);
         pDrop.setLabel("P");
         pDrop.setLabelMode(Marker.LEFT);
+
+        pPDrop = new Marker(0, 0, true, MARKER_RADIUS);
+        pPDrop.setColor(pColor);
+        pPDrop.setAlpha(150);
+        pPDrop.setLabel("P");
+        pPDrop.setLabelMode(Marker.LEFT);
+
         sDrop = new Marker(0, rock.y, true, MARKER_RADIUS);
         sDrop.setColor(sColor);
         sDrop.setLabel("S");
         sDrop.setLabelMode(Marker.BOTTOM);
+
+        pSDrop = new Marker(0, rock.y, true, MARKER_RADIUS);
+        pSDrop.setColor(sColor);
+        pSDrop.setAlpha(150);
+        pSDrop.setLabel("S");
+        pSDrop.setLabelMode(Marker.BOTTOM);
 
         setEnabled(false);
 
@@ -176,9 +199,9 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         scissors.draw(applet);
 
         if (enabled) {
-            calculatePlannedDist(mouseX - rock.x, rock.y - mouseY);
+            calculateAxisDistance(mouseX - rock.x, rock.y - mouseY);
 
-            if (plannedDist[R] <= maxDist && plannedDist[R] >= 0 && plannedDist[P] <= maxDist && plannedDist[P] >= 0 && plannedDist[S] <= maxDist && plannedDist[S] >= 0) {
+            if (axisDistance[R] <= maxDist && axisDistance[R] >= 0 && axisDistance[P] <= maxDist && axisDistance[P] >= 0 && axisDistance[S] <= maxDist && axisDistance[S] >= 0) {
                 mouseInTriangle = true;
             } else {
                 mouseInTriangle = false;
@@ -188,46 +211,43 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
                 applet.noCursor();
                 if (current.isGrabbed()) {
                     current.update(mouseX, mouseY);
+                    calculateTargetStrats();
+                    stratSlider[R].setGhostValue(targetStrat[R]);
+                    stratSlider[P].setGhostValue(targetStrat[P]);
+                    stratSlider[S].setGhostValue(targetStrat[S]);
                 } else {
                     calculatePlannedStrats();
                     planned.show();
                     planned.update(mouseX, mouseY);
-
-                    for (int i = R; i <= S; i++) {
-                        stratSlider[i].showPlan();
-                    }
-                    stratSlider[R].setPlan(plannedStrat[R]);
-                    stratSlider[P].setPlan(plannedStrat[P]);
-                    stratSlider[S].setPlan(plannedStrat[S]);
                 }
             } else {
                 if (current.isGrabbed()) {
                     current.release();
                 }
                 planned.hide();
-                for (int i = R; i <= S; i++) {
-                    stratSlider[i].hidePlan();
-                }
                 applet.cursor();
             }
 
             if (!mouseInTriangle && applet.mousePressed) {
                 for (int i = R; i <= S; i++) {
-                    if (stratSlider[i].isGrabbed()) {
+                    if (stratSlider[i].isGhostGrabbed()) {
+                        planned.show();
                         if (applet.keyPressed && applet.key == PApplet.CODED && applet.keyCode == PApplet.CONTROL) {
 
-                            float currentPos = stratSlider[i].getSliderPos();
+                            float currentPos = stratSlider[i].getGhostPos();
                             if (applet.mouseX > applet.pmouseX) {
-                                stratSlider[i].moveSlider(currentPos + stratSlider[i].getLength() / 300f);
+                                stratSlider[i].moveGhost(currentPos + stratSlider[i].getLength() / 300f);
                             } else if (applet.mouseX < applet.pmouseX) {
-                                stratSlider[i].moveSlider(currentPos - stratSlider[i].getLength() / 300f);
+                                stratSlider[i].moveGhost(currentPos - stratSlider[i].getLength() / 300f);
                             }
                         } else {
-                            stratSlider[i].moveSlider(mouseX);
+                            stratSlider[i].moveGhost(mouseX);
                         }
 
-                        balanceStratValues(i, stratSlider[i].getStratValue());
-
+                        balancePlannedStrats(i, stratSlider[i].getGhostValue());
+                        float[] coords = calculateStratCoords(plannedStrat[R], plannedStrat[P], plannedStrat[S]);
+                        planned.update(coords[0], coords[1]);
+                        
                         adjustLabels();
 
                         break;
@@ -236,10 +256,32 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             }
         }
 
+        if (planned.visible) {
+            updatePlannedDropLines();
+            applet.strokeWeight(1);
+            applet.stroke(0, 255, 255, 150);
+            applet.line(planned.x, planned.y, pRDrop.x, pRDrop.y);
+            applet.line(planned.x, planned.y, pPDrop.x, pPDrop.y);
+            applet.line(planned.x, planned.y, pSDrop.x, pSDrop.y);
+
+            planned.setLabel(payoffFunction.getPayoff(currentPercent, plannedStrat, opponentStrat));
+
+            pRDrop.setLabel(plannedStrat[R]);
+            pPDrop.setLabel(plannedStrat[P]);
+            pSDrop.setLabel(plannedStrat[S]);
+
+            adjustPlannedLabels();
+            
+            pRDrop.draw(applet);
+            pPDrop.draw(applet);
+            pSDrop.draw(applet);
+        }
+
+
         planned.draw(applet);
 
         if (current.visible) {
-            updateDropLines();
+            updateCurrentDropLines();
             applet.strokeWeight(1);
             applet.stroke(0, 255, 255);
             applet.line(current.x, current.y, rDrop.x, rDrop.y);
@@ -285,13 +327,14 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
                 adjustLabels();
                 current.grab();
                 planned.hide();
-                for (int i = 0; i < stratSlider.length; i++) {
-                    stratSlider[i].hidePlan();
-                }
             } else {
                 for (int i = 0; i < stratSlider.length; i++) {
-                    if (stratSlider[i].mouseOnHandle(mouseX, mouseY)) {
-                        stratSlider[i].grab();
+                    if (stratSlider[i].mouseOnGhost(mouseX, mouseY)) {
+                        stratSlider[i].grabGhost();
+                        planned.show();
+                        balancePlannedStrats(i, stratSlider[i].getGhostValue());
+                        float[] coords = calculateStratCoords(plannedStrat[R], plannedStrat[P], plannedStrat[S]);
+                        planned.update(coords[0], coords[1]);
                         break;
                     }
                 }
@@ -307,8 +350,12 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             }
         } else {
             for (int i = 0; i < stratSlider.length; i++) {
-                if (stratSlider[i].isGrabbed()) {
-                    stratSlider[i].release();
+                if (stratSlider[i].isGhostGrabbed()) {
+                    stratSlider[i].releaseGhost();
+                    balanceTargetStrats(i, stratSlider[i].getGhostValue());
+                    float[] coords = calculateStratCoords(targetStrat[R], targetStrat[P], targetStrat[S]);
+                    current.update(coords[0], coords[1]);
+                    planned.hide();
                     break;
                 }
             }
@@ -327,6 +374,8 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         playedStrat[R] = newR;
         playedStrat[P] = newP;
         playedStrat[S] = newS;
+
+        setTargetRPS(newR, newP, newS);
 
         for (int i = R; i <= S; i++) {
             stratSlider[i].setStratValue(playedStrat[i]);
@@ -356,12 +405,18 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             rDrop.show();
             pDrop.show();
             sDrop.show();
+            for (int i = R; i <= S; ++i) {
+                stratSlider[i].showGhost();;
+            }
         } else {
             current.hide();
             opponent.hide();
             rDrop.hide();
             pDrop.hide();
             sDrop.hide();
+            for (int i = R; i <= S; ++i) {
+                stratSlider[i].hideGhost();;
+            }
         }
     }
 
@@ -372,12 +427,12 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     public void reset() {
         setEnabled(false);
         for (int i = R; i <= S; i++) {
-            plannedDist[i] = 0f;
+            axisDistance[i] = 0f;
             plannedStrat[i] = 0f;
             playedStrat[i] = 0f;
             opponentStrat[i] = 0f;
             stratSlider[i].setStratValue(0f);
-            stratSlider[i].hidePlan();
+            stratSlider[i].hideGhost();
         }
 
         current.hide();
@@ -409,6 +464,24 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             current.setLabelMode(Marker.BOTTOM);
             pDrop.setLabelMode(Marker.LEFT);
             rDrop.setLabelMode(Marker.RIGHT);
+        }
+    }
+
+    private void adjustPlannedLabels() {
+        if (plannedStrat[S] < 0.2f) {
+            if (plannedStrat[R] > plannedStrat[P]) {
+                planned.setLabelMode(Marker.RIGHT);
+                pPDrop.setLabelMode(Marker.TOP);
+                pRDrop.setLabelMode(Marker.RIGHT);
+            } else {
+                planned.setLabelMode(Marker.LEFT);
+                pPDrop.setLabelMode(Marker.LEFT);
+                pRDrop.setLabelMode(Marker.TOP);
+            }
+        } else {
+            planned.setLabelMode(Marker.BOTTOM);
+            pPDrop.setLabelMode(Marker.LEFT);
+            pRDrop.setLabelMode(Marker.RIGHT);
         }
     }
 
@@ -470,13 +543,13 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         return new float[]{newR, newP, newS};
     }
 
-    // calculate plannedDist entries
+    // calculate axisDistance entries
     /*
-     * Modifies plannedDist array. Array is invalid if any of the entries
+     * Modifies axisDistance array. Array is invalid if any of the entries
      * are -1.
      */
-    private void calculatePlannedDist(float x, float y) {
-        plannedDist[S] = y;
+    private void calculateAxisDistance(float x, float y) {
+        axisDistance[S] = y;
 
         // constant factors for determining distances
         float epsilon1 = y + (1 / PApplet.sqrt(3)) * x;
@@ -487,25 +560,32 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         deltaX = x - (PApplet.sqrt(3) / 4) * epsilon1;
         deltaY = y - .75f * epsilon1;
         if (deltaX < 0 && deltaY > 0) {
-            plannedDist[P] = -1;
+            axisDistance[P] = -1;
         } else {
-            plannedDist[P] = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
+            axisDistance[P] = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
         }
 
         deltaX = x - .75f * sideLength + (PApplet.sqrt(3) / 4) * epsilon2;
         deltaY = y - (PApplet.sqrt(3) / 4) * sideLength - .75f * epsilon2;
         if (deltaX > 0 && deltaY > 0) {
-            plannedDist[R] = -1;
+            axisDistance[R] = -1;
         } else {
-            plannedDist[R] = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
+            axisDistance[R] = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
         }
     }
 
-    // calculate plannedPlay entries
+    // calculate plannedStrat entries
     private void calculatePlannedStrats() {
-        plannedStrat[S] = plannedDist[S] / maxDist;
-        plannedStrat[P] = plannedDist[P] / maxDist;
+        plannedStrat[S] = axisDistance[S] / maxDist;
+        plannedStrat[P] = axisDistance[P] / maxDist;
         plannedStrat[R] = 1 - plannedStrat[S] - plannedStrat[P];
+    }
+
+    // calculate targetStrat entries
+    private void calculateTargetStrats() {
+        targetStrat[S] = axisDistance[S] / maxDist;
+        targetStrat[P] = axisDistance[P] / maxDist;
+        targetStrat[R] = 1 - targetStrat[S] - targetStrat[P];
     }
 
     // calculate x, y coordinates given r, p, s values
@@ -519,18 +599,18 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     }
 
     // balance other strat values when using sliders
-    private void balanceStratValues(int strat, float value) {
+    private void balanceTargetStrats(int strat, float value) {
         float pValue, deltaV, percentR, percentP, percentS;
         float newR, newP, newS;
         switch (strat) {
             case R:
-                pValue = playedStrat[R];
+                pValue = targetStrat[R];
                 deltaV = value - pValue;
 
-                float PStotal = playedStrat[P] + playedStrat[S];
+                float PStotal = targetStrat[P] + targetStrat[S];
                 if (PStotal > 0) {
-                    percentP = playedStrat[P] / PStotal;
-                    percentS = playedStrat[S] / PStotal;
+                    percentP = targetStrat[P] / PStotal;
+                    percentS = targetStrat[S] / PStotal;
                 } else {
                     PStotal = 1 - value;
                     percentP = .50f;
@@ -540,17 +620,17 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
                 newR = value;
                 newP = (PStotal - deltaV) * percentP;
                 newS = 1 - newR - newP;
-                setPlayerRPS(newR, newP, newS);
+                setTargetRPS(newR, newP, newS);
                 break;
 
             case P:
-                pValue = playedStrat[P];
+                pValue = targetStrat[P];
                 deltaV = value - pValue;
 
-                float RStotal = playedStrat[R] + playedStrat[S];
+                float RStotal = targetStrat[R] + targetStrat[S];
                 if (RStotal > 0) {
-                    percentR = playedStrat[R] / RStotal;
-                    percentS = playedStrat[S] / RStotal;
+                    percentR = targetStrat[R] / RStotal;
+                    percentS = targetStrat[S] / RStotal;
                 } else {
                     RStotal = 1 - value;
                     percentR = .50f;
@@ -560,17 +640,17 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
                 newP = value;
                 newR = (RStotal - deltaV) * percentR;
                 newS = 1 - newR - newP;
-                setPlayerRPS(newR, newP, newS);
+                setTargetRPS(newR, newP, newS);
                 break;
 
             case S:
-                pValue = playedStrat[S];
+                pValue = targetStrat[S];
                 deltaV = value - pValue;
 
-                float RPtotal = playedStrat[R] + playedStrat[P];
+                float RPtotal = targetStrat[R] + targetStrat[P];
                 if (RPtotal > 0) {
-                    percentR = playedStrat[R] / RPtotal;
-                    percentP = playedStrat[P] / RPtotal;
+                    percentR = targetStrat[R] / RPtotal;
+                    percentP = targetStrat[P] / RPtotal;
                 } else {
                     RPtotal = 1 - value;
                     percentR = .50f;
@@ -580,17 +660,84 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
                 newS = value;
                 newR = (RPtotal - deltaV) * percentR;
                 newP = 1 - newR - newS;
-                setPlayerRPS(newR, newP, newS);
+                setTargetRPS(newR, newP, newS);
                 break;
 
             default:
                 throw new RuntimeException("RPS Error: strat value " + "out of bounds in balanceStratValues()");
         }
-
-        server.strategyChanged(client.getFullName());
     }
 
-    private void updateDropLines() {
+    private void balancePlannedStrats(int strat, float value) {
+        float pValue, deltaV, percentR, percentP, percentS;
+        float newR, newP, newS;
+        switch (strat) {
+            case R:
+                pValue = plannedStrat[R];
+                deltaV = value - pValue;
+
+                float PStotal = plannedStrat[P] + plannedStrat[S];
+                if (PStotal > 0) {
+                    percentP = plannedStrat[P] / PStotal;
+                    percentS = plannedStrat[S] / PStotal;
+                } else {
+                    PStotal = 1 - value;
+                    percentP = .50f;
+                    percentS = .50f;
+                }
+
+                newR = value;
+                newP = (PStotal - deltaV) * percentP;
+                newS = 1 - newR - newP;
+                setPlannedRPS(newR, newP, newS);
+                break;
+
+            case P:
+                pValue = plannedStrat[P];
+                deltaV = value - pValue;
+
+                float RStotal = plannedStrat[R] + plannedStrat[S];
+                if (RStotal > 0) {
+                    percentR = plannedStrat[R] / RStotal;
+                    percentS = plannedStrat[S] / RStotal;
+                } else {
+                    RStotal = 1 - value;
+                    percentR = .50f;
+                    percentS = .50f;
+                }
+
+                newP = value;
+                newR = (RStotal - deltaV) * percentR;
+                newS = 1 - newR - newP;
+                setPlannedRPS(newR, newP, newS);
+                break;
+
+            case S:
+                pValue = plannedStrat[S];
+                deltaV = value - pValue;
+
+                float RPtotal = plannedStrat[R] + plannedStrat[P];
+                if (RPtotal > 0) {
+                    percentR = plannedStrat[R] / RPtotal;
+                    percentP = plannedStrat[P] / RPtotal;
+                } else {
+                    RPtotal = 1 - value;
+                    percentR = .50f;
+                    percentP = .50f;
+                }
+
+                newS = value;
+                newR = (RPtotal - deltaV) * percentR;
+                newP = 1 - newR - newS;
+                setPlannedRPS(newR, newP, newS);
+                break;
+
+            default:
+                throw new RuntimeException("RPS Error: strat value " + "out of bounds in balanceStratValues()");
+        }
+    }
+
+    private void updateCurrentDropLines() {
         sDrop.update(current.x, rock.y);
 
         float x, y;
@@ -601,5 +748,33 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         x = current.x + maxDist * playedStrat[R] * PApplet.cos(PApplet.PI / 6);
         y = current.y - maxDist * playedStrat[R] * PApplet.sin(PApplet.PI / 6);
         rDrop.update(x, y);
+    }
+
+    private void updatePlannedDropLines() {
+        pSDrop.update(planned.x, rock.y);
+
+        float x, y;
+        x = planned.x - maxDist * plannedStrat[P] * PApplet.cos(PApplet.PI / 6);
+        y = planned.y - maxDist * plannedStrat[P] * PApplet.sin(PApplet.PI / 6);
+        pPDrop.update(x, y);
+
+        x = planned.x + maxDist * plannedStrat[R] * PApplet.cos(PApplet.PI / 6);
+        y = planned.y - maxDist * plannedStrat[R] * PApplet.sin(PApplet.PI / 6);
+        pRDrop.update(x, y);
+    }
+
+    private void setTargetRPS (float targetR, float targetP, float targetS) {
+        targetStrat[R] = targetR;
+        targetStrat[P] = targetP;
+        targetStrat[S] = targetS;
+        for (int i = R; i <= S; ++i) {
+            stratSlider[i].setGhostValue(targetStrat[i]);
+        }
+    }
+
+    private void setPlannedRPS (float plannedR, float plannedP, float plannedS) {
+        plannedStrat[R] = plannedR;
+        plannedStrat[P] = plannedP;
+        plannedStrat[S] = plannedS;
     }
 }
