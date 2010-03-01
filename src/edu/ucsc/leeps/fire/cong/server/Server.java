@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  *
@@ -18,6 +19,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     private EventLog eventLog;
     private List<Population> populations;
     private Map<String, Population> membership;
+    private Random random;
 
     public Server() {
         super(PeriodConfig.class, TickLog.class);
@@ -26,6 +28,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
         clients = new HashMap<String, ClientInterface>();
         addLog(tickLog);
         addLog(eventLog);
+        random = new Random();
     }
 
     @Override
@@ -67,23 +70,11 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
 
     @Override
     public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
+        super.setPeriodConfig(superPeriodConfig);
         periodConfig = (PeriodConfig) superPeriodConfig;
-        periodConfig.pointsPerSecond = false;
-        TwoStrategyPayoffFunction homotopyPayoffFunction = new TwoStrategyPayoffFunction();
-        homotopyPayoffFunction.AaStart = 100;
-        homotopyPayoffFunction.AaEnd = 100;
-        homotopyPayoffFunction.Ab = 0;
-        homotopyPayoffFunction.Ba = 0;
-        homotopyPayoffFunction.Bb = 900;
-        //periodConfig.payoffFunction = homotopyPayoffFunction;
-        periodConfig.payoffFunction = new ThreeStrategyPayoffFunction();
         for (ClientInterface client : clients.values()) {
             client.setPeriodConfig(periodConfig);
         }
-        // This should be the FIRST thing done in setPeriodConfig.
-        // But, it assumes the periodConfig is valid. Because configuration is
-        // incomplete, ours needs the addition of a payoffFunction.
-        super.setPeriodConfig(superPeriodConfig);
     }
 
     @Override
@@ -118,10 +109,28 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     private void initPopulations(long periodStartTime) {
         populations = new LinkedList<Population>();
         membership = new HashMap<String, Population>();
-        SinglePopulationInclude population = new SinglePopulationInclude();
         List<ClientInterface> members = new LinkedList<ClientInterface>();
-        members.addAll(clients.values());
-        population.setMembers(members, populations, membership);
+        if (periodConfig.population instanceof Pair) {
+            assert clients.values().size() % 2 == 0;
+            List<ClientInterface> pool = new LinkedList<ClientInterface>();
+            pool.addAll(clients.values());
+            while (pool.size() > 0) {
+                ClientInterface p1 = pool.remove(random.nextInt(pool.size()));
+                ClientInterface p2 = pool.remove(random.nextInt(pool.size()));
+                Pair pair = new Pair();
+                members.clear();
+                members.add(p1);
+                members.add(p2);
+                pair.setMembers(members, populations, membership);
+            }
+        } else if (periodConfig.population instanceof SinglePopulationInclude) {
+            SinglePopulationInclude population = new SinglePopulationInclude();
+            members.clear();
+            members.addAll(clients.values());
+            population.setMembers(members, populations, membership);
+        } else {
+            assert false;
+        }
     }
 
     private void initStrategies(long periodStartTime) {

@@ -5,6 +5,7 @@
 package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +13,7 @@ import java.util.Map;
  *
  * @author dev
  */
-public class Pair implements Population {
+public class Pair implements Population, Serializable {
 
     public ClientInterface player1, player2;
     public long periodStartTime;

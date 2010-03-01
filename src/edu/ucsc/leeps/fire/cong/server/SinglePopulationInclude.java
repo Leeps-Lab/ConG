@@ -5,6 +5,7 @@
 package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Map;
  *
  * @author jpettit
  */
-public class SinglePopulationInclude implements Population {
+public class SinglePopulationInclude implements Population, Serializable {
 
     private List<ClientInterface> members;
     private long periodStartTime;

@@ -19,5 +19,6 @@ public class Main {
         Client.main(new String[]{"Player", "One", "localhost"});
         Client.main(new String[]{"Player", "Two", "localhost"});
         Client.main(new String[]{"Player", "Three", "localhost"});
+        Client.main(new String[]{"Player", "Four", "localhost"});
     }
 }

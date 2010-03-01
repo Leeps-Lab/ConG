@@ -5,7 +5,6 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 
@@ -47,7 +46,7 @@ public class HeatmapHelper {
     }
 
     // Chooses whether to interpolate between low and mid, or low and high
-    private int getRGB(float u) {
+    public int getRGB(float u) {
         if (u < .5) {
             return interpolateRGB(u * 2.0f, lowColor, midColor);
         } else {
