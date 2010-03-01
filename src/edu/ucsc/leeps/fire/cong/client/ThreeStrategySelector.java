@@ -406,7 +406,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             pDrop.show();
             sDrop.show();
             for (int i = R; i <= S; ++i) {
-                stratSlider[i].showGhost();;
+                stratSlider[i].showGhost();
             }
         } else {
             current.hide();
@@ -415,7 +415,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             pDrop.hide();
             sDrop.hide();
             for (int i = R; i <= S; ++i) {
-                stratSlider[i].hideGhost();;
+                stratSlider[i].hideGhost();
             }
         }
     }
@@ -445,6 +445,10 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public void setRateOfChange(float rate) {
+        current.setSpeed(rate);
     }
 
     // adjust the labeling modes of the Markers depending on the
