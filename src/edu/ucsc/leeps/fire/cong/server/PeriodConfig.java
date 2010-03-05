@@ -8,7 +8,7 @@ package edu.ucsc.leeps.fire.cong.server;
  *
  * @author jpettit
  */
-public class PeriodConfig extends edu.ucsc.leeps.fire.server.PeriodConfig {
+public class PeriodConfig extends edu.ucsc.leeps.fire.server.BasePeriodConfig {
 
     public float initialStrategy;
     public boolean pointsPerSecond;

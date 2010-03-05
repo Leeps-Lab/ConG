@@ -4,13 +4,13 @@
  */
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.server.Log;
+import edu.ucsc.leeps.fire.server.BaseLog;
 
 /**
  *
  * @author dev
  */
-public class EventLog extends Log {
+public class EventLog extends BaseLog {
 
     public long timestamp;
     public int subjectId;

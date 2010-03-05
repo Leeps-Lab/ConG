@@ -4,13 +4,13 @@
  */
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.server.Log;
+import edu.ucsc.leeps.fire.server.BaseLog;
 
 /**
  *
  * @author jpettit
  */
-public class TickLog extends Log {
+public class TickLog extends BaseLog {
 
     public long secondsLeft;
     public Population population;

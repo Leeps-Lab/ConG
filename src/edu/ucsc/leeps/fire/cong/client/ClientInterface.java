@@ -8,7 +8,7 @@ package edu.ucsc.leeps.fire.cong.client;
  *
  * @author jpettit
  */
-public interface ClientInterface extends edu.ucsc.leeps.fire.client.ClientInterface {
+public interface ClientInterface extends edu.ucsc.leeps.fire.client.BaseClientInterface {
 
     public float[] getStrategy();
 

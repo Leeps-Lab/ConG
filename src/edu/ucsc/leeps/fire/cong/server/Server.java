@@ -11,7 +11,7 @@ import java.util.Random;
  *
  * @author jpettit
  */
-public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerInterface {
+public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements ServerInterface {
 
     private Map<String, ClientInterface> clients;
     private PeriodConfig periodConfig;
@@ -60,7 +60,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     }
 
     @Override
-    public void setClients(Map<String, edu.ucsc.leeps.fire.client.ClientInterface> superClients) {
+    public void setClients(Map<String, edu.ucsc.leeps.fire.client.BaseClientInterface> superClients) {
         clients.clear();
         for (String name : superClients.keySet()) {
             ClientInterface client = (ClientInterface) superClients.get(name);
@@ -69,7 +69,7 @@ public class Server extends edu.ucsc.leeps.fire.server.Server implements ServerI
     }
 
     @Override
-    public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
+    public void setPeriodConfig(edu.ucsc.leeps.fire.server.BasePeriodConfig superPeriodConfig) {
         super.setPeriodConfig(superPeriodConfig);
         periodConfig = (PeriodConfig) superPeriodConfig;
         for (ClientInterface client : clients.values()) {

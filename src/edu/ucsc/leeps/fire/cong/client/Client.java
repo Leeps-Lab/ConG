@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.client.BaseClient;
 import edu.ucsc.leeps.fire.cong.server.ClientConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
@@ -12,7 +13,7 @@ import processing.core.PFont;
  *
  * @author jpettit
  */
-public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientInterface {
+public class Client extends BaseClient implements ClientInterface {
 
     private int width, height;
     private PEmbed embed;
@@ -27,7 +28,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     private Chart chart;
 
     @Override
-    public void init(edu.ucsc.leeps.fire.server.ServerInterface server) {
+    public void init(edu.ucsc.leeps.fire.server.BaseServerInterface server) {
         this.server = (ServerInterface) server;
         removeAll();
         width = 800;
@@ -74,7 +75,7 @@ public class Client extends edu.ucsc.leeps.fire.client.Client implements ClientI
     }
 
     @Override
-    public void setPeriodConfig(edu.ucsc.leeps.fire.server.PeriodConfig superPeriodConfig) {
+    public void setPeriodConfig(edu.ucsc.leeps.fire.server.BasePeriodConfig superPeriodConfig) {
         super.setPeriodConfig(superPeriodConfig);
         this.periodConfig = (PeriodConfig) superPeriodConfig;
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());

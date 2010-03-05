@@ -8,7 +8,7 @@ package edu.ucsc.leeps.fire.cong.server;
  *
  * @author jpettit
  */
-public class ClientConfig extends edu.ucsc.leeps.fire.server.ClientConfig {
+public class ClientConfig extends edu.ucsc.leeps.fire.server.BaseClientConfig {
 
     private int matchID;
 }
