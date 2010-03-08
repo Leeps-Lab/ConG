@@ -27,7 +27,7 @@ public class Client extends BaseClient implements ClientInterface {
     private ThreeStrategySelector simplex;
     private Chart chart;
 
-    @Override
+    //@Override
     public void init(edu.ucsc.leeps.fire.server.BaseServerInterface server) {
         this.server = (ServerInterface) server;
         removeAll();
@@ -103,7 +103,7 @@ public class Client extends BaseClient implements ClientInterface {
         pointsDisplay.setPeriodPoints(periodPoints);
     }
 
-    @Override
+    //@Override
     public void tick(int secondsLeft) {
         this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
         countdown.setSecondsLeft(secondsLeft);
@@ -111,7 +111,7 @@ public class Client extends BaseClient implements ClientInterface {
         simplex.update();
     }
 
-    @Override
+    //@Override
     public void quickTick(int millisLeft) {
         this.percent = (1 - (millisLeft / ((float) periodConfig.length * 1000)));
         chart.currentPercent = this.percent;
@@ -120,7 +120,7 @@ public class Client extends BaseClient implements ClientInterface {
         simplex.currentPercent = this.percent;
     }
 
-    @Override
+    //@Override
     public void setActionsEnabled(boolean enabled) {
         simplex.setEnabled(enabled);
     }

@@ -118,7 +118,7 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
                 && y > origin.y && y < origin.y + height);
     }
 
-    @Override
+    //@Override
     public void mouseClicked(MouseEvent me) {
         int mouseX = me.getX();
         int mouseY = me.getY();
@@ -128,11 +128,11 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
         }
     }
 
-    @Override
+    //@Override
     public void mousePressed(MouseEvent me) {
     }
 
-    @Override
+    //@Override
     public void mouseReleased(MouseEvent me) {
         int mouseX = me.getX();
         int mouseY = me.getY();
@@ -142,11 +142,11 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
         }
     }
 
-    @Override
+    //@Override
     public void mouseEntered(MouseEvent me) {
     }
 
-    @Override
+    //@Override
     public void mouseExited(MouseEvent me) {
     }
 }

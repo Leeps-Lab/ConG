@@ -21,18 +21,22 @@ public class Chart extends Sprite {
     final static Color A_PAYOFF_COLOR = new Color(200, 50, 50);
     final static Color B_PAYOFF_COLOR = new Color(50, 50, 200);
     final static Color Aa_PAYOFF_COLOR = new Color(200, 50, 50);
-    final static Color Ab_PAYOFF_COLOR = new Color(50, 50, 200);
+    //final static Color Ab_PAYOFF_COLOR = new Color(50, 50, 200);
+    final static Color Ab_PAYOFF_COLOR = new Color(0, 0, 0);
     final static Color Ba_PAYOFF_COLOR = new Color(200, 50, 50);
     final static Color Bb_PAYOFF_COLOR = new Color(50, 50, 200);
     // RPSD
     final static Color R_PAYOFF_COLOR = new Color(255, 25, 25);
     final static Color P_PAYOFF_COLOR = new Color(25, 25, 255);
     final static Color S_PAYOFF_COLOR = new Color(255, 0, 255);
+
+    final static Color TEST_COLOR = new Color(255, 0, 255);
     // Variables to modify that manipulate the chart
     public float currentPercent;
     private PeriodConfig periodConfig;
     private float currentPayoff;
     private float maxPayoff;
+    private float futureDistance;
     // Two strategy
     private float percent_A;
     private float percent_B;
@@ -60,6 +64,8 @@ public class Chart extends Sprite {
     private Line actualBaPayoff;
     private Line actualBbPayoff;
     private Line futureAaPayoff;
+    private Line futureAbPayoff;
+    private Line futureBaPayoff;
     private Line futureBbPayoff;
     // RPSD
     private Line actualRPayoff;
@@ -72,18 +78,23 @@ public class Chart extends Sprite {
         // Two strategy
         actualAPayoff = new Line(0, 0, width, height, 1.5f, A_PAYOFF_COLOR, 150);
         actualBPayoff = new Line(0, 0, width, height, 1.5f, B_PAYOFF_COLOR, 150);
-        futureAPayoff = new Line(0, 0, width, height, 1.0f, A_PAYOFF_COLOR, 100);
+        futureAPayoff = new Line(0, 0, width, height, 1.0f, TEST_COLOR, 255);
         futureBPayoff = new Line(0, 0, width, height, 1.0f, B_PAYOFF_COLOR, 100);
         actualAaPayoff = new Line(0, 0, width, height, 0.5f, Aa_PAYOFF_COLOR, 255);
         actualAbPayoff = new Line(0, 0, width, height, 0.5f, Ab_PAYOFF_COLOR, 255);
         actualBaPayoff = new Line(0, 0, width, height, 0.5f, Ba_PAYOFF_COLOR, 255);
         actualBbPayoff = new Line(0, 0, width, height, 0.5f, Bb_PAYOFF_COLOR, 255);
         futureAaPayoff = new Line(0, 0, width, height, 0.5f, A_PAYOFF_COLOR, 255);
+        futureAbPayoff = new Line(0, 0, width, height, 0.5f, A_PAYOFF_COLOR, 255);
+        futureBaPayoff = new Line(0, 0, width, height, 0.5f, B_PAYOFF_COLOR, 255);
         futureBbPayoff = new Line(0, 0, width, height, 0.5f, B_PAYOFF_COLOR, 255);
         // RPSD
         actualRPayoff = new Line(0, 0, width, height, 1.5f, R_PAYOFF_COLOR, 255);
         actualPPayoff = new Line(0, 0, width, height, 1.5f, P_PAYOFF_COLOR, 255);
         actualSPayoff = new Line(0, 0, width, height, 1.5f, S_PAYOFF_COLOR, 255);
+        futureDistance = 0.3f;
+        //futureAPayoff.addPoint(0.0f, 50.0f);
+        //futureAPayoff.addPoint(20.0f, 50.0f);
     }
 
     private void drawAxis(PApplet applet) {
@@ -132,6 +143,27 @@ public class Chart extends Sprite {
         applet.stroke(0);
         applet.strokeWeight(2);
         applet.rect(0, 0, width, height);
+
+        if(periodConfig != null){
+            float futureA0 = periodConfig.payoffFunction.getPayoff(
+                    currentPayoff,
+                    new float[]{percent_A, percent_B},
+                    new float[]{percent_a, percent_b});
+            float futureA1 = periodConfig.payoffFunction.getPayoff(
+                    currentPayoff + 0.1f,
+                    new float[]{1, 0},
+                    new float[]{percent_a, percent_b});
+            applet.fill(0);
+            applet.pushMatrix();
+            applet.translate(50, 10);
+            applet.text(String.format("%f", futureA0));
+            applet.translate(0, 10);
+            applet.text(String.format("%f", futureA1));
+            applet.popMatrix();
+            applet.noFill();
+
+        }
+
         if (periodConfig != null) {
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 actualAPayoff.draw(applet);
@@ -171,14 +203,39 @@ public class Chart extends Sprite {
         futureAPayoff.clear();
         futureBPayoff.clear();
         futureAaPayoff.clear();
+        futureAbPayoff.clear();
+        futureBaPayoff.clear();
         futureBbPayoff.clear();
     }
+
+    private void setupFuture() {
+        if(periodConfig != null) {
+            //if(periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                if(futureAPayoff.points.size() != 0) {
+                    futureAPayoff.removeFirst();
+                    futureAPayoff.removeFirst();
+                }
+                float futureA0 = periodConfig.payoffFunction.getPayoff(
+                        currentPayoff,
+                        new float[]{1},
+                        new float[]{percent_a});
+                float futureA1 = periodConfig.payoffFunction.getPayoff(
+                        currentPayoff + 0.1f,
+                        new float[]{1},
+                        new float[]{percent_a});
+                addPoint(futureAPayoff, currentPercent, futureA0 );
+                addPoint(futureAPayoff, currentPercent + 0.1f, futureA1);
+           // }
+        }
+    }
+
 
     public void updateLines() {
         if (currentPercent < 1.0) {
             addPoint(actualPayoff, currentPercent, currentPayoff);
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 addTwoStrategyActualPayoffPoints();
+                setupFuture();
             } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 addThreeStrategyActualPayoffPoints();
             }

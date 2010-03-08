@@ -26,12 +26,12 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         tickLog = new TickLog();
         eventLog = new EventLog();
         clients = new HashMap<String, ClientInterface>();
-        addLog(tickLog);
-        addLog(eventLog);
+        //addLog(tickLog);
+        //addLog(eventLog);
         random = new Random();
     }
 
-    @Override
+    //@Override
     public synchronized void strategyChanged(String name) {
         long timestamp = System.currentTimeMillis();
         membership.get(name).strategyChanged(name, timestamp, periodConfig);
@@ -54,12 +54,12 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         Server.start(serverHost, clientHost, configPath, server);
     }
 
-    @Override
+    //@Override
     public boolean readyToStart() {
         return clients.size() >= 1;
     }
 
-    @Override
+    //@Override
     public void setClients(Map<String, edu.ucsc.leeps.fire.client.BaseClientInterface> superClients) {
         clients.clear();
         for (String name : superClients.keySet()) {

@@ -314,11 +314,11 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         applet.popMatrix();
     }
 
-    @Override
+    //@Override
     public void mouseClicked(MouseEvent e) {
     }
 
-    @Override
+    //@Override
     public void mousePressed(MouseEvent e) {
         if (enabled) {
             float mouseX = e.getX() - origin.x;
@@ -342,7 +342,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         }
     }
 
-    @Override
+    //@Override
     public void mouseReleased(MouseEvent e) {
         if (mouseInTriangle) {
             if (current.isGrabbed()) {
@@ -362,11 +362,11 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         }
     }
 
-    @Override
+    //@Override
     public void mouseEntered(MouseEvent e) {
     }
 
-    @Override
+    //@Override
     public void mouseExited(MouseEvent e) {
     }
 

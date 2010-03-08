@@ -81,4 +81,8 @@ public class Line extends Sprite {
     public synchronized void clear() {
         points.clear();
     }
+
+    public void removeFirst() {
+        points.remove(0);
+    }
 }
