@@ -48,7 +48,7 @@ public class Client extends BaseClient implements ClientInterface {
                 embed,
                 this.server,
                 this);
-        chart = new Chart(250, 100, 500, 400);
+        chart = new Chart(250, 100, 500, 400, simplex);
     }
 
     @Override

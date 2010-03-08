@@ -17,10 +17,10 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     private final int P = 1;
     private final int S = 2;
     private float sideLength;
-    private Marker rock, paper, scissors;
+    private Marker rock,  paper,  scissors;
     private float maxDist;
     private MovingMarker current;
-    private Marker planned, opponent;
+    private Marker planned,  opponent;
     private float[] axisDistance;
     private float[] plannedStrat;
     private float[] targetStrat;
@@ -30,7 +30,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     private float[] opponentStrat;
     private Slider[] stratSlider;
     private boolean mouseInTriangle;
-    private Color rColor, pColor, sColor;
+    private Color rColor,  pColor,  sColor;
     private boolean enabled;
     private ServerInterface server;
     private ClientInterface client;
@@ -40,8 +40,8 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     private boolean visible = false;
     public float currentPercent;
     // Markers for droplines
-    private Marker rDrop, pDrop, sDrop;
-    private Marker pRDrop, pPDrop, pSDrop;
+    private Marker rDrop,  pDrop,  sDrop;
+    private Marker pRDrop,  pPDrop,  pSDrop;
 
     public ThreeStrategySelector(
             float x, float y, int width, int height,
@@ -247,7 +247,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
                         balancePlannedStrats(i, stratSlider[i].getGhostValue());
                         float[] coords = calculateStratCoords(plannedStrat[R], plannedStrat[P], plannedStrat[S]);
                         planned.update(coords[0], coords[1]);
-                        
+
                         adjustLabels();
 
                         break;
@@ -271,7 +271,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             pSDrop.setLabel(plannedStrat[S]);
 
             adjustPlannedLabels();
-            
+
             pRDrop.draw(applet);
             pPDrop.draw(applet);
             pSDrop.draw(applet);
@@ -395,6 +395,10 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
 
     public float[] getPlayerRPS() {
         return playedStrat;
+    }
+
+    public float[] getOpponentRPS() {
+        return opponentStrat;
     }
 
     public void setEnabled(boolean enabled) {
@@ -767,7 +771,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         pRDrop.update(x, y);
     }
 
-    private void setTargetRPS (float targetR, float targetP, float targetS) {
+    private void setTargetRPS(float targetR, float targetP, float targetS) {
         targetStrat[R] = targetR;
         targetStrat[P] = targetP;
         targetStrat[S] = targetS;
@@ -776,7 +780,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         }
     }
 
-    private void setPlannedRPS (float plannedR, float plannedP, float plannedS) {
+    private void setPlannedRPS(float plannedR, float plannedP, float plannedS) {
         plannedStrat[R] = plannedR;
         plannedStrat[P] = plannedP;
         plannedStrat[S] = plannedS;
