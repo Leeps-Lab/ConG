@@ -7,6 +7,7 @@ package edu.ucsc.leeps.fire.cong.client;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
+import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import processing.core.PApplet;
@@ -26,6 +27,8 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
     private boolean visible = false;
     public float currentPercent;
 
+    private Marker[] labels;
+
     public TwoStrategySelector(
             int x, int y,
             PApplet applet,
@@ -37,6 +40,28 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
         this.client = client;
         heatmap = new HeatmapHelper(applet, width, height, 0xFF0000FF, 0xFFFFFF00, 0xFF00FF00);
         applet.addMouseListener(this);
+
+        labels = new Marker[4];
+
+        labels[0] = new Marker(10, 0, true, 1);
+        labels[0].setColor(Color.black);
+        labels[0].setLabel("(1, 1)");
+        labels[0].setLabelMode(Marker.TOP);
+
+        labels[1] = new Marker(width, 0, true, 1);
+        labels[1].setColor(Color.black);
+        labels[1].setLabel("(1, 0)");
+        labels[1].setLabelMode(Marker.TOP);
+
+        labels[2] = new Marker(10, height, true, 1);
+        labels[2].setColor(Color.black);
+        labels[2].setLabel("(0, 1)");
+        labels[2].setLabelMode(Marker.BOTTOM);
+
+        labels[3] = new Marker(width, height, true, 1);
+        labels[3].setColor(Color.black);
+        labels[3].setLabel("(0, 0)");
+        labels[3].setLabelMode(Marker.BOTTOM);
     }
 
     public void setPayoffFunction(PayoffFunction payoffFunction) {
@@ -52,6 +77,22 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
     public void update() {
         if (visible) {
             heatmap.updateTwoStrategyHeatmap(currentPercent);
+
+            float payoff = payoffFunction.getPayoff(currentPercent,
+                    new float[] {1}, new float[] {1});
+            labels[0].setLabel(payoff);
+
+            payoff = payoffFunction.getPayoff(currentPercent,
+                    new float[] {1}, new float[] {0});
+            labels[1].setLabel(payoff);
+
+            payoff = payoffFunction.getPayoff(currentPercent,
+                    new float[] {0}, new float[] {1});
+            labels[2].setLabel(payoff);
+
+            payoff = payoffFunction.getPayoff(currentPercent,
+                    new float[] {0}, new float[] {0});
+            labels[3].setLabel(payoff);
         }
     }
 
@@ -94,6 +135,12 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
 
     }
 
+    private void drawLabels() {
+        for (int i = 0; i < 4; ++i) {
+            labels[i].draw(applet);
+        }
+    }
+
     @Override
     public void draw(PApplet applet) {
         if (!visible) {
@@ -108,6 +155,8 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
 
         drawCurrentStrategies();
 
+        drawLabels();
+        
         applet.popMatrix();
 
         drawHover();
