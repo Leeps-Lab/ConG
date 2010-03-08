@@ -29,7 +29,6 @@ public class Chart extends Sprite {
     final static Color R_PAYOFF_COLOR = new Color(255, 25, 25);
     final static Color P_PAYOFF_COLOR = new Color(25, 25, 255);
     final static Color S_PAYOFF_COLOR = new Color(255, 0, 255);
-
     final static Color TEST_COLOR = new Color(255, 0, 255);
     // Variables to modify that manipulate the chart
     public float currentPercent;
@@ -144,7 +143,7 @@ public class Chart extends Sprite {
         applet.strokeWeight(2);
         applet.rect(0, 0, width, height);
 
-        if(periodConfig != null){
+        if (periodConfig != null) {
             float futureA0 = periodConfig.payoffFunction.getPayoff(
                     currentPayoff,
                     new float[]{percent_A, percent_B},
@@ -208,34 +207,28 @@ public class Chart extends Sprite {
         futureBbPayoff.clear();
     }
 
-    private void setupFuture() {
-        if(periodConfig != null) {
-            //if(periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                if(futureAPayoff.points.size() != 0) {
-                    futureAPayoff.removeFirst();
-                    futureAPayoff.removeFirst();
-                }
-                float futureA0 = periodConfig.payoffFunction.getPayoff(
-                        currentPayoff,
-                        new float[]{1},
-                        new float[]{percent_a});
-                float futureA1 = periodConfig.payoffFunction.getPayoff(
-                        currentPayoff + 0.1f,
-                        new float[]{1},
-                        new float[]{percent_a});
-                addPoint(futureAPayoff, currentPercent, futureA0 );
-                addPoint(futureAPayoff, currentPercent + 0.1f, futureA1);
-           // }
+    private void addTwoStrategyFuturePayoffPoints() {
+        clearFuture();
+        for (float futurePercent = currentPercent; futurePercent <= 1.0; futurePercent += 0.01f) {
+            float future_A = periodConfig.payoffFunction.getPayoff(
+                    futurePercent,
+                    new float[]{1},
+                    new float[]{percent_a});
+            float future_B = periodConfig.payoffFunction.getPayoff(
+                    futurePercent,
+                    new float[]{0},
+                    new float[]{percent_a});
+            addPoint(futureAPayoff, futurePercent, future_A);
+            addPoint(futureBPayoff, futurePercent, future_B);
         }
     }
-
 
     public void updateLines() {
         if (currentPercent < 1.0) {
             addPoint(actualPayoff, currentPercent, currentPayoff);
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 addTwoStrategyActualPayoffPoints();
-                setupFuture();
+                addTwoStrategyFuturePayoffPoints();
             } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 addThreeStrategyActualPayoffPoints();
             }
