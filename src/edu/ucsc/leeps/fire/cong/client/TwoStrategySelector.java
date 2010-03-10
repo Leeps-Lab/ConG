@@ -5,7 +5,6 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
@@ -22,11 +21,10 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
     private PayoffFunction payoffFunction;
     private ServerInterface server;
     private ClientInterface client;
-    public float percent_A, percent_a;
+    private float percent_A, percent_a;
     private HeatmapHelper heatmap;
     private boolean visible = false;
-    public float currentPercent;
-
+    private float currentPercent;
     private Marker[] labels;
 
     public TwoStrategySelector(
@@ -64,10 +62,26 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
         labels[3].setLabelMode(Marker.BOTTOM);
     }
 
+    public float[] getMyStrategy() {
+        return new float[]{percent_A};
+    }
+
     public void setPayoffFunction(PayoffFunction payoffFunction) {
         this.payoffFunction = payoffFunction;
         heatmap.setPayoffFunction(payoffFunction);
         heatmap.updateTwoStrategyHeatmap(currentPercent);
+    }
+
+    public void setCurrentPercent(float percent) {
+        currentPercent = percent;
+    }
+
+    public void setMyStrategy(float A) {
+        percent_A = A;
+    }
+
+    public void setOpponentStrategy(float a) {
+        percent_a = a;
     }
 
     public void setVisible(boolean visible) {
@@ -79,19 +93,19 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
             heatmap.updateTwoStrategyHeatmap(currentPercent);
 
             float payoff = payoffFunction.getPayoff(currentPercent,
-                    new float[] {1}, new float[] {1});
+                    new float[]{1}, new float[]{1});
             labels[0].setLabel(payoff);
 
             payoff = payoffFunction.getPayoff(currentPercent,
-                    new float[] {1}, new float[] {0});
+                    new float[]{1}, new float[]{0});
             labels[1].setLabel(payoff);
 
             payoff = payoffFunction.getPayoff(currentPercent,
-                    new float[] {0}, new float[] {1});
+                    new float[]{0}, new float[]{1});
             labels[2].setLabel(payoff);
 
             payoff = payoffFunction.getPayoff(currentPercent,
-                    new float[] {0}, new float[] {0});
+                    new float[]{0}, new float[]{0});
             labels[3].setLabel(payoff);
         }
     }
@@ -106,22 +120,23 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
     }
 
     private void drawHover() {
-        if (applet.mousePressed && inRect(applet.mouseX, applet.mouseY)) {
-            applet.noFill();
+        if (applet.mousePressed && inRect((int) origin.x + width / 2, applet.mouseY)) {
+            applet.fill(0, 0, 0, 100);
             applet.stroke(0);
             applet.strokeWeight(0.5f);
-            applet.ellipse(origin.x + percent_a * width, applet.mouseY, 10, 10);
-            applet.fill(0);
-            float u = heatmap.getPayoff((int) (percent_a * width), (int) (applet.mouseY - origin.y));
+            applet.ellipse(origin.x + (1 - percent_a) * width, applet.mouseY, 10, 10);
+            /*
+            float u = heatmap.getPayoff((int) ((1 - percent_a) * width), (int) (applet.mouseY - origin.y));
             String label = String.format("%.0f", u);
             float tW = applet.textWidth(label);
             float tH = applet.textAscent() + applet.textDescent();
-            float tX = origin.x + percent_a * width;
+            float tX = origin.x + (1 - percent_a) * width;
             float tY = applet.mouseY;
             applet.fill(255);
             applet.rect(tX - tW, tY - tH, tW, tH);
             applet.fill(0);
             applet.text(label, tX, tY);
+             */
         }
     }
 
@@ -129,9 +144,9 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
         applet.stroke(0);
         applet.noFill();
         applet.line(0, (1 - percent_A) * height, width, (1 - percent_A) * height);
-        applet.line(percent_a * width, 0, percent_a * width, height);
+        applet.line((1 - percent_a) * width, 0, (1 - percent_a) * width, height);
         applet.fill(0);
-        applet.ellipse(percent_a * width, (1 - percent_A) * height, 10, 10);
+        applet.ellipse((1 - percent_a) * width, (1 - percent_A) * height, 10, 10);
 
     }
 
@@ -156,7 +171,7 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
         drawCurrentStrategies();
 
         drawLabels();
-        
+
         applet.popMatrix();
 
         drawHover();

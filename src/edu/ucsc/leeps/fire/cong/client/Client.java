@@ -116,7 +116,7 @@ public class Client extends BaseClient implements ClientInterface {
         this.percent = (1 - (millisLeft / ((float) periodConfig.length * 1000)));
         chart.currentPercent = this.percent;
         chart.updateLines();
-        bimatrix.currentPercent = this.percent;
+        bimatrix.setCurrentPercent(this.percent);
         simplex.currentPercent = this.percent;
     }
 
@@ -127,7 +127,7 @@ public class Client extends BaseClient implements ClientInterface {
 
     public synchronized float[] getStrategy() {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            return new float[]{bimatrix.percent_A, 1 - bimatrix.percent_A};
+            return bimatrix.getMyStrategy();
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             return simplex.getPlayerRPS();
         } else {
@@ -138,7 +138,7 @@ public class Client extends BaseClient implements ClientInterface {
 
     public synchronized void setMyStrategy(float[] s) {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            bimatrix.percent_A = s[0];
+            bimatrix.setMyStrategy(s[0]);
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setPlayerRPS(s[0], s[1], s[2]);
         } else {
@@ -149,7 +149,7 @@ public class Client extends BaseClient implements ClientInterface {
 
     public synchronized void setOpponentStrategy(float[] s) {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            bimatrix.percent_a = s[0];
+            bimatrix.setOpponentStrategy(s[0]);
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setOpponentRPS(s[0], s[1], s[2]);
         } else {

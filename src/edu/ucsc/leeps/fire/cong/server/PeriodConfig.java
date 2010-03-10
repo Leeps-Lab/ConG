@@ -18,4 +18,5 @@ public class PeriodConfig extends edu.ucsc.leeps.fire.server.BasePeriodConfig {
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class pair = Pair.class;
     public static final Class singlePopulationInclude = SinglePopulationInclude.class;
+    public static final Class singlePopulationExclude = SinglePopulationExclude.class;
 }

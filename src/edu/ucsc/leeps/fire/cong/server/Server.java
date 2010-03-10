@@ -128,6 +128,11 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
             members.clear();
             members.addAll(clients.values());
             population.setMembers(members, populations, membership);
+        } else if (periodConfig.population instanceof SinglePopulationExclude) {
+            SinglePopulationExclude population = new SinglePopulationExclude();
+            members.clear();
+            members.addAll(clients.values());
+            population.setMembers(members, populations, membership);
         } else {
             assert false;
         }
