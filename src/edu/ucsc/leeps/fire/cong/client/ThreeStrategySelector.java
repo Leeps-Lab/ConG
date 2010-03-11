@@ -1,13 +1,17 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.server.BasePeriodConfig;
+import edu.ucsc.leeps.fire.server.PeriodConfigurable;
 import java.awt.Color;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import processing.core.PApplet;
 
-public class ThreeStrategySelector extends Sprite implements MouseListener {
+public class ThreeStrategySelector extends Sprite implements PeriodConfigurable, MouseListener {
 
     public String rLabel = "Rock";
     public String pLabel = "Paper";
@@ -17,10 +21,10 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     private final int P = 1;
     private final int S = 2;
     private float sideLength;
-    private Marker rock,  paper,  scissors;
+    private Marker rock, paper, scissors;
     private float maxDist;
     private MovingMarker current;
-    private Marker planned,  opponent;
+    private Marker planned, opponent;
     private float[] axisDistance;
     private float[] plannedStrat;
     private float[] targetStrat;
@@ -30,7 +34,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     private float[] opponentStrat;
     private Slider[] stratSlider;
     private boolean mouseInTriangle;
-    private Color rColor,  pColor,  sColor;
+    private Color rColor, pColor, sColor;
     private boolean enabled;
     private ServerInterface server;
     private ClientInterface client;
@@ -40,8 +44,8 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     private boolean visible = false;
     public float currentPercent;
     // Markers for droplines
-    private Marker rDrop,  pDrop,  sDrop;
-    private Marker pRDrop,  pPDrop,  pSDrop;
+    private Marker rDrop, pDrop, sDrop;
+    private Marker pRDrop, pPDrop, pSDrop;
 
     public ThreeStrategySelector(
             float x, float y, int width, int height,
@@ -784,5 +788,15 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         plannedStrat[R] = plannedR;
         plannedStrat[P] = plannedP;
         plannedStrat[S] = plannedS;
+    }
+
+    public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
+        PeriodConfig periodConfig = (PeriodConfig) basePeriodConfig;
+        if (periodConfig.payoffFunction instanceof ThreeStrategySelector) {
+            setPayoffFunction(periodConfig.payoffFunction);
+            setVisible(true);
+        } else {
+            setVisible(false);
+        }
     }
 }

@@ -5,7 +5,11 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.server.BasePeriodConfig;
+import edu.ucsc.leeps.fire.server.PeriodConfigurable;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -15,7 +19,7 @@ import processing.core.PApplet;
  *
  * @author jpettit
  */
-public class TwoStrategySelector extends Sprite implements MouseListener {
+public class TwoStrategySelector extends Sprite implements PeriodConfigurable, MouseListener {
 
     private PApplet applet;
     private PayoffFunction payoffFunction;
@@ -212,5 +216,15 @@ public class TwoStrategySelector extends Sprite implements MouseListener {
 
     //@Override
     public void mouseExited(MouseEvent me) {
+    }
+
+    public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
+        PeriodConfig periodConfig = (PeriodConfig)basePeriodConfig;
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            setPayoffFunction(periodConfig.payoffFunction);
+            setVisible(true);
+        } else {
+            setVisible(false);
+        }
     }
 }

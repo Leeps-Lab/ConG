@@ -75,19 +75,12 @@ public class Client extends BaseClient implements ClientInterface {
     }
 
     @Override
-    public void setPeriodConfig(edu.ucsc.leeps.fire.server.BasePeriodConfig superPeriodConfig) {
-        super.setPeriodConfig(superPeriodConfig);
-        this.periodConfig = (PeriodConfig) superPeriodConfig;
+    public void setPeriodConfig(edu.ucsc.leeps.fire.server.BasePeriodConfig basePeriodConfig) {
+        super.setPeriodConfig(basePeriodConfig);
+        this.periodConfig = (PeriodConfig) basePeriodConfig;
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
-        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            bimatrix.setPayoffFunction(periodConfig.payoffFunction);
-            bimatrix.setVisible(true);
-            simplex.setVisible(false);
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            simplex.setPayoffFunction(periodConfig.payoffFunction);
-            bimatrix.setVisible(false);
-            simplex.setVisible(true);
-        }
+        bimatrix.setPeriodConfig(periodConfig);
+        simplex.setPeriodConfig(periodConfig);
         chart.setPeriodConfig(periodConfig);
     }
 
