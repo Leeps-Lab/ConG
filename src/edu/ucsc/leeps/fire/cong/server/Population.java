@@ -18,9 +18,9 @@ public interface Population {
     public void setMembers(
             List<ClientInterface> members,
             List<Population> populations,
-            Map<String, Population> membership);
+            Map<Integer, Population> membership);
 
     public void initialize(long timestamp, PeriodConfig periodConfig);
 
-    public void strategyChanged(String name, long timestamp, PeriodConfig periodConfig);
+    public void strategyChanged(Integer id, long timestamp, PeriodConfig periodConfig);
 }

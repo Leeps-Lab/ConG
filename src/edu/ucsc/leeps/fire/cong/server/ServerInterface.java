@@ -10,5 +10,5 @@ package edu.ucsc.leeps.fire.cong.server;
  */
 public interface ServerInterface {
 
-    public void strategyChanged(String name);
+    public void strategyChanged(Integer id);
 }

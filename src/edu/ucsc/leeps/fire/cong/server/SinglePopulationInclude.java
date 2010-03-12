@@ -32,11 +32,11 @@ public class SinglePopulationInclude implements Population, Serializable {
     public void setMembers(
             List<ClientInterface> members,
             List<Population> populations,
-            Map<String, Population> membership) {
+            Map<Integer, Population> membership) {
         this.members = members;
         populations.add(this);
         for (ClientInterface client : members) {
-            membership.put(client.getFullName(), this);
+            membership.put(client.getID(), this);
         }
     }
 
@@ -90,7 +90,7 @@ public class SinglePopulationInclude implements Population, Serializable {
         }
     }
 
-    public void strategyChanged(String name, long timestamp, PeriodConfig periodConfig) {
+    public void strategyChanged(Integer id, long timestamp, PeriodConfig periodConfig) {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         long inStrategyTime = System.currentTimeMillis() - lastEvalTime;

@@ -4,7 +4,6 @@
  */
 package edu.ucsc.leeps.fire.cong.client;
 
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
@@ -22,7 +21,7 @@ import processing.core.PApplet;
 public class TwoStrategySelector extends Sprite implements PeriodConfigurable, MouseListener {
 
     private PApplet applet;
-    private PayoffFunction payoffFunction;
+    private PeriodConfig periodConfig;
     private ServerInterface server;
     private ClientInterface client;
     private float percent_A, percent_a;
@@ -69,13 +68,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     public float[] getMyStrategy() {
         return new float[]{percent_A};
     }
-
-    public void setPayoffFunction(PayoffFunction payoffFunction) {
-        this.payoffFunction = payoffFunction;
-        heatmap.setPayoffFunction(payoffFunction);
-        heatmap.updateTwoStrategyHeatmap(currentPercent);
-    }
-
+    
     public void setCurrentPercent(float percent) {
         currentPercent = percent;
     }
@@ -96,19 +89,19 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         if (visible) {
             heatmap.updateTwoStrategyHeatmap(currentPercent);
 
-            float payoff = payoffFunction.getPayoff(currentPercent,
+            float payoff = periodConfig.payoffFunction.getPayoff(currentPercent,
                     new float[]{1}, new float[]{1});
             labels[0].setLabel(payoff);
 
-            payoff = payoffFunction.getPayoff(currentPercent,
+            payoff = periodConfig.payoffFunction.getPayoff(currentPercent,
                     new float[]{1}, new float[]{0});
             labels[1].setLabel(payoff);
 
-            payoff = payoffFunction.getPayoff(currentPercent,
+            payoff = periodConfig.payoffFunction.getPayoff(currentPercent,
                     new float[]{0}, new float[]{1});
             labels[2].setLabel(payoff);
 
-            payoff = payoffFunction.getPayoff(currentPercent,
+            payoff = periodConfig.payoffFunction.getPayoff(currentPercent,
                     new float[]{0}, new float[]{0});
             labels[3].setLabel(payoff);
         }
@@ -192,7 +185,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
             percent_A = 1 - ((mouseY - origin.y) / height);
-            server.strategyChanged(client.getFullName());
+            server.strategyChanged(client.getID());
         }
     }
 
@@ -206,7 +199,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
             percent_A = 1 - ((mouseY - origin.y) / height);
-            server.strategyChanged(client.getFullName());
+            server.strategyChanged(client.getID());
         }
     }
 
@@ -219,10 +212,18 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
-        PeriodConfig periodConfig = (PeriodConfig)basePeriodConfig;
+        periodConfig = (PeriodConfig) basePeriodConfig;
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            setPayoffFunction(periodConfig.payoffFunction);
+            heatmap.setPeriodConfig(basePeriodConfig);
             setVisible(true);
+            switch (periodConfig.twoStrategySelectionType) {
+                case HeatmapBoth:
+                    break;
+                case HeatmapSingle:
+                    break;
+                case Matrix:
+                    break;
+            }
         } else {
             setVisible(false);
         }

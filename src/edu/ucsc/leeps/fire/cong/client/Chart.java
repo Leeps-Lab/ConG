@@ -35,7 +35,6 @@ public class Chart extends Sprite {
     private PeriodConfig periodConfig;
     private float currentPayoff;
     private float maxPayoff;
-    private float futureDistance;
     // Two strategy
     private float percent_A;
     private float percent_a;

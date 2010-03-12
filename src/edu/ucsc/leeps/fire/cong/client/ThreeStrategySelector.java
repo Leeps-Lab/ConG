@@ -1,9 +1,7 @@
 package edu.ucsc.leeps.fire.cong.client;
 
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
 import edu.ucsc.leeps.fire.server.PeriodConfigurable;
 import java.awt.Color;
@@ -39,7 +37,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     private ServerInterface server;
     private ClientInterface client;
     private PApplet applet;
-    private PayoffFunction payoffFunction;
+    private PeriodConfig periodConfig;
     private HeatmapHelper heatmap;
     private boolean visible = false;
     public float currentPercent;
@@ -154,7 +152,6 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         heatmap = new HeatmapHelper(applet,
                 (int) (paper.x - rock.x), (int) (rock.y - scissors.y),
                 0xFF0000FF, 0xFFFFFF00, 0xFF00FF00);
-        heatmap.setThreeStrategySelector(this);
         currentPercent = 0f;
         this.applet = applet;
     }
@@ -163,16 +160,12 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         this.visible = visible;
     }
 
-    public void setPayoffFunction(PayoffFunction payoffFunction) {
-        this.payoffFunction = payoffFunction;
-        heatmap.setPayoffFunction(payoffFunction);
-    }
-
     public void update() {
         if (visible) {
             heatmap.updateThreeStrategyHeatmap(
                     currentPercent,
-                    opponentStrat[0], opponentStrat[1], opponentStrat[2]);
+                    opponentStrat[0], opponentStrat[1], opponentStrat[2],
+                    this);
         }
     }
 
@@ -268,7 +261,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             applet.line(planned.x, planned.y, pPDrop.x, pPDrop.y);
             applet.line(planned.x, planned.y, pSDrop.x, pSDrop.y);
 
-            planned.setLabel(payoffFunction.getPayoff(currentPercent, plannedStrat, opponentStrat));
+            planned.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, plannedStrat, opponentStrat));
 
             pRDrop.setLabel(plannedStrat[R]);
             pPDrop.setLabel(plannedStrat[P]);
@@ -293,7 +286,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             applet.line(current.x, current.y, sDrop.x, sDrop.y);
         }
 
-        current.setLabel(payoffFunction.getPayoff(currentPercent, playedStrat, opponentStrat));
+        current.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, playedStrat, opponentStrat));
 
         current.update();
         if (enabled) {
@@ -521,7 +514,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             stratSlider[i].setStratValue(playedStrat[i]);
         }
 
-        server.strategyChanged(client.getFullName());
+        server.strategyChanged(client.getID());
     }
 
     public float[] translate(float x, float y) {
@@ -791,9 +784,9 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     }
 
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
-        PeriodConfig periodConfig = (PeriodConfig) basePeriodConfig;
+        this.periodConfig = (PeriodConfig) basePeriodConfig;
         if (periodConfig.payoffFunction instanceof ThreeStrategySelector) {
-            setPayoffFunction(periodConfig.payoffFunction);
+            heatmap.setPeriodConfig(basePeriodConfig);
             setVisible(true);
         } else {
             setVisible(false);

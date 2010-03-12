@@ -4,11 +4,11 @@
  */
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
+import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,37 +16,71 @@ import java.util.Map;
  *
  * @author jpettit
  */
-public class SinglePopulationExclude implements Population, Serializable {
+public class TwoPopulation implements Population, Serializable {
 
-    private List<ClientInterface> members;
+    private Map<Integer, ClientInterface> members1, members2;
     private long periodStartTime;
-    private long lastEvalTime;
+    private long lastEvalTime1, lastEvalTime2;
     private Map<ClientInterface, float[]> lastStrategiesMine;
     private Map<ClientInterface, float[]> lastStrategiesOpposing;
-
-    public SinglePopulationExclude() {
-        members = new LinkedList<ClientInterface>();
-        lastStrategiesMine = new HashMap<ClientInterface, float[]>();
-        lastStrategiesOpposing = new HashMap<ClientInterface, float[]>();
-    }
 
     public void setMembers(
             List<ClientInterface> members,
             List<Population> populations,
             Map<Integer, Population> membership) {
-        this.members = members;
-        populations.add(this);
+        members1 = new HashMap<Integer, ClientInterface>();
+        members2 = new HashMap<Integer, ClientInterface>();
         for (ClientInterface client : members) {
+            if (members1.size() >= members2.size()) {
+                members1.put(client.getID(), client);
+            } else {
+                members2.put(client.getID(), client);
+            }
             membership.put(client.getID(), this);
         }
+        populations.add(this);
     }
 
     public void initialize(long timestamp, PeriodConfig periodConfig) {
         periodStartTime = timestamp;
-        lastEvalTime = timestamp;
-        lastStrategiesMine.clear();
-        lastStrategiesOpposing.clear();
-        updateStrategies(periodConfig);
+        lastEvalTime1 = timestamp;
+        lastEvalTime2 = timestamp;
+        lastStrategiesMine = new HashMap<ClientInterface, float[]>();
+        lastStrategiesOpposing = new HashMap<ClientInterface, float[]>();
+        updateStrategies(members1.values(), periodConfig);
+        updateStrategies(members2.values(), periodConfig);
+    }
+
+    public void strategyChanged(Integer id, long timestamp, PeriodConfig periodConfig) {
+        long periodTimeElapsed = timestamp - periodStartTime;
+        float percent = periodTimeElapsed / (periodConfig.length * 1000f);
+        float percentInStrategyTime;
+        Collection<ClientInterface> membersPaid, membersChanged;
+        if (members1.containsKey(id)) {
+            long inStrategyTime = System.currentTimeMillis() - lastEvalTime2;
+            percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
+            lastEvalTime2 = timestamp;
+            membersChanged = members1.values();
+            membersPaid = members2.values();
+        } else if (members2.containsKey(id)) {
+            long inStrategyTime = System.currentTimeMillis() - lastEvalTime1;
+            percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
+            lastEvalTime1 = timestamp;
+            membersChanged = members2.values();
+            membersPaid = members1.values();
+        } else {
+            assert false;
+            percentInStrategyTime = Float.NaN;
+            lastEvalTime1 = Long.MIN_VALUE;
+            lastEvalTime2 = Long.MIN_VALUE;
+            membersChanged = null;
+            membersPaid = null;
+        }
+        for (ClientInterface client : membersPaid) {
+            updatePayoffs(
+                    client, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
+        }
+        updateStrategies(membersChanged, periodConfig);
     }
 
     private void updatePayoffs(
@@ -65,7 +99,7 @@ public class SinglePopulationExclude implements Population, Serializable {
         client.addToPeriodPoints(points);
     }
 
-    private void updateStrategies(PeriodConfig periodConfig) {
+    private void updateStrategies(Collection<ClientInterface> members, PeriodConfig periodConfig) {
         for (ClientInterface client : members) {
             float[] averageStrategy = null;
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
@@ -94,18 +128,5 @@ public class SinglePopulationExclude implements Population, Serializable {
             lastStrategiesMine.put(client, client.getStrategy());
             lastStrategiesOpposing.put(client, averageStrategy);
         }
-    }
-
-    public void strategyChanged(Integer id, long timestamp, PeriodConfig periodConfig) {
-        long periodTimeElapsed = timestamp - periodStartTime;
-        float percent = periodTimeElapsed / (periodConfig.length * 1000f);
-        long inStrategyTime = System.currentTimeMillis() - lastEvalTime;
-        float percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
-        for (ClientInterface client : members) {
-            updatePayoffs(
-                    client, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
-        }
-        lastEvalTime = timestamp;
-        updateStrategies(periodConfig);
     }
 }

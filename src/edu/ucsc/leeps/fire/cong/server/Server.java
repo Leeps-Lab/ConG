@@ -16,31 +16,31 @@ import java.util.Random;
  */
 public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements ServerInterface {
 
-    private Map<String, ClientInterface> clients;
+    private Map<Integer, ClientInterface> clients;
     private PeriodConfig periodConfig;
     private TickLog tickLog;
     private EventLog eventLog;
     private List<Population> populations;
-    private Map<String, Population> membership;
+    private Map<Integer, Population> membership;
     private Random random;
 
     public Server() {
         super(PeriodConfig.class, TickLog.class);
         tickLog = new TickLog();
         eventLog = new EventLog();
-        clients = new HashMap<String, ClientInterface>();
+        clients = new HashMap<Integer, ClientInterface>();
         //addLog(tickLog);
         //addLog(eventLog);
         random = new Random();
     }
 
     //@Override
-    public synchronized void strategyChanged(String name) {
+    public synchronized void strategyChanged(Integer id) {
         long timestamp = System.currentTimeMillis();
-        membership.get(name).strategyChanged(name, timestamp, periodConfig);
+        membership.get(id).strategyChanged(id, timestamp, periodConfig);
         eventLog.timestamp = timestamp;
-        eventLog.subjectId = clients.get(name).getID();
-        eventLog.strategy = clients.get(name).getStrategy();
+        eventLog.subjectId = id;
+        eventLog.strategy = clients.get(id).getStrategy();
         eventLog.commit();
     }
 
@@ -67,7 +67,7 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         clients.clear();
         for (String name : superClients.keySet()) {
             ClientInterface client = (ClientInterface) superClients.get(name);
-            clients.put(name, client);
+            clients.put(client.getID(), client);
         }
     }
 
@@ -84,7 +84,7 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
     public void initPeriod() {
         super.initPeriod();
         long periodStartTime = System.currentTimeMillis();
-        initPopulations(periodStartTime);
+        initPopulations();
         initStrategies(periodStartTime);
         startPeriod();
     }
@@ -109,36 +109,13 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         super.endPeriod();
     }
 
-    private void initPopulations(long periodStartTime) {
+    private void initPopulations() {
         populations = new LinkedList<Population>();
-        membership = new HashMap<String, Population>();
+        membership = new HashMap<Integer, Population>();
         List<ClientInterface> members = new LinkedList<ClientInterface>();
-        if (periodConfig.population instanceof Pair) {
-            assert clients.values().size() % 2 == 0;
-            List<ClientInterface> pool = new LinkedList<ClientInterface>();
-            pool.addAll(clients.values());
-            while (pool.size() > 0) {
-                ClientInterface p1 = pool.remove(random.nextInt(pool.size()));
-                ClientInterface p2 = pool.remove(random.nextInt(pool.size()));
-                Pair pair = new Pair();
-                members.clear();
-                members.add(p1);
-                members.add(p2);
-                pair.setMembers(members, populations, membership);
-            }
-        } else if (periodConfig.population instanceof SinglePopulationInclude) {
-            SinglePopulationInclude population = new SinglePopulationInclude();
-            members.clear();
-            members.addAll(clients.values());
-            population.setMembers(members, populations, membership);
-        } else if (periodConfig.population instanceof SinglePopulationExclude) {
-            SinglePopulationExclude population = new SinglePopulationExclude();
-            members.clear();
-            members.addAll(clients.values());
-            population.setMembers(members, populations, membership);
-        } else {
-            assert false;
-        }
+        members.clear();
+        members.addAll(clients.values());
+        periodConfig.population.setMembers(members, populations, membership);
     }
 
     private void initStrategies(long periodStartTime) {
