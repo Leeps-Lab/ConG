@@ -4,7 +4,7 @@
  */
 package edu.ucsc.leeps.fire.cong.client;
 
-import edu.ucsc.leeps.fire.cong.server.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;

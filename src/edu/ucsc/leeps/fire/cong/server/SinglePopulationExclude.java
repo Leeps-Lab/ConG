@@ -4,6 +4,7 @@
  */
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import java.io.Serializable;
 import java.util.HashMap;

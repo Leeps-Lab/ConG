@@ -4,6 +4,7 @@
  */
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import java.util.List;
 import java.util.Map;

@@ -2,9 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.ucsc.leeps.fire.cong.server;
+package edu.ucsc.leeps.fire.cong.config;
 
-import edu.ucsc.leeps.fire.cong.client.configuration.TwoStrategySelectionType;
+import edu.ucsc.leeps.fire.cong.server.Pair;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.Population;
+import edu.ucsc.leeps.fire.cong.server.SinglePopulationExclude;
+import edu.ucsc.leeps.fire.cong.server.SinglePopulationInclude;
+import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 
 /**
  *
