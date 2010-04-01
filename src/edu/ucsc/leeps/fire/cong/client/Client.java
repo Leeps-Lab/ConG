@@ -6,6 +6,7 @@ import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.server.BasePeriodConfig;
 import processing.core.PApplet;
 import processing.core.PFont;
 
@@ -75,9 +76,9 @@ public class Client extends BaseClient implements ClientInterface {
     }
 
     @Override
-    public void setPeriodConfig(edu.ucsc.leeps.fire.server.BasePeriodConfig basePeriodConfig) {
+    public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         super.setPeriodConfig(basePeriodConfig);
-        this.periodConfig = (PeriodConfig) basePeriodConfig;
+        periodConfig = (PeriodConfig) basePeriodConfig;
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
         bimatrix.setPeriodConfig(periodConfig);
         simplex.setPeriodConfig(periodConfig);

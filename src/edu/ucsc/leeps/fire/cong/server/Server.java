@@ -29,8 +29,8 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         tickLog = new TickLog();
         eventLog = new EventLog();
         clients = new HashMap<Integer, ClientInterface>();
-        //addLog(tickLog);
-        //addLog(eventLog);
+        addLog(tickLog);
+        addLog(eventLog);
         random = new Random();
     }
 

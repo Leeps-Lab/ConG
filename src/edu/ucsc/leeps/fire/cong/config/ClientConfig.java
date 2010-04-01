@@ -4,11 +4,13 @@
  */
 package edu.ucsc.leeps.fire.cong.config;
 
+import edu.ucsc.leeps.fire.server.BaseClientConfig;
+
 /**
  *
  * @author jpettit
  */
-public class ClientConfig extends edu.ucsc.leeps.fire.server.BaseClientConfig {
+public class ClientConfig extends BaseClientConfig {
 
     private int matchID;
 }

@@ -12,7 +12,6 @@ import java.io.Serializable;
  */
 public class TwoStrategyPayoffFunction implements PayoffFunction, Serializable {
 
-    private float maxPercent;
     public float AaStart, AaEnd;
     public float Ab, Ba, Bb;
 
