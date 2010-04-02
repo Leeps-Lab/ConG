@@ -1,5 +1,5 @@
 "period","timeConstrained","paid","length","initialStrategy","pointsPerSecond","percentChangePerSecond","payoffFunction","AaStart","AaEnd","Ab","Ba","Bb","counterpartPayoffFunction","AaStart","AaEnd","Ab","Ba","Bb","population","twoStrategySelectionType"
-1,"TRUE","FALSE",30,0,"FALSE",0.1,"homotopy",3,3,0,5,1,"homotopy",3,3,0,5,1,"twoPopulation","Matrix"
+1,"TRUE","FALSE",30,0,"FALSE",0.1,"homotopy",3,3,0,5,1,"homotopy",3,3,0,5,1,"paired","Matrix"
 2,"TRUE","FALSE",30,0,"FALSE",0.1,"homotopy",3,3,0,5,1,"homotopy",3,3,0,5,1,"twoPopulation","HeatmapSingle"
 3,"TRUE","TRUE",30,0.5,"FALSE",0.1,"homotopy",3,3,0,5,1,"homotopy",3,3,0,5,1,"twoPopulation","Matrix"
 4,"TRUE","TRUE",30,0.5,"FALSE",0.1,"homotopy",3,3,0,5,1,"homotopy",3,3,0,5,1,"twoPopulation","Matrix"

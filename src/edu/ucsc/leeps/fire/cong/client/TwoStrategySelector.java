@@ -403,6 +403,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
                                 percent_A = targetPercent_A;
                             }
                         }
+                        client.setMyStrategy(new float[]{percent_A});
                         server.strategyChanged(client.getID());
                     }
                     try {

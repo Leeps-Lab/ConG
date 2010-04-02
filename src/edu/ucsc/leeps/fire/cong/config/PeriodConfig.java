@@ -4,6 +4,7 @@
  */
 package edu.ucsc.leeps.fire.cong.config;
 
+import edu.ucsc.leeps.fire.cong.server.PairedPopulation;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.Population;
 import edu.ucsc.leeps.fire.cong.server.SinglePopulationExclude;
@@ -31,4 +32,5 @@ public class PeriodConfig extends BasePeriodConfig {
     public static final Class singlePopulationInclude = SinglePopulationInclude.class;
     public static final Class singlePopulationExclude = SinglePopulationExclude.class;
     public static final Class twoPopulation = TwoPopulation.class;
+    public static final Class paired = PairedPopulation.class;
 }
