@@ -1,8 +1,7 @@
-
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import java.awt.Color;
-import processing.core.PApplet;
 
 /**
  * MovingMarkers can be set to converge on a target
@@ -11,22 +10,21 @@ import processing.core.PApplet;
  */
 public class MovingMarker extends Marker {
     // speed of marker movement
+
     private float speed;
     private float xVel, yVel;
-
     // point marker moves toward
     private Marker target;
 
-    public MovingMarker(float x, float y, boolean visible, float radius,
+    public MovingMarker(Sprite parent, float x, float y, boolean visible, float radius,
             float speed) {
-        super(x, y, visible, radius);
+        super(parent, x, y, visible, radius);
 
         this.speed = speed;
         xVel = 0;
         yVel = 0;
-        target = new Marker(x, y, true, radius - 2);
+        target = new Marker(parent, x, y, true, radius - 2);
     }
-
 
     public void setSpeed(float speed) {
         this.speed = speed;
@@ -44,12 +42,6 @@ public class MovingMarker extends Marker {
         target.setColor(C);
     }
 
-    @Override
-    public void setAlpha(float alpha) {
-        super.setAlpha(alpha);
-        target.setAlpha(alpha);
-    }
-
     public void setTargetLabel(String newLabel) {
         target.setLabel(newLabel);
     }
@@ -58,28 +50,28 @@ public class MovingMarker extends Marker {
         target.setLabel(newLabel);
     }
 
-    public void setTargetLabelMode(int newMode) {
-        target.setLabelMode(newMode);
+    public void setTargetLabelMode(LabelMode newMode) {
+        target.setLabelMode(mode);
     }
 
     public void setLocation(float x, float y) {
-        this.x = x;
-        this.y = y;
-        target.x = x;
-        target.y = y;
+        origin.x = x;
+        origin.y = y;
+        target.origin.x = x;
+        target.origin.y = y;
         xVel = 0;
         yVel = 0;
     }
-    
+
     @Override
     public void update(float x, float y) {
-        target.x = x;
-        target.y = y;
+        target.origin.x = x;
+        target.origin.y = y;
 
-        float deltaX = target.x - this.x;
-        float deltaY = target.y - this.y;
+        float deltaX = target.origin.x - origin.x;
+        float deltaY = target.origin.y - origin.y;
 
-        float dist = PApplet.sqrt(deltaX * deltaX + deltaY * deltaY);
+        float dist = PEmbed.sqrt(deltaX * deltaX + deltaY * deltaY);
         float scale = speed / dist;
 
         xVel = deltaX * scale;
@@ -87,50 +79,28 @@ public class MovingMarker extends Marker {
     }
 
     public void update() {
-        float deltaX = target.x - x;
-        float deltaY = target.y - y;
+        float deltaX = target.origin.x - origin.x;
+        float deltaY = target.origin.y - origin.y;
 
         float distSquared = deltaX * deltaX + deltaY * deltaY;
         if (distSquared < speed * speed || distSquared == 0) {
-            x = target.x;
-            y = target.y;
+            origin.x = target.origin.x;
+            origin.y = target.origin.y;
             xVel = 0;
             yVel = 0;
         } else {
-            x += xVel;
-            y += yVel;
+            origin.x += xVel;
+            origin.y += yVel;
         }
-        
-        switch(labelMode) {
-            case NONE:
-                break;
-            case TOP:
-                labelCoords.x = this.x;
-                labelCoords.y = this.y - radius - 5;
-                break;
-            case RIGHT:
-                labelCoords.x = this.x + radius + 8;
-                labelCoords.y = this.y;
-                break;
-            case BOTTOM:
-                labelCoords.x = this.x;
-                labelCoords.y = this.y + radius + 5;
-                break;
-            case LEFT:
-                labelCoords.x = this.x - radius - 8;
-                labelCoords.y = this.y;
-                break;
-            default:
-                throw new RuntimeException("Label mode out of range.");
-        }
+        setLabelMode(mode);
     }
 
     @Override
-    public void draw(PApplet applet) {
+    public void draw(PEmbed applet) {
         if (visible) {
             applet.stroke(0, 255, 255);
             applet.strokeWeight(1);
-            applet.line(x, y, target.x, target.y);
+            applet.line(origin.x, origin.y, target.origin.x, target.origin.y);
             target.draw(applet);
         }
         super.draw(applet);

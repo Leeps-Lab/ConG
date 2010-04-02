@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
@@ -7,7 +8,6 @@ import edu.ucsc.leeps.fire.server.PeriodConfigurable;
 import java.awt.Color;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
-import processing.core.PApplet;
 
 public class ThreeStrategySelector extends Sprite implements PeriodConfigurable, MouseListener {
 
@@ -36,7 +36,6 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     private boolean enabled;
     private ServerInterface server;
     private ClientInterface client;
-    private PApplet applet;
     private PeriodConfig periodConfig;
     private HeatmapHelper heatmap;
     private boolean visible = false;
@@ -47,7 +46,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
 
     public ThreeStrategySelector(
             float x, float y, int width, int height,
-            PApplet applet,
+            PEmbed applet,
             ServerInterface server,
             ClientInterface client) {
         super(x, y, width, height);
@@ -76,31 +75,30 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         sColor = new Color(255, 0, 255);
 
         sideLength = width - 10;
-        maxDist = (PApplet.sqrt(3) / 2f) * sideLength;
+        maxDist = (PEmbed.sqrt(3) / 2f) * sideLength;
 
-        rock = new Marker(5, height / 3, true, 10);
+        rock = new Marker(this, 5, height / 3, true, 10);
         rock.setColor(rColor);
         rock.setLabel("R");
-        rock.setLabelMode(Marker.BOTTOM);
-        paper = new Marker(rock.x + sideLength, rock.y, true, 10);
+        rock.setLabelMode(Marker.LabelMode.Bottom);
+        paper = new Marker(this, rock.origin.x + sideLength, rock.origin.y, true, 10);
         paper.setColor(pColor);
         paper.setLabel("P");
-        paper.setLabelMode(Marker.BOTTOM);
-        scissors = new Marker(rock.x + sideLength / 2,
-                rock.y - (int) maxDist, true, 10);
+        paper.setLabelMode(Marker.LabelMode.Bottom);
+        scissors = new Marker(this, rock.origin.x + sideLength / 2,
+                rock.origin.y - (int) maxDist, true, 10);
         scissors.setColor(sColor);
         scissors.setLabel("S");
-        scissors.setLabelMode(Marker.TOP);
+        scissors.setLabelMode(Marker.LabelMode.Top);
 
         // set up strategy markers
-        current = new MovingMarker(0, 0, false, MARKER_RADIUS + 2, 1f);
+        current = new MovingMarker(this, 0, 0, false, MARKER_RADIUS + 2, 1f);
         current.setColor(50, 255, 50);
         current.setLabel("$$");
-        current.setLabelMode(Marker.BOTTOM);
-        planned = new Marker(0, 0, false, MARKER_RADIUS);
-        planned.setAlpha(140);
-        planned.setColor(25, 255, 25);
-        opponent = new Marker(0, 0, false, MARKER_RADIUS);
+        current.setLabelMode(Marker.LabelMode.Bottom);
+        planned = new Marker(this, 0, 0, false, MARKER_RADIUS);
+        planned.setColor(25, 255, 25, 140);
+        opponent = new Marker(this, 0, 0, false, MARKER_RADIUS);
         opponent.setColor(200, 40, 40);
 
         // set up Sliders
@@ -113,51 +111,46 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
 
 
         // set up dropline Markers
-        rDrop = new Marker(0, 0, true, MARKER_RADIUS);
+        rDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
         rDrop.setColor(rColor);
         rDrop.setLabel("R");
-        rDrop.setLabelMode(Marker.RIGHT);
+        rDrop.setLabelMode(Marker.LabelMode.Right);
 
-        pRDrop = new Marker(0, 0, true, MARKER_RADIUS);
+        pRDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
         pRDrop.setColor(rColor);
         pRDrop.setAlpha(150);
         pRDrop.setLabel("R");
-        pRDrop.setLabelMode(Marker.RIGHT);
+        pRDrop.setLabelMode(Marker.LabelMode.Right);
 
-        pDrop = new Marker(0, 0, true, MARKER_RADIUS);
+        pDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
         pDrop.setColor(pColor);
         pDrop.setLabel("P");
-        pDrop.setLabelMode(Marker.LEFT);
+        pDrop.setLabelMode(Marker.LabelMode.Left);
 
-        pPDrop = new Marker(0, 0, true, MARKER_RADIUS);
+        pPDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
         pPDrop.setColor(pColor);
         pPDrop.setAlpha(150);
         pPDrop.setLabel("P");
-        pPDrop.setLabelMode(Marker.LEFT);
+        pPDrop.setLabelMode(Marker.LabelMode.Left);
 
-        sDrop = new Marker(0, rock.y, true, MARKER_RADIUS);
+        sDrop = new Marker(this, 0, rock.origin.y, true, MARKER_RADIUS);
         sDrop.setColor(sColor);
         sDrop.setLabel("S");
-        sDrop.setLabelMode(Marker.BOTTOM);
+        sDrop.setLabelMode(Marker.LabelMode.Bottom);
 
-        pSDrop = new Marker(0, rock.y, true, MARKER_RADIUS);
+        pSDrop = new Marker(this, 0, rock.origin.y, true, MARKER_RADIUS);
         pSDrop.setColor(sColor);
         pSDrop.setAlpha(150);
         pSDrop.setLabel("S");
-        pSDrop.setLabelMode(Marker.BOTTOM);
+        pSDrop.setLabelMode(Marker.LabelMode.Bottom);
 
         setEnabled(false);
 
         applet.addMouseListener(this);
         heatmap = new HeatmapHelper(applet,
-                (int) (paper.x - rock.x), (int) (rock.y - scissors.y),
+                (int) (paper.origin.x - rock.origin.x), (int) (rock.origin.y - scissors.origin.y),
                 0xFF0000FF, 0xFFFFFF00, 0xFF00FF00);
         currentPercent = 0f;
-        this.applet = applet;
-    }
-
-    public void setVisible(boolean visible) {
-        this.visible = visible;
     }
 
     public void update() {
@@ -170,13 +163,13 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     }
 
     @Override
-    public void draw(PApplet applet) {
+    public void draw(PEmbed applet) {
         if (!visible) {
             return;
         }
 
         if (heatmap.getHeatmap() != null) {
-            applet.image(heatmap.getHeatmap(), origin.x + rock.x, origin.y + scissors.y);
+            applet.image(heatmap.getHeatmap(), origin.x + rock.origin.x, origin.y + scissors.origin.y);
         }
 
 
@@ -188,15 +181,15 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
 
         applet.stroke(0);
         applet.strokeWeight(2);
-        applet.line(rock.x, rock.y, paper.x, paper.y);
-        applet.line(rock.x, rock.y, scissors.x, scissors.y);
-        applet.line(scissors.x, scissors.y, paper.x, paper.y);
+        applet.line(rock.origin.x, rock.origin.y, paper.origin.x, paper.origin.y);
+        applet.line(rock.origin.x, rock.origin.y, scissors.origin.x, scissors.origin.y);
+        applet.line(scissors.origin.x, scissors.origin.y, paper.origin.x, paper.origin.y);
         rock.draw(applet);
         paper.draw(applet);
         scissors.draw(applet);
 
         if (enabled) {
-            calculateAxisDistance(mouseX - rock.x, rock.y - mouseY);
+            calculateAxisDistance(mouseX - rock.origin.x, rock.origin.y - mouseY);
 
             if (axisDistance[R] <= maxDist && axisDistance[R] >= 0 && axisDistance[P] <= maxDist && axisDistance[P] >= 0 && axisDistance[S] <= maxDist && axisDistance[S] >= 0) {
                 mouseInTriangle = true;
@@ -214,22 +207,22 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
                     stratSlider[S].setGhostValue(targetStrat[S]);
                 } else {
                     calculatePlannedStrats();
-                    planned.show();
+                    planned.setVisible(true);
                     planned.update(mouseX, mouseY);
                 }
             } else {
                 if (current.isGrabbed()) {
                     current.release();
                 }
-                planned.hide();
+                planned.setVisible(false);
                 applet.cursor();
             }
 
             if (!mouseInTriangle && applet.mousePressed) {
                 for (int i = R; i <= S; i++) {
                     if (stratSlider[i].isGhostGrabbed()) {
-                        planned.show();
-                        if (applet.keyPressed && applet.key == PApplet.CODED && applet.keyCode == PApplet.CONTROL) {
+                        planned.setVisible(true);
+                        if (applet.keyPressed && applet.key == PEmbed.CODED && applet.keyCode == PEmbed.CONTROL) {
 
                             float currentPos = stratSlider[i].getGhostPos();
                             if (applet.mouseX > applet.pmouseX) {
@@ -257,9 +250,9 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             updatePlannedDropLines();
             applet.strokeWeight(1);
             applet.stroke(0, 255, 255, 150);
-            applet.line(planned.x, planned.y, pRDrop.x, pRDrop.y);
-            applet.line(planned.x, planned.y, pPDrop.x, pPDrop.y);
-            applet.line(planned.x, planned.y, pSDrop.x, pSDrop.y);
+            applet.line(planned.origin.x, planned.origin.y, pRDrop.origin.x, pRDrop.origin.y);
+            applet.line(planned.origin.x, planned.origin.y, pPDrop.origin.x, pPDrop.origin.y);
+            applet.line(planned.origin.x, planned.origin.y, pSDrop.origin.x, pSDrop.origin.y);
 
             planned.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, plannedStrat, opponentStrat));
 
@@ -281,16 +274,16 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             updateCurrentDropLines();
             applet.strokeWeight(1);
             applet.stroke(0, 255, 255);
-            applet.line(current.x, current.y, rDrop.x, rDrop.y);
-            applet.line(current.x, current.y, pDrop.x, pDrop.y);
-            applet.line(current.x, current.y, sDrop.x, sDrop.y);
+            applet.line(current.origin.x, current.origin.y, rDrop.origin.x, rDrop.origin.y);
+            applet.line(current.origin.x, current.origin.y, pDrop.origin.x, pDrop.origin.y);
+            applet.line(current.origin.x, current.origin.y, sDrop.origin.x, sDrop.origin.y);
         }
 
         current.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, playedStrat, opponentStrat));
 
         current.update();
         if (enabled) {
-            calculatePlayedStrats(current.x - rock.x, rock.y - current.y);
+            calculatePlayedStrats(current.origin.x - rock.origin.x, rock.origin.y - current.origin.y);
         }
         adjustLabels();
 
@@ -323,12 +316,12 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             if (mouseInTriangle) {
                 adjustLabels();
                 current.grab();
-                planned.hide();
+                planned.setVisible(false);
             } else {
                 for (int i = 0; i < stratSlider.length; i++) {
                     if (stratSlider[i].mouseOnGhost(mouseX, mouseY)) {
                         stratSlider[i].grabGhost();
-                        planned.show();
+                        planned.setVisible(true);
                         balancePlannedStrats(i, stratSlider[i].getGhostValue());
                         float[] coords = calculateStratCoords(plannedStrat[R], plannedStrat[P], plannedStrat[S]);
                         planned.update(coords[0], coords[1]);
@@ -352,7 +345,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
                     balanceTargetStrats(i, stratSlider[i].getGhostValue());
                     float[] coords = calculateStratCoords(targetStrat[R], targetStrat[P], targetStrat[S]);
                     current.update(coords[0], coords[1]);
-                    planned.hide();
+                    planned.setVisible(false);
                     break;
                 }
             }
@@ -401,20 +394,20 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
         if (enabled) {
-            current.show();
-            opponent.show();
-            rDrop.show();
-            pDrop.show();
-            sDrop.show();
+            current.setVisible(true);
+            opponent.setVisible(true);
+            rDrop.setVisible(true);
+            pDrop.setVisible(true);
+            sDrop.setVisible(true);
             for (int i = R; i <= S; ++i) {
                 stratSlider[i].showGhost();
             }
         } else {
-            current.hide();
-            opponent.hide();
-            rDrop.hide();
-            pDrop.hide();
-            sDrop.hide();
+            current.setVisible(false);
+            opponent.setVisible(false);
+            rDrop.setVisible(false);
+            pDrop.setVisible(false);
+            sDrop.setVisible(false);
             for (int i = R; i <= S; ++i) {
                 stratSlider[i].hideGhost();
             }
@@ -436,12 +429,12 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             stratSlider[i].hideGhost();
         }
 
-        current.hide();
-        planned.hide();
-        opponent.hide();
-        rDrop.hide();
-        pDrop.hide();
-        sDrop.hide();
+        current.setVisible(false);
+        planned.setVisible(false);
+        opponent.setVisible(false);
+        rDrop.setVisible(false);
+        pDrop.setVisible(false);
+        sDrop.setVisible(false);
     }
 
     public boolean isEnabled() {
@@ -457,36 +450,36 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     private void adjustLabels() {
         if (playedStrat[S] < 0.2f) {
             if (playedStrat[R] > playedStrat[P]) {
-                current.setLabelMode(Marker.RIGHT);
-                pDrop.setLabelMode(Marker.TOP);
-                rDrop.setLabelMode(Marker.RIGHT);
+                current.setLabelMode(Marker.LabelMode.Right);
+                pDrop.setLabelMode(Marker.LabelMode.Top);
+                rDrop.setLabelMode(Marker.LabelMode.Right);
             } else {
-                current.setLabelMode(Marker.LEFT);
-                pDrop.setLabelMode(Marker.LEFT);
-                rDrop.setLabelMode(Marker.TOP);
+                current.setLabelMode(Marker.LabelMode.Left);
+                pDrop.setLabelMode(Marker.LabelMode.Left);
+                rDrop.setLabelMode(Marker.LabelMode.Top);
             }
         } else {
-            current.setLabelMode(Marker.BOTTOM);
-            pDrop.setLabelMode(Marker.LEFT);
-            rDrop.setLabelMode(Marker.RIGHT);
+            current.setLabelMode(Marker.LabelMode.Bottom);
+            pDrop.setLabelMode(Marker.LabelMode.Left);
+            rDrop.setLabelMode(Marker.LabelMode.Right);
         }
     }
 
     private void adjustPlannedLabels() {
         if (plannedStrat[S] < 0.2f) {
             if (plannedStrat[R] > plannedStrat[P]) {
-                planned.setLabelMode(Marker.RIGHT);
-                pPDrop.setLabelMode(Marker.TOP);
-                pRDrop.setLabelMode(Marker.RIGHT);
+                planned.setLabelMode(Marker.LabelMode.Right);
+                pPDrop.setLabelMode(Marker.LabelMode.Top);
+                pRDrop.setLabelMode(Marker.LabelMode.Right);
             } else {
-                planned.setLabelMode(Marker.LEFT);
-                pPDrop.setLabelMode(Marker.LEFT);
-                pRDrop.setLabelMode(Marker.TOP);
+                planned.setLabelMode(Marker.LabelMode.Left);
+                pPDrop.setLabelMode(Marker.LabelMode.Left);
+                pRDrop.setLabelMode(Marker.LabelMode.Top);
             }
         } else {
-            planned.setLabelMode(Marker.BOTTOM);
-            pPDrop.setLabelMode(Marker.LEFT);
-            pRDrop.setLabelMode(Marker.RIGHT);
+            planned.setLabelMode(Marker.LabelMode.Bottom);
+            pPDrop.setLabelMode(Marker.LabelMode.Left);
+            pRDrop.setLabelMode(Marker.LabelMode.Right);
         }
     }
 
@@ -495,12 +488,12 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         float newS = y / maxDist;
 
         // constant factor for determining distance
-        float epsilon = y + (1 / PApplet.sqrt(3)) * x;
+        float epsilon = y + (1 / PEmbed.sqrt(3)) * x;
 
         // calculate distance from paper 3D axis
-        float deltaX = x - (PApplet.sqrt(3) / 4) * epsilon;
+        float deltaX = x - (PEmbed.sqrt(3) / 4) * epsilon;
         float deltaY = y - .75f * epsilon;
-        float distP = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
+        float distP = PEmbed.sqrt(PEmbed.sq(deltaX) + PEmbed.sq(deltaY));
 
         float newP = distP / maxDist;
 
@@ -521,23 +514,23 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         float newS = y / maxDist;
 
         // constant factors for determining distances
-        float epsilon1 = y + (1 / PApplet.sqrt(3)) * x;
-        float epsilon2 = y - (1 / PApplet.sqrt(3)) * x;
+        float epsilon1 = y + (1 / PEmbed.sqrt(3)) * x;
+        float epsilon2 = y - (1 / PEmbed.sqrt(3)) * x;
 
         // calculate distance from paper 3D axis
-        float deltaX = x - (PApplet.sqrt(3) / 4) * epsilon1;
+        float deltaX = x - (PEmbed.sqrt(3) / 4) * epsilon1;
         float deltaY = y - .75f * epsilon1;
         float newP;
         if (deltaX < 0 && deltaY > 0) {
             newP = -1;
         } else {
-            float distP = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
+            float distP = PEmbed.sqrt(PEmbed.sq(deltaX) + PEmbed.sq(deltaY));
             newP = distP / maxDist;
         }
 
         // calculate distance from rock 3D axis
-        deltaX = x - .75f * sideLength + (PApplet.sqrt(3) / 4) * epsilon2;
-        deltaY = y - (PApplet.sqrt(3) / 4) * sideLength - .75f * epsilon2;
+        deltaX = x - .75f * sideLength + (PEmbed.sqrt(3) / 4) * epsilon2;
+        deltaY = y - (PEmbed.sqrt(3) / 4) * sideLength - .75f * epsilon2;
         float newR;
         if (deltaX > 0 && deltaY > 0) {
             newR = -1;
@@ -557,25 +550,25 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         axisDistance[S] = y;
 
         // constant factors for determining distances
-        float epsilon1 = y + (1 / PApplet.sqrt(3)) * x;
-        float epsilon2 = y - (1 / PApplet.sqrt(3)) * x;
+        float epsilon1 = y + (1 / PEmbed.sqrt(3)) * x;
+        float epsilon2 = y - (1 / PEmbed.sqrt(3)) * x;
 
         float deltaX, deltaY;
 
-        deltaX = x - (PApplet.sqrt(3) / 4) * epsilon1;
+        deltaX = x - (PEmbed.sqrt(3) / 4) * epsilon1;
         deltaY = y - .75f * epsilon1;
         if (deltaX < 0 && deltaY > 0) {
             axisDistance[P] = -1;
         } else {
-            axisDistance[P] = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
+            axisDistance[P] = PEmbed.sqrt(PEmbed.sq(deltaX) + PEmbed.sq(deltaY));
         }
 
-        deltaX = x - .75f * sideLength + (PApplet.sqrt(3) / 4) * epsilon2;
-        deltaY = y - (PApplet.sqrt(3) / 4) * sideLength - .75f * epsilon2;
+        deltaX = x - .75f * sideLength + (PEmbed.sqrt(3) / 4) * epsilon2;
+        deltaY = y - (PEmbed.sqrt(3) / 4) * sideLength - .75f * epsilon2;
         if (deltaX > 0 && deltaY > 0) {
             axisDistance[R] = -1;
         } else {
-            axisDistance[R] = PApplet.sqrt(PApplet.sq(deltaX) + PApplet.sq(deltaY));
+            axisDistance[R] = PEmbed.sqrt(PEmbed.sq(deltaX) + PEmbed.sq(deltaY));
         }
     }
 
@@ -597,8 +590,8 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     private float[] calculateStratCoords(float r, float p, float s) {
         float[] coords = new float[2];
 
-        coords[0] = rock.x + (maxDist * p) / PApplet.sin(PApplet.PI / 3) + maxDist * s * PApplet.tan(PApplet.PI / 6);
-        coords[1] = rock.y - maxDist * s;
+        coords[0] = rock.origin.x + (maxDist * p) / PEmbed.sin(PEmbed.PI / 3) + maxDist * s * PEmbed.tan(PEmbed.PI / 6);
+        coords[1] = rock.origin.y - maxDist * s;
 
         return coords;
     }
@@ -743,28 +736,28 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     }
 
     private void updateCurrentDropLines() {
-        sDrop.update(current.x, rock.y);
+        sDrop.update(current.origin.x, rock.origin.y);
 
         float x, y;
-        x = current.x - maxDist * playedStrat[P] * PApplet.cos(PApplet.PI / 6);
-        y = current.y - maxDist * playedStrat[P] * PApplet.sin(PApplet.PI / 6);
+        x = current.origin.x - maxDist * playedStrat[P] * PEmbed.cos(PEmbed.PI / 6);
+        y = current.origin.y - maxDist * playedStrat[P] * PEmbed.sin(PEmbed.PI / 6);
         pDrop.update(x, y);
 
-        x = current.x + maxDist * playedStrat[R] * PApplet.cos(PApplet.PI / 6);
-        y = current.y - maxDist * playedStrat[R] * PApplet.sin(PApplet.PI / 6);
+        x = current.origin.x + maxDist * playedStrat[R] * PEmbed.cos(PEmbed.PI / 6);
+        y = current.origin.y - maxDist * playedStrat[R] * PEmbed.sin(PEmbed.PI / 6);
         rDrop.update(x, y);
     }
 
     private void updatePlannedDropLines() {
-        pSDrop.update(planned.x, rock.y);
+        pSDrop.update(planned.origin.x, rock.origin.y);
 
         float x, y;
-        x = planned.x - maxDist * plannedStrat[P] * PApplet.cos(PApplet.PI / 6);
-        y = planned.y - maxDist * plannedStrat[P] * PApplet.sin(PApplet.PI / 6);
+        x = planned.origin.x - maxDist * plannedStrat[P] * PEmbed.cos(PEmbed.PI / 6);
+        y = planned.origin.y - maxDist * plannedStrat[P] * PEmbed.sin(PEmbed.PI / 6);
         pPDrop.update(x, y);
 
-        x = planned.x + maxDist * plannedStrat[R] * PApplet.cos(PApplet.PI / 6);
-        y = planned.y - maxDist * plannedStrat[R] * PApplet.sin(PApplet.PI / 6);
+        x = planned.origin.x + maxDist * plannedStrat[R] * PEmbed.cos(PEmbed.PI / 6);
+        y = planned.origin.y - maxDist * plannedStrat[R] * PEmbed.sin(PEmbed.PI / 6);
         pRDrop.update(x, y);
     }
 

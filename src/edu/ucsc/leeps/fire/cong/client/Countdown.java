@@ -1,6 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client;
 
-import processing.core.PApplet;
+import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 
 /**
  *
@@ -16,19 +16,19 @@ public class Countdown extends Sprite {
     }
 
     @Override
-    public void draw(PApplet applet) {
+    public void draw(PEmbed applet) {
         String string = String.format("Seconds Left: %d", secondsLeft);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
         applet.fill(255);
         applet.noStroke();
-        applet.rectMode(PApplet.CORNER);
+        applet.rectMode(PEmbed.CORNER);
         float w = applet.textWidth(string);
         float h = applet.textAscent() + applet.textDescent();
         applet.rect(-0.25f * w, 0.25f * h, 1.5f * w, -1.5f * h);
         applet.fill(0);
-        applet.textAlign(PApplet.LEFT);
-        applet.text(string, 0, 0);
+        applet.textAlign(PEmbed.LEFT);
+        applet.text(string, origin.x, origin.y);
         applet.popMatrix();
     }
 

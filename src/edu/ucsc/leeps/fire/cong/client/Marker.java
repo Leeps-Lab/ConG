@@ -1,44 +1,47 @@
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import java.awt.Color;
-import processing.core.PApplet;
 
-public class Marker extends FPoint {
+public class Marker extends Sprite {
+
     protected float R, G, B, alpha;
     protected float radius;
-    protected String label;
-    protected FPoint labelCoords;
-    protected int labelMode;
+    protected String label1;
+    protected String label2;
+    protected FPoint labelOrigin;
     protected boolean grabbed;
+    protected Sprite parent;
+    protected LabelMode mode;
 
-    public static final int NONE = 0;
-    public static final int TOP = 1;
-    public static final int RIGHT = 2;
-    public static final int BOTTOM = 3;
-    public static final int LEFT = 4;
+    public enum LabelMode {
 
-    public Marker(float x, float y, boolean visible, float radius) {
-        super(x, y);
+        Center, Top, Right, Bottom, Left
+    };
+
+    public Marker(Sprite parent, float x, float y, boolean visible, float radius) {
+        super(x, y, 0, 0);
+        this.parent = parent;
         this.visible = visible;
         this.radius = radius;
 
-        this.R = 0;
-        this.G = 0;
-        this.B = 0;
-        this.alpha = 255;
+        R = 0;
+        G = 0;
+        B = 0;
+        alpha = 255;
 
-        labelMode = NONE;
-        labelCoords = new FPoint(x, y);
+        mode = LabelMode.Center;
+
+        label1 = null;
+        label2 = null;
 
         grabbed = false;
+
+        labelOrigin = new FPoint(x, y);
     }
 
-    public void show() {
-        visible = true;
-    }
-
-    public void hide() {
-        visible = false;
+    public void setAlpha(int alpha) {
+        this.alpha = alpha;
     }
 
     public void setColor(float r, float g, float b) {
@@ -47,53 +50,56 @@ public class Marker extends FPoint {
         B = b;
     }
 
+    public void setColor(float r, float g, float b, int a) {
+        R = r;
+        G = g;
+        B = b;
+        alpha = a;
+    }
+
     public void setColor(Color C) {
         R = C.getRed();
         G = C.getGreen();
         B = C.getBlue();
-    }
-
-    public void setAlpha(float alpha) {
-        this.alpha = alpha;
+        alpha = C.getAlpha();
     }
 
     public void setLabel(String newLabel) {
-        label = newLabel;
-        if(labelMode == NONE) {
-            labelMode = BOTTOM;
-        }
+        label1 = newLabel;
     }
 
     public void setLabel(float newLabel) {
-        label = String.format("%3.2f", newLabel);
-        if(labelMode == NONE) {
-            labelMode = BOTTOM;
-        }
+        label1 = String.format("%3.2f", newLabel);
     }
 
-    public void setLabelMode(int newMode) {
-        labelMode = newMode;
-        switch(labelMode) {
-            case NONE:
+    public void setLabel(float newLabel1, float newLabel2) {
+        label1 = String.format("%3.2f", newLabel1);
+        label2 = String.format("%3.2f", newLabel2);
+    }
+
+    public void setLabelMode(LabelMode position) {
+        this.mode = position;
+        switch (position) {
+            case Center:
+                labelOrigin.x = origin.x;
+                labelOrigin.y = origin.y;
                 break;
-            case TOP:
-                labelCoords.x = this.x;
-                labelCoords.y = this.y - radius - 8;
+            case Top:
+                labelOrigin.x = origin.x;
+                labelOrigin.y = origin.y - radius - 8;
                 break;
-            case RIGHT:
-                labelCoords.x = this.x + radius + 8;
-                labelCoords.y = this.y;
+            case Right:
+                labelOrigin.x = origin.x + radius + 8;
+                labelOrigin.y = origin.y;
                 break;
-            case BOTTOM:
-                labelCoords.x = this.x;
-                labelCoords.y = this.y + radius + 8;
+            case Bottom:
+                labelOrigin.x = origin.x;
+                labelOrigin.y = origin.y + radius + 8;
                 break;
-            case LEFT:
-                labelCoords.x = this.x - radius - 8;
-                labelCoords.y = this.y;
+            case Left:
+                labelOrigin.x = origin.x - radius - 8;
+                labelOrigin.y = origin.y;
                 break;
-            default:
-                throw new RuntimeException("Label mode out of range.");
         }
     }
 
@@ -110,53 +116,47 @@ public class Marker extends FPoint {
     }
 
     public void update(float x, float y) {
-        this.x = x;
-        this.y = y;
-        switch(labelMode) {
-            case NONE:
-                break;
-            case TOP:
-                labelCoords.x = this.x;
-                labelCoords.y = this.y - radius - 5;
-                break;
-            case RIGHT:
-                labelCoords.x = this.x + radius + 8;
-                labelCoords.y = this.y;
-                break;
-            case BOTTOM:
-                labelCoords.x = this.x;
-                labelCoords.y = this.y + radius + 5;
-                break;
-            case LEFT:
-                labelCoords.x = this.x - radius - 8;
-                labelCoords.y = this.y;
-                break;
-            default:
-                throw new RuntimeException("Label mode out of range.");
-        }
+        origin.x = x;
+        origin.y = y;
+        setLabelMode(mode);
     }
 
-    public void draw(PApplet applet) {
-        if (visible) {
-            if(labelMode != NONE) {
-                applet.rectMode(PApplet.CENTER);
-                applet.fill(255);
-                float textWidth = applet.textWidth(label);
-                if (textWidth > 16 && labelMode == LEFT) {
-                    labelCoords.x = this.x - radius - textWidth / 2;
-                } else if (textWidth > 16 && labelMode == RIGHT) {
-                    labelCoords.x = this.x + radius + textWidth / 2;
-                }
-                float textHeight = applet.textAscent() + applet.textDescent();
-                applet.rect(labelCoords.x, labelCoords.y, textWidth, textHeight);
-                applet.textAlign(PApplet.CENTER, PApplet.CENTER);
-                applet.fill(0, 0, 0, alpha);
-                applet.text(label, labelCoords.x, labelCoords.y);
-            }
-            applet.noStroke();
-            applet.fill(R, G, B, alpha);
-            applet.ellipseMode(PApplet.CENTER);
-            applet.ellipse(x, y, radius, radius);
+    public void draw(PEmbed applet) {
+        if (!visible) {
+            return;
         }
+        if (label1 != null) {
+            applet.textFont(applet.size14);
+            float textWidth = applet.textWidth(label1);
+            if (label2 != null) {
+                applet.textFont(applet.size14Bold);
+                textWidth += applet.textWidth(label2);
+            }
+            if (textWidth > 16 && mode == LabelMode.Left) {
+                labelOrigin.x = origin.x - radius - textWidth / 2;
+            } else if (textWidth > 16 && mode == LabelMode.Right) {
+                labelOrigin.x = origin.x + radius + textWidth / 2;
+            }
+            float textHeight = applet.textAscent() + applet.textDescent();
+            applet.rectMode(PEmbed.CENTER);
+            applet.fill(255);
+            applet.rect(labelOrigin.x, labelOrigin.y, textWidth, textHeight);
+            applet.textAlign(PEmbed.CENTER, PEmbed.CENTER);
+            applet.fill(0);
+            if (label1 != null && label2 != null) {
+                float label1Width = applet.textWidth(label1);
+                applet.textFont(applet.size14Bold);
+                applet.text(label1, parent.origin.x + labelOrigin.x - label1Width / 2, parent.origin.y + labelOrigin.y);
+                applet.textFont(applet.size14);
+                applet.text("," + label2, parent.origin.x + labelOrigin.x + label1Width / 2, parent.origin.y + labelOrigin.y);
+            } else if (label1 != null) {
+                applet.textFont(applet.size14);
+                applet.text(label1, parent.origin.x + labelOrigin.x, parent.origin.y + labelOrigin.y);
+            }
+        }
+        applet.noStroke();
+        applet.fill(R, G, B, alpha);
+        applet.ellipseMode(PEmbed.CENTER);
+        applet.ellipse(origin.x, origin.y, radius, radius);
     }
 }

@@ -1,7 +1,7 @@
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import java.awt.Color;
-import processing.core.PApplet;
 
 public class Slider {
 
@@ -159,18 +159,18 @@ public class Slider {
         return (mouseX < ghostPos + HANDLE_WIDTH / 2 && mouseX > ghostPos - HANDLE_WIDTH / 2 && mouseY < sliderY + HANDLE_HEIGHT / 2 && mouseY > sliderY - HANDLE_HEIGHT / 2);
     }
 
-    public void draw(PApplet applet) {
+    public void draw(PEmbed applet) {
         applet.stroke(0);
         applet.strokeWeight(3);
         applet.line(sliderStart, sliderY, sliderEnd, sliderY);
 
         applet.noStroke();
         applet.fill(R, G, B);
-        applet.rectMode(PApplet.CENTER);
+        applet.rectMode(PEmbed.CENTER);
         applet.rect(sliderPos, sliderY, HANDLE_WIDTH, HANDLE_HEIGHT);
 
         applet.fill(0);
-        applet.textAlign(PApplet.LEFT);
+        applet.textAlign(PEmbed.LEFT);
         applet.text(label, sliderStart - 50, sliderY + 2);
         applet.text(stratLabel, sliderEnd + 10, sliderY + 2);
 

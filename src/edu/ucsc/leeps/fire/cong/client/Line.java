@@ -1,8 +1,8 @@
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import java.util.ArrayList;
 import java.awt.Color;
-import processing.core.PApplet;
 
 public class Line extends Sprite {
 
@@ -48,7 +48,7 @@ public class Line extends Sprite {
         }
     }
 
-    public synchronized void draw(PApplet applet) {
+    public synchronized void draw(PEmbed applet) {
         if (!visible) {
             return;
         }

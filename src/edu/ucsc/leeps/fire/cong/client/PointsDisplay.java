@@ -1,6 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client;
 
-import processing.core.PApplet;
+import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 
 /**
  *
@@ -19,11 +19,11 @@ public class PointsDisplay extends Sprite {
     }
 
     @Override
-    public void draw(PApplet applet) {
+    public void draw(PEmbed applet) {
         String payoffString = String.format("Period Payoff: %.2f", points);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
-        applet.rectMode(PApplet.CORNER);
+        applet.rectMode(PEmbed.CORNER);
         applet.fill(255);
         applet.noStroke();
         float w = applet.textWidth(payoffString);
@@ -31,13 +31,13 @@ public class PointsDisplay extends Sprite {
         float h = 4 * textHeight;
         applet.rect(0.25f * w, 0.5f * h, -1.5f * w, -1.5f * h);
         applet.fill(0);
-        applet.textAlign(PApplet.RIGHT);
-        applet.text(payoffString, 0, 0);
+        applet.textAlign(PEmbed.RIGHT);
+        applet.text(payoffString, origin.x, origin.y);
         if (displaySwitchCosts) {
             String costString = String.format("Switch Costs: -%.2f", switchCosts);
             String totalString = String.format("Total: %.2f", points - switchCosts);
-            applet.text(costString, 0, textHeight);
-            applet.text(totalString, 0, 2 * textHeight);
+            applet.text(costString, origin.x, origin.y + textHeight);
+            applet.text(totalString, origin.x, origin.y + 2 * textHeight);
         }
         applet.popMatrix();
     }

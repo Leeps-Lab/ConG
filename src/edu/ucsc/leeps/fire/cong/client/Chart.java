@@ -4,11 +4,11 @@
  */
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;
-import processing.core.PApplet;
 
 /**
  *
@@ -48,7 +48,6 @@ public class Chart extends Sprite {
     private Line futureBPayoff;
     // RPSD
     private ThreeStrategySelector simplex;
-
     private float currentRPayoff;
     private float currentPPayoff;
     private float currentSPayoff;
@@ -69,7 +68,6 @@ public class Chart extends Sprite {
     private Line actualRPayoff;
     private Line actualPPayoff;
     private Line actualSPayoff;
-
     private Line futureRPayoff;
     private Line futurePPayoff;
     private Line futureSPayoff;
@@ -120,9 +118,8 @@ public class Chart extends Sprite {
         this.simplex = simplex;
     }
 
-    private void drawAxis(PApplet applet) {
-        //applet.textAlign(PApplet.CENTER, PApplet.CENTER);
-        //applet.textFont(small);
+    private void drawAxis(PEmbed applet) {
+        applet.textAlign(PEmbed.CENTER, PEmbed.CENTER);
         applet.fill(255);
         applet.noStroke();
         applet.rect(-40, 0, 38, height);
@@ -131,30 +128,43 @@ public class Chart extends Sprite {
             applet.noFill();
             applet.stroke(100, 100, 100);
             applet.strokeWeight(2);
-            applet.line(x * width, height, x * width, height + 10);
+            float x0, y0, x1, y1;
+            x0 = x * width;
+            y0 = height;
+            x1 = x * width;
+            y1 = height + 10;
+            applet.line(x0, y0, x1, y1);
             applet.fill(0);
-            //applet.text(String.format("%d%%", (int) (x * 100)), x * width, height + 10 + applet.textAscent() + applet.textDescent());
+            int percent = Math.round(x * 100);
+            String label = String.format("%d%%", percent);
+            applet.text(label, x0 + origin.x, y0 + origin.y + 1.2f * applet.textAscent() + applet.textDescent());
         }
         for (float y = 0.1f; y < 1.0f; y += 0.1f) {
             applet.noFill();
             applet.stroke(100, 100, 100);
             applet.strokeWeight(2);
-            applet.line(-10, y * height, 0, y * height);
+            float x0, y0, x1, y1;
+            x0 = -10;
+            y0 = y * height;
+            x1 = 0;
+            y1 = y * height;
+            applet.line(x0, y0, x1, y1);
             applet.fill(0);
-            //applet.text(String.format("%.1f", (1 - y) * maxPayoff), -12 - applet.textWidth("  "), y * height);
+            float payoff = (1 - y) * maxPayoff;
+            String label = String.format("%.1f", payoff);
+            applet.text(label, origin.x - 1.2f * applet.textWidth(label), y0 + origin.y);
         }
-        //applet.textFont(font);
     }
 
-    private void drawPercentLine(PApplet applet) {
+    private void drawPercentLine(PEmbed applet) {
         applet.strokeWeight(2f);
         applet.stroke(150, 150, 150);
         applet.line(currentPercent * width, 0, currentPercent * width, height);
     }
 
     @Override
-    public void draw(PApplet applet) {
-        applet.rectMode(PApplet.CORNER);
+    public void draw(PEmbed applet) {
+        applet.rectMode(PEmbed.CORNER);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
         applet.fill(255);
@@ -197,7 +207,7 @@ public class Chart extends Sprite {
             }
             actualPayoff.draw(applet);
         }
-        //drawAxis(applet);
+        drawAxis(applet);
         applet.popMatrix();
     }
 
@@ -273,7 +283,7 @@ public class Chart extends Sprite {
 
     private void addThreeStrategyFuturePayoffPoints() {
         clearFuture();
-        for(float futurePercent = currentPercent; futurePercent <= 1.0; futurePercent += 0.01f) {
+        for (float futurePercent = currentPercent; futurePercent <= 1.0; futurePercent += 0.01f) {
             float futureR = periodConfig.payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{1, 0, 0},

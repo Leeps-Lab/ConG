@@ -21,6 +21,7 @@ public class PeriodConfig extends BasePeriodConfig {
 
     public float initialStrategy;
     public boolean pointsPerSecond;
+    public float percentChangePerSecond;
     public PayoffFunction payoffFunction;
     public PayoffFunction counterpartPayoffFunction;
     public Population population;

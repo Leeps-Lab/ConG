@@ -4,10 +4,10 @@
  */
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
 import edu.ucsc.leeps.fire.server.PeriodConfigurable;
-import processing.core.PApplet;
 import processing.core.PGraphics;
 
 /**
@@ -20,11 +20,12 @@ public class HeatmapHelper implements PeriodConfigurable {
     private int width, height;
     private int lowColor, midColor, highColor;
     private float[][] payoff;
-    private PGraphics buffer;
-    private PApplet applet;
+    private PGraphics buffer, invisibleBuffer;
+    private PEmbed applet;
+    private boolean visible;
 
     public HeatmapHelper(
-            PApplet applet,
+            PEmbed applet,
             int width, int height,
             int lowColor, int midColor, int highColor) {
         this.width = width;
@@ -34,11 +35,19 @@ public class HeatmapHelper implements PeriodConfigurable {
         this.highColor = highColor;
         this.payoff = new float[width][height];
         this.applet = applet;
+        invisibleBuffer = applet.createGraphics(width, height, PEmbed.P2D);
+        invisibleBuffer.beginDraw();
+        invisibleBuffer.background(0, 0, 0, 0);
+        invisibleBuffer.endDraw();
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         this.periodConfig = (PeriodConfig) basePeriodConfig;
-        buffer = applet.createGraphics(width, height, PApplet.P2D);
+        buffer = applet.createGraphics(width, height, PEmbed.P2D);
     }
 
     // Chooses whether to interpolate between low and mid, or low and high
@@ -76,7 +85,7 @@ public class HeatmapHelper implements PeriodConfigurable {
     }
 
     public void updateTwoStrategyHeatmap(float currentPercent) {
-        buffer = applet.createGraphics(width, height, PApplet.P2D);
+        buffer = applet.createGraphics(width, height, PEmbed.P2D);
         buffer.loadPixels();
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -100,7 +109,7 @@ public class HeatmapHelper implements PeriodConfigurable {
             float currentPercent,
             float r, float p, float s,
             ThreeStrategySelector threeStrategySelector) {
-        buffer = applet.createGraphics(width, height, PApplet.P2D);
+        buffer = applet.createGraphics(width, height, PEmbed.P2D);
         buffer.loadPixels();
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -121,10 +130,23 @@ public class HeatmapHelper implements PeriodConfigurable {
     }
 
     public PGraphics getHeatmap() {
-        return buffer;
+        if (visible) {
+            return buffer;
+        }
+        return invisibleBuffer;
     }
 
     public float getPayoff(int x, int y) {
+        if (x < 0) {
+            x = 0;
+        } else if (x >= payoff.length) {
+            x = payoff.length - 1;
+        }
+        if (y < 0) {
+            y = 0;
+        } else if (y >= payoff.length) {
+            y = payoff.length - 1;
+        }
         return payoff[x][y];
     }
 }

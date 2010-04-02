@@ -81,6 +81,13 @@ public class TwoPopulation implements Population, Serializable {
                     client, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
         }
         updateStrategies(membersChanged, periodConfig);
+        ClientInterface changed = null;
+        if (members1.containsKey(id)) {
+            changed = members1.get(id);
+        } else if (members2.containsKey(id)) {
+            changed = members2.get(id);
+        }
+        changed.setMyStrategy(lastStrategiesMine.get(changed));
     }
 
     private void updatePayoffs(
