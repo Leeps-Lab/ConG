@@ -43,7 +43,9 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private Marker matrixAb;
     private Marker matrixBa;
     private Marker matrixBb;
-    private Marker current, planned, hover;
+    private Marker current, planned, dragged, hover;
+    private long hoverTimestamp;
+    private long hoverTimeMillis = 1000;
 
     public TwoStrategySelector(
             int x, int y,
@@ -97,10 +99,13 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
         current = new Marker(this, 0, 0, true, 10);
         current.setLabelMode(Marker.LabelMode.Top);
-        hover = new Marker(this, 0, 0, false, 10);
-        hover.setLabelMode(Marker.LabelMode.Top);
+        dragged = new Marker(this, 0, 0, false, 10);
+        dragged.setLabelMode(Marker.LabelMode.Top);
         planned = new Marker(this, 0, 0, false, 10);
         planned.setLabelMode(Marker.LabelMode.Top);
+        hover = new Marker(this, 0, 0, false, 10);
+        hover.setLabelMode(Marker.LabelMode.Top);
+        hoverTimestamp = System.currentTimeMillis();
 
         targetPercent_A = -1;
 
@@ -234,13 +239,13 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         current.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{percent_A}, new float[]{percent_a}));
 
         if (applet.mousePressed && inRect((int) origin.x + width / 2, applet.mouseY)) {
-            hover.setVisible(true);
-            hover.update((1 - percent_a) * width, applet.mouseY - origin.y);
+            dragged.setVisible(true);
+            dragged.update((1 - percent_a) * width, applet.mouseY - origin.y);
             float hoverPercentA = 1 - ((applet.mouseY - origin.y) / height);
-            hover.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{hoverPercentA}, new float[]{percent_a}));
+            dragged.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{hoverPercentA}, new float[]{percent_a}));
         } else {
-            hover.setVisible(false);
-            hover.update((1 - percent_a) * width, hover.origin.y);
+            dragged.setVisible(false);
+            dragged.update((1 - percent_a) * width, dragged.origin.y);
         }
 
         if (targetPercent_A != percent_A) {
@@ -252,8 +257,16 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         }
 
         current.draw(applet);
-        hover.draw(applet);
+        dragged.draw(applet);
         planned.draw(applet);
+        if (System.currentTimeMillis() - hoverTimestamp >= hoverTimeMillis) {
+            float hoverPercentA = 1 - ((applet.mouseY - origin.y) / height);
+            float hoverPercenta = 1 - ((applet.mouseX - origin.x) / height);
+            hover.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{hoverPercentA}, new float[]{hoverPercenta}));
+            hover.update((1 - hoverPercenta) * width, (1 - hoverPercentA) * height);
+            hover.setVisible(true);
+            hover.draw(applet);
+        }
     }
 
     private void drawLabels() {
@@ -280,6 +293,10 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     public void draw(PEmbed applet) {
         if (!visible) {
             return;
+        }
+        if (!inRect(applet.mouseX, applet.mouseY) || applet.pmouseX != applet.mouseX || applet.pmouseY != applet.mouseY) {
+            hoverTimestamp = System.currentTimeMillis();
+            hover.setVisible(false);
         }
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
@@ -383,7 +400,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private class StrategyChangeThread extends Thread {
 
         public volatile boolean running = true;
-        private final static long sleepTimeMillis = 50;
+        private final static long sleepTimeMillis = 100;
 
         @Override
         public void run() {

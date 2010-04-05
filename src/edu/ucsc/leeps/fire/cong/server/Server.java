@@ -97,16 +97,9 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
             tickLog.population = population;
             tickLog.commit();
         }
-    }
-
-    @Override
-    public void quickTick(int millisLeft) {
-        super.quickTick(millisLeft);
-    }
-
-    @Override
-    public void endPeriod() {
-        super.endPeriod();
+        if (secondsLeft == 0) {
+            endPeriod();
+        }
     }
 
     private void initPopulations() {

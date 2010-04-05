@@ -104,24 +104,23 @@ public class Client extends BaseClient implements ClientInterface {
         pointsDisplay.setPeriodPoints(periodPoints);
     }
 
-    //@Override
-    public void tick(int secondsLeft) {
+    public void localTick(int secondsLeft) {
         this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
         countdown.setSecondsLeft(secondsLeft);
         bimatrix.update();
         simplex.update();
     }
 
-    //@Override
     public void quickTick(int millisLeft) {
-        this.percent = (1 - (millisLeft / ((float) periodConfig.length * 1000)));
-        chart.currentPercent = this.percent;
-        chart.updateLines();
-        bimatrix.setCurrentPercent(this.percent);
-        simplex.currentPercent = this.percent;
+        if (millisLeft > 0) {
+            this.percent = (1 - (millisLeft / ((float) periodConfig.length * 1000)));
+            chart.currentPercent = this.percent;
+            chart.updateLines();
+            bimatrix.setCurrentPercent(this.percent);
+            simplex.currentPercent = this.percent;
+        }
     }
 
-    //@Override
     public void setActionsEnabled(boolean enabled) {
         simplex.setEnabled(enabled);
     }

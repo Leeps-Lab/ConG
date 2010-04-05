@@ -1,26 +1,32 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
-import java.util.ArrayList;
 import java.awt.Color;
+import java.util.LinkedList;
+import processing.core.PApplet;
 
 public class Line extends Sprite {
 
-    public boolean visible;
-    public Color color;
-    public float weight, scale;
-    public int alpha;
-    public ArrayList<FPoint> points;
-    public int maxSize = 500;
+    private float weight;
+    private int r, g, b, alpha;
+    private LinkedList<FPoint> points;
 
-    public Line(int x, int y, int width, int height, float weight, Color color, int alpha) {
+    public enum Mode {
+
+        Solid, EndPoint, Dotted
+    };
+    private Mode mode;
+
+    public Line(int x, int y, int width, int height, float weight, Color color, int alpha, Mode mode) {
         super(x, y, width, height);
         visible = true;
-        scale = 1;
-        this.color = color;
+        this.r = color.getRed();
+        this.g = color.getGreen();
+        this.b = color.getBlue();
         this.weight = weight;
         this.alpha = alpha;
-        points = new ArrayList<FPoint>();
+        this.mode = mode;
+        points = new LinkedList<FPoint>();
     }
 
     public synchronized void addPoint(float x, float y) {
@@ -36,35 +42,20 @@ public class Line extends Sprite {
             }
             points.add(p1);
         }
-        //while (points.size() > maxSize) {
-        //    points.remove(0);
-        //}
     }
 
-    // TODO: error/range checking
     public synchronized void setVisible(int start, int stop, boolean vis) {
-        for (int i = start; i < stop; i++) {
-            points.get(i).visible = vis;
+        if (start <= stop && start >= 0 && stop < points.size() - 1) {
+            for (int i = start; i < stop; i++) {
+                points.get(i).visible = vis;
+            }
         }
     }
 
-    public synchronized void draw(PEmbed applet) {
-        if (!visible) {
-            return;
-        }
-        applet.pushMatrix();
-        applet.translate(origin.x, origin.y);
-        int hex = color.getRGB();
-        applet.stroke(((hex & 0x00FF0000) >> 16),
-                ((hex & 0x0000FF00) >> 8),
-                (hex & 0x000000FF), alpha);
-        applet.strokeWeight(weight);
-        if (points.size() == 1) {
-            FPoint p = points.get(0);
-            if (p.visible) {
-                applet.point(p.x, p.y);
-            }
-        } else if (points.size() > 1) {
+    private void drawSolidLine(PEmbed applet) {
+        if (points.size() >= 2) {
+            applet.stroke(r, g, b, alpha);
+            applet.strokeWeight(weight);
             for (int i = 0; i < points.size() - 1; i++) {
                 FPoint p0 = points.get(i);
                 FPoint p1 = points.get(i + 1);
@@ -75,6 +66,54 @@ public class Line extends Sprite {
                 }
             }
         }
+    }
+
+    private void drawDottedLine(PEmbed applet) {
+        if (points.size() >= 2) {
+            applet.stroke(r, g, b, alpha);
+            applet.strokeWeight(weight);
+            for (int i = 0; i < points.size() - 1; i++) {
+                if (i % 2 == 0) {
+                    FPoint p0 = points.get(i);
+                    FPoint p1 = points.get(i + 1);
+                    if (p0.visible && p1.visible) {
+                        applet.line(
+                                p0.x, p0.y,
+                                p1.x, p1.y);
+                    }
+                }
+            }
+        }
+    }
+
+    private void drawLineEndPoint(PEmbed applet) {
+        if (points.size() >= 1) {
+            applet.fill(r, g, b, alpha);
+            applet.stroke(r, g, b, alpha);
+            applet.strokeWeight(weight);
+            applet.ellipseMode(PApplet.CENTER);
+            FPoint last = points.getLast();
+            applet.ellipse(last.x, last.y, 12, 12);
+        }
+    }
+
+    public synchronized void draw(PEmbed applet) {
+        if (!visible) {
+            return;
+        }
+        applet.pushMatrix();
+        applet.translate(origin.x, origin.y);
+        switch (mode) {
+            case Solid:
+                drawSolidLine(applet);
+                break;
+            case Dotted:
+                drawDottedLine(applet);
+                break;
+            case EndPoint:
+                drawLineEndPoint(applet);
+                break;
+        }
         applet.popMatrix();
     }
 
@@ -82,7 +121,7 @@ public class Line extends Sprite {
         points.clear();
     }
 
-    public void removeFirst() {
-        points.remove(0);
+    public synchronized void removeFirst() {
+        points.removeFirst();
     }
 }
