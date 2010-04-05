@@ -48,13 +48,15 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         Server server = new Server();
         String serverHost = null;
         String clientHost = null;
-        String configPath = null;
-        if (args.length == 3) {
+        String periodConfigFilePath = null;
+        String clientConfigFilePath = null;
+        if (args.length == 4) {
             serverHost = args[0];
             clientHost = args[1];
-            configPath = args[2];
+            periodConfigFilePath = args[2];
+            clientConfigFilePath = args[3];
         }
-        Server.start(serverHost, clientHost, configPath, server);
+        Server.start(serverHost, clientHost, periodConfigFilePath, clientConfigFilePath, server);
     }
 
     //@Override

@@ -15,7 +15,7 @@ public class Main {
     
     public static void main(String[] args) throws Exception {
         Server.main(new String[]{"localhost", "localhost",
-        "configs/test.csv"});
+        "configs/test.csv", "configs/clients.csv"});
         Client.main(new String[]{"Player", "One", "localhost"});
         Client.main(new String[]{"Player", "Two", "localhost"});
         Client.main(new String[]{"Player", "Three", "localhost"});

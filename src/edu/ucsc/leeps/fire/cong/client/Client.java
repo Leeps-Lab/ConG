@@ -86,7 +86,7 @@ public class Client extends BaseClient implements ClientInterface {
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         super.setPeriodConfig(basePeriodConfig);
         periodConfig = (PeriodConfig) basePeriodConfig;
-        //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
+        this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
         bimatrix.setPeriodConfig(periodConfig);
         simplex.setPeriodConfig(periodConfig);
         chart.setPeriodConfig(periodConfig);
