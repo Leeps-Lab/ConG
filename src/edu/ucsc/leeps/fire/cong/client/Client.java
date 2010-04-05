@@ -42,7 +42,7 @@ public class Client extends BaseClient implements ClientInterface {
         add(embed);
         percent = -1;
         countdown = new Countdown(10, 20);
-        pointsDisplay = new PointsDisplay(750, 20);
+        pointsDisplay = new PointsDisplay(width - 200, 20);
         bimatrix = new TwoStrategySelector(
                 10, 100, 400, 400, embed,
                 this.server, this);
@@ -95,13 +95,13 @@ public class Client extends BaseClient implements ClientInterface {
     @Override
     public void setPeriodPoints(float periodPoints) {
         super.setPeriodPoints(periodPoints);
-        pointsDisplay.setPeriodPoints(periodPoints);
+        pointsDisplay.setPoints(periodPoints, totalPoints);
     }
 
     @Override
     public void addToPeriodPoints(float points) {
         super.addToPeriodPoints(points);
-        pointsDisplay.setPeriodPoints(periodPoints);
+        pointsDisplay.setPoints(periodPoints, totalPoints);
     }
 
     public void localTick(int secondsLeft) {
@@ -207,11 +207,15 @@ public class Client extends BaseClient implements ClientInterface {
             background(255);
             fill(0);
             stroke(0);
-            bimatrix.draw(embed);
-            simplex.draw(embed);
-            chart.draw(embed);
-            countdown.draw(embed);
-            pointsDisplay.draw(embed);
+            try {
+                bimatrix.draw(embed);
+                simplex.draw(embed);
+                chart.draw(embed);
+                countdown.draw(embed);
+                pointsDisplay.draw(embed);
+            } catch (NullPointerException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
