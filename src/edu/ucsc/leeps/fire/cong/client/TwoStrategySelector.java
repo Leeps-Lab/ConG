@@ -6,6 +6,7 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.config.TwoStrategySelectionType;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
@@ -29,21 +30,21 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private float targetPercent_A;
     private StrategyChangeThread thread;
     private boolean enabled;
-    private HeatmapHelper heatmap;
+    private HeatmapHelper myHeatmap, counterpartHeatmap;
     private float currentPercent;
-    private Marker heatmapSingleAa;
-    private Marker heatmapSingleAb;
-    private Marker heatmapSingleBa;
-    private Marker heatmapSingleBb;
-    private Marker heatmapBothAa;
-    private Marker heatmapBothAb;
-    private Marker heatmapBothBa;
-    private Marker heatmapBothBb;
+    private Marker myHeatmapAa;
+    private Marker myHeatmapAb;
+    private Marker myHeatmapBa;
+    private Marker myHeatmapBb;
+    private Marker counterpartHeatmapAa;
+    private Marker cuonterpartHeatmapAb;
+    private Marker counterpartHeatmapBa;
+    private Marker counterpartHeatmapBb;
     private Marker matrixAa;
     private Marker matrixAb;
     private Marker matrixBa;
     private Marker matrixBb;
-    private Marker current, planned, dragged, hover;
+    private Marker current, planned, dragged, hover, counterpart;
     private long hoverTimestamp;
     private long hoverTimeMillis = 1000;
 
@@ -57,33 +58,34 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         this.applet = applet;
         this.server = server;
         this.client = client;
-        heatmap = new HeatmapHelper(applet, width, height);
+        myHeatmap = new HeatmapHelper(0, 0, width, height, true);
+        counterpartHeatmap = new HeatmapHelper(0, -130, 100, 100, false);
         applet.addMouseListener(this);
         applet.addKeyListener(this);
 
-        heatmapSingleAa = new Marker(this, 10, 0, true, 0);
-        heatmapSingleAa.setLabelMode(Marker.LabelMode.Top);
+        myHeatmapAa = new Marker(this, 10, 0, true, 0);
+        myHeatmapAa.setLabelMode(Marker.LabelMode.Top);
 
-        heatmapSingleAb = new Marker(this, width, 0, true, 0);
-        heatmapSingleAb.setLabelMode(Marker.LabelMode.Top);
+        myHeatmapAb = new Marker(this, width, 0, true, 0);
+        myHeatmapAb.setLabelMode(Marker.LabelMode.Top);
 
-        heatmapSingleBa = new Marker(this, 10, height, true, 0);
-        heatmapSingleBa.setLabelMode(Marker.LabelMode.Bottom);
+        myHeatmapBa = new Marker(this, 10, height, true, 0);
+        myHeatmapBa.setLabelMode(Marker.LabelMode.Bottom);
 
-        heatmapSingleBb = new Marker(this, width, height, true, 0);
-        heatmapSingleBb.setLabelMode(Marker.LabelMode.Bottom);
+        myHeatmapBb = new Marker(this, width, height, true, 0);
+        myHeatmapBb.setLabelMode(Marker.LabelMode.Bottom);
 
-        heatmapBothAa = new Marker(this, 10, 0, true, 0);
-        heatmapBothAa.setLabelMode(Marker.LabelMode.Top);
+        counterpartHeatmapAa = new Marker(this, counterpartHeatmap.origin.x + 10, counterpartHeatmap.origin.y, true, 0);
+        counterpartHeatmapAa.setLabelMode(Marker.LabelMode.Top);
 
-        heatmapBothAb = new Marker(this, width, 0, true, 0);
-        heatmapBothAb.setLabelMode(Marker.LabelMode.Top);
+        cuonterpartHeatmapAb = new Marker(this, counterpartHeatmap.origin.x + counterpartHeatmap.width, counterpartHeatmap.origin.y, true, 0);
+        cuonterpartHeatmapAb.setLabelMode(Marker.LabelMode.Top);
 
-        heatmapBothBa = new Marker(this, 10, height, true, 0);
-        heatmapBothBa.setLabelMode(Marker.LabelMode.Bottom);
+        counterpartHeatmapBa = new Marker(this, counterpartHeatmap.origin.x + 10, counterpartHeatmap.origin.y + counterpartHeatmap.height, true, 0);
+        counterpartHeatmapBa.setLabelMode(Marker.LabelMode.Bottom);
 
-        heatmapBothBb = new Marker(this, width, height, true, 0);
-        heatmapBothBb.setLabelMode(Marker.LabelMode.Bottom);
+        counterpartHeatmapBb = new Marker(this, counterpartHeatmap.origin.x + counterpartHeatmap.width, counterpartHeatmap.origin.y + counterpartHeatmap.height, true, 0);
+        counterpartHeatmapBb.setLabelMode(Marker.LabelMode.Bottom);
 
         matrixAa = new Marker(this, width / 4, height / 4, true, 0);
         matrixAa.setLabelMode(Marker.LabelMode.Top);
@@ -106,6 +108,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         hover = new Marker(this, 0, 0, false, 10);
         hover.setLabelMode(Marker.LabelMode.Top);
         hoverTimestamp = System.currentTimeMillis();
+        counterpart = new Marker(this, 0, 0, false, 10);
+        counterpart.setLabelMode(Marker.LabelMode.Top);
 
         targetPercent_A = -1;
 
@@ -139,7 +143,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
     public void update() {
         if (visible) {
-            heatmap.updateTwoStrategyHeatmap(currentPercent);
+            myHeatmap.updateTwoStrategyHeatmap(currentPercent, applet);
+            counterpartHeatmap.updateTwoStrategyHeatmap(currentPercent, applet);
             updateLabels();
         }
     }
@@ -155,15 +160,15 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         myBb = periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
         counterBb = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
 
-        heatmapSingleAa.setLabel(myAa);
-        heatmapSingleAb.setLabel(myAb);
-        heatmapSingleBa.setLabel(myBa);
-        heatmapSingleBb.setLabel(myBb);
+        myHeatmapAa.setLabel(myAa);
+        myHeatmapAb.setLabel(myAb);
+        myHeatmapBa.setLabel(myBa);
+        myHeatmapBb.setLabel(myBb);
 
-        heatmapBothAa.setLabel(myAa, counterAa);
-        heatmapBothAb.setLabel(myAb, counterAb);
-        heatmapBothBa.setLabel(myBa, counterBa);
-        heatmapBothBb.setLabel(myBb, counterBb);
+        counterpartHeatmapAa.setLabel(counterAa);
+        cuonterpartHeatmapAb.setLabel(counterAb);
+        counterpartHeatmapBa.setLabel(counterBa);
+        counterpartHeatmapBb.setLabel(counterBb);
 
         matrixAa.setLabel(myAa, counterAa);
         matrixAb.setLabel(myAb, counterAb);
@@ -172,15 +177,16 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     private void setModeMatrix() {
-        heatmap.setVisible(false);
-        heatmapSingleAa.setVisible(false);
-        heatmapSingleAb.setVisible(false);
-        heatmapSingleBa.setVisible(false);
-        heatmapSingleBb.setVisible(false);
-        heatmapBothAa.setVisible(false);
-        heatmapBothAb.setVisible(false);
-        heatmapBothBa.setVisible(false);
-        heatmapBothBb.setVisible(false);
+        myHeatmap.setVisible(false);
+        counterpartHeatmap.setVisible(false);
+        myHeatmapAa.setVisible(false);
+        myHeatmapAb.setVisible(false);
+        myHeatmapBa.setVisible(false);
+        myHeatmapBb.setVisible(false);
+        counterpartHeatmapAa.setVisible(false);
+        cuonterpartHeatmapAb.setVisible(false);
+        counterpartHeatmapBa.setVisible(false);
+        counterpartHeatmapBb.setVisible(false);
         matrixAa.setVisible(true);
         matrixAb.setVisible(true);
         matrixBa.setVisible(true);
@@ -188,15 +194,16 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     private void setModeHeatmapSingle() {
-        heatmap.setVisible(true);
-        heatmapSingleAa.setVisible(true);
-        heatmapSingleAb.setVisible(true);
-        heatmapSingleBa.setVisible(true);
-        heatmapSingleBb.setVisible(true);
-        heatmapBothAa.setVisible(false);
-        heatmapBothAb.setVisible(false);
-        heatmapBothBa.setVisible(false);
-        heatmapBothBb.setVisible(false);
+        myHeatmap.setVisible(true);
+        counterpartHeatmap.setVisible(false);
+        myHeatmapAa.setVisible(true);
+        myHeatmapAb.setVisible(true);
+        myHeatmapBa.setVisible(true);
+        myHeatmapBb.setVisible(true);
+        counterpartHeatmapAa.setVisible(false);
+        cuonterpartHeatmapAb.setVisible(false);
+        counterpartHeatmapBa.setVisible(false);
+        counterpartHeatmapBb.setVisible(false);
         matrixAa.setVisible(false);
         matrixAb.setVisible(false);
         matrixBa.setVisible(false);
@@ -204,28 +211,20 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     private void setModeHeatmapBoth() {
-        heatmap.setVisible(true);
-        heatmapSingleAa.setVisible(false);
-        heatmapSingleAb.setVisible(false);
-        heatmapSingleBa.setVisible(false);
-        heatmapSingleBb.setVisible(false);
-        heatmapBothAa.setVisible(true);
-        heatmapBothAb.setVisible(true);
-        heatmapBothBa.setVisible(true);
-        heatmapBothBb.setVisible(true);
+        myHeatmap.setVisible(true);
+        counterpartHeatmap.setVisible(true);
+        myHeatmapAa.setVisible(true);
+        myHeatmapAb.setVisible(true);
+        myHeatmapBa.setVisible(true);
+        myHeatmapBb.setVisible(true);
+        counterpartHeatmapAa.setVisible(true);
+        cuonterpartHeatmapAb.setVisible(true);
+        counterpartHeatmapBa.setVisible(true);
+        counterpartHeatmapBb.setVisible(true);
         matrixAa.setVisible(false);
         matrixAb.setVisible(false);
         matrixBa.setVisible(false);
         matrixBb.setVisible(false);
-    }
-
-    private void drawOutline() {
-        applet.fill(255);
-        applet.noStroke();
-        applet.rect(0, 0, width, height);
-        applet.noFill();
-        applet.stroke(0);
-        applet.rect(0, 0, width, height);
     }
 
     private void drawStrategyInfo() {
@@ -267,26 +266,56 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
             hover.setVisible(true);
             hover.draw(applet);
         }
+        if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+            counterpart.setVisible(true);
+            counterpart.setLabel(periodConfig.counterpartPayoffFunction.getPayoff(
+                    currentPercent, new float[]{percent_A}, new float[]{percent_a}));
+            counterpart.update(
+                    counterpartHeatmap.origin.x + (1 - percent_A) * counterpartHeatmap.width,
+                    counterpartHeatmap.origin.y + (1 - percent_a) * counterpartHeatmap.height);
+            counterpart.draw(applet);
+        }
     }
 
-    private void drawLabels() {
-        heatmapSingleAa.draw(applet);
-        heatmapSingleAb.draw(applet);
-        heatmapSingleBa.draw(applet);
-        heatmapSingleBb.draw(applet);
-        heatmapBothAa.draw(applet);
-        heatmapBothAb.draw(applet);
-        heatmapBothBa.draw(applet);
-        heatmapBothBb.draw(applet);
+    private void drawMatrix() {
+        applet.line(width / 2, 0, width / 2, height);
+        applet.line(0, height / 2, width, height / 2);
+
         matrixAa.draw(applet);
         matrixAb.draw(applet);
         matrixBa.draw(applet);
         matrixBb.draw(applet);
     }
 
-    private void drawMatrix() {
-        applet.line(width / 2, 0, width / 2, height);
-        applet.line(0, height / 2, width, height / 2);
+    private void drawHeatmap() {
+        myHeatmap.draw(applet);
+
+        if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+            counterpartHeatmap.draw(applet);
+
+            float x, y, w, h;
+            x = counterpartHeatmap.origin.x;
+            y = counterpartHeatmap.origin.y;
+            w = counterpartHeatmap.width;
+            h = counterpartHeatmap.height;
+
+            applet.stroke(0);
+            applet.strokeWeight(2);
+            applet.line(x + w * (1 - percent_A), y, x + w * (1 - percent_A), y + h);
+            applet.line(x, y + h * (1 - percent_a), x + w, y + h * (1 - percent_a));
+        }
+
+        myHeatmapAa.draw(applet);
+        myHeatmapAb.draw(applet);
+        myHeatmapBa.draw(applet);
+        myHeatmapBb.draw(applet);
+
+        if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+            counterpartHeatmapAa.draw(applet);
+            cuonterpartHeatmapAb.draw(applet);
+            counterpartHeatmapBa.draw(applet);
+            counterpartHeatmapBb.draw(applet);
+        }
     }
 
     @Override
@@ -301,20 +330,16 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
 
-        drawOutline();
-
         switch (periodConfig.twoStrategySelectionType) {
             case HeatmapSingle:
             case HeatmapBoth:
-                applet.image(heatmap.getHeatmap(), 0, 0);
+                drawHeatmap();
                 break;
             case Matrix:
                 drawMatrix();
         }
 
         drawStrategyInfo();
-
-        drawLabels();
 
         applet.popMatrix();
     }
@@ -358,7 +383,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         periodConfig = (PeriodConfig) basePeriodConfig;
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            heatmap.setPeriodConfig(basePeriodConfig);
+            myHeatmap.setPeriodConfig(periodConfig);
+            counterpartHeatmap.setPeriodConfig(periodConfig);
             setVisible(true);
             switch (periodConfig.twoStrategySelectionType) {
                 case Matrix:

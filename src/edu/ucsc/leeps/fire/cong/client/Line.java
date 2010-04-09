@@ -120,7 +120,7 @@ public class Line extends Sprite implements Serializable {
                 do {
                     FPoint p = points.get(i++);
                     applet.vertex(p.x, p.y);
-                } while (i < points.size() && i % 100 != 0);
+                } while (i < points.size() && i % 10 != 0);
                 applet.vertex(points.get(i - 1).x, height);
                 applet.endShape(PApplet.CLOSE);
             }

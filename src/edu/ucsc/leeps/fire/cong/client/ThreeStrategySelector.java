@@ -42,6 +42,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
     private Marker pRDrop, pPDrop, pSDrop;
+    private PEmbed applet;
 
     public ThreeStrategySelector(
             float x, float y, int width, int height,
@@ -146,9 +147,12 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         setEnabled(false);
 
         applet.addMouseListener(this);
-        heatmap = new HeatmapHelper(applet,
-                (int) (paper.origin.x - rock.origin.x), (int) (rock.origin.y - scissors.origin.y));
+        heatmap = new HeatmapHelper(
+                (int) (origin.x + rock.origin.x), (int) (origin.y + scissors.origin.y),
+                (int) (paper.origin.x - rock.origin.x), (int) (rock.origin.y - scissors.origin.y),
+                true);
         currentPercent = 0f;
+        this.applet = applet;
     }
 
     public void update() {
@@ -156,7 +160,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             heatmap.updateThreeStrategyHeatmap(
                     currentPercent,
                     opponentStrat[0], opponentStrat[1], opponentStrat[2],
-                    this);
+                    this, applet);
         }
     }
 
@@ -166,10 +170,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             return;
         }
 
-        if (heatmap.getHeatmap() != null) {
-            applet.image(heatmap.getHeatmap(), origin.x + rock.origin.x, origin.y + scissors.origin.y);
-        }
-
+        heatmap.draw(applet);
 
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
@@ -775,9 +776,9 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     }
 
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
-        this.periodConfig = (PeriodConfig) basePeriodConfig;
+        periodConfig = (PeriodConfig) basePeriodConfig;
         if (periodConfig.payoffFunction instanceof ThreeStrategySelector) {
-            heatmap.setPeriodConfig(basePeriodConfig);
+            heatmap.setPeriodConfig(periodConfig);
             setVisible(true);
         } else {
             setVisible(false);

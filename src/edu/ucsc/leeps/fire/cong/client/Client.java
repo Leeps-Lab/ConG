@@ -35,7 +35,7 @@ public class Client extends BaseClient implements ClientInterface {
         this.server = (ServerInterface) server;
         removeAll();
         width = 1200;
-        height = 600;
+        height = 650;
         embed = new PEmbed(width, height);
         embed.init();
         setSize(embed.getSize());
@@ -44,14 +44,14 @@ public class Client extends BaseClient implements ClientInterface {
         countdown = new Countdown(10, 20);
         pointsDisplay = new PointsDisplay(width - 200, 20);
         bimatrix = new TwoStrategySelector(
-                10, 100, 400, 400, embed,
+                20, 200, 400, 400, embed,
                 this.server, this);
         simplex = new ThreeStrategySelector(
-                10, 100, 200, 600,
+                20, 200, 200, 600,
                 embed,
                 this.server,
                 this);
-        chart = new Chart(475, 100, 700, 400, simplex);
+        chart = new Chart(480, 200, 700, 400, simplex);
     }
 
     @Override

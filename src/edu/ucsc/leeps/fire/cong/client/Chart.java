@@ -106,6 +106,12 @@ public class Chart extends Sprite {
     }
 
     private void drawAxis(PEmbed applet) {
+
+        applet.noFill();
+        applet.stroke(0);
+        applet.strokeWeight(2);
+        applet.rect(0, 0, width, height);
+
         applet.textAlign(PEmbed.CENTER, PEmbed.CENTER);
         applet.fill(255);
         applet.noStroke();
@@ -159,10 +165,6 @@ public class Chart extends Sprite {
         float currX = currentPercent * width;
         applet.rect(currX - 8, 0, width, height);
         drawPercentLine(applet);
-        applet.noFill();
-        applet.stroke(0);
-        applet.strokeWeight(2);
-        applet.rect(0, 0, width, height);
         if (periodConfig != null) {
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 actualAPayoff.draw(applet);
