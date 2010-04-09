@@ -8,7 +8,6 @@ import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
-import java.awt.Color;
 
 /**
  *
@@ -16,19 +15,6 @@ import java.awt.Color;
  */
 public class Chart extends Sprite {
 
-    final static Color MY_PAYOFF_COLOR = new Color(20, 200, 20);
-    final static Color OTHER_PAYOFF_COLOR = new Color(20, 200, 100);
-    // Two strategies
-    final static Color A_PAYOFF_COLOR = new Color(200, 50, 50);
-    final static Color B_PAYOFF_COLOR = new Color(50, 50, 200);
-    final static Color Aa_PAYOFF_COLOR = new Color(200, 50, 50);
-    final static Color Ab_PAYOFF_COLOR = new Color(0, 0, 0);
-    final static Color Ba_PAYOFF_COLOR = new Color(200, 50, 50);
-    final static Color Bb_PAYOFF_COLOR = new Color(50, 50, 200);
-    // RPSD
-    final static Color R_PAYOFF_COLOR = new Color(255, 25, 25);
-    final static Color P_PAYOFF_COLOR = new Color(25, 25, 255);
-    final static Color S_PAYOFF_COLOR = new Color(255, 0, 255);
     // Variables to modify that manipulate the chart
     public float currentPercent;
     private PeriodConfig periodConfig;
@@ -83,38 +69,38 @@ public class Chart extends Sprite {
 
     public Chart(int x, int y, int width, int height, ThreeStrategySelector simplex) {
         super(x, y, width, height);
-        actualPayoffYou = new Line(0, 0, width, height, 1f, MY_PAYOFF_COLOR, 255, Line.Mode.Solid);
-        actualPayoffOther = new Line(0, 0, width, height, 1f, OTHER_PAYOFF_COLOR, 255, Line.Mode.Solid);
+        actualPayoffYou = new Line(0, 0, width, height);
+        actualPayoffOther = new Line(0, 0, width, height);
         // Two strategy
-        actualAPayoff = new Line(0, 0, width, height, 1.5f, A_PAYOFF_COLOR, 150, Line.Mode.Solid);
-        actualBPayoff = new Line(0, 0, width, height, 1.5f, B_PAYOFF_COLOR, 150, Line.Mode.Solid);
-        futureAPayoff = new Line(0, 0, width, height, 1.0f, A_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futureBPayoff = new Line(0, 0, width, height, 1.0f, B_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        actualAaPayoff = new Line(0, 0, width, height, 0.5f, Aa_PAYOFF_COLOR, 255, Line.Mode.Solid);
-        actualAbPayoff = new Line(0, 0, width, height, 0.5f, Ab_PAYOFF_COLOR, 255, Line.Mode.Solid);
-        actualBaPayoff = new Line(0, 0, width, height, 0.5f, Ba_PAYOFF_COLOR, 255, Line.Mode.Solid);
-        actualBbPayoff = new Line(0, 0, width, height, 0.5f, Bb_PAYOFF_COLOR, 255, Line.Mode.Solid);
-        futureAaPayoff = new Line(0, 0, width, height, 0.5f, A_PAYOFF_COLOR, 255, Line.Mode.Solid);
-        futureAbPayoff = new Line(0, 0, width, height, 0.5f, A_PAYOFF_COLOR, 255, Line.Mode.Solid);
-        futureBaPayoff = new Line(0, 0, width, height, 0.5f, B_PAYOFF_COLOR, 255, Line.Mode.Solid);
-        futureBbPayoff = new Line(0, 0, width, height, 0.5f, B_PAYOFF_COLOR, 255, Line.Mode.Solid);
+        actualAPayoff = new Line(0, 0, width, height);
+        actualBPayoff = new Line(0, 0, width, height);
+        futureAPayoff = new Line(0, 0, width, height);
+        futureBPayoff = new Line(0, 0, width, height);
+        actualAaPayoff = new Line(0, 0, width, height);
+        actualAbPayoff = new Line(0, 0, width, height);
+        actualBaPayoff = new Line(0, 0, width, height);
+        actualBbPayoff = new Line(0, 0, width, height);
+        futureAaPayoff = new Line(0, 0, width, height);
+        futureAbPayoff = new Line(0, 0, width, height);
+        futureBaPayoff = new Line(0, 0, width, height);
+        futureBbPayoff = new Line(0, 0, width, height);
         // RPSD
-        actualRPayoff = new Line(0, 0, width, height, 1.5f, R_PAYOFF_COLOR, 255, Line.Mode.Solid);
-        actualPPayoff = new Line(0, 0, width, height, 1.5f, P_PAYOFF_COLOR, 255, Line.Mode.Solid);
-        actualSPayoff = new Line(0, 0, width, height, 1.5f, S_PAYOFF_COLOR, 255, Line.Mode.Solid);
+        actualRPayoff = new Line(0, 0, width, height);
+        actualPPayoff = new Line(0, 0, width, height);
+        actualSPayoff = new Line(0, 0, width, height);
 
-        futureRPayoff = new Line(0, 0, width, height, 1.5f, R_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futurePPayoff = new Line(0, 0, width, height, 1.5f, P_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futureSPayoff = new Line(0, 0, width, height, 1.5f, S_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futureRrPayoff = new Line(0, 0, width, height, 1.5f, R_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futureRpPayoff = new Line(0, 0, width, height, 1.5f, R_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futureRsPayoff = new Line(0, 0, width, height, 1.5f, R_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futurePrPayoff = new Line(0, 0, width, height, 1.5f, P_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futurePpPayoff = new Line(0, 0, width, height, 1.5f, P_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futurePsPayoff = new Line(0, 0, width, height, 1.5f, P_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futureSrPayoff = new Line(0, 0, width, height, 1.5f, S_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futureSpPayoff = new Line(0, 0, width, height, 1.5f, S_PAYOFF_COLOR, 100, Line.Mode.Solid);
-        futureSsPayoff = new Line(0, 0, width, height, 1.5f, S_PAYOFF_COLOR, 100, Line.Mode.Solid);
+        futureRPayoff = new Line(0, 0, width, height);
+        futurePPayoff = new Line(0, 0, width, height);
+        futureSPayoff = new Line(0, 0, width, height);
+        futureRrPayoff = new Line(0, 0, width, height);
+        futureRpPayoff = new Line(0, 0, width, height);
+        futureRsPayoff = new Line(0, 0, width, height);
+        futurePrPayoff = new Line(0, 0, width, height);
+        futurePpPayoff = new Line(0, 0, width, height);
+        futurePsPayoff = new Line(0, 0, width, height);
+        futureSrPayoff = new Line(0, 0, width, height);
+        futureSpPayoff = new Line(0, 0, width, height);
+        futureSsPayoff = new Line(0, 0, width, height);
 
         this.simplex = simplex;
     }
@@ -443,6 +429,8 @@ public class Chart extends Sprite {
     public void setPeriodConfig(PeriodConfig periodConfig) {
         this.periodConfig = periodConfig;
         maxPayoff = periodConfig.payoffFunction.getMax();
+        actualPayoffYou.configure(periodConfig.yourPayoff);
+        actualPayoffOther.configure(periodConfig.otherPayoff);
     }
 
     public void addPoint(Line line, float x, float y) {

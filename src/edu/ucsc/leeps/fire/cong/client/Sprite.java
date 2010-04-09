@@ -1,14 +1,15 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import java.io.Serializable;
 import processing.core.PMatrix2D;
 
-public abstract class Sprite {
+public abstract class Sprite implements Serializable {
 
-    FPoint origin;
-    FPoint screenLocation;
-    int width, height;
-    boolean visible;
+    protected transient FPoint origin;
+    protected transient FPoint screenLocation;
+    protected transient int width, height;
+    public boolean visible;
 
     public Sprite(float x, float y, int width, int height) {
         origin = new FPoint(x, y);

@@ -57,7 +57,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         this.applet = applet;
         this.server = server;
         this.client = client;
-        heatmap = new HeatmapHelper(applet, width, height, 0xFF0000FF, 0xFFFFFF00, 0xFF00FF00);
+        heatmap = new HeatmapHelper(applet, width, height);
         applet.addMouseListener(this);
         applet.addKeyListener(this);
 
@@ -149,9 +149,9 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         myAa = periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
         counterAa = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
         myAb = periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
-        counterAb = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
+        counterAb = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
         myBa = periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
-        counterBa = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
+        counterBa = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
         myBb = periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
         counterBb = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
 

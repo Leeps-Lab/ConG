@@ -34,7 +34,7 @@ public class Client extends BaseClient implements ClientInterface {
     public void init(edu.ucsc.leeps.fire.server.BaseServerInterface server) {
         this.server = (ServerInterface) server;
         removeAll();
-        width = 1000;
+        width = 1200;
         height = 600;
         embed = new PEmbed(width, height);
         embed.init();
@@ -51,7 +51,7 @@ public class Client extends BaseClient implements ClientInterface {
                 embed,
                 this.server,
                 this);
-        chart = new Chart(475, 100, 500, 400, simplex);
+        chart = new Chart(475, 100, 700, 400, simplex);
     }
 
     @Override
@@ -86,7 +86,7 @@ public class Client extends BaseClient implements ClientInterface {
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         super.setPeriodConfig(basePeriodConfig);
         periodConfig = (PeriodConfig) basePeriodConfig;
-        this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
+        //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
         bimatrix.setPeriodConfig(periodConfig);
         simplex.setPeriodConfig(periodConfig);
         chart.setPeriodConfig(periodConfig);
@@ -207,15 +207,11 @@ public class Client extends BaseClient implements ClientInterface {
             background(255);
             fill(0);
             stroke(0);
-            try {
-                bimatrix.draw(embed);
-                simplex.draw(embed);
-                chart.draw(embed);
-                countdown.draw(embed);
-                pointsDisplay.draw(embed);
-            } catch (NullPointerException ex) {
-                ex.printStackTrace();
-            }
+            bimatrix.draw(embed);
+            simplex.draw(embed);
+            chart.draw(embed);
+            countdown.draw(embed);
+            pointsDisplay.draw(embed);
         }
     }
 

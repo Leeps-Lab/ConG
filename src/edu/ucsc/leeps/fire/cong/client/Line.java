@@ -1,32 +1,43 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
-import java.awt.Color;
+import java.io.Serializable;
 import java.util.LinkedList;
 import processing.core.PApplet;
 
-public class Line extends Sprite {
-
-    private float weight;
-    private int r, g, b, alpha;
-    private LinkedList<FPoint> points;
+public class Line extends Sprite implements Serializable {
 
     public enum Mode {
 
-        Solid, EndPoint, Dotted
+        Solid, EndPoint, Dashed, Shaded,
     };
-    private Mode mode;
+    public float weight;
+    public int r, g, b, alpha;
+    public Mode mode;
+    private transient LinkedList<FPoint> points;
 
-    public Line(int x, int y, int width, int height, float weight, Color color, int alpha, Mode mode) {
+    public Line() {
+        super(0, 0, 0, 0);
+        r = g = b = 0;
+        alpha = 255;
+        weight = 1.0f;
+        mode = Mode.Solid;
+    }
+
+    public Line(int x, int y, int width, int height) {
         super(x, y, width, height);
-        visible = true;
-        this.r = color.getRed();
-        this.g = color.getGreen();
-        this.b = color.getBlue();
-        this.weight = weight;
-        this.alpha = alpha;
-        this.mode = mode;
+        visible = false;
         points = new LinkedList<FPoint>();
+    }
+
+    public void configure(Line config) {
+        this.visible = true;
+        this.r = config.r;
+        this.g = config.g;
+        this.b = config.b;
+        this.alpha = config.alpha;
+        this.weight = config.weight;
+        this.mode = config.mode;
     }
 
     public synchronized void addPoint(float x, float y) {
@@ -68,7 +79,7 @@ public class Line extends Sprite {
         }
     }
 
-    private void drawDottedLine(PEmbed applet) {
+    private void drawDashedLine(PEmbed applet) {
         if (points.size() >= 2) {
             applet.stroke(r, g, b, alpha);
             applet.strokeWeight(weight);
@@ -97,6 +108,25 @@ public class Line extends Sprite {
         }
     }
 
+    private void drawShadedArea(PEmbed applet) {
+        if (points.size() >= 1) {
+            applet.fill(r, g, b, alpha);
+            applet.stroke(r, g, b, alpha);
+            applet.strokeWeight(weight);
+            int i = 0;
+            while (i < points.size()) {
+                applet.beginShape();
+                applet.vertex(points.get(i).x, height);
+                do {
+                    FPoint p = points.get(i++);
+                    applet.vertex(p.x, p.y);
+                } while (i < points.size() && i % 100 != 0);
+                applet.vertex(points.get(i - 1).x, height);
+                applet.endShape(PApplet.CLOSE);
+            }
+        }
+    }
+
     public synchronized void draw(PEmbed applet) {
         if (!visible) {
             return;
@@ -107,11 +137,14 @@ public class Line extends Sprite {
             case Solid:
                 drawSolidLine(applet);
                 break;
-            case Dotted:
-                drawDottedLine(applet);
+            case Dashed:
+                drawDashedLine(applet);
                 break;
             case EndPoint:
                 drawLineEndPoint(applet);
+                break;
+            case Shaded:
+                drawShadedArea(applet);
                 break;
         }
         applet.popMatrix();

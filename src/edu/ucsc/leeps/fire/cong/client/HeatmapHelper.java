@@ -18,7 +18,6 @@ public class HeatmapHelper implements PeriodConfigurable {
 
     private PeriodConfig periodConfig;
     private int width, height;
-    private int lowColor, midColor, highColor;
     private float[][] payoff;
     private PGraphics buffer, invisibleBuffer;
     private PEmbed applet;
@@ -26,13 +25,9 @@ public class HeatmapHelper implements PeriodConfigurable {
 
     public HeatmapHelper(
             PEmbed applet,
-            int width, int height,
-            int lowColor, int midColor, int highColor) {
+            int width, int height) {
         this.width = width;
         this.height = height;
-        this.lowColor = lowColor;
-        this.midColor = midColor;
-        this.highColor = highColor;
         this.payoff = new float[width][height];
         this.applet = applet;
         invisibleBuffer = applet.createGraphics(width, height, PEmbed.P2D);
@@ -53,9 +48,9 @@ public class HeatmapHelper implements PeriodConfigurable {
     // Chooses whether to interpolate between low and mid, or low and high
     public int getRGB(float u) {
         if (u < .5) {
-            return interpolateRGB(u * 2.0f, lowColor, midColor);
+            return interpolateRGB(u * 2.0f, periodConfig.heatmapColorLow, periodConfig.heatmapColorMid);
         } else {
-            return interpolateRGB((u - 0.5f) * 2.0f, midColor, highColor);
+            return interpolateRGB((u - 0.5f) * 2.0f, periodConfig.heatmapColorMid, periodConfig.heatmapColorHigh);
         }
     }
 

@@ -38,7 +38,6 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     private ClientInterface client;
     private PeriodConfig periodConfig;
     private HeatmapHelper heatmap;
-    private boolean visible = false;
     public float currentPercent;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
@@ -148,8 +147,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
 
         applet.addMouseListener(this);
         heatmap = new HeatmapHelper(applet,
-                (int) (paper.origin.x - rock.origin.x), (int) (rock.origin.y - scissors.origin.y),
-                0xFF0000FF, 0xFFFFFF00, 0xFF00FF00);
+                (int) (paper.origin.x - rock.origin.x), (int) (rock.origin.y - scissors.origin.y));
         currentPercent = 0f;
     }
 
