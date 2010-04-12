@@ -28,7 +28,10 @@ public class Client extends BaseClient implements ClientInterface {
     private PointsDisplay pointsDisplay;
     private TwoStrategySelector bimatrix;
     private ThreeStrategySelector simplex;
-    private Chart chart;
+    private Chart payoffChart, strategyChart;
+    private float[] myStrategy;
+    private float[] counterpartStrategy;
+    private float periodPointsEstimate;
 
     //@Override
     public void init(edu.ucsc.leeps.fire.server.BaseServerInterface server) {
@@ -51,7 +54,8 @@ public class Client extends BaseClient implements ClientInterface {
                 embed,
                 this.server,
                 this);
-        chart = new Chart(480, 200, 700, 400, simplex);
+        payoffChart = new Chart(480, 200, 700, 400, simplex, Chart.Mode.Payoff);
+        strategyChart = new Chart(480, 70, 700, 100, simplex, Chart.Mode.Strategy);
     }
 
     @Override
@@ -59,7 +63,9 @@ public class Client extends BaseClient implements ClientInterface {
         this.percent = 0;
         simplex.setEnabled(true);
         bimatrix.setEnabled(true);
-        chart.clearAll();
+        payoffChart.clearAll();
+        strategyChart.clearAll();
+        periodPointsEstimate = 0;
         super.startPeriod();
     }
 
@@ -89,7 +95,8 @@ public class Client extends BaseClient implements ClientInterface {
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
         bimatrix.setPeriodConfig(periodConfig);
         simplex.setPeriodConfig(periodConfig);
-        chart.setPeriodConfig(periodConfig);
+        payoffChart.setPeriodConfig(periodConfig);
+        strategyChart.setPeriodConfig(periodConfig);
     }
 
     @Override
@@ -114,10 +121,17 @@ public class Client extends BaseClient implements ClientInterface {
     public void quickTick(int millisLeft) {
         if (millisLeft > 0) {
             this.percent = (1 - (millisLeft / ((float) periodConfig.length * 1000)));
-            chart.currentPercent = this.percent;
-            chart.updateLines();
+            payoffChart.currentPercent = this.percent;
+            payoffChart.updateLines();
+            strategyChart.currentPercent = this.percent;
+            strategyChart.updateLines();
             bimatrix.setCurrentPercent(this.percent);
             simplex.currentPercent = this.percent;
+            float currentFlowPayoff = periodConfig.payoffFunction.getPayoff(
+                    percent, myStrategy, counterpartStrategy);
+            float percentOfPeriod = getQuickTickInterval() / (periodConfig.length * 1000f);
+            periodPointsEstimate += currentFlowPayoff * percentOfPeriod;
+            pointsDisplay.setPoints(periodPointsEstimate, totalPoints);
         }
     }
 
@@ -127,9 +141,11 @@ public class Client extends BaseClient implements ClientInterface {
 
     public synchronized float[] getStrategy() {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            return bimatrix.getMyStrategy();
+            myStrategy = bimatrix.getMyStrategy();
+            return myStrategy;
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            return simplex.getPlayerRPS();
+            myStrategy = simplex.getPlayerRPS();
+            return myStrategy;
         } else {
             assert false;
             return new float[]{};
@@ -137,6 +153,7 @@ public class Client extends BaseClient implements ClientInterface {
     }
 
     public synchronized void setMyStrategy(float[] s) {
+        myStrategy = s;
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setMyStrategy(s[0]);
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
@@ -144,18 +161,21 @@ public class Client extends BaseClient implements ClientInterface {
         } else {
             assert false;
         }
-        chart.setMyStrategy(s);
+        payoffChart.setMyStrategy(s);
+        strategyChart.setMyStrategy(s);
     }
 
-    public synchronized void setOpponentStrategy(float[] s) {
+    public synchronized void setCounterpartStrategy(float[] s) {
+        counterpartStrategy = s;
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            bimatrix.setOpponentStrategy(s[0]);
+            bimatrix.setCounterpartStrategy(s[0]);
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            simplex.setOpponentRPS(s[0], s[1], s[2]);
+            simplex.setCounterpartRPS(s[0], s[1], s[2]);
         } else {
             assert false;
         }
-        chart.setOpponentStrategy(s);
+        payoffChart.setCounterpartStrategy(s);
+        strategyChart.setCounterpartStrategy(s);
     }
 
     @Override
@@ -209,7 +229,8 @@ public class Client extends BaseClient implements ClientInterface {
             stroke(0);
             bimatrix.draw(embed);
             simplex.draw(embed);
-            chart.draw(embed);
+            strategyChart.draw(embed);
+            payoffChart.draw(embed);
             countdown.draw(embed);
             pointsDisplay.draw(embed);
         }

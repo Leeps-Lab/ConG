@@ -29,6 +29,7 @@ public class PeriodConfig extends BasePeriodConfig {
     public Population population;
     public TwoStrategySelectionType twoStrategySelectionType;
     public Line payoffAa, payoffAb, payoffBa, payoffBb, yourPayoff, otherPayoff;
+    public Line yourStrategyOverTime, counterpartStrategyOverTime;
     public int heatmapColorLow, heatmapColorMid, heatmapColorHigh;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
@@ -54,5 +55,21 @@ public class PeriodConfig extends BasePeriodConfig {
         heatmapColorLow = 0xFF0000;
         heatmapColorMid = 0x00FF00;
         heatmapColorHigh = 0x0000FF;
+        yourStrategyOverTime = new Line();
+        yourStrategyOverTime.visible = true;
+        yourStrategyOverTime.mode = Line.Mode.Solid;
+        yourStrategyOverTime.r = 0;
+        yourStrategyOverTime.g = 0;
+        yourStrategyOverTime.b = 255;
+        yourStrategyOverTime.alpha = 255;
+        yourStrategyOverTime.weight = 2f;
+        counterpartStrategyOverTime = new Line();
+        counterpartStrategyOverTime.visible = true;
+        counterpartStrategyOverTime.mode = Line.Mode.Solid;
+        counterpartStrategyOverTime.r = 255;
+        counterpartStrategyOverTime.g = 0;
+        counterpartStrategyOverTime.b = 0;
+        counterpartStrategyOverTime.alpha = 255;
+        counterpartStrategyOverTime.weight = 2f;
     }
 }

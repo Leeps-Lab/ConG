@@ -30,7 +30,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private float targetPercent_A;
     private StrategyChangeThread thread;
     private boolean enabled;
-    private HeatmapHelper myHeatmap, counterpartHeatmap;
+    private HeatmapHelper heatmap, counterpartHeatmap;
     private float currentPercent;
     private Marker myHeatmapAa;
     private Marker myHeatmapAb;
@@ -58,8 +58,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         this.applet = applet;
         this.server = server;
         this.client = client;
-        myHeatmap = new HeatmapHelper(0, 0, width, height, true);
-        counterpartHeatmap = new HeatmapHelper(0, -130, 100, 100, false);
+        heatmap = new HeatmapHelper(0, 0, width, height, true);
+        counterpartHeatmap = new HeatmapHelper(width - 100, -130, 100, 100, false);
         applet.addMouseListener(this);
         applet.addKeyListener(this);
 
@@ -137,13 +137,13 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         percent_A = A;
     }
 
-    public void setOpponentStrategy(float a) {
+    public void setCounterpartStrategy(float a) {
         percent_a = a;
     }
 
     public void update() {
         if (visible) {
-            myHeatmap.updateTwoStrategyHeatmap(currentPercent, applet);
+            heatmap.updateTwoStrategyHeatmap(currentPercent, applet);
             counterpartHeatmap.updateTwoStrategyHeatmap(currentPercent, applet);
             updateLabels();
         }
@@ -177,7 +177,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     private void setModeMatrix() {
-        myHeatmap.setVisible(false);
+        heatmap.setVisible(false);
         counterpartHeatmap.setVisible(false);
         myHeatmapAa.setVisible(false);
         myHeatmapAb.setVisible(false);
@@ -194,7 +194,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     private void setModeHeatmapSingle() {
-        myHeatmap.setVisible(true);
+        heatmap.setVisible(true);
         counterpartHeatmap.setVisible(false);
         myHeatmapAa.setVisible(true);
         myHeatmapAb.setVisible(true);
@@ -211,7 +211,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     private void setModeHeatmapBoth() {
-        myHeatmap.setVisible(true);
+        heatmap.setVisible(true);
         counterpartHeatmap.setVisible(true);
         myHeatmapAa.setVisible(true);
         myHeatmapAb.setVisible(true);
@@ -269,7 +269,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
             counterpart.setVisible(true);
             counterpart.setLabel(periodConfig.counterpartPayoffFunction.getPayoff(
-                    currentPercent, new float[]{percent_A}, new float[]{percent_a}));
+                    currentPercent, new float[]{percent_a}, new float[]{percent_A}));
             counterpart.update(
                     counterpartHeatmap.origin.x + (1 - percent_A) * counterpartHeatmap.width,
                     counterpartHeatmap.origin.y + (1 - percent_a) * counterpartHeatmap.height);
@@ -288,7 +288,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     private void drawHeatmap() {
-        myHeatmap.draw(applet);
+        heatmap.draw(applet);
 
         if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
             counterpartHeatmap.draw(applet);
@@ -383,7 +383,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         periodConfig = (PeriodConfig) basePeriodConfig;
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            myHeatmap.setPeriodConfig(periodConfig);
+            heatmap.setPeriodConfig(periodConfig);
             counterpartHeatmap.setPeriodConfig(periodConfig);
             setVisible(true);
             switch (periodConfig.twoStrategySelectionType) {

@@ -87,8 +87,10 @@ public class PairedPopulation implements Population, Serializable {
                 percent, last2, last1);
         if (!periodConfig.pointsPerSecond) {
             points1 *= percentInStrategyTime;
+            points2 *= percentInStrategyTime;
         } else {
             points1 *= inStrategyTime / 1000f;
+            points2 *= inStrategyTime / 1000f;
         }
         client1.addToPeriodPoints(points1);
         client2.addToPeriodPoints(points2);
@@ -98,8 +100,8 @@ public class PairedPopulation implements Population, Serializable {
     private void updateStrategies(ClientInterface client1, ClientInterface client2) {
         float[] c1s = client1.getStrategy();
         float[] c2s = client2.getStrategy();
-        client1.setOpponentStrategy(c2s);
-        client2.setOpponentStrategy(c1s);
+        client1.setCounterpartStrategy(c2s);
+        client2.setCounterpartStrategy(c1s);
         lastStrategies.put(client1, c1s);
         lastStrategies.put(client2, c2s);
     }

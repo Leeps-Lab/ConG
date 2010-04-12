@@ -90,7 +90,7 @@ public class SinglePopulationExclude implements Population, Serializable {
             for (int i = 0; i < averageStrategy.length; i++) {
                 averageStrategy[i] /= (members.size() - 1);
             }
-            client.setOpponentStrategy(averageStrategy);
+            client.setCounterpartStrategy(averageStrategy);
             lastStrategiesMine.put(client, client.getStrategy());
             lastStrategiesOpposing.put(client, averageStrategy);
         }

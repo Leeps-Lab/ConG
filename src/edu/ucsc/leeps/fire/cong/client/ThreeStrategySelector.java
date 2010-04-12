@@ -374,7 +374,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         current.setLocation(coords[0], coords[1]);
     }
 
-    public void setOpponentRPS(float r, float p, float s) {
+    public void setCounterpartRPS(float r, float p, float s) {
         opponentStrat[R] = r;
         opponentStrat[P] = p;
         opponentStrat[S] = s;

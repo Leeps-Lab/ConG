@@ -18,7 +18,7 @@ public class Chart extends Sprite {
     // Variables to modify that manipulate the chart
     public float currentPercent;
     private PeriodConfig periodConfig;
-    private float currentPayoffYou, currentPayoffOther;
+    private float currentPayoffYou, currentPayoffCounterpart;
     private float maxPayoff;
     // Two strategy
     private float percent_A;
@@ -29,16 +29,14 @@ public class Chart extends Sprite {
     private float currentAbPayoff;
     private float currentBaPayoff;
     private float currentBbPayoff;
-    private Line futureAPayoff;
-    private Line futureBPayoff;
-    // RPSD
+    // Three strategy
     private ThreeStrategySelector simplex;
     private float currentRPayoff;
     private float currentPPayoff;
     private float currentSPayoff;
-    // Private controls accessed through public methods
+    // Either two or three strategies
     private Line actualPayoffYou;
-    private Line actualPayoffOther;
+    private Line actualPayoffCounterpart;
     // Two strategy
     private Line actualAPayoff;
     private Line actualBPayoff;
@@ -50,7 +48,11 @@ public class Chart extends Sprite {
     private Line futureAbPayoff;
     private Line futureBaPayoff;
     private Line futureBbPayoff;
-    // RPSD
+    private Line futureAPayoff;
+    private Line futureBPayoff;
+    private Line yourStrategyOverTime;
+    private Line counterpartStrategyOverTime;
+    // Three strategy
     private Line actualRPayoff;
     private Line actualPPayoff;
     private Line actualSPayoff;
@@ -67,10 +69,16 @@ public class Chart extends Sprite {
     private Line futureSpPayoff;
     private Line futureSsPayoff;
 
-    public Chart(int x, int y, int width, int height, ThreeStrategySelector simplex) {
+    public enum Mode {
+
+        Payoff, Strategy
+    };
+    private Mode mode;
+
+    public Chart(int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode) {
         super(x, y, width, height);
         actualPayoffYou = new Line(0, 0, width, height);
-        actualPayoffOther = new Line(0, 0, width, height);
+        actualPayoffCounterpart = new Line(0, 0, width, height);
         // Two strategy
         actualAPayoff = new Line(0, 0, width, height);
         actualBPayoff = new Line(0, 0, width, height);
@@ -84,6 +92,8 @@ public class Chart extends Sprite {
         futureAbPayoff = new Line(0, 0, width, height);
         futureBaPayoff = new Line(0, 0, width, height);
         futureBbPayoff = new Line(0, 0, width, height);
+        yourStrategyOverTime = new Line(0, 0, width, height);
+        counterpartStrategyOverTime = new Line(0, 0, width, height);
         // RPSD
         actualRPayoff = new Line(0, 0, width, height);
         actualPPayoff = new Line(0, 0, width, height);
@@ -103,6 +113,8 @@ public class Chart extends Sprite {
         futureSsPayoff = new Line(0, 0, width, height);
 
         this.simplex = simplex;
+
+        this.mode = mode;
     }
 
     private void drawAxis(PEmbed applet) {
@@ -117,35 +129,37 @@ public class Chart extends Sprite {
         applet.noStroke();
         applet.rect(-40, 0, 38, height);
         applet.rect(0, height + 2, width, 40);
-        for (float x = 0.1f; x < 1.0f; x += 0.1f) {
-            applet.noFill();
-            applet.stroke(100, 100, 100);
-            applet.strokeWeight(2);
-            float x0, y0, x1, y1;
-            x0 = x * width;
-            y0 = height;
-            x1 = x * width;
-            y1 = height + 10;
-            applet.line(x0, y0, x1, y1);
-            applet.fill(0);
-            int percent = Math.round(x * 100);
-            String label = String.format("%d%%", percent);
-            applet.text(label, x0 + origin.x, y0 + origin.y + 1.2f * applet.textAscent() + applet.textDescent());
-        }
-        for (float y = 0.1f; y < 1.0f; y += 0.1f) {
-            applet.noFill();
-            applet.stroke(100, 100, 100);
-            applet.strokeWeight(2);
-            float x0, y0, x1, y1;
-            x0 = -10;
-            y0 = y * height;
-            x1 = 0;
-            y1 = y * height;
-            applet.line(x0, y0, x1, y1);
-            applet.fill(0);
-            float payoff = (1 - y) * maxPayoff;
-            String label = String.format("%.1f", payoff);
-            applet.text(label, origin.x - 1.2f * applet.textWidth(label), y0 + origin.y);
+        if (mode == Mode.Payoff) {
+            for (float x = 0.1f; x < 1.0f; x += 0.1f) {
+                applet.noFill();
+                applet.stroke(100, 100, 100);
+                applet.strokeWeight(2);
+                float x0, y0, x1, y1;
+                x0 = x * width;
+                y0 = height;
+                x1 = x * width;
+                y1 = height + 10;
+                applet.line(x0, y0, x1, y1);
+                applet.fill(0);
+                int percent = Math.round(x * 100);
+                String label = String.format("%d%%", percent);
+                applet.text(label, x0 + origin.x, y0 + origin.y + 1.2f * applet.textAscent() + applet.textDescent());
+            }
+            for (float y = 0.1f; y < 1.0f; y += 0.1f) {
+                applet.noFill();
+                applet.stroke(100, 100, 100);
+                applet.strokeWeight(2);
+                float x0, y0, x1, y1;
+                x0 = -10;
+                y0 = y * height;
+                x1 = 0;
+                y1 = y * height;
+                applet.line(x0, y0, x1, y1);
+                applet.fill(0);
+                float payoff = (1 - y) * maxPayoff;
+                String label = String.format("%.1f", payoff);
+                applet.text(label, origin.x - 1.2f * applet.textWidth(label), y0 + origin.y);
+            }
         }
     }
 
@@ -153,6 +167,45 @@ public class Chart extends Sprite {
         applet.strokeWeight(2f);
         applet.stroke(150, 150, 150);
         applet.line(currentPercent * width, 0, currentPercent * width, height);
+    }
+
+    private void drawTwoStrategyPayoffLines(PEmbed applet) {
+        actualAPayoff.draw(applet);
+        actualBPayoff.draw(applet);
+        futureAPayoff.draw(applet);
+        futureBPayoff.draw(applet);
+        actualAaPayoff.draw(applet);
+        actualAbPayoff.draw(applet);
+        actualBaPayoff.draw(applet);
+        actualBbPayoff.draw(applet);
+        futureAaPayoff.draw(applet);
+        futureBbPayoff.draw(applet);
+    }
+
+    private void drawTwoStrategyLines(PEmbed applet) {
+        counterpartStrategyOverTime.draw(applet);
+        yourStrategyOverTime.draw(applet);
+    }
+
+    private void drawThreeStrategyPayoffLines(PEmbed applet) {
+        actualRPayoff.draw(applet);
+        actualPPayoff.draw(applet);
+        actualSPayoff.draw(applet);
+        futureRPayoff.draw(applet);
+        futurePPayoff.draw(applet);
+        futureSPayoff.draw(applet);
+        futureRrPayoff.draw(applet);
+        futureRpPayoff.draw(applet);
+        futureRsPayoff.draw(applet);
+        futurePrPayoff.draw(applet);
+        futurePpPayoff.draw(applet);
+        futurePsPayoff.draw(applet);
+        futureSrPayoff.draw(applet);
+        futureSpPayoff.draw(applet);
+        futureSsPayoff.draw(applet);
+    }
+
+    private void drawThreeStrategyLines(PEmbed applet) {
     }
 
     @Override
@@ -167,35 +220,22 @@ public class Chart extends Sprite {
         drawPercentLine(applet);
         if (periodConfig != null) {
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                actualAPayoff.draw(applet);
-                actualBPayoff.draw(applet);
-                futureAPayoff.draw(applet);
-                futureBPayoff.draw(applet);
-                actualAaPayoff.draw(applet);
-                actualAbPayoff.draw(applet);
-                actualBaPayoff.draw(applet);
-                actualBbPayoff.draw(applet);
-                futureAaPayoff.draw(applet);
-                futureBbPayoff.draw(applet);
+                if (mode == Mode.Payoff) {
+                    drawTwoStrategyPayoffLines(applet);
+                } else if (mode == Mode.Strategy) {
+                    drawTwoStrategyLines(applet);
+                }
             } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                actualRPayoff.draw(applet);
-                actualPPayoff.draw(applet);
-                actualSPayoff.draw(applet);
-                futureRPayoff.draw(applet);
-                futurePPayoff.draw(applet);
-                futureSPayoff.draw(applet);
-                futureRrPayoff.draw(applet);
-                futureRpPayoff.draw(applet);
-                futureRsPayoff.draw(applet);
-                futurePrPayoff.draw(applet);
-                futurePpPayoff.draw(applet);
-                futurePsPayoff.draw(applet);
-                futureSrPayoff.draw(applet);
-                futureSpPayoff.draw(applet);
-                futureSsPayoff.draw(applet);
+                if (mode == Mode.Payoff) {
+                    drawThreeStrategyPayoffLines(applet);
+                } else if (mode == Mode.Strategy) {
+                    drawThreeStrategyLines(applet);
+                }
             }
-            actualPayoffYou.draw(applet);
-            actualPayoffOther.draw(applet);
+            if (mode == Mode.Payoff) {
+                actualPayoffYou.draw(applet);
+                actualPayoffCounterpart.draw(applet);
+            }
         }
         drawAxis(applet);
         applet.popMatrix();
@@ -203,11 +243,13 @@ public class Chart extends Sprite {
 
     public void clearAll() {
         actualPayoffYou.clear();
-        actualPayoffOther.clear();
+        actualPayoffCounterpart.clear();
         actualAPayoff.clear();
         actualBPayoff.clear();
         actualAaPayoff.clear();
         actualBbPayoff.clear();
+        yourStrategyOverTime.clear();
+        counterpartStrategyOverTime.clear();
 
         clearFuture();
     }
@@ -263,12 +305,12 @@ public class Chart extends Sprite {
                     futurePercent,
                     new float[]{0},
                     new float[]{0});
-            addPoint(futureAPayoff, futurePercent, future_A);
-            addPoint(futureBPayoff, futurePercent, future_B);
-            addPoint(futureAaPayoff, futurePercent, future_Aa);
-            addPoint(futureAbPayoff, futurePercent, future_Ab);
-            addPoint(futureBaPayoff, futurePercent, future_Ba);
-            addPoint(futureBbPayoff, futurePercent, future_Bb);
+            addPayoffPoint(futureAPayoff, futurePercent, future_A);
+            addPayoffPoint(futureBPayoff, futurePercent, future_B);
+            addPayoffPoint(futureAaPayoff, futurePercent, future_Aa);
+            addPayoffPoint(futureAbPayoff, futurePercent, future_Ab);
+            addPayoffPoint(futureBaPayoff, futurePercent, future_Ba);
+            addPayoffPoint(futureBbPayoff, futurePercent, future_Bb);
         }
     }
 
@@ -324,25 +366,25 @@ public class Chart extends Sprite {
                     new float[]{0, 0, 1},
                     new float[]{0, 0, 1});
 
-            addPoint(futureRPayoff, futurePercent, futureR);
-            addPoint(futurePPayoff, futurePercent, futureP);
-            addPoint(futureSPayoff, futurePercent, futureS);
-            addPoint(futureRrPayoff, futurePercent, futureRr);
-            addPoint(futureRpPayoff, futurePercent, futureRp);
-            addPoint(futureRsPayoff, futurePercent, futureRs);
-            addPoint(futurePrPayoff, futurePercent, futurePr);
-            addPoint(futurePpPayoff, futurePercent, futurePp);
-            addPoint(futurePsPayoff, futurePercent, futurePs);
-            addPoint(futureSrPayoff, futurePercent, futureSr);
-            addPoint(futureSpPayoff, futurePercent, futureSp);
-            addPoint(futureSsPayoff, futurePercent, futureSs);
+            addPayoffPoint(futureRPayoff, futurePercent, futureR);
+            addPayoffPoint(futurePPayoff, futurePercent, futureP);
+            addPayoffPoint(futureSPayoff, futurePercent, futureS);
+            addPayoffPoint(futureRrPayoff, futurePercent, futureRr);
+            addPayoffPoint(futureRpPayoff, futurePercent, futureRp);
+            addPayoffPoint(futureRsPayoff, futurePercent, futureRs);
+            addPayoffPoint(futurePrPayoff, futurePercent, futurePr);
+            addPayoffPoint(futurePpPayoff, futurePercent, futurePp);
+            addPayoffPoint(futurePsPayoff, futurePercent, futurePs);
+            addPayoffPoint(futureSrPayoff, futurePercent, futureSr);
+            addPayoffPoint(futureSpPayoff, futurePercent, futureSp);
+            addPayoffPoint(futureSsPayoff, futurePercent, futureSs);
         }
     }
 
     public void updateLines() {
         if (currentPercent < 1.0) {
-            addPoint(actualPayoffYou, currentPercent, currentPayoffYou);
-            addPoint(actualPayoffOther, currentPercent, currentPayoffOther);
+            addPayoffPoint(actualPayoffYou, currentPercent, currentPayoffYou);
+            addPayoffPoint(actualPayoffCounterpart, currentPercent, currentPayoffCounterpart);
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 addTwoStrategyActualPayoffPoints();
                 addTwoStrategyFuturePayoffPoints();
@@ -350,23 +392,25 @@ public class Chart extends Sprite {
                 addThreeStrategyActualPayoffPoints();
                 addThreeStrategyFuturePayoffPoints();
             }
+            addStrategyPoint(yourStrategyOverTime, currentPercent, percent_A);
+            addStrategyPoint(counterpartStrategyOverTime, currentPercent, percent_a);
         }
     }
 
     private void addTwoStrategyActualPayoffPoints() {
-        addPoint(actualAPayoff, currentPercent, currentAPayoff);
-        addPoint(actualBPayoff, currentPercent, currentBPayoff);
+        addPayoffPoint(actualAPayoff, currentPercent, currentAPayoff);
+        addPayoffPoint(actualBPayoff, currentPercent, currentBPayoff);
 
-        addPoint(actualAaPayoff, currentPercent, currentAaPayoff);
-        addPoint(actualAbPayoff, currentPercent, currentAbPayoff);
-        addPoint(actualBaPayoff, currentPercent, currentBaPayoff);
-        addPoint(actualBbPayoff, currentPercent, currentBbPayoff);
+        addPayoffPoint(actualAaPayoff, currentPercent, currentAaPayoff);
+        addPayoffPoint(actualAbPayoff, currentPercent, currentAbPayoff);
+        addPayoffPoint(actualBaPayoff, currentPercent, currentBaPayoff);
+        addPayoffPoint(actualBbPayoff, currentPercent, currentBbPayoff);
     }
 
     private void addThreeStrategyActualPayoffPoints() {
-        addPoint(actualRPayoff, currentPercent, currentRPayoff);
-        addPoint(actualPPayoff, currentPercent, currentPPayoff);
-        addPoint(actualSPayoff, currentPercent, currentSPayoff);
+        addPayoffPoint(actualRPayoff, currentPercent, currentRPayoff);
+        addPayoffPoint(actualPPayoff, currentPercent, currentPPayoff);
+        addPayoffPoint(actualSPayoff, currentPercent, currentSPayoff);
     }
 
     private void twoStrategyChanged() {
@@ -374,7 +418,7 @@ public class Chart extends Sprite {
                 currentPercent,
                 new float[]{percent_A},
                 new float[]{percent_a});
-        currentPayoffOther = periodConfig.counterpartPayoffFunction.getPayoff(
+        currentPayoffCounterpart = periodConfig.counterpartPayoffFunction.getPayoff(
                 currentPercent,
                 new float[]{percent_a},
                 new float[]{percent_A});
@@ -421,7 +465,7 @@ public class Chart extends Sprite {
         strategyChanged();
     }
 
-    public void setOpponentStrategy(float[] s) {
+    public void setCounterpartStrategy(float[] s) {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_a = s[0];
         }
@@ -432,12 +476,20 @@ public class Chart extends Sprite {
         this.periodConfig = periodConfig;
         maxPayoff = periodConfig.payoffFunction.getMax();
         actualPayoffYou.configure(periodConfig.yourPayoff);
-        actualPayoffOther.configure(periodConfig.otherPayoff);
+        actualPayoffCounterpart.configure(periodConfig.otherPayoff);
+        yourStrategyOverTime.configure(periodConfig.yourStrategyOverTime);
+        counterpartStrategyOverTime.configure(periodConfig.counterpartStrategyOverTime);
     }
 
-    public void addPoint(Line line, float x, float y) {
-        line.addPoint(
-                line.width * x,
-                line.height * (1 - (y / maxPayoff)));
+    public void addPayoffPoint(Line line, float x, float y) {
+        line.setPoint(
+                Math.round(line.width * x),
+                Math.round(line.height * (1 - (y / maxPayoff))));
+    }
+
+    public void addStrategyPoint(Line line, float x, float y) {
+        line.setPoint(
+                Math.round(line.width * x),
+                Math.round(line.height * (1 - y)));
     }
 }

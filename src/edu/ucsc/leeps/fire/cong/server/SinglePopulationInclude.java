@@ -85,7 +85,7 @@ public class SinglePopulationInclude implements Population, Serializable {
             averageStrategy[i] /= members.size();
         }
         for (ClientInterface client : members) {
-            client.setOpponentStrategy(averageStrategy);
+            client.setCounterpartStrategy(averageStrategy);
             lastStrategies.put(client, client.getStrategy());
         }
     }

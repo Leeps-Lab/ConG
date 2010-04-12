@@ -2,6 +2,7 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.LinkedList;
 import processing.core.PApplet;
 
@@ -14,6 +15,7 @@ public class Line extends Sprite implements Serializable {
     public float weight;
     public int r, g, b, alpha;
     public Mode mode;
+    private transient HashMap<Integer, FPoint> definedPoints;
     private transient LinkedList<FPoint> points;
 
     public Line() {
@@ -27,6 +29,7 @@ public class Line extends Sprite implements Serializable {
     public Line(int x, int y, int width, int height) {
         super(x, y, width, height);
         visible = false;
+        definedPoints = new HashMap<Integer, FPoint>();
         points = new LinkedList<FPoint>();
     }
 
@@ -40,18 +43,11 @@ public class Line extends Sprite implements Serializable {
         this.mode = config.mode;
     }
 
-    public synchronized void addPoint(float x, float y) {
-        if (points.size() == 0) {
-            FPoint p = new FPoint(x, y);
-            points.add(p);
-        } else {
-            FPoint p0 = points.get(points.size() - 1);
-            FPoint p1 = new FPoint(x, y);
-            for (int i = (int) p0.x; i < p1.x; i++) {
-                FPoint p = new FPoint(x, y);
-                points.add(p);
-            }
-            points.add(p1);
+    public synchronized void setPoint(int x, int y) {
+        if (!definedPoints.containsKey(x)) {
+            FPoint point = new FPoint(x, y);
+            definedPoints.put(x, point);
+            points.add(point);
         }
     }
 
@@ -103,7 +99,12 @@ public class Line extends Sprite implements Serializable {
             applet.stroke(r, g, b, alpha);
             applet.strokeWeight(weight);
             applet.ellipseMode(PApplet.CENTER);
-            FPoint last = points.getLast();
+            FPoint last = null;
+            for (FPoint p : points) {
+                if (p != null) {
+                    last = p;
+                }
+            }
             applet.ellipse(last.x, last.y, 12, 12);
         }
     }
@@ -113,17 +114,18 @@ public class Line extends Sprite implements Serializable {
             applet.fill(r, g, b, alpha);
             applet.stroke(r, g, b, alpha);
             applet.strokeWeight(weight);
-            int i = 0;
-            while (i < points.size()) {
-                applet.beginShape();
-                applet.vertex(points.get(i).x, height);
-                do {
-                    FPoint p = points.get(i++);
+
+            applet.beginShape();
+            applet.vertex(0, height);
+            FPoint last = null;
+            for (FPoint p : points) {
+                if (p != null) {
                     applet.vertex(p.x, p.y);
-                } while (i < points.size() && i % 10 != 0);
-                applet.vertex(points.get(i - 1).x, height);
-                applet.endShape(PApplet.CLOSE);
+                    last = p;
+                }
             }
+            applet.vertex(last.x, height);
+            applet.endShape(PApplet.CLOSE);
         }
     }
 
@@ -151,10 +153,12 @@ public class Line extends Sprite implements Serializable {
     }
 
     public synchronized void clear() {
+        definedPoints.clear();
         points.clear();
     }
 
     public synchronized void removeFirst() {
-        points.removeFirst();
+        FPoint first = points.removeFirst();
+        definedPoints.remove(Math.round(first.x));
     }
 }
