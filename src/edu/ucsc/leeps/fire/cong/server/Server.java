@@ -46,17 +46,13 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
 
     public static void main(String[] args) throws Exception {
         Server server = new Server();
-        String serverHost = null;
-        String clientHost = null;
         String periodConfigFilePath = null;
         String clientConfigFilePath = null;
-        if (args.length == 4) {
-            serverHost = args[0];
-            clientHost = args[1];
-            periodConfigFilePath = args[2];
-            clientConfigFilePath = args[3];
+        if (args.length == 2) {
+            periodConfigFilePath = args[0];
+            clientConfigFilePath = args[1];
         }
-        Server.start(serverHost, clientHost, periodConfigFilePath, clientConfigFilePath, server);
+        Server.start(periodConfigFilePath, clientConfigFilePath, server);
     }
 
     //@Override
@@ -77,9 +73,6 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
     public void setPeriodConfig(edu.ucsc.leeps.fire.server.BasePeriodConfig superPeriodConfig) {
         super.setPeriodConfig(superPeriodConfig);
         periodConfig = (PeriodConfig) superPeriodConfig;
-        for (ClientInterface client : clients.values()) {
-            client.setPeriodConfig(periodConfig);
-        }
     }
 
     @Override

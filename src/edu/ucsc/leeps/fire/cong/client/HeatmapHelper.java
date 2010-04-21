@@ -9,7 +9,8 @@ import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
 import edu.ucsc.leeps.fire.server.PeriodConfigurable;
-import processing.core.PGraphics;
+import processing.core.PApplet;
+import processing.core.PImage;
 
 /**
  *
@@ -19,20 +20,22 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
 
     private PeriodConfig periodConfig;
     private float[][] payoff;
-    private PGraphics buffer;
+    private PImage buffer, nextBuffer;
     private boolean mine;
+    private PApplet applet;
 
-    public HeatmapHelper(int x, int y, int width, int height, boolean mine) {
+    public HeatmapHelper(int x, int y, int width, int height, boolean mine, PApplet applet) {
         super(x, y, width, height);
         this.width = width;
         this.height = height;
         this.payoff = new float[width][height];
         this.mine = mine;
+        this.applet = applet;
     }
 
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         periodConfig = (PeriodConfig) basePeriodConfig;
-        
+
     }
 
     // Chooses whether to interpolate between low and mid, or low and high
@@ -69,8 +72,8 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
         return color;
     }
 
-    public void updateTwoStrategyHeatmap(float currentPercent, PEmbed applet) {
-        buffer = applet.createGraphics(width, height, PEmbed.P2D);
+    public void updateTwoStrategyHeatmap(float currentPercent) {
+        buffer = applet.createImage(width, height, PEmbed.RGB);
         buffer.loadPixels();
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -83,13 +86,17 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
                 PayoffFunction payoffFunction;
                 if (mine) {
                     payoffFunction = periodConfig.payoffFunction;
+                    u = payoffFunction.getPayoff(
+                            currentPercent,
+                            new float[]{tmpA, tmpB},
+                            new float[]{tmpa, tmpb});
                 } else {
                     payoffFunction = periodConfig.counterpartPayoffFunction;
+                    u = payoffFunction.getPayoff(
+                            currentPercent,
+                            new float[]{tmpa, tmpb},
+                            new float[]{tmpA, tmpB});
                 }
-                u = payoffFunction.getPayoff(
-                        currentPercent,
-                        new float[]{tmpA, tmpB},
-                        new float[]{tmpa, tmpb});
                 max = payoffFunction.getMax();
                 payoff[x][y] = u;
                 buffer.pixels[y * width + x] = getRGB(u / max);
@@ -101,8 +108,7 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
     public void updateThreeStrategyHeatmap(
             float currentPercent,
             float r, float p, float s,
-            ThreeStrategySelector threeStrategySelector,
-            PEmbed applet) {
+            ThreeStrategySelector threeStrategySelector) {
         buffer = applet.createGraphics(width, height, PEmbed.P2D);
         buffer.loadPixels();
         for (int x = 0; x < width; x++) {

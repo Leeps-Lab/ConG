@@ -23,17 +23,9 @@ public class PointsDisplay extends Sprite {
     public void draw(PEmbed applet) {
         String periodPayoffString = String.format("Period Payoff: %.2f", periodPoints);
         String totalPayoffString = String.format("Total Payoff: %.2f", totalPoints);
-        applet.pushMatrix();
-        applet.translate(origin.x, origin.y);
-        applet.rectMode(PEmbed.CORNER);
-        applet.fill(255);
-        applet.noStroke();
-        float w = applet.textWidth(periodPayoffString) + applet.textWidth(totalPayoffString);
         float textHeight = applet.textAscent() + applet.textDescent();
-        float h = 4 * textHeight;
-        applet.rect(0.25f * w, 0.5f * h, -1.5f * w, -1.5f * h);
         applet.fill(0);
-        applet.textAlign(PEmbed.RIGHT);
+        applet.textAlign(PEmbed.LEFT);
         applet.text(periodPayoffString, origin.x, origin.y);
         applet.text(totalPayoffString, origin.x, origin.y + textHeight);
         if (displaySwitchCosts) {
@@ -45,7 +37,6 @@ public class PointsDisplay extends Sprite {
              * 
              */
         }
-        applet.popMatrix();
     }
 
     public void setPoints(float periodPoints, float totalPoints) {

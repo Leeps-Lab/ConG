@@ -58,8 +58,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         this.applet = applet;
         this.server = server;
         this.client = client;
-        heatmap = new HeatmapHelper(0, 0, width, height, true);
-        counterpartHeatmap = new HeatmapHelper(width - 100, -130, 100, 100, false);
+        heatmap = new HeatmapHelper(0, 0, width, height, true, applet);
+        counterpartHeatmap = new HeatmapHelper(0, -130, 100, 100, false, applet);
         applet.addMouseListener(this);
         applet.addKeyListener(this);
 
@@ -143,8 +143,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
     public void update() {
         if (visible) {
-            heatmap.updateTwoStrategyHeatmap(currentPercent, applet);
-            counterpartHeatmap.updateTwoStrategyHeatmap(currentPercent, applet);
+            heatmap.updateTwoStrategyHeatmap(currentPercent);
+            counterpartHeatmap.updateTwoStrategyHeatmap(currentPercent);
             updateLabels();
         }
     }
@@ -426,7 +426,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private class StrategyChangeThread extends Thread {
 
         public volatile boolean running = true;
-        private final static long sleepTimeMillis = 100;
+        private final static long sleepTimeMillis = Client.SLEEP_TIME_MILLIS;
 
         @Override
         public void run() {
@@ -449,11 +449,11 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
                         client.setMyStrategy(new float[]{percent_A});
                         server.strategyChanged(client.getID());
                     }
-                    try {
-                        sleep(sleepTimeMillis);
-                    } catch (InterruptedException ex) {
-                        ex.printStackTrace();
-                    }
+                }
+                try {
+                    sleep(sleepTimeMillis);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
                 }
             }
         }

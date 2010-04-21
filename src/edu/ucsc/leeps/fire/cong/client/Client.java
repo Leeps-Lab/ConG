@@ -31,7 +31,7 @@ public class Client extends BaseClient implements ClientInterface {
     private Chart payoffChart, strategyChart;
     private float[] myStrategy;
     private float[] counterpartStrategy;
-    private float periodPointsEstimate;
+    public final static int SLEEP_TIME_MILLIS = 100;
 
     //@Override
     public void init(edu.ucsc.leeps.fire.server.BaseServerInterface server) {
@@ -44,18 +44,18 @@ public class Client extends BaseClient implements ClientInterface {
         setSize(embed.getSize());
         add(embed);
         percent = -1;
-        countdown = new Countdown(10, 20);
-        pointsDisplay = new PointsDisplay(width - 200, 20);
+        countdown = new Countdown(230, 55);
+        pointsDisplay = new PointsDisplay(230, (int) (55 + embed.textAscent() + embed.textDescent()));
         bimatrix = new TwoStrategySelector(
-                20, 200, 400, 400, embed,
+                20, 150, 400, 400, embed,
                 this.server, this);
         simplex = new ThreeStrategySelector(
-                20, 200, 200, 600,
+                20, 150, 200, 600,
                 embed,
                 this.server,
                 this);
-        payoffChart = new Chart(480, 200, 700, 400, simplex, Chart.Mode.Payoff);
-        strategyChart = new Chart(480, 70, 700, 100, simplex, Chart.Mode.Strategy);
+        payoffChart = new Chart(480, 150, 700, 400, simplex, Chart.Mode.Payoff);
+        strategyChart = new Chart(480, 20, 700, 100, simplex, Chart.Mode.Strategy);
     }
 
     @Override
@@ -65,7 +65,6 @@ public class Client extends BaseClient implements ClientInterface {
         bimatrix.setEnabled(true);
         payoffChart.clearAll();
         strategyChart.clearAll();
-        periodPointsEstimate = 0;
         super.startPeriod();
     }
 
@@ -127,11 +126,6 @@ public class Client extends BaseClient implements ClientInterface {
             strategyChart.updateLines();
             bimatrix.setCurrentPercent(this.percent);
             simplex.currentPercent = this.percent;
-            float currentFlowPayoff = periodConfig.payoffFunction.getPayoff(
-                    percent, myStrategy, counterpartStrategy);
-            float percentOfPeriod = getQuickTickInterval() / (periodConfig.length * 1000f);
-            periodPointsEstimate += currentFlowPayoff * percentOfPeriod;
-            pointsDisplay.setPoints(periodPointsEstimate, totalPoints);
         }
     }
 
@@ -180,7 +174,7 @@ public class Client extends BaseClient implements ClientInterface {
 
     @Override
     public int getQuickTickInterval() {
-        return 100;
+        return SLEEP_TIME_MILLIS;
     }
 
     public class PEmbed extends PApplet {
@@ -220,19 +214,23 @@ public class Client extends BaseClient implements ClientInterface {
             }
             textFont(size16);
             textMode(SCREEN);
+            frameRate(30);
         }
 
         @Override
         public void draw() {
-            background(255);
-            fill(0);
-            stroke(0);
-            bimatrix.draw(embed);
-            simplex.draw(embed);
-            strategyChart.draw(embed);
-            payoffChart.draw(embed);
-            countdown.draw(embed);
-            pointsDisplay.draw(embed);
+            try {
+                background(255);
+                fill(0);
+                stroke(0);
+                bimatrix.draw(embed);
+                simplex.draw(embed);
+                strategyChart.draw(embed);
+                payoffChart.draw(embed);
+                countdown.draw(embed);
+                pointsDisplay.draw(embed);
+            } catch (NullPointerException ex) {
+            }
         }
     }
 

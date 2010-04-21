@@ -150,7 +150,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         heatmap = new HeatmapHelper(
                 (int) (origin.x + rock.origin.x), (int) (origin.y + scissors.origin.y),
                 (int) (paper.origin.x - rock.origin.x), (int) (rock.origin.y - scissors.origin.y),
-                true);
+                true, applet);
         currentPercent = 0f;
         this.applet = applet;
     }
@@ -160,7 +160,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             heatmap.updateThreeStrategyHeatmap(
                     currentPercent,
                     opponentStrat[0], opponentStrat[1], opponentStrat[2],
-                    this, applet);
+                    this);
         }
     }
 
