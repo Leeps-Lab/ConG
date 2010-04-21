@@ -4,6 +4,7 @@ import edu.ucsc.leeps.fire.client.BaseClient;
 import edu.ucsc.leeps.fire.cong.config.ClientConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
@@ -31,6 +32,7 @@ public class Client extends BaseClient implements ClientInterface {
     private Chart payoffChart, strategyChart;
     private float[] myStrategy;
     private float[] counterpartStrategy;
+    private boolean isCounterpart = false;
     public final static int SLEEP_TIME_MILLIS = 100;
 
     //@Override
@@ -91,6 +93,11 @@ public class Client extends BaseClient implements ClientInterface {
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         super.setPeriodConfig(basePeriodConfig);
         periodConfig = (PeriodConfig) basePeriodConfig;
+        if (isCounterpart) {
+            PayoffFunction tmp = periodConfig.payoffFunction;
+            periodConfig.payoffFunction = periodConfig.counterpartPayoffFunction;
+            periodConfig.counterpartPayoffFunction = tmp;
+        }
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
         bimatrix.setPeriodConfig(periodConfig);
         simplex.setPeriodConfig(periodConfig);
@@ -175,6 +182,10 @@ public class Client extends BaseClient implements ClientInterface {
     @Override
     public int getQuickTickInterval() {
         return SLEEP_TIME_MILLIS;
+    }
+
+    public void setIsCounterpart(boolean isCounterpart) {
+        this.isCounterpart = isCounterpart;
     }
 
     public class PEmbed extends PApplet {

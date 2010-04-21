@@ -58,6 +58,8 @@ public class PairedPopulation implements Population, Serializable {
             ClientInterface client2 = partners.remove(0);
             pairs.put(client1, client2);
             pairs.put(client2, client1);
+            client1.setIsCounterpart(false);
+            client2.setIsCounterpart(true);
         }
         updateAllStrategies();
     }

@@ -13,6 +13,7 @@ import edu.ucsc.leeps.fire.cong.server.SinglePopulationInclude;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoPopulation;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.UltimatumPayoffFunction;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
 
 /**
@@ -33,6 +34,7 @@ public class PeriodConfig extends BasePeriodConfig {
     public int heatmapColorLow, heatmapColorMid, heatmapColorHigh;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
+    public static final Class ultimatum = UltimatumPayoffFunction.class;
     public static final Class singlePopulationInclude = SinglePopulationInclude.class;
     public static final Class singlePopulationExclude = SinglePopulationExclude.class;
     public static final Class twoPopulation = TwoPopulation.class;

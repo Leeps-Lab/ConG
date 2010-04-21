@@ -1,0 +1,2 @@
+"period","timeConstrained","paid","length","initialStrategy","pointsPerSecond","percentChangePerSecond","payoffFunction","MAX","sender","counterpartPayoffFunction","MAX","sender","population","twoStrategySelectionType","yourPayoff","mode","r","g","b","otherPayoff","mode","r","g","b","weight","heatmapColorLow","heatmapColorMid","heatmapColorHigh"
+1,"TRUE","TRUE",60,0,"FALSE",0.1,"ultimatum",100,TRUE,"ultimatum",100,FALSE,"paired","HeatmapBoth","line","shaded",100,255,100,"line","solid",100,150,255,2,"0xFF0000","0xFFFF00","0x00FF00"
