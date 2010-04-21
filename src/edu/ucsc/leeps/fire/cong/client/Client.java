@@ -219,10 +219,10 @@ public class Client extends BaseClient implements ClientInterface {
 
         @Override
         public void draw() {
+            background(255);
+            fill(0);
+            stroke(0);
             try {
-                background(255);
-                fill(0);
-                stroke(0);
                 bimatrix.draw(embed);
                 simplex.draw(embed);
                 strategyChart.draw(embed);
@@ -230,7 +230,9 @@ public class Client extends BaseClient implements ClientInterface {
                 countdown.draw(embed);
                 pointsDisplay.draw(embed);
             } catch (NullPointerException ex) {
+                ex.printStackTrace();
             }
+            //System.err.println(frame)
         }
     }
 
