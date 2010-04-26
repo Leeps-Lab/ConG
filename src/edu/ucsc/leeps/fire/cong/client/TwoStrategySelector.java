@@ -50,16 +50,16 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
     public TwoStrategySelector(
             int x, int y,
-            int width, int height,
+            int matrixSize, int counterpartMatrixSize,
             PEmbed applet,
             ServerInterface server,
             ClientInterface client) {
-        super(x, y, width, height);
+        super(x, y, matrixSize, matrixSize);
         this.applet = applet;
         this.server = server;
         this.client = client;
-        heatmap = new HeatmapHelper(0, 0, width, height, true, applet);
-        counterpartHeatmap = new HeatmapHelper(0, -130, 100, 100, false, applet);
+        heatmap = new HeatmapHelper(0, 0, matrixSize, matrixSize, true, applet);
+        counterpartHeatmap = new HeatmapHelper(0, -(counterpartMatrixSize + 30), counterpartMatrixSize, counterpartMatrixSize, false, applet);
         applet.addMouseListener(this);
         applet.addKeyListener(this);
 
@@ -342,6 +342,11 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         drawStrategyInfo();
 
         applet.popMatrix();
+
+        if (Client.DEBUG) {
+            String changesPerSecondEMA = String.format("%.2f", thread.changeNanosEMA / 1000000f);
+            applet.text(changesPerSecondEMA, origin.x + width - 100, origin.y + height + 10);
+        }
     }
 
     private boolean inRect(int x, int y) {
@@ -423,10 +428,16 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     public void keyReleased(KeyEvent ke) {
     }
 
+    public void setTwoStrategyHeatmapBuffers(float[][][] payoff, float[][][] counterpartPayoff) {
+        heatmap.setTwoStrategyHeatmapBuffers(payoff);
+        counterpartHeatmap.setTwoStrategyHeatmapBuffers(counterpartPayoff);
+    }
+
     private class StrategyChangeThread extends Thread {
 
         public volatile boolean running = true;
-        private final static long sleepTimeMillis = Client.SLEEP_TIME_MILLIS;
+        private final static long sleepTimeMillis = Client.QUICK_TICK_TIME;
+        public float changeNanosEMA = 0;
 
         @Override
         public void run() {
@@ -447,7 +458,9 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
                             }
                         }
                         client.setMyStrategy(new float[]{percent_A});
+                        long startTime = System.nanoTime();
                         server.strategyChanged(client.getID());
+                        changeNanosEMA += 0.01f * ((System.nanoTime() - startTime) - changeNanosEMA);
                     }
                 }
                 try {

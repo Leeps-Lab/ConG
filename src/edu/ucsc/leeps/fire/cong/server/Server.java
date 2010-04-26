@@ -34,14 +34,19 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         random = new Random();
     }
 
-    //@Override
-    public synchronized void strategyChanged(Integer id) {
-        long timestamp = System.currentTimeMillis();
-        membership.get(id).strategyChanged(id, timestamp, periodConfig);
-        eventLog.timestamp = timestamp;
-        eventLog.subjectId = id;
-        eventLog.strategy = clients.get(id).getStrategy();
-        eventLog.commit();
+    public synchronized void strategyChanged(final Integer id) {
+        (new Thread() {
+
+            @Override
+            public void run() {
+                long timestamp = System.currentTimeMillis();
+                membership.get(id).strategyChanged(id, timestamp, periodConfig);
+                eventLog.timestamp = timestamp;
+                eventLog.subjectId = id;
+                eventLog.strategy = clients.get(id).getStrategy();
+                eventLog.commit();
+            }
+        }).start();
     }
 
     public static void main(String[] args) throws Exception {
@@ -81,6 +86,7 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         long periodStartTime = System.currentTimeMillis();
         initPopulations();
         initStrategies(periodStartTime);
+        initHeatmaps();
         startPeriod();
     }
 
@@ -118,6 +124,42 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         }
         for (Population population : populations) {
             population.initialize(periodStartTime, periodConfig);
+        }
+    }
+
+    private void initHeatmaps() {
+        int size = 50;
+        final float[][][] payoffBuffer = new float[periodConfig.length][size][size];
+        final float[][][] counterpartPayoffBuffer = new float[periodConfig.length][size][size];
+        for (int tick = 0; tick < periodConfig.length; tick++) {
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
+                    float A = 1 - (y / (float) size);
+                    float a = 1 - (x / (float) size);
+                    payoffBuffer[tick][x][y] = periodConfig.payoffFunction.getPayoff(
+                            tick / (float) periodConfig.length,
+                            new float[]{A},
+                            new float[]{a}) / periodConfig.payoffFunction.getMax();
+                    counterpartPayoffBuffer[tick][x][y] = periodConfig.counterpartPayoffFunction.getPayoff(
+                            tick / (float) periodConfig.length,
+                            new float[]{A},
+                            new float[]{a}) / periodConfig.counterpartPayoffFunction.getMax();
+                }
+            }
+        }
+        final List<ClientInterface> finished = new LinkedList<ClientInterface>();
+        for (final ClientInterface client : clients.values()) {
+            new Thread() {
+
+                @Override
+                public void run() {
+                    client.setTwoStrategyHeatmapBuffers(payoffBuffer, counterpartPayoffBuffer);
+                    finished.add(client);
+                }
+            }.start();
+        }
+        while (finished.size() != clients.size()) {
+            Thread.yield();
         }
     }
 }

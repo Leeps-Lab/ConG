@@ -15,6 +15,7 @@ public class Line extends Sprite implements Serializable {
     public float weight;
     public int r, g, b, alpha;
     public Mode mode;
+    public int SAMPLE_RATE = 4;
     private transient HashMap<Integer, FPoint> definedPoints;
     private transient LinkedList<FPoint> points;
 
@@ -44,6 +45,9 @@ public class Line extends Sprite implements Serializable {
     }
 
     public synchronized void setPoint(int x, int y) {
+        if (!visible) {
+            return;
+        }
         if (!definedPoints.containsKey(x)) {
             FPoint point = new FPoint(x, y);
             definedPoints.put(x, point);
@@ -63,14 +67,16 @@ public class Line extends Sprite implements Serializable {
         if (points.size() >= 2) {
             applet.stroke(r, g, b, alpha);
             applet.strokeWeight(weight);
-            for (int i = 0; i < points.size() - 1; i++) {
-                FPoint p0 = points.get(i);
-                FPoint p1 = points.get(i + 1);
-                if (p0.visible && p1.visible) {
-                    applet.line(
-                            p0.x, p0.y,
-                            p1.x, p1.y);
+            FPoint last = null;
+            int i = 0;
+            for (FPoint p : points) {
+                if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
+                    if (last != null) {
+                        applet.line(last.x, last.y, p.x, p.y);
+                    }
+                    last = p;
                 }
+                i++;
             }
         }
     }
@@ -118,11 +124,15 @@ public class Line extends Sprite implements Serializable {
             applet.beginShape();
             applet.vertex(0, height);
             FPoint last = null;
+            int i = 0;
             for (FPoint p : points) {
-                if (p != null) {
-                    applet.vertex(p.x, p.y);
-                    last = p;
+                if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
+                    if (p != null) {
+                        applet.vertex(p.x, p.y);
+                        last = p;
+                    }
                 }
+                i++;
             }
             applet.vertex(last.x, height);
             applet.endShape(PApplet.CLOSE);

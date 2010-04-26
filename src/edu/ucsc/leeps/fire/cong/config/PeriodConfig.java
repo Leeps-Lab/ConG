@@ -47,7 +47,7 @@ public class PeriodConfig extends BasePeriodConfig {
     public PeriodConfig() {
         initialStrategy = 0.0f;
         pointsPerSecond = false;
-        percentChangePerSecond = 1.0f;
+        percentChangePerSecond = 0.1f;
         payoffFunction = new TwoStrategyPayoffFunction();
         counterpartPayoffFunction = new TwoStrategyPayoffFunction();
         population = new PairedPopulation();

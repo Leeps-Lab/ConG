@@ -12,8 +12,8 @@ public class PointsDisplay extends Sprite {
     private float switchCosts;
     private float periodPoints, totalPoints;
 
-    public PointsDisplay(int x, int y) {
-        super(x, y, 0, 0);
+    public PointsDisplay(int x, int y, PEmbed embed) {
+        super(x, y, (int) embed.textWidth("Period Payoff: 000"), (int) (2 * (embed.textAscent() + embed.textDescent())));
         periodPoints = 0;
         totalPoints = 0;
         displaySwitchCosts = false;

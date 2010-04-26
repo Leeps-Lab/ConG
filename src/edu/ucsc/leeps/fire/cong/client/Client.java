@@ -19,6 +19,7 @@ import processing.core.PFont;
  */
 public class Client extends BaseClient implements ClientInterface {
 
+    public static final boolean DEBUG = true;
     private int width, height;
     private PEmbed embed;
     private ServerInterface server;
@@ -33,37 +34,60 @@ public class Client extends BaseClient implements ClientInterface {
     private float[] myStrategy;
     private float[] counterpartStrategy;
     private boolean isCounterpart = false;
-    public final static int SLEEP_TIME_MILLIS = 100;
+    public final static int QUICK_TICK_TIME = 100;
 
     //@Override
     public void init(edu.ucsc.leeps.fire.server.BaseServerInterface server) {
         this.server = (ServerInterface) server;
         removeAll();
-        width = 1200;
-        height = 650;
+        width = 900;
+        height = 500;
         embed = new PEmbed(width, height);
         embed.init();
         setSize(embed.getSize());
         add(embed);
         percent = -1;
-        countdown = new Countdown(230, 55);
-        pointsDisplay = new PointsDisplay(230, (int) (55 + embed.textAscent() + embed.textDescent()));
+        int leftMargin = 20;
+        int topMargin = 20;
+        float textHeight = embed.textAscent() + embed.textDescent();
+        //int matrixSize = (int) (height - (4 * textHeight) - 120);
+        int matrixSize = 320;
+        int counterpartMatrixSize = 100;
         bimatrix = new TwoStrategySelector(
-                20, 150, 400, 400, embed,
-                this.server, this);
+                leftMargin, topMargin + counterpartMatrixSize + 30,
+                matrixSize, counterpartMatrixSize,
+                embed, this.server, this);
+        /*
         simplex = new ThreeStrategySelector(
-                20, 150, 200, 600,
-                embed,
-                this.server,
-                this);
-        payoffChart = new Chart(480, 150, 700, 400, simplex, Chart.Mode.Payoff);
-        strategyChart = new Chart(480, 20, 700, 100, simplex, Chart.Mode.Strategy);
+        20, 150, 200, 600,
+        embed,
+        this.server,
+        this);
+         * 
+         */
+        countdown = new Countdown(
+                counterpartMatrixSize + 4 * leftMargin, 40 + topMargin, embed);
+        pointsDisplay = new PointsDisplay(
+                counterpartMatrixSize + 4 * leftMargin, (int) (40 + textHeight) + topMargin, embed);
+        int chartWidth = (int) (width - bimatrix.width - 2 * leftMargin - 80);
+        int chartMargin = 30;
+        int strategyChartHeight = 100;
+        int payoffChartHeight = (int) (height - strategyChartHeight - 2 * topMargin - chartMargin - 10);
+        strategyChart = new Chart(
+                bimatrix.width + 80 + leftMargin, topMargin,
+                chartWidth, strategyChartHeight,
+                simplex, Chart.Mode.Strategy);
+        payoffChart = new Chart(
+                bimatrix.width + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
+                chartWidth, payoffChartHeight,
+                simplex, Chart.Mode.Payoff);
+        embed.running = true;
     }
 
     @Override
     public void startPeriod() {
         this.percent = 0;
-        simplex.setEnabled(true);
+        //simplex.setEnabled(true);
         bimatrix.setEnabled(true);
         payoffChart.clearAll();
         strategyChart.clearAll();
@@ -72,7 +96,7 @@ public class Client extends BaseClient implements ClientInterface {
 
     @Override
     public void endPeriod() {
-        simplex.reset();
+        //simplex.reset();
         bimatrix.reset();
         bimatrix.setEnabled(false);
         super.endPeriod();
@@ -100,7 +124,7 @@ public class Client extends BaseClient implements ClientInterface {
         }
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
         bimatrix.setPeriodConfig(periodConfig);
-        simplex.setPeriodConfig(periodConfig);
+        //simplex.setPeriodConfig(periodConfig);
         payoffChart.setPeriodConfig(periodConfig);
         strategyChart.setPeriodConfig(periodConfig);
     }
@@ -121,7 +145,7 @@ public class Client extends BaseClient implements ClientInterface {
         this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
         countdown.setSecondsLeft(secondsLeft);
         bimatrix.update();
-        simplex.update();
+        //simplex.update();
     }
 
     public void quickTick(int millisLeft) {
@@ -132,12 +156,12 @@ public class Client extends BaseClient implements ClientInterface {
             strategyChart.currentPercent = this.percent;
             strategyChart.updateLines();
             bimatrix.setCurrentPercent(this.percent);
-            simplex.currentPercent = this.percent;
+            //simplex.currentPercent = this.percent;
         }
     }
 
     public void setActionsEnabled(boolean enabled) {
-        simplex.setEnabled(enabled);
+        //simplex.setEnabled(enabled);
     }
 
     public synchronized float[] getStrategy() {
@@ -181,29 +205,34 @@ public class Client extends BaseClient implements ClientInterface {
 
     @Override
     public int getQuickTickInterval() {
-        return SLEEP_TIME_MILLIS;
+        return QUICK_TICK_TIME;
     }
 
     public void setIsCounterpart(boolean isCounterpart) {
         this.isCounterpart = isCounterpart;
     }
 
+    public void setTwoStrategyHeatmapBuffers(float[][][] payoff, float[][][] counterpartPayoff) {
+        if (isCounterpart) {
+            bimatrix.setTwoStrategyHeatmapBuffers(counterpartPayoff, payoff);
+        } else {
+            bimatrix.setTwoStrategyHeatmapBuffers(payoff, counterpartPayoff);
+        }
+    }
+
     public class PEmbed extends PApplet {
 
+        private final String RENDERER = P2D;
         private int initWidth, initHeight;
         public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
+        public boolean running = false;
 
         public PEmbed(int initWidth, int initHeight) {
             this.initWidth = initWidth;
             this.initHeight = initHeight;
-        }
-
-        @Override
-        public void setup() {
-            size(initWidth, initHeight, PEmbed.P2D);
-            smooth();
             try {
-                InputStream fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-14.vlw");
+                InputStream fontInputStream;
+                fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-14.vlw");
                 size14 = new PFont(fontInputStream);
                 fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-Bold-14.vlw");
                 size14Bold = new PFont(fontInputStream);
@@ -223,27 +252,33 @@ public class Client extends BaseClient implements ClientInterface {
                 ex.printStackTrace();
                 System.exit(1);
             }
+        }
+
+        @Override
+        public void setup() {
+            size(initWidth, initHeight, RENDERER);
+            smooth();
             textFont(size16);
             textMode(SCREEN);
-            frameRate(30);
         }
 
         @Override
         public void draw() {
-            background(255);
-            fill(0);
-            stroke(0);
-            try {
+            if (running) {
+                background(255);
                 bimatrix.draw(embed);
-                simplex.draw(embed);
+                //simplex.draw(embed);
                 strategyChart.draw(embed);
                 payoffChart.draw(embed);
                 countdown.draw(embed);
                 pointsDisplay.draw(embed);
-            } catch (NullPointerException ex) {
-                ex.printStackTrace();
+                if (DEBUG) {
+                    String frameRateString = String.format("%.2f", frameRate);
+                    text(frameRateString,
+                            width - (textWidth(frameRateString) + 10),
+                            height - (textAscent() + textDescent()));
+                }
             }
-            //System.err.println(frame)
         }
     }
 

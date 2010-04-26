@@ -217,7 +217,6 @@ public class Chart extends Sprite {
         applet.noStroke();
         float currX = currentPercent * width;
         applet.rect(currX - 8, 0, width, height);
-        drawPercentLine(applet);
         if (periodConfig != null) {
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
@@ -237,6 +236,7 @@ public class Chart extends Sprite {
                 actualPayoffCounterpart.draw(applet);
             }
         }
+        drawPercentLine(applet);
         drawAxis(applet);
         applet.popMatrix();
     }
