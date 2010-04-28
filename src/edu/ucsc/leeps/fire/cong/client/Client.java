@@ -57,14 +57,13 @@ public class Client extends BaseClient implements ClientInterface {
                 leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, counterpartMatrixSize,
                 embed, this.server, this);
-        /*
+        
         simplex = new ThreeStrategySelector(
         20, 150, 200, 600,
         embed,
         this.server,
         this);
-         * 
-         */
+        
         countdown = new Countdown(
                 counterpartMatrixSize + 4 * leftMargin, 40 + topMargin, embed);
         pointsDisplay = new PointsDisplay(
@@ -87,7 +86,7 @@ public class Client extends BaseClient implements ClientInterface {
     @Override
     public void startPeriod() {
         this.percent = 0;
-        //simplex.setEnabled(true);
+        simplex.setEnabled(true);
         bimatrix.setEnabled(true);
         payoffChart.clearAll();
         strategyChart.clearAll();
@@ -96,7 +95,7 @@ public class Client extends BaseClient implements ClientInterface {
 
     @Override
     public void endPeriod() {
-        //simplex.reset();
+        simplex.reset();
         bimatrix.reset();
         bimatrix.setEnabled(false);
         super.endPeriod();
@@ -124,7 +123,7 @@ public class Client extends BaseClient implements ClientInterface {
         }
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
         bimatrix.setPeriodConfig(periodConfig);
-        //simplex.setPeriodConfig(periodConfig);
+        simplex.setPeriodConfig(periodConfig);
         payoffChart.setPeriodConfig(periodConfig);
         strategyChart.setPeriodConfig(periodConfig);
     }
@@ -145,7 +144,7 @@ public class Client extends BaseClient implements ClientInterface {
         this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
         countdown.setSecondsLeft(secondsLeft);
         bimatrix.update();
-        //simplex.update();
+        simplex.update();
     }
 
     public void quickTick(int millisLeft) {
@@ -156,12 +155,12 @@ public class Client extends BaseClient implements ClientInterface {
             strategyChart.currentPercent = this.percent;
             strategyChart.updateLines();
             bimatrix.setCurrentPercent(this.percent);
-            //simplex.currentPercent = this.percent;
+            simplex.currentPercent = this.percent;
         }
     }
 
     public void setActionsEnabled(boolean enabled) {
-        //simplex.setEnabled(enabled);
+        simplex.setEnabled(enabled);
     }
 
     public synchronized float[] getStrategy() {
@@ -267,7 +266,7 @@ public class Client extends BaseClient implements ClientInterface {
             if (running) {
                 background(255);
                 bimatrix.draw(embed);
-                //simplex.draw(embed);
+                simplex.draw(embed);
                 strategyChart.draw(embed);
                 payoffChart.draw(embed);
                 countdown.draw(embed);

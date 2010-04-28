@@ -3,6 +3,7 @@ package edu.ucsc.leeps.fire.cong.client;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
+import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
 import edu.ucsc.leeps.fire.server.PeriodConfigurable;
 import java.awt.Color;
@@ -102,11 +103,11 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         opponent.setColor(200, 40, 40);
 
         // set up Sliders
-        stratSlider[R] = new Slider(50, width - 50, height / 3 + 50,
+        stratSlider[R] = new Slider(this, 50, width - 50, height / 3 + 50,
                 rColor, rLabel, 1f);
-        stratSlider[P] = new Slider(50, width - 50, height / 3 + 100,
+        stratSlider[P] = new Slider(this, 50, width - 50, height / 3 + 100,
                 pColor, pLabel, 1f);
-        stratSlider[S] = new Slider(50, width - 50, height / 3 + 150,
+        stratSlider[S] = new Slider(this, 50, width - 50, height / 3 + 150,
                 sColor, sLabel, 1f);
 
 
@@ -777,7 +778,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
 
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         periodConfig = (PeriodConfig) basePeriodConfig;
-        if (periodConfig.payoffFunction instanceof ThreeStrategySelector) {
+        if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             heatmap.setPeriodConfig(periodConfig);
             setVisible(true);
         } else {

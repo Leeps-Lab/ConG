@@ -21,12 +21,16 @@ public class Slider {
     private boolean grabbed;
     private boolean ghostGrabbed;
     private float maxValue;
+    private Sprite parent;
 
     // Constructor ////////////////
-    public Slider(float x1, float x2, float y, Color C, String label, float maxValue) {
+    public Slider(Sprite parent, float x1, float x2, float y, Color C,
+            String label, float maxValue) {
         if (x2 < x1) {
             throw new RuntimeException("Invalid Slider coordinates " + "(x2 < x1)");
         }
+
+        this.parent = parent;
 
         this.sliderStart = x1;
         this.sliderEnd = x2;
@@ -171,15 +175,16 @@ public class Slider {
 
         applet.fill(0);
         applet.textAlign(PEmbed.LEFT);
-        applet.text(label, sliderStart - 50, sliderY + 2);
-        applet.text(stratLabel, sliderEnd + 10, sliderY + 2);
+        float labelWidth = applet.textWidth(label);
+        applet.text(label, parent.origin.x + sliderStart - labelWidth - 10, parent.origin.y + sliderY + 2);
+        applet.text(stratLabel, parent.origin.x + sliderEnd + 10, parent.origin.y + sliderY + 2);
 
         if (ghosting) {
             applet.fill(R, G, B, 125);
             applet.rect(ghostPos, sliderY, HANDLE_WIDTH, HANDLE_HEIGHT);
 
             applet.fill(120);
-            applet.text(ghostLabel, sliderEnd + 10, sliderY + 20);
+            applet.text(ghostLabel, parent.origin.x + sliderEnd + 10, parent.origin.y + sliderY + 20);
         }
     }
 }

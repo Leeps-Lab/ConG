@@ -442,7 +442,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         @Override
         public void run() {
             while (running) {
-                if (enabled) {
+                if (enabled && visible) {
                     if (targetPercent_A != -1 && targetPercent_A != percent_A) {
                         if (periodConfig.percentChangePerSecond == -1) {
                             percent_A = targetPercent_A;
