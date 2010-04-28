@@ -45,15 +45,29 @@ public class PeriodConfig extends BasePeriodConfig {
      * Setup whatever defaults you like here.
      */
     public PeriodConfig() {
+        timeConstrained = true;
+        paid = true;
+        length = 120;
+
         initialStrategy = 0.0f;
         pointsPerSecond = false;
         percentChangePerSecond = 0.1f;
-        payoffFunction = new TwoStrategyPayoffFunction();
-        counterpartPayoffFunction = new TwoStrategyPayoffFunction();
-        population = new PairedPopulation();
-        twoStrategySelectionType = TwoStrategySelectionType.HeatmapBoth;
+        payoffFunction = new ThreeStrategyPayoffFunction();
+        counterpartPayoffFunction = new ThreeStrategyPayoffFunction();
+        population = new SinglePopulationInclude();
+        //twoStrategySelectionType = TwoStrategySelectionType.HeatmapBoth;
         yourPayoff = new Line();
+        yourPayoff.r = 0;
+        yourPayoff.g = 255;
+        yourPayoff.b = 0;
+        yourPayoff.visible = true;
+        yourPayoff.mode = Line.Mode.Shaded;
         otherPayoff = new Line();
+        otherPayoff.r = 0;
+        otherPayoff.g = 255;
+        otherPayoff.b = 0;
+        otherPayoff.visible = true;
+        otherPayoff.mode = Line.Mode.Shaded;
         heatmapColorLow = 0xFF0000;
         heatmapColorMid = 0x00FF00;
         heatmapColorHigh = 0x0000FF;
