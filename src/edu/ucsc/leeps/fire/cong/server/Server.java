@@ -86,7 +86,9 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         long periodStartTime = System.currentTimeMillis();
         initPopulations();
         initStrategies(periodStartTime);
-        initHeatmaps();
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            initHeatmaps();
+        }
         startPeriod();
     }
 

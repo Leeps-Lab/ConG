@@ -57,13 +57,11 @@ public class Client extends BaseClient implements ClientInterface {
                 leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, counterpartMatrixSize,
                 embed, this.server, this);
-        
         simplex = new ThreeStrategySelector(
-        20, 150, 200, 600,
-        embed,
-        this.server,
-        this);
-        
+                20, 100, 250, 600,
+                embed,
+                this.server,
+                this);
         countdown = new Countdown(
                 counterpartMatrixSize + 4 * leftMargin, 40 + topMargin, embed);
         pointsDisplay = new PointsDisplay(

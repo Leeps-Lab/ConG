@@ -152,6 +152,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
                 (int) (origin.x + rock.origin.x), (int) (origin.y + scissors.origin.y),
                 (int) (paper.origin.x - rock.origin.x), (int) (rock.origin.y - scissors.origin.y),
                 true, applet);
+        heatmap.setVisible(true);
         currentPercent = 0f;
         this.applet = applet;
     }

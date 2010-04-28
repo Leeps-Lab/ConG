@@ -6,6 +6,7 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
 import edu.ucsc.leeps.fire.server.PeriodConfigurable;
 import java.util.ArrayList;
@@ -100,75 +101,39 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
 
     public void updateTwoStrategyHeatmap(float currentPercent) {
         currentBuffer = buffers.get(Math.round(currentPercent * periodConfig.length));
-        /*
-        buffer = applet.createImage(width, height, PEmbed.RGB);
-        buffer.loadPixels();
-        for (int x = 0; x < width; x++) {
-        for (int y = 0; y < height; y++) {
-        float tmpA, tmpB, tmpa, tmpb;
-        tmpA = 1 - (y / (float) height);
-        tmpB = 1 - tmpA;
-        tmpa = 1 - (x / (float) width);
-        tmpb = 1 - tmpa;
-        float u, max;
-        PayoffFunction payoffFunction;
-        if (mine) {
-        payoffFunction = periodConfig.payoffFunction;
-        u = payoffFunction.getPayoff(
-        currentPercent,
-        new float[]{tmpA, tmpB},
-        new float[]{tmpa, tmpb});
-        } else {
-        payoffFunction = periodConfig.counterpartPayoffFunction;
-        u = payoffFunction.getPayoff(
-        currentPercent,
-        new float[]{tmpa, tmpb},
-        new float[]{tmpA, tmpB});
-        }
-        max = payoffFunction.getMax();
-        payoff[x][y] = u;
-        buffer.pixels[y * width + x] = getRGB(u / max);
-        }
-        }
-        buffer.updatePixels();
-         *
-         */
     }
 
     public void updateThreeStrategyHeatmap(
             float currentPercent,
             float r, float p, float s,
             ThreeStrategySelector threeStrategySelector) {
-        /*
-        buffer = applet.createGraphics(width, height, PEmbed.P2D);
-        buffer.loadPixels();
+        currentBuffer = applet.createGraphics(width, height, PEmbed.P2D);
+        currentBuffer.loadPixels();
         for (int x = 0; x < width; x++) {
-        for (int y = 0; y < height; y++) {
-        float[] RPS = threeStrategySelector.translate(x, height - y);
-        if (RPS[0] >= 0 && RPS[1] >= 0 && RPS[2] >= 0) {
-        float u, max;
-        PayoffFunction payoffFunction;
-        if (mine) {
-        payoffFunction = periodConfig.payoffFunction;
-        } else {
-        payoffFunction = periodConfig.counterpartPayoffFunction;
-        }
-        u = payoffFunction.getPayoff(
-        currentPercent,
-        RPS, new float[]{r, p, s});
-        max = payoffFunction.getMax();
+            for (int y = 0; y < height; y++) {
+                float[] RPS = threeStrategySelector.translate(x, height - y);
+                if (RPS[0] >= 0 && RPS[1] >= 0 && RPS[2] >= 0) {
+                    float u, max;
+                    PayoffFunction payoffFunction;
+                    if (mine) {
+                        payoffFunction = periodConfig.payoffFunction;
+                    } else {
+                        payoffFunction = periodConfig.counterpartPayoffFunction;
+                    }
+                    u = payoffFunction.getPayoff(
+                            currentPercent,
+                            RPS, new float[]{r, p, s});
+                    max = payoffFunction.getMax();
 
-        payoff[x][y] = u;
-        buffer.pixels[y * width + x] = getRGB(u / max);
-        } else {
-        payoff[x][y] = 0;
-        buffer.pixels[y * width + x] = applet.color(255, 0, 0, 0);
+                    payoff[x][y] = u;
+                    currentBuffer.pixels[y * width + x] = getRGB(u / max);
+                } else {
+                    payoff[x][y] = 0;
+                    currentBuffer.pixels[y * width + x] = applet.color(255, 0, 0, 0);
+                }
+            }
         }
-        }
-        }
-        buffer.updatePixels();
-         * 
-         */
+        currentBuffer.updatePixels();
     }
 
     public float getPayoff(int x, int y) {
