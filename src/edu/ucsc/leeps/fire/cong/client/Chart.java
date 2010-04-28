@@ -445,7 +445,14 @@ public class Chart extends Sprite {
     }
 
     private void threeStrategyChanged() {
-        // FIXME
+        currentPayoffYou = periodConfig.payoffFunction.getPayoff(
+                currentPercent,
+                simplex.getPlayerRPS(),
+                simplex.getOpponentRPS());
+        currentPayoffCounterpart = periodConfig.counterpartPayoffFunction.getPayoff(
+                currentPercent,
+                simplex.getOpponentRPS(),
+                simplex.getPlayerRPS());
     }
 
     private void strategyChanged() {

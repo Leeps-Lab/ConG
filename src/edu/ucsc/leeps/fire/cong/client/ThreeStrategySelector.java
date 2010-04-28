@@ -43,7 +43,6 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
     private Marker pRDrop, pPDrop, pSDrop;
-    private PEmbed applet;
 
     public ThreeStrategySelector(
             float x, float y, int width, int height,
@@ -154,7 +153,6 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
                 true, applet);
         heatmap.setVisible(true);
         currentPercent = 0f;
-        this.applet = applet;
     }
 
     public void update() {
@@ -167,7 +165,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     }
 
     @Override
-    public void draw(PEmbed applet) {
+    public synchronized void draw(PEmbed applet) {
         if (!visible) {
             return;
         }
@@ -267,7 +265,6 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             pPDrop.draw(applet);
             pSDrop.draw(applet);
         }
-
 
         planned.draw(applet);
 
@@ -508,7 +505,13 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             stratSlider[i].setStratValue(playedStrat[i]);
         }
 
-        server.strategyChanged(client.getID());
+        new Thread() {
+
+            @Override
+            public void run() {
+                server.strategyChanged(client.getID());
+            }
+        }.start();
     }
 
     public float[] translate(float x, float y) {

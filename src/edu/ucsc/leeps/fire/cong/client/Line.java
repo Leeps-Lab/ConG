@@ -15,7 +15,7 @@ public class Line extends Sprite implements Serializable {
     public float weight;
     public int r, g, b, alpha;
     public Mode mode;
-    public int SAMPLE_RATE = 4;
+    public int SAMPLE_RATE = 2;
     private transient HashMap<Integer, FPoint> definedPoints;
     private transient LinkedList<FPoint> points;
 
