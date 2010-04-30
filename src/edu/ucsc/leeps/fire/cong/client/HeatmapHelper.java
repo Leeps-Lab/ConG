@@ -25,10 +25,12 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
     //private PImage buffer;
     private List<PImage> buffers;
     private PImage currentBuffer;
-    private boolean mine;
+    private boolean mine, isCounterpart;
     private PApplet applet;
 
-    public HeatmapHelper(int x, int y, int width, int height, boolean mine, PApplet applet) {
+    public HeatmapHelper(int x, int y, int width, int height,
+            boolean mine,
+            PApplet applet) {
         super(x, y, width, height);
         this.width = width;
         this.height = height;
@@ -37,9 +39,12 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
         this.applet = applet;
     }
 
+    public void setIsCounterpart(boolean isCounterpart) {
+        this.isCounterpart = isCounterpart;
+    }
+
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         periodConfig = (PeriodConfig) basePeriodConfig;
-
     }
 
     public void setTwoStrategyHeatmapBuffers(float[][][] payoff) {
@@ -100,7 +105,32 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
     }
 
     public void updateTwoStrategyHeatmap(float currentPercent) {
-        currentBuffer = buffers.get(Math.round(currentPercent * periodConfig.length));
+        if (buffers == null) {
+            int size = 100;
+            currentBuffer = applet.createImage(size, size, PEmbed.RGB);
+            currentBuffer.loadPixels();
+            for (int x = 0; x < size; x++) {
+                for (int y = 0; y < size; y++) {
+                    PayoffFunction u;
+                    float A = y / (float) size;
+                    float a = x / (float) size;
+                    if (mine) {
+                        u = periodConfig.payoffFunction;
+                        A = 1 - A;
+                        a = 1 - a;
+                    } else {
+                        u = periodConfig.counterpartPayoffFunction;
+                    }
+                    float value = u.getPayoff(currentPercent,
+                            new float[]{A}, new float[]{a}) / u.getMax();
+                    currentBuffer.pixels[y * size + x] = getRGB(value);
+                }
+            }
+            currentBuffer.updatePixels();
+            currentBuffer.resize(width, height);
+        } else {
+            currentBuffer = buffers.get(Math.round(currentPercent * periodConfig.length));
+        }
     }
 
     public void updateThreeStrategyHeatmap(

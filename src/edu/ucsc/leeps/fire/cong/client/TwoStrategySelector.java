@@ -58,8 +58,14 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         this.applet = applet;
         this.server = server;
         this.client = client;
-        heatmap = new HeatmapHelper(0, 0, matrixSize, matrixSize, true, applet);
-        counterpartHeatmap = new HeatmapHelper(0, -(counterpartMatrixSize + 30), counterpartMatrixSize, counterpartMatrixSize, false, applet);
+        heatmap = new HeatmapHelper(
+                0, 0, matrixSize, matrixSize,
+                true,
+                applet);
+        counterpartHeatmap = new HeatmapHelper(
+                0, -(counterpartMatrixSize + 30), counterpartMatrixSize, counterpartMatrixSize,
+                false,
+                applet);
         applet.addMouseListener(this);
         applet.addKeyListener(this);
 
@@ -139,6 +145,11 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
     public void setCounterpartStrategy(float a) {
         percent_a = a;
+    }
+
+    public void setIsCounterpart(boolean isCounterpart) {
+        heatmap.setIsCounterpart(isCounterpart);
+        counterpartHeatmap.setIsCounterpart(isCounterpart);
     }
 
     public void update() {

@@ -41,6 +41,9 @@ public class PeriodConfig extends BasePeriodConfig {
     public static final Class paired = PairedPopulation.class;
     public static final Class line = Line.class;
 
+    // only for testing framerate
+    public boolean serverInitHeatmaps = false;
+
     /*
      * Setup whatever defaults you like here.
      */
@@ -68,9 +71,9 @@ public class PeriodConfig extends BasePeriodConfig {
         otherPayoff.b = 0;
         otherPayoff.visible = true;
         otherPayoff.mode = Line.Mode.Shaded;
-        heatmapColorLow = 0xFF0000;
-        heatmapColorMid = 0x00FF00;
-        heatmapColorHigh = 0x0000FF;
+        heatmapColorLow = 0xff0000;
+        heatmapColorMid = 0x0000ff;
+        heatmapColorHigh = 0x00ff00;
         yourStrategyOverTime = new Line();
         yourStrategyOverTime.visible = true;
         yourStrategyOverTime.mode = Line.Mode.Solid;

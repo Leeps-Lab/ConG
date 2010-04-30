@@ -505,13 +505,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             stratSlider[i].setStratValue(playedStrat[i]);
         }
 
-        new Thread() {
-
-            @Override
-            public void run() {
-                server.strategyChanged(client.getID());
-            }
-        }.start();
+        server.strategyChanged(client.getID());
     }
 
     public float[] translate(float x, float y) {

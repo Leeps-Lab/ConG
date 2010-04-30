@@ -31,8 +31,6 @@ public class Client extends BaseClient implements ClientInterface {
     private TwoStrategySelector bimatrix;
     private ThreeStrategySelector simplex;
     private Chart payoffChart, strategyChart;
-    private float[] myStrategy;
-    private float[] counterpartStrategy;
     private boolean isCounterpart = false;
     public final static int QUICK_TICK_TIME = 100;
 
@@ -163,11 +161,9 @@ public class Client extends BaseClient implements ClientInterface {
 
     public synchronized float[] getStrategy() {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            myStrategy = bimatrix.getMyStrategy();
-            return myStrategy;
+            return bimatrix.getMyStrategy();
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            myStrategy = simplex.getPlayerRPS();
-            return myStrategy;
+            return simplex.getPlayerRPS();
         } else {
             assert false;
             return new float[]{};
@@ -175,7 +171,6 @@ public class Client extends BaseClient implements ClientInterface {
     }
 
     public synchronized void setMyStrategy(float[] s) {
-        myStrategy = s;
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setMyStrategy(s[0]);
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
@@ -188,7 +183,6 @@ public class Client extends BaseClient implements ClientInterface {
     }
 
     public synchronized void setCounterpartStrategy(float[] s) {
-        counterpartStrategy = s;
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setCounterpartStrategy(s[0]);
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
@@ -207,6 +201,7 @@ public class Client extends BaseClient implements ClientInterface {
 
     public void setIsCounterpart(boolean isCounterpart) {
         this.isCounterpart = isCounterpart;
+        bimatrix.setIsCounterpart(isCounterpart);
     }
 
     public void setTwoStrategyHeatmapBuffers(float[][][] payoff, float[][][] counterpartPayoff) {

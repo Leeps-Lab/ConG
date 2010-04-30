@@ -35,12 +35,12 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
     }
 
     public synchronized void strategyChanged(final Integer id) {
+        final long timestamp = System.currentTimeMillis();
+        membership.get(id).strategyChanged(id, timestamp, periodConfig);
         (new Thread() {
 
             @Override
             public void run() {
-                long timestamp = System.currentTimeMillis();
-                membership.get(id).strategyChanged(id, timestamp, periodConfig);
                 eventLog.timestamp = timestamp;
                 eventLog.subjectId = id;
                 eventLog.strategy = clients.get(id).getStrategy();
@@ -86,7 +86,8 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         long periodStartTime = System.currentTimeMillis();
         initPopulations();
         initStrategies(periodStartTime);
-        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (periodConfig.serverInitHeatmaps
+                && periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             initHeatmaps();
         }
         startPeriod();
