@@ -176,7 +176,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private void updateLabels() {
         float myAa, counterAa, myAb, counterAb, myBa, counterBa, myBb, counterBb;
         if (isCounterpart) {
-            myAa = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
+            myAa = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
             counterAa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
             myAb = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
             counterAb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
@@ -270,7 +270,11 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         applet.fill(0);
 
         current.update((1 - percent_a) * width, (1 - percent_A) * height);
-        current.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{percent_A}, new float[]{percent_a}));
+        if (isCounterpart) {
+            current.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{percent_A}, new float[]{1 - percent_a}));
+        } else {
+            current.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{percent_A}, new float[]{percent_a}));
+        }
 
         if (applet.mousePressed && inRect((int) origin.x + width / 2, applet.mouseY)) {
             dragged.setVisible(true);
@@ -320,8 +324,15 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
             applet.line(x, y + h * (1 - percent_A), x + w, y + h * (1 - percent_A));
 
             counterpart.setVisible(true);
-            counterpart.setLabel(counterpartPayoffFunction.getPayoff(
-                    currentPercent, new float[]{percent_a}, new float[]{percent_A}));
+            if (isCounterpart) {
+                //FIXME
+                counterpart.setLabel(counterpartPayoffFunction.getPayoff(
+                        currentPercent, new float[]{1 - percent_a}, new float[]{1 - percent_A}));
+            } else {
+                counterpart.setLabel(counterpartPayoffFunction.getPayoff(
+                        currentPercent, new float[]{1 - percent_a}, new float[]{1 - percent_A}));
+
+            }
             counterpart.update(
                     counterpartHeatmap.origin.x + (1 - percent_a) * counterpartHeatmap.width,
                     counterpartHeatmap.origin.y + (1 - percent_A) * counterpartHeatmap.height);

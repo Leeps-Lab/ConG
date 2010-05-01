@@ -127,7 +127,10 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
                         u = null;
                     }
                     if (mine && isCounterpart) {
-                        a = 1 - a;
+                        float tmpA = A;
+                        float tmpa = a;
+                        A = 1 - tmpa;
+                        a = 1 - tmpA;
                     } else if (!mine && isCounterpart) {
                         float tmpA = A;
                         float tmpa = a;
