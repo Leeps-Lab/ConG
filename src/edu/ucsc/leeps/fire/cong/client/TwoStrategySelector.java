@@ -42,7 +42,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private Marker matrixBb;
     private Marker current, planned, dragged, hover, counterpart;
     private long hoverTimestamp;
-    private long hoverTimeMillis = 100;
+    private long hoverTimeMillis = 0;
     private boolean isCounterpart;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private StrategyChanger strategyChanger;
@@ -176,11 +176,11 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private void updateLabels() {
         float myAa, counterAa, myAb, counterAb, myBa, counterBa, myBb, counterBb;
         if (isCounterpart) {
-            myAa = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
+            myAa = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
             counterAa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
-            myAb = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
+            myAb = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
             counterAb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
-            myBa = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
+            myBa = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
             counterBa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
             myBb = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
             counterBb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
@@ -271,7 +271,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
         current.update((1 - percent_a) * width, (1 - percent_A) * height);
         if (isCounterpart) {
-            current.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{percent_A}, new float[]{1 - percent_a}));
+            current.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{1 - percent_a}, new float[]{percent_A}));
         } else {
             current.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{percent_A}, new float[]{percent_a}));
         }
@@ -279,8 +279,12 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         if (applet.mousePressed && inRect((int) origin.x + width / 2, applet.mouseY)) {
             dragged.setVisible(true);
             dragged.update((1 - percent_a) * width, applet.mouseY - origin.y);
-            float hoverPercentA = 1 - ((applet.mouseY - origin.y) / height);
-            dragged.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverPercentA}, new float[]{percent_a}));
+            float hoverPercent_A = 1 - ((applet.mouseY - origin.y) / height);
+            if (isCounterpart) {
+                dragged.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{1 - percent_a}, new float[]{hoverPercent_A}));
+            } else {
+                dragged.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverPercent_A}, new float[]{percent_a}));
+            }
         } else {
             dragged.setVisible(false);
             dragged.update((1 - percent_a) * width, dragged.origin.y);
@@ -292,10 +296,17 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
             planned.update(
                     (1 - percent_a) * width,
                     (1 - targetPercentA) * height);
-            planned.setLabel(payoffFunction.getPayoff(
-                    currentPercent,
-                    new float[]{targetPercentA},
-                    new float[]{percent_a}));
+            if (isCounterpart) {
+                planned.setLabel(payoffFunction.getPayoff(
+                        currentPercent,
+                        new float[]{1 - percent_a},
+                        new float[]{targetPercentA}));
+            } else {
+                planned.setLabel(payoffFunction.getPayoff(
+                        currentPercent,
+                        new float[]{targetPercentA},
+                        new float[]{percent_a}));
+            }
         } else {
             planned.setVisible(false);
         }
@@ -304,12 +315,19 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         dragged.draw(applet);
         planned.draw(applet);
         if (System.currentTimeMillis() - hoverTimestamp >= hoverTimeMillis) {
-            float hoverPercentA = 1 - ((applet.mouseY - origin.y) / height);
-            float hoverPercenta = 1 - ((applet.mouseX - origin.x) / height);
-            hover.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverPercentA}, new float[]{hoverPercenta}));
-            hover.update((1 - hoverPercenta) * width, (1 - hoverPercentA) * height);
-            hover.setVisible(true);
-            hover.draw(applet);
+            float hoverPercent_A = 1 - ((applet.mouseY - origin.y) / height);
+            float hoverPercent_a = 1 - ((applet.mouseX - origin.x) / height);
+            if (hoverPercent_A >= 0 && hoverPercent_A <= 1.0
+                    && hoverPercent_a >= 0 && hoverPercent_a <= 1.0) {
+                if (isCounterpart) {
+                    hover.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{1 - hoverPercent_a}, new float[]{hoverPercent_A}));
+                } else {
+                    hover.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
+                }
+                hover.update((1 - hoverPercent_a) * width, (1 - hoverPercent_A) * height);
+                hover.setVisible(true);
+                hover.draw(applet);
+            }
         }
         if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
             float x, y, w, h;
@@ -325,9 +343,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
             counterpart.setVisible(true);
             if (isCounterpart) {
-                //FIXME
                 counterpart.setLabel(counterpartPayoffFunction.getPayoff(
-                        currentPercent, new float[]{1 - percent_a}, new float[]{1 - percent_A}));
+                        currentPercent, new float[]{1 - percent_a}, new float[]{percent_A}));
             } else {
                 counterpart.setLabel(counterpartPayoffFunction.getPayoff(
                         currentPercent, new float[]{1 - percent_a}, new float[]{1 - percent_A}));
