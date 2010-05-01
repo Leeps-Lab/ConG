@@ -206,6 +206,7 @@ public class Client extends BaseClient implements ClientInterface {
     public void setIsCounterpart(boolean isCounterpart) {
         this.isCounterpart = isCounterpart;
         bimatrix.setIsCounterpart(isCounterpart);
+        payoffChart.setIsCounterpart(isCounterpart);
     }
 
     public void setTwoStrategyHeatmapBuffers(float[][][] payoff, float[][][] counterpartPayoff) {

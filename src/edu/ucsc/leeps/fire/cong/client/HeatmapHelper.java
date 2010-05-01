@@ -114,12 +114,28 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
                     PayoffFunction u;
                     float A = y / (float) size;
                     float a = x / (float) size;
-                    if (mine) {
+                    if (mine && isCounterpart) {
+                        u = periodConfig.counterpartPayoffFunction;
+                    } else if (mine && !isCounterpart) {
                         u = periodConfig.payoffFunction;
+                    } else if (!mine && isCounterpart) {
+                        u = periodConfig.payoffFunction;
+                    } else if (!mine && !isCounterpart) {
+                        u = periodConfig.counterpartPayoffFunction;
+                    } else {
+                        assert false;
+                        u = null;
+                    }
+                    if (mine && isCounterpart) {
+                        a = 1 - a;
+                    } else if (!mine && isCounterpart) {
+                        float tmpA = A;
+                        float tmpa = a;
+                        A = tmpa;
+                        a = 1 - tmpA;
+                    } else {
                         A = 1 - A;
                         a = 1 - a;
-                    } else {
-                        u = periodConfig.counterpartPayoffFunction;
                     }
                     float value = u.getPayoff(currentPercent,
                             new float[]{A}, new float[]{a}) / u.getMax();

@@ -35,7 +35,7 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
     private void update() {
         synchronized (lock) {
             float equalCount = 0;
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < currentStrategy.length; i++) {
                 if (Math.abs(currentStrategy[i] - targetStrategy[i]) < tickDelta) {
                     equalCount++;
                 } else if (targetStrategy[i] > currentStrategy[i]) {
@@ -96,6 +96,9 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
     }
 
     public float[] getTargetStrategy() {
+        if (targetStrategy == null) {
+            targetStrategy = currentStrategy;
+        }
         return targetStrategy;
     }
 

@@ -6,6 +6,7 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 
@@ -18,6 +19,7 @@ public class Chart extends Sprite {
     // Variables to modify that manipulate the chart
     public float currentPercent;
     private PeriodConfig periodConfig;
+    private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private float currentPayoffYou, currentPayoffCounterpart;
     private float maxPayoff;
     // Two strategy
@@ -281,27 +283,27 @@ public class Chart extends Sprite {
     private void addTwoStrategyFuturePayoffPoints() {
         clearFuture();
         for (float futurePercent = currentPercent; futurePercent <= 1.0; futurePercent += 0.001f) {
-            float future_A = periodConfig.payoffFunction.getPayoff(
+            float future_A = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{1},
                     new float[]{percent_a});
-            float future_B = periodConfig.payoffFunction.getPayoff(
+            float future_B = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0},
                     new float[]{percent_a});
-            float future_Aa = periodConfig.payoffFunction.getPayoff(
+            float future_Aa = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{1},
                     new float[]{1});
-            float future_Ab = periodConfig.payoffFunction.getPayoff(
+            float future_Ab = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{1},
                     new float[]{0});
-            float future_Ba = periodConfig.payoffFunction.getPayoff(
+            float future_Ba = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0},
                     new float[]{1});
-            float future_Bb = periodConfig.payoffFunction.getPayoff(
+            float future_Bb = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0},
                     new float[]{0});
@@ -317,51 +319,51 @@ public class Chart extends Sprite {
     private void addThreeStrategyFuturePayoffPoints() {
         clearFuture();
         for (float futurePercent = currentPercent; futurePercent <= 1.0; futurePercent += 0.01f) {
-            float futureR = periodConfig.payoffFunction.getPayoff(
+            float futureR = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{1, 0, 0},
                     simplex.getOpponentRPS());
-            float futureP = periodConfig.payoffFunction.getPayoff(
+            float futureP = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0, 1, 0},
                     simplex.getOpponentRPS());
-            float futureS = periodConfig.payoffFunction.getPayoff(
+            float futureS = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0, 0, 1},
                     simplex.getOpponentRPS());
-            float futureRr = periodConfig.payoffFunction.getPayoff(
+            float futureRr = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{1, 0, 0},
                     new float[]{1, 0, 0});
-            float futureRp = periodConfig.payoffFunction.getPayoff(
+            float futureRp = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{1, 0, 0},
                     new float[]{0, 1, 0});
-            float futureRs = periodConfig.payoffFunction.getPayoff(
+            float futureRs = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{1, 0, 0},
                     new float[]{0, 0, 1});
-            float futurePr = periodConfig.payoffFunction.getPayoff(
+            float futurePr = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0, 1, 0},
                     new float[]{1, 0, 0});
-            float futurePp = periodConfig.payoffFunction.getPayoff(
+            float futurePp = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0, 1, 0},
                     new float[]{0, 1, 0});
-            float futurePs = periodConfig.payoffFunction.getPayoff(
+            float futurePs = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0, 1, 0},
                     new float[]{0, 0, 1});
-            float futureSr = periodConfig.payoffFunction.getPayoff(
+            float futureSr = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0, 0, 1},
                     new float[]{1, 0, 0});
-            float futureSp = periodConfig.payoffFunction.getPayoff(
+            float futureSp = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0, 0, 1},
                     new float[]{0, 1, 0});
-            float futureSs = periodConfig.payoffFunction.getPayoff(
+            float futureSs = payoffFunction.getPayoff(
                     futurePercent,
                     new float[]{0, 0, 1},
                     new float[]{0, 0, 1});
@@ -414,42 +416,42 @@ public class Chart extends Sprite {
     }
 
     private void twoStrategyChanged() {
-        currentPayoffYou = periodConfig.payoffFunction.getPayoff(
+        currentPayoffYou = payoffFunction.getPayoff(
                 currentPercent,
                 new float[]{percent_A},
                 new float[]{percent_a});
-        currentPayoffCounterpart = periodConfig.counterpartPayoffFunction.getPayoff(
+        currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(
                 currentPercent,
                 new float[]{percent_a},
                 new float[]{percent_A});
-        currentAPayoff = periodConfig.payoffFunction.getPayoff(
+        currentAPayoff = payoffFunction.getPayoff(
                 currentPercent,
                 new float[]{1},
                 new float[]{percent_a});
-        currentBPayoff = periodConfig.payoffFunction.getPayoff(
+        currentBPayoff = payoffFunction.getPayoff(
                 currentPercent,
                 new float[]{0},
                 new float[]{percent_a});
-        currentAaPayoff = periodConfig.payoffFunction.getPayoff(currentPercent,
+        currentAaPayoff = payoffFunction.getPayoff(currentPercent,
                 new float[]{1},
                 new float[]{1});
-        currentAbPayoff = periodConfig.payoffFunction.getPayoff(currentPercent,
+        currentAbPayoff = payoffFunction.getPayoff(currentPercent,
                 new float[]{1},
                 new float[]{0});
-        currentBaPayoff = periodConfig.payoffFunction.getPayoff(currentPercent,
+        currentBaPayoff = payoffFunction.getPayoff(currentPercent,
                 new float[]{0},
                 new float[]{1});
-        currentBbPayoff = periodConfig.payoffFunction.getPayoff(currentPercent,
+        currentBbPayoff = payoffFunction.getPayoff(currentPercent,
                 new float[]{0},
                 new float[]{0});
     }
 
     private void threeStrategyChanged() {
-        currentPayoffYou = periodConfig.payoffFunction.getPayoff(
+        currentPayoffYou = payoffFunction.getPayoff(
                 currentPercent,
                 simplex.getPlayerRPS(),
                 simplex.getOpponentRPS());
-        currentPayoffCounterpart = periodConfig.counterpartPayoffFunction.getPayoff(
+        currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(
                 currentPercent,
                 simplex.getOpponentRPS(),
                 simplex.getPlayerRPS());
@@ -479,8 +481,20 @@ public class Chart extends Sprite {
         strategyChanged();
     }
 
+    public void setIsCounterpart(boolean isCounterpart) {
+        if (isCounterpart) {
+            payoffFunction = periodConfig.counterpartPayoffFunction;
+            counterpartPayoffFunction = periodConfig.payoffFunction;
+        } else {
+            payoffFunction = periodConfig.payoffFunction;
+            counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
+        }
+    }
+
     public void setPeriodConfig(PeriodConfig periodConfig) {
         this.periodConfig = periodConfig;
+        payoffFunction = periodConfig.payoffFunction;
+        counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
         maxPayoff = periodConfig.payoffFunction.getMax();
         actualPayoffYou.configure(periodConfig.yourPayoff);
         actualPayoffCounterpart.configure(periodConfig.otherPayoff);

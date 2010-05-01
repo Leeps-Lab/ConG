@@ -7,7 +7,7 @@ package edu.ucsc.leeps.fire.cong.client;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.config.TwoStrategySelectionType;
-import edu.ucsc.leeps.fire.cong.server.ServerInterface;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
 import edu.ucsc.leeps.fire.server.PeriodConfigurable;
@@ -42,7 +42,9 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private Marker matrixBb;
     private Marker current, planned, dragged, hover, counterpart;
     private long hoverTimestamp;
-    private long hoverTimeMillis = 1000;
+    private long hoverTimeMillis = 100;
+    private boolean isCounterpart;
+    private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private StrategyChanger strategyChanger;
 
     public TwoStrategySelector(
@@ -143,10 +145,22 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     public void setCounterpartStrategy(float a) {
-        percent_a = a;
+        if (isCounterpart) {
+            percent_a = 1 - a;
+        } else {
+            percent_a = a;
+        }
     }
 
     public void setIsCounterpart(boolean isCounterpart) {
+        this.isCounterpart = isCounterpart;
+        if (isCounterpart) {
+            payoffFunction = periodConfig.counterpartPayoffFunction;
+            counterpartPayoffFunction = periodConfig.payoffFunction;
+        } else {
+            payoffFunction = periodConfig.payoffFunction;
+            counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
+        }
         heatmap.setIsCounterpart(isCounterpart);
         counterpartHeatmap.setIsCounterpart(isCounterpart);
     }
@@ -161,14 +175,25 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
     private void updateLabels() {
         float myAa, counterAa, myAb, counterAb, myBa, counterBa, myBb, counterBb;
-        myAa = periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
-        counterAa = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
-        myAb = periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
-        counterAb = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
-        myBa = periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
-        counterBa = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
-        myBb = periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
-        counterBb = periodConfig.counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
+        if (isCounterpart) {
+            myAa = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
+            counterAa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
+            myAb = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
+            counterAb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
+            myBa = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
+            counterBa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
+            myBb = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
+            counterBb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
+        } else {
+            myAa = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
+            counterAa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
+            myAb = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
+            counterAb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
+            myBa = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
+            counterBa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
+            myBb = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
+            counterBb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
+        }
 
         myHeatmapAa.setLabel(myAa);
         myHeatmapAb.setLabel(myAb);
@@ -245,13 +270,13 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         applet.fill(0);
 
         current.update((1 - percent_a) * width, (1 - percent_A) * height);
-        current.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{percent_A}, new float[]{percent_a}));
+        current.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{percent_A}, new float[]{percent_a}));
 
         if (applet.mousePressed && inRect((int) origin.x + width / 2, applet.mouseY)) {
             dragged.setVisible(true);
             dragged.update((1 - percent_a) * width, applet.mouseY - origin.y);
             float hoverPercentA = 1 - ((applet.mouseY - origin.y) / height);
-            dragged.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{hoverPercentA}, new float[]{percent_a}));
+            dragged.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverPercentA}, new float[]{percent_a}));
         } else {
             dragged.setVisible(false);
             dragged.update((1 - percent_a) * width, dragged.origin.y);
@@ -263,7 +288,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
             planned.update(
                     (1 - percent_a) * width,
                     (1 - targetPercentA) * height);
-            planned.setLabel(periodConfig.payoffFunction.getPayoff(
+            planned.setLabel(payoffFunction.getPayoff(
                     currentPercent,
                     new float[]{targetPercentA},
                     new float[]{percent_a}));
@@ -277,18 +302,29 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         if (System.currentTimeMillis() - hoverTimestamp >= hoverTimeMillis) {
             float hoverPercentA = 1 - ((applet.mouseY - origin.y) / height);
             float hoverPercenta = 1 - ((applet.mouseX - origin.x) / height);
-            hover.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{hoverPercentA}, new float[]{hoverPercenta}));
+            hover.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverPercentA}, new float[]{hoverPercenta}));
             hover.update((1 - hoverPercenta) * width, (1 - hoverPercentA) * height);
             hover.setVisible(true);
             hover.draw(applet);
         }
         if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+            float x, y, w, h;
+            x = counterpartHeatmap.origin.x;
+            y = counterpartHeatmap.origin.y;
+            w = counterpartHeatmap.width;
+            h = counterpartHeatmap.height;
+
+            applet.stroke(0);
+            applet.strokeWeight(2);
+            applet.line(x + w * (1 - percent_a), y, x + w * (1 - percent_a), y + h);
+            applet.line(x, y + h * (1 - percent_A), x + w, y + h * (1 - percent_A));
+
             counterpart.setVisible(true);
-            counterpart.setLabel(periodConfig.counterpartPayoffFunction.getPayoff(
+            counterpart.setLabel(counterpartPayoffFunction.getPayoff(
                     currentPercent, new float[]{percent_a}, new float[]{percent_A}));
             counterpart.update(
-                    counterpartHeatmap.origin.x + (1 - percent_A) * counterpartHeatmap.width,
-                    counterpartHeatmap.origin.y + (1 - percent_a) * counterpartHeatmap.height);
+                    counterpartHeatmap.origin.x + (1 - percent_a) * counterpartHeatmap.width,
+                    counterpartHeatmap.origin.y + (1 - percent_A) * counterpartHeatmap.height);
             counterpart.draw(applet);
         }
     }
@@ -308,17 +344,6 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
         if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
             counterpartHeatmap.draw(applet);
-
-            float x, y, w, h;
-            x = counterpartHeatmap.origin.x;
-            y = counterpartHeatmap.origin.y;
-            w = counterpartHeatmap.width;
-            h = counterpartHeatmap.height;
-
-            applet.stroke(0);
-            applet.strokeWeight(2);
-            applet.line(x + w * (1 - percent_A), y, x + w * (1 - percent_A), y + h);
-            applet.line(x, y + h * (1 - percent_a), x + w, y + h * (1 - percent_a));
         }
 
         myHeatmapAa.draw(applet);
@@ -400,6 +425,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         periodConfig = (PeriodConfig) basePeriodConfig;
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            payoffFunction = periodConfig.payoffFunction;
+            counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
             heatmap.setPeriodConfig(periodConfig);
             counterpartHeatmap.setPeriodConfig(periodConfig);
             setVisible(true);

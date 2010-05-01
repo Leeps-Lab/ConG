@@ -140,6 +140,7 @@ public class Marker extends Sprite {
             float textHeight = applet.textAscent() + applet.textDescent();
             applet.rectMode(PEmbed.CENTER);
             applet.fill(255);
+            applet.noStroke();
             applet.rect(labelOrigin.x, labelOrigin.y, textWidth, textHeight);
             applet.textAlign(PEmbed.CENTER, PEmbed.CENTER);
             applet.fill(0);

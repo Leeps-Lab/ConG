@@ -23,6 +23,7 @@ public class PairedPopulation implements Population, Serializable {
 
     private Map<Integer, ClientInterface> members;
     private long periodStartTime;
+    private Set<ClientInterface> counterparts;
     private Map<ClientInterface, ClientInterface> pairs;
     private Map<ClientInterface, Long> lastEvalTimes;
     private Map<ClientInterface, float[]> lastStrategies;
@@ -53,6 +54,7 @@ public class PairedPopulation implements Population, Serializable {
         if (partners.size() % 2 != 0) {
             System.err.println("Error while making pairs, odd number of subjects to pair up");
         }
+        this.counterparts = new HashSet<ClientInterface>();
         while (partners.size() > 0) {
             ClientInterface client1 = partners.remove(0);
             ClientInterface client2 = partners.remove(0);
@@ -60,6 +62,7 @@ public class PairedPopulation implements Population, Serializable {
             pairs.put(client2, client1);
             client1.setIsCounterpart(false);
             client2.setIsCounterpart(true);
+            counterparts.add(client2);
         }
         updateAllStrategies();
     }
@@ -76,7 +79,8 @@ public class PairedPopulation implements Population, Serializable {
         lastEvalTimes.put(other, timestamp);
         updatePayoffs(
                 newStrategy,
-                changed, other, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
+                changed, other,
+                percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
     }
 
     private void updatePayoffs(
@@ -84,21 +88,29 @@ public class PairedPopulation implements Population, Serializable {
             ClientInterface changed, ClientInterface other,
             float percent, float percentInStrategyTime, float inStrategyTime,
             PeriodConfig periodConfig) {
-        float[] last1 = lastStrategies.get(changed);
-        float[] last2 = lastStrategies.get(other);
-        float points1 = periodConfig.payoffFunction.getPayoff(
-                percent, last1, last2);
-        float points2 = periodConfig.payoffFunction.getPayoff(
-                percent, last2, last1);
-        if (!periodConfig.pointsPerSecond) {
-            points1 *= percentInStrategyTime;
-            points2 *= percentInStrategyTime;
+        PayoffFunction changedPayoff, otherPayoff;
+        if (counterparts.contains(changed)) {
+            changedPayoff = periodConfig.payoffFunction;
+            otherPayoff = periodConfig.counterpartPayoffFunction;
         } else {
-            points1 *= inStrategyTime / 1000f;
-            points2 *= inStrategyTime / 1000f;
+            changedPayoff = periodConfig.counterpartPayoffFunction;
+            otherPayoff = periodConfig.payoffFunction;
         }
-        changed.addToPeriodPoints(points1);
-        other.addToPeriodPoints(points2);
+        float[] changedLast = lastStrategies.get(changed);
+        float[] otherLast = lastStrategies.get(other);
+        float changedPoints = changedPayoff.getPayoff(
+                percent, changedLast, otherLast);
+        float otherPoints = otherPayoff.getPayoff(
+                percent, otherLast, changedLast);
+        if (!periodConfig.pointsPerSecond) {
+            changedPoints *= percentInStrategyTime;
+            otherPoints *= percentInStrategyTime;
+        } else {
+            changedPoints *= inStrategyTime / 1000f;
+            otherPoints *= inStrategyTime / 1000f;
+        }
+        changed.addToPeriodPoints(changedPoints);
+        other.addToPeriodPoints(otherPoints);
         updateStrategiesFast(newStrategy, changed, other);
     }
 
