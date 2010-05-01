@@ -51,7 +51,7 @@ public class TwoPopulation implements Population, Serializable {
         updateStrategies(members2.values(), periodConfig);
     }
 
-    public void strategyChanged(Integer id, long timestamp, PeriodConfig periodConfig) {
+    public void strategyChanged(float[] newStrategy, Integer id, long timestamp, PeriodConfig periodConfig) {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         float percentInStrategyTime;

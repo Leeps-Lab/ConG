@@ -90,7 +90,7 @@ public class SinglePopulationInclude implements Population, Serializable {
         }
     }
 
-    public void strategyChanged(Integer id, long timestamp, PeriodConfig periodConfig) {
+    public void strategyChanged(float[] newStrategy, Integer id, long timestamp, PeriodConfig periodConfig) {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         long inStrategyTime = System.currentTimeMillis() - lastEvalTime;

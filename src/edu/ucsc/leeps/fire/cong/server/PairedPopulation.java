@@ -64,7 +64,7 @@ public class PairedPopulation implements Population, Serializable {
         updateAllStrategies();
     }
 
-    public void strategyChanged(Integer id, long timestamp, PeriodConfig periodConfig) {
+    public void strategyChanged(float[] newStrategy, Integer id, long timestamp, PeriodConfig periodConfig) {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         float percentInStrategyTime;
@@ -74,15 +74,18 @@ public class PairedPopulation implements Population, Serializable {
         percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
         lastEvalTimes.put(changed, timestamp);
         lastEvalTimes.put(other, timestamp);
-        updatePayoffs(changed, other, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
+        updatePayoffs(
+                newStrategy,
+                changed, other, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
     }
 
     private void updatePayoffs(
-            ClientInterface client1, ClientInterface client2,
+            float[] newStrategy,
+            ClientInterface changed, ClientInterface other,
             float percent, float percentInStrategyTime, float inStrategyTime,
             PeriodConfig periodConfig) {
-        float[] last1 = lastStrategies.get(client1);
-        float[] last2 = lastStrategies.get(client2);
+        float[] last1 = lastStrategies.get(changed);
+        float[] last2 = lastStrategies.get(other);
         float points1 = periodConfig.payoffFunction.getPayoff(
                 percent, last1, last2);
         float points2 = periodConfig.payoffFunction.getPayoff(
@@ -94,12 +97,19 @@ public class PairedPopulation implements Population, Serializable {
             points1 *= inStrategyTime / 1000f;
             points2 *= inStrategyTime / 1000f;
         }
-        client1.addToPeriodPoints(points1);
-        client2.addToPeriodPoints(points2);
-        updateStrategies(client1, client2);
+        changed.addToPeriodPoints(points1);
+        other.addToPeriodPoints(points2);
+        updateStrategiesFast(newStrategy, changed, other);
     }
 
-    private void updateStrategies(ClientInterface client1, ClientInterface client2) {
+    private void updateStrategiesFast(
+            float[] newStrategy, ClientInterface changed, ClientInterface other) {
+        float[] c1s = newStrategy;
+        other.setCounterpartStrategy(c1s);
+        lastStrategies.put(changed, c1s);
+    }
+
+    private void updateStrategiesSlow(ClientInterface client1, ClientInterface client2) {
         float[] c1s = client1.getStrategy();
         float[] c2s = client2.getStrategy();
         client1.setCounterpartStrategy(c2s);
@@ -112,7 +122,7 @@ public class PairedPopulation implements Population, Serializable {
         Set<ClientInterface> notified = new HashSet<ClientInterface>();
         for (ClientInterface client : members.values()) {
             if (!notified.contains(client)) {
-                updateStrategies(client, pairs.get(client));
+                updateStrategiesSlow(client, pairs.get(client));
                 notified.add(client);
                 notified.add(pairs.get(client));
             }

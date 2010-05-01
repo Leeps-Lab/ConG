@@ -22,8 +22,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     private float sideLength;
     private Marker rock, paper, scissors;
     private float maxDist;
-    private MovingMarker current;
-    private Marker planned, opponent;
+    private Marker current, planned, opponent;
     private float[] axisDistance;
     private float[] plannedStrat;
     private float[] targetStrat;
@@ -37,20 +36,19 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     private boolean enabled;
     private PeriodConfig periodConfig;
     private HeatmapHelper heatmap;
+    private PEmbed applet;
     public float currentPercent;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
     private Marker pRDrop, pPDrop, pSDrop;
-
     private StrategyChanger strategyChanger;
 
     public ThreeStrategySelector(
             float x, float y, int width, int height,
-            PEmbed applet,
-            ServerInterface server,
-            ClientInterface client) {
+            PEmbed applet, StrategyChanger strategyChanger) {
         super(x, y, width, height);
-
+        this.applet = applet;
+        this.strategyChanger = strategyChanger;
         mouseInTriangle = false;
         axisDistance = new float[3];
         plannedStrat = new float[3];
@@ -89,7 +87,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         scissors.setLabelMode(Marker.LabelMode.Top);
 
         // set up strategy markers
-        current = new MovingMarker(this, 0, 0, false, MARKER_RADIUS + 2, 1f);
+        current = new Marker(this, 0, 0, false, MARKER_RADIUS + 2);
         current.setColor(50, 255, 50);
         current.setLabel("$$");
         current.setLabelMode(Marker.LabelMode.Bottom);
@@ -276,7 +274,6 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
 
         current.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, playedStrat, opponentStrat));
 
-        current.update();
         if (enabled) {
             calculatePlayedStrats(current.origin.x - rock.origin.x, rock.origin.y - current.origin.y);
         }
@@ -367,7 +364,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         }
 
         float[] coords = calculateStratCoords(newR, newP, newS);
-        current.setLocation(coords[0], coords[1]);
+        current.update(coords[0], coords[1]);
     }
 
     public void setCounterpartRPS(float r, float p, float s) {
@@ -436,8 +433,14 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         return enabled;
     }
 
-    public void setRateOfChange(float rate) {
-        current.setSpeed(rate);
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (!visible) {
+            applet.removeMouseListener(this);
+        } else {
+            applet.addMouseListener(this);
+        }
     }
 
     // adjust the labeling modes of the Markers depending on the
@@ -579,6 +582,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         targetStrat[S] = axisDistance[S] / maxDist;
         targetStrat[P] = axisDistance[P] / maxDist;
         targetStrat[R] = 1 - targetStrat[S] - targetStrat[P];
+        strategyChanger.setTargetStrategy(targetStrat);
     }
 
     // calculate x, y coordinates given r, p, s values

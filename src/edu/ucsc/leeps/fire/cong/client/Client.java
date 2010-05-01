@@ -59,9 +59,7 @@ public class Client extends BaseClient implements ClientInterface {
                 embed, strategyChanger);
         simplex = new ThreeStrategySelector(
                 20, 100, 250, 600,
-                embed,
-                this.server,
-                this);
+                embed, strategyChanger);
         countdown = new Countdown(
                 counterpartMatrixSize + 4 * leftMargin, 40 + topMargin, embed);
         pointsDisplay = new PointsDisplay(

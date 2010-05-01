@@ -34,9 +34,9 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         random = new Random();
     }
 
-    public synchronized void strategyChanged(final Integer id) {
-        final long timestamp = System.currentTimeMillis();
-        membership.get(id).strategyChanged(id, timestamp, periodConfig);
+    public synchronized void strategyChanged(float[] newStrategy, Integer id) {
+        long timestamp = System.currentTimeMillis();
+        membership.get(id).strategyChanged(newStrategy, id, timestamp, periodConfig);
         eventLog.timestamp = timestamp;
         eventLog.subjectId = id;
         eventLog.strategy = clients.get(id).getStrategy();

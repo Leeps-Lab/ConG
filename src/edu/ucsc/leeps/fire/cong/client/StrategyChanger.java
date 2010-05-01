@@ -20,7 +20,7 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
     private boolean isMoving;
     private float[] currentStrategy;
     private float[] targetStrategy;
-    private long tickTime = 1000;
+    private long tickTime = 100;
     private float tickDelta;
     private long sleepTimeMillis;
     private float changeTimeEMA = 0;
@@ -34,31 +34,33 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
 
     private void update() {
         synchronized (lock) {
-            if (targetStrategy[0] > currentStrategy[0]) {
-                currentStrategy[0] += tickDelta;
-            } else if (targetStrategy[0] < currentStrategy[0]) {
-                currentStrategy[0] -= tickDelta;
-            } else {
-                isMoving = false;
-                sleepTimeMillis = 100;
-                return;
+            float equalCount = 0;
+            for (int i = 0; i < 3; i++) {
+                if (Math.abs(currentStrategy[i] - targetStrategy[i]) < tickDelta) {
+                    equalCount++;
+                } else if (targetStrategy[i] > currentStrategy[i]) {
+                    currentStrategy[i] += tickDelta;
+                } else if (targetStrategy[i] < currentStrategy[i]) {
+                    currentStrategy[i] -= tickDelta;
+                }
             }
-            if (Math.abs(currentStrategy[0] - targetStrategy[0]) < tickDelta) {
+            if (equalCount == currentStrategy.length) {
                 currentStrategy = targetStrategy;
-                server.strategyChanged(client.getID());
-                client.setMyStrategy(targetStrategy);
+                server.strategyChanged(currentStrategy, client.getID());
+                client.setMyStrategy(currentStrategy);
                 isMoving = false;
                 sleepTimeMillis = 100;
                 return;
             }
             long timestamp = System.nanoTime();
-            server.strategyChanged(client.getID());
+            server.strategyChanged(currentStrategy, client.getID());
             client.setMyStrategy(currentStrategy);
             float elapsed = (System.nanoTime() - timestamp) / 1000000f;
             changeTimeEMA += 0.1 * (elapsed - changeTimeEMA);
+            System.err.println(changeTimeEMA);
             long estimatedLag = Math.round(changeTimeEMA);
             sleepTimeMillis = tickTime - Math.round(changeTimeEMA);
-            if (tickTime > 10.0 * estimatedLag) {
+            if (tickTime > 20.0 * estimatedLag) {
                 tickTime = Math.round(5.0 * estimatedLag);
                 sleepTimeMillis = tickTime - Math.round(changeTimeEMA);
                 recalculateTickDelta();

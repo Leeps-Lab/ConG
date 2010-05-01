@@ -118,6 +118,18 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         this.enabled = enabled;
     }
 
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (!visible) {
+            applet.removeMouseListener(this);
+            applet.removeKeyListener(this);
+        } else {
+            applet.addMouseListener(this);
+            applet.addKeyListener(this);
+        }
+    }
+
     public float[] getMyStrategy() {
         return new float[]{percent_A};
     }
@@ -349,8 +361,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     private boolean inRect(int x, int y) {
-        return (x > origin.x && x < origin.x + width
-                && y > origin.y && y < origin.y + height);
+        return (x > origin.x && x < origin.x + width && y > origin.y && y < origin.y + height);
     }
 
     public void mouseClicked(MouseEvent me) {
