@@ -37,16 +37,10 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
     public synchronized void strategyChanged(final Integer id) {
         final long timestamp = System.currentTimeMillis();
         membership.get(id).strategyChanged(id, timestamp, periodConfig);
-        (new Thread() {
-
-            @Override
-            public void run() {
-                eventLog.timestamp = timestamp;
-                eventLog.subjectId = id;
-                eventLog.strategy = clients.get(id).getStrategy();
-                eventLog.commit();
-            }
-        }).start();
+        eventLog.timestamp = timestamp;
+        eventLog.subjectId = id;
+        eventLog.strategy = clients.get(id).getStrategy();
+        eventLog.commit();
     }
 
     public static void main(String[] args) throws Exception {

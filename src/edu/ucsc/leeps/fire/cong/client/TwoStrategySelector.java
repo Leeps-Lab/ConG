@@ -24,11 +24,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
     private PEmbed applet;
     private PeriodConfig periodConfig;
-    private ServerInterface server;
-    private ClientInterface client;
     private float percent_A, percent_a;
-    private float targetPercent_A;
-    private StrategyChangeThread thread;
     private boolean enabled;
     private HeatmapHelper heatmap, counterpartHeatmap;
     private float currentPercent;
@@ -47,17 +43,15 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private Marker current, planned, dragged, hover, counterpart;
     private long hoverTimestamp;
     private long hoverTimeMillis = 1000;
+    private StrategyChanger strategyChanger;
 
     public TwoStrategySelector(
             int x, int y,
             int matrixSize, int counterpartMatrixSize,
             PEmbed applet,
-            ServerInterface server,
-            ClientInterface client) {
+            StrategyChanger strategyChanger) {
         super(x, y, matrixSize, matrixSize);
         this.applet = applet;
-        this.server = server;
-        this.client = client;
         heatmap = new HeatmapHelper(
                 0, 0, matrixSize, matrixSize,
                 true,
@@ -117,18 +111,11 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         counterpart = new Marker(this, 0, 0, false, 10);
         counterpart.setLabelMode(Marker.LabelMode.Top);
 
-        targetPercent_A = -1;
-
-        thread = new StrategyChangeThread();
-        thread.start();
+        this.strategyChanger = strategyChanger;
     }
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-    }
-
-    public void reset() {
-        targetPercent_A = -1;
     }
 
     public float[] getMyStrategy() {
@@ -258,10 +245,16 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
             dragged.update((1 - percent_a) * width, dragged.origin.y);
         }
 
-        if (targetPercent_A != percent_A) {
+        if (strategyChanger.strategyIsMoving()) {
+            float targetPercentA = strategyChanger.getTargetStrategy()[0];
             planned.setVisible(true);
-            planned.update((1 - percent_a) * width, (1 - targetPercent_A) * height);
-            planned.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, new float[]{targetPercent_A}, new float[]{percent_a}));
+            planned.update(
+                    (1 - percent_a) * width,
+                    (1 - targetPercentA) * height);
+            planned.setLabel(periodConfig.payoffFunction.getPayoff(
+                    currentPercent,
+                    new float[]{targetPercentA},
+                    new float[]{percent_a}));
         } else {
             planned.setVisible(false);
         }
@@ -353,11 +346,6 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         drawStrategyInfo();
 
         applet.popMatrix();
-
-        if (Client.DEBUG) {
-            String changesPerSecondEMA = String.format("%.2f", thread.changeNanosEMA / 1000000f);
-            applet.text(changesPerSecondEMA, origin.x + width - 100, origin.y + height + 10);
-        }
     }
 
     private boolean inRect(int x, int y) {
@@ -372,7 +360,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         int mouseX = me.getX();
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
-            targetPercent_A = 1 - ((mouseY - origin.y) / height);
+            float targetPercentA = 1 - ((mouseY - origin.y) / height);
+            strategyChanger.setTargetStrategy(new float[]{targetPercentA});
         }
     }
 
@@ -386,7 +375,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         int mouseX = me.getX();
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
-            targetPercent_A = 1 - ((mouseY - origin.y) / height);
+            float targetPercentA = 1 - ((mouseY - origin.y) / height);
+            strategyChanger.setTargetStrategy(new float[]{targetPercentA});
         }
     }
 
@@ -427,11 +417,15 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         }
         if (ke.isActionKey()) {
             if (ke.getKeyCode() == KeyEvent.VK_UP) {
-                targetPercent_A += 0.01;
-                targetPercent_A = PEmbed.constrain(targetPercent_A, 0, 1);
+                float targetPercentA = strategyChanger.getTargetStrategy()[0];
+                targetPercentA += 0.01f;
+                targetPercentA = PEmbed.constrain(targetPercentA, 0, 1);
+                strategyChanger.setTargetStrategy(new float[]{targetPercentA});
             } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
-                targetPercent_A -= 0.01;
-                targetPercent_A = PEmbed.constrain(targetPercent_A, 0, 1);
+                float targetPercentA = strategyChanger.getTargetStrategy()[0];
+                targetPercentA -= 0.01f;
+                targetPercentA = PEmbed.constrain(targetPercentA, 0, 1);
+                strategyChanger.setTargetStrategy(new float[]{targetPercentA});
             }
         }
     }
@@ -442,44 +436,5 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     public void setTwoStrategyHeatmapBuffers(float[][][] payoff, float[][][] counterpartPayoff) {
         heatmap.setTwoStrategyHeatmapBuffers(payoff);
         counterpartHeatmap.setTwoStrategyHeatmapBuffers(counterpartPayoff);
-    }
-
-    private class StrategyChangeThread extends Thread {
-
-        public volatile boolean running = true;
-        private final static long sleepTimeMillis = Client.QUICK_TICK_TIME;
-        public float changeNanosEMA = 0;
-
-        @Override
-        public void run() {
-            while (running) {
-                if (enabled && visible) {
-                    if (targetPercent_A != -1 && targetPercent_A != percent_A) {
-                        if (periodConfig.percentChangePerSecond == -1) {
-                            percent_A = targetPercent_A;
-                        } else {
-                            float percentChangePerTick = periodConfig.percentChangePerSecond * (sleepTimeMillis / 1000f);
-                            if (targetPercent_A > percent_A) {
-                                percent_A += percentChangePerTick;
-                            } else {
-                                percent_A -= percentChangePerTick;
-                            }
-                            if (Math.abs(percent_A - targetPercent_A) < percentChangePerTick) {
-                                percent_A = targetPercent_A;
-                            }
-                        }
-                        client.setMyStrategy(new float[]{percent_A});
-                        long startTime = System.nanoTime();
-                        server.strategyChanged(client.getID());
-                        changeNanosEMA += 0.01f * ((System.nanoTime() - startTime) - changeNanosEMA);
-                    }
-                }
-                try {
-                    sleep(sleepTimeMillis);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
     }
 }

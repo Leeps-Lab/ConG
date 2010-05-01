@@ -35,8 +35,6 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     private boolean mouseInTriangle;
     private Color rColor, pColor, sColor;
     private boolean enabled;
-    private ServerInterface server;
-    private ClientInterface client;
     private PeriodConfig periodConfig;
     private HeatmapHelper heatmap;
     public float currentPercent;
@@ -44,15 +42,14 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     private Marker rDrop, pDrop, sDrop;
     private Marker pRDrop, pPDrop, pSDrop;
 
+    private StrategyChanger strategyChanger;
+
     public ThreeStrategySelector(
             float x, float y, int width, int height,
             PEmbed applet,
             ServerInterface server,
             ClientInterface client) {
         super(x, y, width, height);
-
-        this.server = server;
-        this.client = client;
 
         mouseInTriangle = false;
         axisDistance = new float[3];
@@ -505,7 +502,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             stratSlider[i].setStratValue(playedStrat[i]);
         }
 
-        server.strategyChanged(client.getID());
+        //server.strategyChanged(client.getID());
     }
 
     public float[] translate(float x, float y) {

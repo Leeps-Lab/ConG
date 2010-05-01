@@ -32,6 +32,7 @@ public class Client extends BaseClient implements ClientInterface {
     private ThreeStrategySelector simplex;
     private Chart payoffChart, strategyChart;
     private boolean isCounterpart = false;
+    private StrategyChanger strategyChanger;
     public final static int QUICK_TICK_TIME = 100;
 
     //@Override
@@ -51,10 +52,11 @@ public class Client extends BaseClient implements ClientInterface {
         //int matrixSize = (int) (height - (4 * textHeight) - 120);
         int matrixSize = 320;
         int counterpartMatrixSize = 100;
+        strategyChanger = new StrategyChanger(this.server, this);
         bimatrix = new TwoStrategySelector(
                 leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, counterpartMatrixSize,
-                embed, this.server, this);
+                embed, strategyChanger);
         simplex = new ThreeStrategySelector(
                 20, 100, 250, 600,
                 embed,
@@ -82,6 +84,7 @@ public class Client extends BaseClient implements ClientInterface {
     @Override
     public void startPeriod() {
         this.percent = 0;
+        strategyChanger.startPeriod();
         simplex.setEnabled(true);
         bimatrix.setEnabled(true);
         payoffChart.clearAll();
@@ -91,14 +94,15 @@ public class Client extends BaseClient implements ClientInterface {
 
     @Override
     public void endPeriod() {
+        strategyChanger.endPeriod();
         simplex.reset();
-        bimatrix.reset();
         bimatrix.setEnabled(false);
         super.endPeriod();
     }
 
     @Override
     public void setPause(boolean paused) {
+        strategyChanger.setPause(paused);
         if (paused) {
             simplex.setEnabled(true);
         } else {
@@ -118,6 +122,7 @@ public class Client extends BaseClient implements ClientInterface {
             periodConfig.counterpartPayoffFunction = tmp;
         }
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
+        strategyChanger.setPeriodConfig(periodConfig);
         bimatrix.setPeriodConfig(periodConfig);
         simplex.setPeriodConfig(periodConfig);
         payoffChart.setPeriodConfig(periodConfig);
@@ -171,6 +176,7 @@ public class Client extends BaseClient implements ClientInterface {
     }
 
     public synchronized void setMyStrategy(float[] s) {
+        strategyChanger.setCurrentStrategy(s);
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setMyStrategy(s[0]);
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
