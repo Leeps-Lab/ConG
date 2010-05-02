@@ -31,6 +31,7 @@ public class Client extends BaseClient implements ClientInterface {
     private TwoStrategySelector bimatrix;
     private ThreeStrategySelector simplex;
     private Chart payoffChart, strategyChart;
+    private ChartLegend legend;
     private boolean isCounterpart = false;
     private StrategyChanger strategyChanger;
     public final static int QUICK_TICK_TIME = 100;
@@ -76,6 +77,9 @@ public class Client extends BaseClient implements ClientInterface {
                 bimatrix.width + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight,
                 simplex, Chart.Mode.Payoff);
+        legend = new ChartLegend(
+                (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
+                0, 0);
         embed.running = true;
     }
 
@@ -125,6 +129,7 @@ public class Client extends BaseClient implements ClientInterface {
         simplex.setPeriodConfig(periodConfig);
         payoffChart.setPeriodConfig(periodConfig);
         strategyChart.setPeriodConfig(periodConfig);
+        legend.setPeriodConfig(periodConfig);
     }
 
     @Override
@@ -267,6 +272,7 @@ public class Client extends BaseClient implements ClientInterface {
                 simplex.draw(embed);
                 strategyChart.draw(embed);
                 payoffChart.draw(embed);
+                legend.draw(embed);
                 countdown.draw(embed);
                 pointsDisplay.draw(embed);
                 if (DEBUG) {
