@@ -347,7 +347,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
                         currentPercent, new float[]{1 - percent_a}, new float[]{percent_A}));
             } else {
                 counterpart.setLabel(counterpartPayoffFunction.getPayoff(
-                        currentPercent, new float[]{1 - percent_a}, new float[]{1 - percent_A}));
+                        currentPercent, new float[]{percent_A}, new float[]{percent_a}));
 
             }
             counterpart.update(

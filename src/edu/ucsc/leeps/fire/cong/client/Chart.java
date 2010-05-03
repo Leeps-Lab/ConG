@@ -19,9 +19,12 @@ public class Chart extends Sprite {
     // Variables to modify that manipulate the chart
     public float currentPercent;
     private PeriodConfig periodConfig;
+    private boolean isCounterpart;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private float currentPayoffYou, currentPayoffCounterpart;
     private float maxPayoff;
+    private int scaledMargin;
+    private int scaledHeight;
     // Two strategy
     private float percent_A;
     private float percent_a;
@@ -79,8 +82,12 @@ public class Chart extends Sprite {
 
     public Chart(int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode) {
         super(x, y, width, height);
-        actualPayoffYou = new Line(0, 0, width, height);
-        actualPayoffCounterpart = new Line(0, 0, width, height);
+
+        scaledHeight = Math.round(0.9f * height);
+        scaledMargin = Math.round((height - scaledHeight) / 2f);
+
+        actualPayoffYou = new Line(0, scaledMargin, width, scaledHeight);
+        actualPayoffCounterpart = new Line(0, scaledMargin, width, scaledHeight);
         // Two strategy
         actualAPayoff = new Line(0, 0, width, height);
         actualBPayoff = new Line(0, 0, width, height);
@@ -94,8 +101,8 @@ public class Chart extends Sprite {
         futureAbPayoff = new Line(0, 0, width, height);
         futureBaPayoff = new Line(0, 0, width, height);
         futureBbPayoff = new Line(0, 0, width, height);
-        yourStrategyOverTime = new Line(0, 0, width, height);
-        counterpartStrategyOverTime = new Line(0, 0, width, height);
+        yourStrategyOverTime = new Line(0, scaledMargin, width, scaledHeight);
+        counterpartStrategyOverTime = new Line(0, scaledMargin, width, scaledHeight);
         // RPSD
         actualRPayoff = new Line(0, 0, width, height);
         actualPPayoff = new Line(0, 0, width, height);
@@ -132,7 +139,7 @@ public class Chart extends Sprite {
         applet.rect(-40, 0, 38, height);
         applet.rect(0, height + 2, width, 40);
         if (mode == Mode.Payoff) {
-            for (float x = 0.1f; x < 1.0f; x += 0.1f) {
+            for (float x = 0.0f; x <= 1.01f; x += 0.1f) {
                 applet.noFill();
                 applet.stroke(100, 100, 100);
                 applet.strokeWeight(2);
@@ -147,18 +154,21 @@ public class Chart extends Sprite {
                 String label = String.format("%d%%", percent);
                 applet.text(label, x0 + origin.x, y0 + origin.y + 1.2f * applet.textAscent() + applet.textDescent());
             }
-            for (float y = 0.1f; y < 1.0f; y += 0.1f) {
+            for (float y = 0.0f; y <= 1.01f; y += 0.1f) {
                 applet.noFill();
                 applet.stroke(100, 100, 100);
                 applet.strokeWeight(2);
                 float x0, y0, x1, y1;
                 x0 = -10;
-                y0 = y * height;
+                y0 = y * scaledHeight + scaledMargin;
                 x1 = 0;
-                y1 = y * height;
+                y1 = y * scaledHeight + scaledMargin;
                 applet.line(x0, y0, x1, y1);
                 applet.fill(0);
                 float payoff = (1 - y) * maxPayoff;
+                if (payoff == -0.0f) {
+                    payoff = 0f;
+                }
                 String label = String.format("%.1f", payoff);
                 applet.text(label, origin.x - 1.2f * applet.textWidth(label), y0 + origin.y);
             }
@@ -215,10 +225,6 @@ public class Chart extends Sprite {
         applet.rectMode(PEmbed.CORNER);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
-        applet.fill(255);
-        applet.noStroke();
-        float currX = currentPercent * width;
-        applet.rect(currX - 8, 0, width, height);
         if (periodConfig != null) {
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
@@ -416,14 +422,26 @@ public class Chart extends Sprite {
     }
 
     private void twoStrategyChanged() {
-        currentPayoffYou = payoffFunction.getPayoff(
-                currentPercent,
-                new float[]{percent_A},
-                new float[]{percent_a});
-        currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(
-                currentPercent,
-                new float[]{percent_a},
-                new float[]{percent_A});
+        if (isCounterpart) {
+            currentPayoffYou = payoffFunction.getPayoff(
+                    currentPercent,
+                    new float[]{percent_a},
+                    new float[]{percent_A});
+            currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(
+                    currentPercent,
+                    new float[]{percent_a},
+                    new float[]{percent_A});
+        } else {
+            currentPayoffYou = payoffFunction.getPayoff(
+                    currentPercent,
+                    new float[]{percent_A},
+                    new float[]{percent_a});
+            currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(
+                    currentPercent,
+                    new float[]{percent_A},
+                    new float[]{percent_a});
+        }
+        // FIXME - use counterpart info to fix these
         currentAPayoff = payoffFunction.getPayoff(
                 currentPercent,
                 new float[]{1},
@@ -482,6 +500,7 @@ public class Chart extends Sprite {
     }
 
     public void setIsCounterpart(boolean isCounterpart) {
+        this.isCounterpart = isCounterpart;
         if (isCounterpart) {
             payoffFunction = periodConfig.counterpartPayoffFunction;
             counterpartPayoffFunction = periodConfig.payoffFunction;
