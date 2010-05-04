@@ -57,7 +57,6 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
             client.setMyStrategy(currentStrategy);
             float elapsed = (System.nanoTime() - timestamp) / 1000000f;
             changeTimeEMA += 0.1 * (elapsed - changeTimeEMA);
-            System.err.println(changeTimeEMA);
             long estimatedLag = Math.round(changeTimeEMA);
             sleepTimeMillis = tickTime - Math.round(changeTimeEMA);
             if (tickTime > 20.0 * estimatedLag) {
@@ -134,5 +133,9 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
 
     public void signalStop() {
         running = false;
+    }
+
+    public float getAverageChangeTime() {
+        return changeTimeEMA;
     }
 }

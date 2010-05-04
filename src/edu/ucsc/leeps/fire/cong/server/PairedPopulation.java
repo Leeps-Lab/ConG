@@ -73,7 +73,7 @@ public class PairedPopulation implements Population, Serializable {
         float percentInStrategyTime;
         ClientInterface changed = members.get(id);
         ClientInterface other = pairs.get(changed);
-        long inStrategyTime = System.currentTimeMillis() - lastEvalTimes.get(changed);
+        long inStrategyTime = timestamp - lastEvalTimes.get(changed);
         percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
         lastEvalTimes.put(changed, timestamp);
         lastEvalTimes.put(other, timestamp);
@@ -90,11 +90,11 @@ public class PairedPopulation implements Population, Serializable {
             PeriodConfig periodConfig) {
         PayoffFunction changedPayoff, otherPayoff;
         if (counterparts.contains(changed)) {
-            changedPayoff = periodConfig.payoffFunction;
-            otherPayoff = periodConfig.counterpartPayoffFunction;
-        } else {
             changedPayoff = periodConfig.counterpartPayoffFunction;
             otherPayoff = periodConfig.payoffFunction;
+        } else {
+            changedPayoff = periodConfig.payoffFunction;
+            otherPayoff = periodConfig.counterpartPayoffFunction;
         }
         float[] changedLast = lastStrategies.get(changed);
         float[] otherLast = lastStrategies.get(other);
@@ -138,6 +138,22 @@ public class PairedPopulation implements Population, Serializable {
                 notified.add(client);
                 notified.add(pairs.get(client));
             }
+        }
+    }
+
+    public void endPeriod(PeriodConfig periodConfig) {
+        float percentInStrategyTime;
+        for (ClientInterface client1 : counterparts) {
+            ClientInterface client2 = pairs.get(client1);
+            long lastEvalTime1 = lastEvalTimes.get(client1);
+            long lastEvalTime2 = lastEvalTimes.get(client2);
+            long lastEvalTime = Math.max(lastEvalTime1, lastEvalTime2);
+            long inStrategyTime = (periodStartTime + (periodConfig.length * 1000)) - lastEvalTime;
+            percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
+            updatePayoffs(
+                    lastStrategies.get(client1),
+                    client1, client2,
+                    1.0f, percentInStrategyTime, percentInStrategyTime, periodConfig);
         }
     }
 }

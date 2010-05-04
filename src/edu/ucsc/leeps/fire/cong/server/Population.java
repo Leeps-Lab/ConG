@@ -23,4 +23,6 @@ public interface Population {
     public void initialize(long timestamp, PeriodConfig periodConfig);
 
     public void strategyChanged(float[] newStrategy, Integer id, long timestamp, PeriodConfig periodConfig);
+
+    public void endPeriod(PeriodConfig periodConfig);
 }

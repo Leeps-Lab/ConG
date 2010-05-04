@@ -136,4 +136,8 @@ public class TwoPopulation implements Population, Serializable {
             lastStrategiesOpposing.put(client, averageStrategy);
         }
     }
+
+    public void endPeriod(PeriodConfig periodConfig) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

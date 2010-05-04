@@ -108,4 +108,8 @@ public class SinglePopulationExclude implements Population, Serializable {
         lastEvalTime = timestamp;
         updateStrategies(periodConfig);
     }
+
+    public void endPeriod(PeriodConfig periodConfig) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

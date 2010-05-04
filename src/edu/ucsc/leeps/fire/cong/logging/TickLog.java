@@ -4,7 +4,6 @@
  */
 package edu.ucsc.leeps.fire.cong.logging;
 
-import edu.ucsc.leeps.fire.cong.server.Population;
 import edu.ucsc.leeps.fire.server.BaseLog;
 
 /**
@@ -14,7 +13,6 @@ import edu.ucsc.leeps.fire.server.BaseLog;
 public class TickLog extends BaseLog {
 
     public long secondsLeft;
-    public Population population;
 
     public TickLog() {
         try {

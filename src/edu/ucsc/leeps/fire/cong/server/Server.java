@@ -88,11 +88,18 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
     }
 
     @Override
+    public void endPeriod() {
+        for (Population population : populations) {
+            population.endPeriod(periodConfig);
+        }
+        super.endPeriod();
+    }
+
+    @Override
     public void tick(int secondsLeft) {
         super.tick(secondsLeft);
         tickLog.secondsLeft = secondsLeft;
         for (Population population : populations) {
-            tickLog.population = population;
             tickLog.commit();
         }
         if (secondsLeft == 0) {

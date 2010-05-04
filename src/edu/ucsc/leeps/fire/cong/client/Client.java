@@ -260,7 +260,7 @@ public class Client extends BaseClient implements ClientInterface {
         public void setup() {
             size(initWidth, initHeight, RENDERER);
             smooth();
-            textFont(size16);
+            textFont(size14);
             textMode(SCREEN);
         }
 
@@ -276,10 +276,21 @@ public class Client extends BaseClient implements ClientInterface {
                 countdown.draw(embed);
                 pointsDisplay.draw(embed);
                 if (DEBUG) {
-                    String frameRateString = String.format("%.2f", frameRate);
-                    text(frameRateString,
-                            width - (textWidth(frameRateString) + 10),
-                            height - (textAscent() + textDescent()));
+                    String frameRateString = String.format("FPS: %.2f", frameRate);
+                    if (frameRate < 8) {
+                        fill(255, 0, 0);
+                    } else {
+                        fill(0);
+                    }
+                    text(frameRateString, 330, 30);
+                    float averageChangeTime = strategyChanger.getAverageChangeTime();
+                    String changeTimeString = String.format("MPC: %.2f", averageChangeTime);
+                    if (averageChangeTime > 10) {
+                        fill(255, 0, 0);
+                    } else {
+                        fill(0);
+                    }
+                    text(changeTimeString, 330, 45);
                 }
             }
         }
