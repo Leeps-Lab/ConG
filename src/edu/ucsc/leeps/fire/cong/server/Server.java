@@ -119,7 +119,7 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
     private void initStrategies(long periodStartTime) {
         for (ClientInterface client : clients.values()) {
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                client.setMyStrategy(new float[]{0});
+                client.setMyStrategy(new float[]{random.nextFloat()});
             } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 client.setMyStrategy(new float[]{0.33f, 0.33f, 0.33f});
             } else {

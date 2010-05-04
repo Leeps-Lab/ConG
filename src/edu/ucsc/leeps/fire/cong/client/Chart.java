@@ -164,6 +164,8 @@ public class Chart extends Sprite {
                 x1 = 0;
                 y1 = y * scaledHeight + scaledMargin;
                 applet.line(x0, y0, x1, y1);
+                applet.stroke(100, 100, 100, 50);
+                applet.line(x0, y0, width, y1);
                 applet.fill(0);
                 float payoff = (1 - y) * maxPayoff;
                 if (payoff == -0.0f) {
