@@ -17,7 +17,7 @@ public class Main {
         Server.main(new String[]{"configs/bimatrix-pilot.csv", "configs/clients.csv"});
         Client.main(new String[]{"Player", "One", null});
         Client.main(new String[]{"Player", "Two", null});
-        Client.main(new String[]{"Player", "Three", null});
-        Client.main(new String[]{"Player", "Four", null});
+        //Client.main(new String[]{"Player", "Three", null});
+        //Client.main(new String[]{"Player", "Four", null});
     }
 }

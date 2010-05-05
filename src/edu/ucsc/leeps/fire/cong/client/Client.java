@@ -19,7 +19,7 @@ import processing.core.PFont;
  */
 public class Client extends BaseClient implements ClientInterface {
 
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     private int width, height;
     private PEmbed embed;
     private ServerInterface server;

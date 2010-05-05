@@ -79,7 +79,7 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
         }
     }
 
-    // Linearly interpolates u% between low and high
+    // Linearly interpolates u between low and high
     private static int interpolateRGB(float u, int low, int high) {
         int red = (high & 0x00FF0000) >> 16;
         red -= ((low & 0x00FF0000) >> 16);
@@ -112,8 +112,8 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
             for (int x = 0; x < size; x++) {
                 for (int y = 0; y < size; y++) {
                     PayoffFunction u;
-                    float A = y / (float) size;
-                    float a = x / (float) size;
+                    float A = 1 - (y / (float) size);
+                    float a = 1 - (x / (float) size);
                     if (mine && isCounterpart) {
                         u = periodConfig.counterpartPayoffFunction;
                     } else if (mine && !isCounterpart) {
@@ -126,22 +126,14 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
                         assert false;
                         u = null;
                     }
-                    if (mine && isCounterpart) {
-                        float tmpA = A;
-                        float tmpa = a;
-                        a = 1 - tmpA;
-                        A = tmpa;
-                    } else if (!mine && isCounterpart) {
-                        float tmpA = A;
-                        float tmpa = a;
-                        A = tmpa;
-                        a = 1 - tmpA;
-                    } else {
-                        A = 1 - A;
-                        a = 1 - a;
-                    }
-                    float value = u.getPayoff(currentPercent,
+                    float value;
+                    if (mine) {
+                        value = u.getPayoff(currentPercent,
                             new float[]{A}, new float[]{a}) / u.getMax();
+                    } else {
+                        value = u.getPayoff(currentPercent,
+                            new float[]{a}, new float[]{A}) / u.getMax();
+                    }
                     currentBuffer.pixels[y * size + x] = getRGB(value);
                 }
             }

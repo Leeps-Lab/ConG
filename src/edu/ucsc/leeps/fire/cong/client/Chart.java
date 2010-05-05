@@ -424,25 +424,14 @@ public class Chart extends Sprite {
     }
 
     private void twoStrategyChanged() {
-        if (isCounterpart) {
-            currentPayoffYou = payoffFunction.getPayoff(
-                    currentPercent,
-                    new float[]{percent_a},
-                    new float[]{percent_A});
-            currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(
-                    currentPercent,
-                    new float[]{percent_a},
-                    new float[]{percent_A});
-        } else {
-            currentPayoffYou = payoffFunction.getPayoff(
-                    currentPercent,
-                    new float[]{percent_A},
-                    new float[]{percent_a});
-            currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(
-                    currentPercent,
-                    new float[]{percent_A},
-                    new float[]{percent_a});
-        }
+        currentPayoffYou = payoffFunction.getPayoff(
+                currentPercent,
+                new float[]{percent_A},
+                new float[]{percent_a});
+        currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(
+                currentPercent,
+                new float[]{percent_a},
+                new float[]{percent_A});
         // FIXME - use counterpart info to fix these
         currentAPayoff = payoffFunction.getPayoff(
                 currentPercent,

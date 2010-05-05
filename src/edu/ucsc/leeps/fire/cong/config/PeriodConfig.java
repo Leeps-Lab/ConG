@@ -33,6 +33,7 @@ public class PeriodConfig extends BasePeriodConfig {
     public Line yourStrategyOverTime, counterpartStrategyOverTime;
     public int heatmapColorLow, heatmapColorMid, heatmapColorHigh;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
+    public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class ultimatum = UltimatumPayoffFunction.class;
     public static final Class singlePopulationInclude = SinglePopulationInclude.class;

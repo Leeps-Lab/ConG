@@ -12,26 +12,40 @@ import java.io.Serializable;
  */
 public class TwoStrategyPayoffFunction implements PayoffFunction, Serializable {
 
+    public float Aa;
     public float AaStart, AaEnd;
     public float Ab, Ba, Bb;
+    public boolean isCounterpart;
+    public float min, max;
+
+    public TwoStrategyPayoffFunction() {
+        AaStart = Float.NaN;
+        AaEnd = Float.NaN;
+        isCounterpart = false;
+    }
 
     public float getMax() {
-        return Math.max(AaStart, Math.max(AaEnd, Math.max(Ab, Math.max(Ba, Bb))));
+        return max;
     }
 
     public float getMin() {
-        return Math.min(AaStart, Math.max(AaEnd, Math.max(Ab, Math.max(Ba, Bb))));
+        return min;
     }
 
     public float getPayoff(
             float percent, float[] myStrategy, float[] opponentStrategy) {
-        float Aa;
-        Aa = AaStart + (percent * (AaEnd - AaStart));
+        if (!Float.isNaN(AaStart) && !Float.isNaN(AaEnd)) {
+            Aa = AaStart + (percent * (AaEnd - AaStart));
+        }
         float A, B, a, b;
         A = myStrategy[0];
         B = 1 - A;
         a = opponentStrategy[0];
         b = 1 - a;
-        return A * (a * Aa + b * Ab) + B * (a * Ba + b * Bb);
+        if (isCounterpart) {
+            return A * (a * Aa + b * Ba) + B * (a * Ab + b * Bb);
+        } else {
+            return A * (a * Aa + b * Ab) + B * (a * Ba + b * Bb);
+        }
     }
 }
