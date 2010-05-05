@@ -12,6 +12,7 @@ import java.io.Serializable;
  */
 public class TwoStrategyPayoffFunction implements PayoffFunction, Serializable {
 
+    public String name;
     public float Aa;
     public float AaStart, AaEnd;
     public float Ab, Ba, Bb;

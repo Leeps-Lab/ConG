@@ -303,7 +303,9 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
                     && hoverPercent_a >= 0 && hoverPercent_a <= 1.0) {
                 hover.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
                 hover.update((1 - hoverPercent_a) * width, (1 - hoverPercent_A) * height);
-                strategyChanger.setHoverStrategy(new float[][]{{hoverPercent_A}, {hoverPercent_a}});
+                strategyChanger.setHoverStrategy(
+                        new float[]{hoverPercent_A},
+                        new float[]{hoverPercent_a});
                 hover.setVisible(true);
                 hover.draw(applet);
             }

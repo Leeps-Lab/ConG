@@ -15,15 +15,16 @@ public class EventLog extends BaseLog {
 
     public int period;
     public long timestamp;
+    public long periodStartTime;
     public int changedId;
     public int counterpartId;
     public boolean isCounterpart;
     public float[] currentStrategy;
     public float[] targetStrategy;
-    public float[][] hoverStrategy;
+    public float[] hoverStrategy_A, hoverStrategy_a;
     public float[] counterpartCurrentStrategy;
     public float[] counterpartTargetStrategy;
-    public float[][] counterpartHoverStrategy;
+    public float[] counterpartHoverStrategy_A, counterpartHoverStrategy_a;
     public PayoffFunction payoffFunction;
     public PayoffFunction counterpartPayoffFunction;
 

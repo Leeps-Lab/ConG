@@ -7,6 +7,7 @@ package edu.ucsc.leeps.fire.cong.server;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
+import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,11 +31,11 @@ public class PairedPopulation implements Population, Serializable {
     private Map<ClientInterface, Long> lastEvalTimes;
     private Map<ClientInterface, float[]> lastStrategies;
     private Map<ClientInterface, float[]> lastTargetStrategies;
-    private Map<ClientInterface, float[][]> lastHoverStrategies;
+    private Map<ClientInterface, float[]> lastHoverStrategies_A;
+    private Map<ClientInterface, float[]> lastHoverStrategies_a;
 
     public void setMembers(
             List<ClientInterface> members,
-            List<Population> populations,
             Map<Integer, Population> membership) {
         this.members = new HashMap<Integer, ClientInterface>();
         this.ids = new HashMap<ClientInterface, Integer>();
@@ -44,7 +45,6 @@ public class PairedPopulation implements Population, Serializable {
             this.ids.put(client, id);
             membership.put(client.getID(), this);
         }
-        populations.add(this);
     }
 
     public void initialize(long timestamp, PeriodConfig periodConfig) {
@@ -55,7 +55,8 @@ public class PairedPopulation implements Population, Serializable {
         }
         lastStrategies = new HashMap<ClientInterface, float[]>();
         lastTargetStrategies = new HashMap<ClientInterface, float[]>();
-        lastHoverStrategies = new HashMap<ClientInterface, float[][]>();
+        lastHoverStrategies_A = new HashMap<ClientInterface, float[]>();
+        lastHoverStrategies_a = new HashMap<ClientInterface, float[]>();
         pairs = new HashMap<ClientInterface, ClientInterface>();
         List<ClientInterface> partners = new ArrayList<ClientInterface>();
         partners.addAll(members.values());
@@ -79,7 +80,8 @@ public class PairedPopulation implements Population, Serializable {
     public void strategyChanged(
             float[] newStrategy,
             float[] targetStrategy,
-            float[][] hoverStrategy,
+            float[] hoverStrategy_A,
+            float[] hoverStrategy_a,
             Integer id, long timestamp,
             PeriodConfig periodConfig,
             EventLog eventLog) {
@@ -103,10 +105,12 @@ public class PairedPopulation implements Population, Serializable {
         eventLog.counterpartId = ids.get(other);
         eventLog.currentStrategy = newStrategy;
         eventLog.targetStrategy = targetStrategy;
-        eventLog.hoverStrategy = hoverStrategy;
+        eventLog.hoverStrategy_A = hoverStrategy_A;
+        eventLog.hoverStrategy_a = hoverStrategy_a;
         eventLog.counterpartCurrentStrategy = lastStrategies.get(other);
         eventLog.counterpartTargetStrategy = lastTargetStrategies.get(other);
-        eventLog.counterpartHoverStrategy = lastHoverStrategies.get(other);
+        eventLog.counterpartHoverStrategy_A = lastHoverStrategies_A.get(other);
+        eventLog.counterpartHoverStrategy_a = lastHoverStrategies_a.get(other);
         if (counterparts.contains(changed)) {
             eventLog.isCounterpart = true;
             eventLog.payoffFunction = periodConfig.counterpartPayoffFunction;
@@ -116,10 +120,41 @@ public class PairedPopulation implements Population, Serializable {
             eventLog.payoffFunction = periodConfig.payoffFunction;
             eventLog.counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
         }
+        if (eventLog.targetStrategy == null) {
+            eventLog.targetStrategy = eventLog.currentStrategy;
+        }
+        if (eventLog.counterpartTargetStrategy == null) {
+            eventLog.counterpartTargetStrategy = eventLog.counterpartCurrentStrategy;
+        }
+        if (eventLog.hoverStrategy_A == null) {
+            eventLog.hoverStrategy_A = new float[eventLog.currentStrategy.length];
+            for (int i = 0; i < eventLog.hoverStrategy_A.length; i++) {
+                eventLog.hoverStrategy_A[i] = Float.NaN;
+            }
+        }
+        if (eventLog.hoverStrategy_a == null) {
+            eventLog.hoverStrategy_a = new float[eventLog.currentStrategy.length];
+            for (int i = 0; i < eventLog.hoverStrategy_a.length; i++) {
+                eventLog.hoverStrategy_a[i] = Float.NaN;
+            }
+        }
+        if (eventLog.counterpartHoverStrategy_A == null) {
+            eventLog.counterpartHoverStrategy_A = new float[eventLog.currentStrategy.length];
+            for (int i = 0; i < eventLog.counterpartHoverStrategy_A.length; i++) {
+                eventLog.counterpartHoverStrategy_A[i] = Float.NaN;
+            }
+        }
+        if (eventLog.counterpartHoverStrategy_a == null) {
+            eventLog.counterpartHoverStrategy_a = new float[eventLog.currentStrategy.length];
+            for (int i = 0; i < eventLog.counterpartHoverStrategy_a.length; i++) {
+                eventLog.counterpartHoverStrategy_a[i] = Float.NaN;
+            }
+        }
         eventLog.commit();
         // save the strategies
         lastTargetStrategies.put(changed, targetStrategy);
-        lastHoverStrategies.put(changed, hoverStrategy);
+        lastHoverStrategies_A.put(changed, hoverStrategy_A);
+        lastHoverStrategies_a.put(changed, hoverStrategy_a);
     }
 
     private void updatePayoffs(
@@ -193,6 +228,54 @@ public class PairedPopulation implements Population, Serializable {
                     lastStrategies.get(client1),
                     client1, client2,
                     1.0f, percentInStrategyTime, percentInStrategyTime, periodConfig);
+        }
+    }
+
+    public void logTick(TickLog tickLog, PeriodConfig periodConfig) {
+        for (Map.Entry<ClientInterface, ClientInterface> pair : pairs.entrySet()) {
+            ClientInterface p1 = pair.getKey();
+            ClientInterface p2 = pair.getValue();
+            tickLog.id = ids.get(p1);
+            tickLog.counterpartId = ids.get(p2);
+            tickLog.currentStrategy = lastStrategies.get(p1);
+            tickLog.targetStrategy = lastTargetStrategies.get(p1);
+            tickLog.hoverStrategy_A = lastHoverStrategies_A.get(p1);
+            tickLog.hoverStrategy_a = lastHoverStrategies_a.get(p1);
+            tickLog.counterpartCurrentStrategy = lastStrategies.get(p2);
+            tickLog.counterpartTargetStrategy = lastTargetStrategies.get(p2);
+            tickLog.counterpartHoverStrategy_A = lastHoverStrategies_A.get(p2);
+            tickLog.counterpartHoverStrategy_a = lastHoverStrategies_a.get(p2);
+            if (tickLog.targetStrategy == null) {
+                tickLog.targetStrategy = tickLog.currentStrategy;
+            }
+            if (tickLog.counterpartTargetStrategy == null) {
+                tickLog.counterpartTargetStrategy = tickLog.counterpartCurrentStrategy;
+            }
+            if (tickLog.hoverStrategy_A == null) {
+                tickLog.hoverStrategy_A = new float[tickLog.currentStrategy.length];
+                for (int i = 0; i < tickLog.hoverStrategy_A.length; i++) {
+                    tickLog.hoverStrategy_A[i] = Float.NaN;
+                }
+            }
+            if (tickLog.hoverStrategy_a == null) {
+                tickLog.hoverStrategy_a = new float[tickLog.currentStrategy.length];
+                for (int i = 0; i < tickLog.hoverStrategy_a.length; i++) {
+                    tickLog.hoverStrategy_a[i] = Float.NaN;
+                }
+            }
+            if (tickLog.counterpartHoverStrategy_A == null) {
+                tickLog.counterpartHoverStrategy_A = new float[tickLog.currentStrategy.length];
+                for (int i = 0; i < tickLog.counterpartHoverStrategy_A.length; i++) {
+                    tickLog.counterpartHoverStrategy_A[i] = Float.NaN;
+                }
+            }
+            if (tickLog.counterpartHoverStrategy_a == null) {
+                tickLog.counterpartHoverStrategy_a = new float[tickLog.currentStrategy.length];
+                for (int i = 0; i < tickLog.counterpartHoverStrategy_a.length; i++) {
+                    tickLog.counterpartHoverStrategy_a[i] = Float.NaN;
+                }
+            }
+            tickLog.commit();
         }
     }
 }

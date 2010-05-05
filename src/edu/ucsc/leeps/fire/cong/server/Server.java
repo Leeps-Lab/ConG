@@ -1,9 +1,9 @@
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
+import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,28 +20,29 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
     private PeriodConfig periodConfig;
     private TickLog tickLog;
     private EventLog eventLog;
-    private List<Population> populations;
+    private Population population;
     private Map<Integer, Population> membership;
     private Random random;
 
     public Server() {
-        super(PeriodConfig.class, TickLog.class);
+        super(PeriodConfig.class);
         tickLog = new TickLog();
         eventLog = new EventLog();
-        clients = new HashMap<Integer, ClientInterface>();
         addLog(tickLog);
         addLog(eventLog);
+        clients = new HashMap<Integer, ClientInterface>();
         random = new Random();
     }
 
     public synchronized void strategyChanged(
             float[] newStrategy,
             float[] targetStrategy,
-            float[][] hoverStrategy,
+            float[] hoverStrategy_A,
+            float[] hoverStrategy_a,
             Integer id) {
         long timestamp = System.currentTimeMillis();
         membership.get(id).strategyChanged(
-                newStrategy, targetStrategy, hoverStrategy,
+                newStrategy, targetStrategy, hoverStrategy_A, hoverStrategy_a,
                 id, timestamp, periodConfig, eventLog);
     }
 
@@ -80,6 +81,8 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
     public void initPeriod() {
         super.initPeriod();
         long periodStartTime = System.currentTimeMillis();
+        tickLog.periodStartTime = periodStartTime;
+        eventLog.periodStartTime = periodStartTime;
         initPopulations();
         initStrategies(periodStartTime);
         if (periodConfig.serverInitHeatmaps
@@ -91,31 +94,28 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
 
     @Override
     public void endPeriod() {
-        for (Population population : populations) {
-            population.endPeriod(periodConfig);
-        }
+        population.endPeriod(periodConfig);
         super.endPeriod();
     }
 
     @Override
-    public void tick(int secondsLeft) {
-        /*
-        tickLog.secondsLeft = secondsLeft;
-        for (Population population : populations) {
-            tickLog.commit();
-        }
-         * 
-         */
-        super.tick(secondsLeft);
+    public void quickTick(int millisLeft) {
+        tickLog.period = configurator.getCurrentPeriodNum();
+        tickLog.timestamp = System.currentTimeMillis();
+        tickLog.millisLeft = millisLeft;
+        tickLog.payoffFunction = periodConfig.payoffFunction;
+        tickLog.counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
+        population.logTick(tickLog, periodConfig);
+        super.quickTick(millisLeft);
     }
 
     private void initPopulations() {
-        populations = new LinkedList<Population>();
         membership = new HashMap<Integer, Population>();
         List<ClientInterface> members = new LinkedList<ClientInterface>();
         members.clear();
         members.addAll(clients.values());
-        periodConfig.population.setMembers(members, populations, membership);
+        population = periodConfig.population;
+        population.setMembers(members, membership);
     }
 
     private void initStrategies(long periodStartTime) {
@@ -128,9 +128,7 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
                 assert false;
             }
         }
-        for (Population population : populations) {
-            population.initialize(periodStartTime, periodConfig);
-        }
+        population.initialize(periodStartTime, periodConfig);
     }
 
     private void initHeatmaps() {

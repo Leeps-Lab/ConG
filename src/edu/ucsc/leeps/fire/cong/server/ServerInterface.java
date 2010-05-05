@@ -10,5 +10,10 @@ package edu.ucsc.leeps.fire.cong.server;
  */
 public interface ServerInterface {
 
-    public void strategyChanged(float[] newStrategy, float[] targetStrategy, float[][] hoverStrategy, Integer id);
+    public void strategyChanged(
+            float[] newStrategy,
+            float[] targetStrategy,
+            float[] hoverStrategy_A,
+            float[] hoverStrategy_a,
+            Integer id);
 }

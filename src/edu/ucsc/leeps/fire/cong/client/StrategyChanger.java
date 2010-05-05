@@ -20,7 +20,8 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
     private boolean isMoving;
     private float[] currentStrategy;
     private float[] targetStrategy;
-    private float[][] hoverStrategy;
+    private float[] hoverStrategy_A;
+    private float[] hoverStrategy_a;
     private long tickTime = 100;
     private float tickDelta;
     private long sleepTimeMillis;
@@ -47,14 +48,14 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
             }
             if (equalCount == currentStrategy.length) {
                 currentStrategy = targetStrategy;
-                server.strategyChanged(currentStrategy, targetStrategy, hoverStrategy, client.getID());
+                sendUpdate();
                 client.setMyStrategy(currentStrategy);
                 isMoving = false;
                 sleepTimeMillis = 100;
                 return;
             }
             long timestamp = System.nanoTime();
-            server.strategyChanged(currentStrategy, targetStrategy, hoverStrategy, client.getID());
+            sendUpdate();
             client.setMyStrategy(currentStrategy);
             float elapsed = (System.nanoTime() - timestamp) / 1000000f;
             changeTimeEMA += 0.1 * (elapsed - changeTimeEMA);
@@ -70,6 +71,15 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
                 recalculateTickDelta();
             }
         }
+    }
+
+    private void sendUpdate() {
+        server.strategyChanged(
+                currentStrategy,
+                targetStrategy,
+                hoverStrategy_A,
+                hoverStrategy_a,
+                client.getID());
     }
 
     @Override
@@ -106,8 +116,9 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
         this.currentStrategy = strategy;
     }
 
-    public void setHoverStrategy(float[][] strategy) {
-        this.hoverStrategy = strategy;
+    public void setHoverStrategy(float[] strategy_A, float[] strategy_a) {
+        this.hoverStrategy_A = strategy_A;
+        this.hoverStrategy_a = strategy_a;
     }
 
     public void setTargetStrategy(float[] strategy) {

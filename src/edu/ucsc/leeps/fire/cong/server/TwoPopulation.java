@@ -7,6 +7,7 @@ package edu.ucsc.leeps.fire.cong.server;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
+import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,7 +28,6 @@ public class TwoPopulation implements Population, Serializable {
 
     public void setMembers(
             List<ClientInterface> members,
-            List<Population> populations,
             Map<Integer, Population> membership) {
         members1 = new HashMap<Integer, ClientInterface>();
         members2 = new HashMap<Integer, ClientInterface>();
@@ -39,7 +39,6 @@ public class TwoPopulation implements Population, Serializable {
             }
             membership.put(client.getID(), this);
         }
-        populations.add(this);
     }
 
     public void initialize(long timestamp, PeriodConfig periodConfig) {
@@ -55,7 +54,8 @@ public class TwoPopulation implements Population, Serializable {
     public void strategyChanged(
             float[] newStrategy,
             float[] targetStrategy,
-            float[][] hoverStrategy,
+            float[] hoverStrategy_A,
+            float[] hoverStrategy_a,
             Integer id, long timestamp,
             PeriodConfig periodConfig,
             EventLog eventLog) {
@@ -145,6 +145,10 @@ public class TwoPopulation implements Population, Serializable {
     }
 
     public void endPeriod(PeriodConfig periodConfig) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void logTick(TickLog tickLog, PeriodConfig periodConfig) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

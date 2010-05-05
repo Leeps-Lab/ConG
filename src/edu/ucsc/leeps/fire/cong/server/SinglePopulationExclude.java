@@ -7,6 +7,7 @@ package edu.ucsc.leeps.fire.cong.server;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
+import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -33,10 +34,8 @@ public class SinglePopulationExclude implements Population, Serializable {
 
     public void setMembers(
             List<ClientInterface> members,
-            List<Population> populations,
             Map<Integer, Population> membership) {
         this.members = members;
-        populations.add(this);
         for (ClientInterface client : members) {
             membership.put(client.getID(), this);
         }
@@ -100,7 +99,8 @@ public class SinglePopulationExclude implements Population, Serializable {
     public void strategyChanged(
             float[] newStrategy,
             float[] targetStrategy,
-            float[][] hoverStrategy,
+            float[] hoverStrategy_A,
+            float[] hoverStrategy_a,
             Integer id, long timestamp,
             PeriodConfig periodConfig,
             EventLog eventLog) {
@@ -117,6 +117,10 @@ public class SinglePopulationExclude implements Population, Serializable {
     }
 
     public void endPeriod(PeriodConfig periodConfig) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void logTick(TickLog tickLog, PeriodConfig periodConfig) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
