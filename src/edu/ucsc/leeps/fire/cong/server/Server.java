@@ -34,13 +34,15 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
         random = new Random();
     }
 
-    public synchronized void strategyChanged(float[] newStrategy, Integer id) {
+    public synchronized void strategyChanged(
+            float[] newStrategy,
+            float[] targetStrategy,
+            float[][] hoverStrategy,
+            Integer id) {
         long timestamp = System.currentTimeMillis();
-        membership.get(id).strategyChanged(newStrategy, id, timestamp, periodConfig);
-        eventLog.timestamp = timestamp;
-        eventLog.subjectId = id;
-        eventLog.strategy = clients.get(id).getStrategy();
-        eventLog.commit();
+        membership.get(id).strategyChanged(
+                newStrategy, targetStrategy, hoverStrategy,
+                id, timestamp, periodConfig, eventLog);
     }
 
     public static void main(String[] args) throws Exception {
@@ -69,9 +71,9 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
     }
 
     @Override
-    public void setPeriodConfig(edu.ucsc.leeps.fire.server.BasePeriodConfig superPeriodConfig) {
-        super.setPeriodConfig(superPeriodConfig);
-        periodConfig = (PeriodConfig) superPeriodConfig;
+    public void setPeriodConfig(edu.ucsc.leeps.fire.server.BasePeriodConfig basePeriodConfig) {
+        super.setPeriodConfig(basePeriodConfig);
+        this.periodConfig = (PeriodConfig) basePeriodConfig;
     }
 
     @Override
@@ -97,14 +99,14 @@ public class Server extends edu.ucsc.leeps.fire.server.BaseServer implements Ser
 
     @Override
     public void tick(int secondsLeft) {
-        super.tick(secondsLeft);
+        /*
         tickLog.secondsLeft = secondsLeft;
         for (Population population : populations) {
             tickLog.commit();
         }
-        if (secondsLeft == 0) {
-            endPeriod();
-        }
+         * 
+         */
+        super.tick(secondsLeft);
     }
 
     private void initPopulations() {

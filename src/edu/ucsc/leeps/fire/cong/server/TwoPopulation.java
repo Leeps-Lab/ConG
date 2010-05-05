@@ -6,6 +6,7 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
@@ -51,7 +52,13 @@ public class TwoPopulation implements Population, Serializable {
         updateStrategies(members2.values(), periodConfig);
     }
 
-    public void strategyChanged(float[] newStrategy, Integer id, long timestamp, PeriodConfig periodConfig) {
+    public void strategyChanged(
+            float[] newStrategy,
+            float[] targetStrategy,
+            float[][] hoverStrategy,
+            Integer id, long timestamp,
+            PeriodConfig periodConfig,
+            EventLog eventLog) {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         float percentInStrategyTime;

@@ -159,6 +159,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         }
         heatmap.setIsCounterpart(isCounterpart);
         counterpartHeatmap.setIsCounterpart(isCounterpart);
+        setVisible(true);
     }
 
     public void update() {
@@ -302,6 +303,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
                     && hoverPercent_a >= 0 && hoverPercent_a <= 1.0) {
                 hover.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
                 hover.update((1 - hoverPercent_a) * width, (1 - hoverPercent_A) * height);
+                strategyChanger.setHoverStrategy(new float[][]{{hoverPercent_A}, {hoverPercent_a}});
                 hover.setVisible(true);
                 hover.draw(applet);
             }
@@ -320,7 +322,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
             counterpart.setVisible(true);
             counterpart.setLabel(counterpartPayoffFunction.getPayoff(
-                        currentPercent, new float[]{percent_a}, new float[]{percent_A}));
+                    currentPercent, new float[]{percent_a}, new float[]{percent_A}));
             counterpart.update(
                     counterpartHeatmap.origin.x + (1 - percent_a) * counterpartHeatmap.width,
                     counterpartHeatmap.origin.y + (1 - percent_A) * counterpartHeatmap.height);
@@ -363,25 +365,29 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         if (!visible) {
             return;
         }
-        if (!inRect(applet.mouseX, applet.mouseY) || applet.pmouseX != applet.mouseX || applet.pmouseY != applet.mouseY) {
-            hoverTimestamp = System.currentTimeMillis();
-            hover.setVisible(false);
+        try {
+            if (!inRect(applet.mouseX, applet.mouseY) || applet.pmouseX != applet.mouseX || applet.pmouseY != applet.mouseY) {
+                hoverTimestamp = System.currentTimeMillis();
+                hover.setVisible(false);
+            }
+            applet.pushMatrix();
+            applet.translate(origin.x, origin.y);
+
+            switch (periodConfig.twoStrategySelectionType) {
+                case HeatmapSingle:
+                case HeatmapBoth:
+                    drawHeatmap();
+                    break;
+                case Matrix:
+                    drawMatrix();
+            }
+
+            drawStrategyInfo();
+
+            applet.popMatrix();
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
         }
-        applet.pushMatrix();
-        applet.translate(origin.x, origin.y);
-
-        switch (periodConfig.twoStrategySelectionType) {
-            case HeatmapSingle:
-            case HeatmapBoth:
-                drawHeatmap();
-                break;
-            case Matrix:
-                drawMatrix();
-        }
-
-        drawStrategyInfo();
-
-        applet.popMatrix();
     }
 
     private boolean inRect(int x, int y) {
@@ -424,11 +430,8 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         periodConfig = (PeriodConfig) basePeriodConfig;
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            payoffFunction = periodConfig.payoffFunction;
-            counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
             heatmap.setPeriodConfig(periodConfig);
             counterpartHeatmap.setPeriodConfig(periodConfig);
-            setVisible(true);
             switch (periodConfig.twoStrategySelectionType) {
                 case Matrix:
                     setModeMatrix();

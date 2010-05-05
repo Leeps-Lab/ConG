@@ -6,6 +6,7 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,19 +23,25 @@ import java.util.Set;
 public class PairedPopulation implements Population, Serializable {
 
     private Map<Integer, ClientInterface> members;
+    private Map<ClientInterface, Integer> ids;
     private long periodStartTime;
     private Set<ClientInterface> counterparts;
     private Map<ClientInterface, ClientInterface> pairs;
     private Map<ClientInterface, Long> lastEvalTimes;
     private Map<ClientInterface, float[]> lastStrategies;
+    private Map<ClientInterface, float[]> lastTargetStrategies;
+    private Map<ClientInterface, float[][]> lastHoverStrategies;
 
     public void setMembers(
             List<ClientInterface> members,
             List<Population> populations,
             Map<Integer, Population> membership) {
         this.members = new HashMap<Integer, ClientInterface>();
+        this.ids = new HashMap<ClientInterface, Integer>();
         for (ClientInterface client : members) {
-            this.members.put(client.getID(), client);
+            int id = client.getID();
+            this.members.put(id, client);
+            this.ids.put(client, id);
             membership.put(client.getID(), this);
         }
         populations.add(this);
@@ -47,6 +54,8 @@ public class PairedPopulation implements Population, Serializable {
             lastEvalTimes.put(client, timestamp);
         }
         lastStrategies = new HashMap<ClientInterface, float[]>();
+        lastTargetStrategies = new HashMap<ClientInterface, float[]>();
+        lastHoverStrategies = new HashMap<ClientInterface, float[][]>();
         pairs = new HashMap<ClientInterface, ClientInterface>();
         List<ClientInterface> partners = new ArrayList<ClientInterface>();
         partners.addAll(members.values());
@@ -67,7 +76,13 @@ public class PairedPopulation implements Population, Serializable {
         updateAllStrategies();
     }
 
-    public void strategyChanged(float[] newStrategy, Integer id, long timestamp, PeriodConfig periodConfig) {
+    public void strategyChanged(
+            float[] newStrategy,
+            float[] targetStrategy,
+            float[][] hoverStrategy,
+            Integer id, long timestamp,
+            PeriodConfig periodConfig,
+            EventLog eventLog) {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         float percentInStrategyTime;
@@ -81,6 +96,30 @@ public class PairedPopulation implements Population, Serializable {
                 newStrategy,
                 changed, other,
                 percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
+        // log the event
+        eventLog.period = periodConfig.number;
+        eventLog.timestamp = timestamp;
+        eventLog.changedId = id;
+        eventLog.counterpartId = ids.get(other);
+        eventLog.currentStrategy = newStrategy;
+        eventLog.targetStrategy = targetStrategy;
+        eventLog.hoverStrategy = hoverStrategy;
+        eventLog.counterpartCurrentStrategy = lastStrategies.get(other);
+        eventLog.counterpartTargetStrategy = lastTargetStrategies.get(other);
+        eventLog.counterpartHoverStrategy = lastHoverStrategies.get(other);
+        if (counterparts.contains(changed)) {
+            eventLog.isCounterpart = true;
+            eventLog.payoffFunction = periodConfig.counterpartPayoffFunction;
+            eventLog.counterpartPayoffFunction = periodConfig.payoffFunction;
+        } else {
+            eventLog.isCounterpart = false;
+            eventLog.payoffFunction = periodConfig.payoffFunction;
+            eventLog.counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
+        }
+        eventLog.commit();
+        // save the strategies
+        lastTargetStrategies.put(changed, targetStrategy);
+        lastHoverStrategies.put(changed, hoverStrategy);
     }
 
     private void updatePayoffs(

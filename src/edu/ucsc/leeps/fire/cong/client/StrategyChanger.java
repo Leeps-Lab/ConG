@@ -20,6 +20,7 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
     private boolean isMoving;
     private float[] currentStrategy;
     private float[] targetStrategy;
+    private float[][] hoverStrategy;
     private long tickTime = 100;
     private float tickDelta;
     private long sleepTimeMillis;
@@ -46,14 +47,14 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
             }
             if (equalCount == currentStrategy.length) {
                 currentStrategy = targetStrategy;
-                server.strategyChanged(currentStrategy, client.getID());
+                server.strategyChanged(currentStrategy, targetStrategy, hoverStrategy, client.getID());
                 client.setMyStrategy(currentStrategy);
                 isMoving = false;
                 sleepTimeMillis = 100;
                 return;
             }
             long timestamp = System.nanoTime();
-            server.strategyChanged(currentStrategy, client.getID());
+            server.strategyChanged(currentStrategy, targetStrategy, hoverStrategy, client.getID());
             client.setMyStrategy(currentStrategy);
             float elapsed = (System.nanoTime() - timestamp) / 1000000f;
             changeTimeEMA += 0.1 * (elapsed - changeTimeEMA);
@@ -103,6 +104,10 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
 
     public void setCurrentStrategy(float[] strategy) {
         this.currentStrategy = strategy;
+    }
+
+    public void setHoverStrategy(float[][] strategy) {
+        this.hoverStrategy = strategy;
     }
 
     public void setTargetStrategy(float[] strategy) {

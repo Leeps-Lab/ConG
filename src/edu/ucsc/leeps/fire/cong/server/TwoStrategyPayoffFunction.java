@@ -48,4 +48,9 @@ public class TwoStrategyPayoffFunction implements PayoffFunction, Serializable {
             return A * (a * Aa + b * Ab) + B * (a * Ba + b * Bb);
         }
     }
+
+    @Override
+    public String toString() {
+        return String.format("%.2f, %.2f, %.2f, %.2f, %b", Aa, Ab, Ba, Bb, isCounterpart);
+    }
 }

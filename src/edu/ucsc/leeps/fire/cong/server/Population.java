@@ -6,6 +6,7 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
+import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +23,13 @@ public interface Population {
 
     public void initialize(long timestamp, PeriodConfig periodConfig);
 
-    public void strategyChanged(float[] newStrategy, Integer id, long timestamp, PeriodConfig periodConfig);
+    public void strategyChanged(
+            float[] newStrategy,
+            float[] targetStrategy,
+            float[][] hoverStrategy,
+            Integer id, long timestamp,
+            PeriodConfig periodConfig,
+            EventLog eventLog);
 
     public void endPeriod(PeriodConfig periodConfig);
 }

@@ -118,11 +118,6 @@ public class Client extends BaseClient implements ClientInterface {
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         super.setPeriodConfig(basePeriodConfig);
         periodConfig = (PeriodConfig) basePeriodConfig;
-        if (isCounterpart) {
-            PayoffFunction tmp = periodConfig.payoffFunction;
-            periodConfig.payoffFunction = periodConfig.counterpartPayoffFunction;
-            periodConfig.counterpartPayoffFunction = tmp;
-        }
         //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
         strategyChanger.setPeriodConfig(periodConfig);
         bimatrix.setPeriodConfig(periodConfig);
