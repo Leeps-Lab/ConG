@@ -111,10 +111,10 @@ public class SinglePopulationInclude implements Population, Serializable {
     }
 
     public void endPeriod(PeriodConfig periodConfig) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void logTick(TickLog tickLog, PeriodConfig periodConfig) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 }

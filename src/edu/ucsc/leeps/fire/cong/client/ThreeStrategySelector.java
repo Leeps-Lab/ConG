@@ -21,9 +21,9 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     private float sideLength;
     private Marker rock, paper, scissors;
     private float maxDist;
-    private Marker current, planned, opponent;
+    private Marker current, ghost, opponent;
     private float[] axisDistance;
-    private float[] plannedStrat;
+    private float[] ghostStrat;
     private float[] targetStrat;
     // current played strategies stored here (R, P, S)
     private float[] playedStrat;
@@ -39,7 +39,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     public float currentPercent;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
-    private Marker pRDrop, pPDrop, pSDrop;
+    private Marker ghostRDrop, ghostPDrop, ghostSDrop;
     private StrategyChanger strategyChanger;
 
     public ThreeStrategySelector(
@@ -50,13 +50,13 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         this.strategyChanger = strategyChanger;
         mouseInTriangle = false;
         axisDistance = new float[3];
-        plannedStrat = new float[3];
+        ghostStrat = new float[3];
         targetStrat = new float[3];
         playedStrat = new float[3];
         opponentStrat = new float[3];
         for (int i = R; i <= S; i++) {
             axisDistance[i] = 0f;
-            plannedStrat[i] = 0f;
+            ghostStrat[i] = 0f;
             targetStrat[i] = 0f;
             playedStrat[i] = 0f;
             opponentStrat[i] = 0f;
@@ -90,8 +90,8 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         current.setColor(50, 255, 50);
         current.setLabel("$$");
         current.setLabelMode(Marker.LabelMode.Bottom);
-        planned = new Marker(this, 0, 0, false, MARKER_RADIUS);
-        planned.setColor(25, 255, 25, 140);
+        ghost = new Marker(this, 0, 0, false, MARKER_RADIUS);
+        ghost.setColor(25, 255, 25, 140);
         opponent = new Marker(this, 0, 0, false, MARKER_RADIUS);
         opponent.setColor(200, 40, 40);
 
@@ -110,33 +110,33 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         rDrop.setLabel("R");
         rDrop.setLabelMode(Marker.LabelMode.Right);
 
-        pRDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
-        pRDrop.setColor(rColor);
-        pRDrop.setAlpha(150);
-        pRDrop.setLabel("R");
-        pRDrop.setLabelMode(Marker.LabelMode.Right);
+        ghostRDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
+        ghostRDrop.setColor(rColor);
+        ghostRDrop.setAlpha(150);
+        ghostRDrop.setLabel("R");
+        ghostRDrop.setLabelMode(Marker.LabelMode.Right);
 
         pDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
         pDrop.setColor(pColor);
         pDrop.setLabel("P");
         pDrop.setLabelMode(Marker.LabelMode.Left);
 
-        pPDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
-        pPDrop.setColor(pColor);
-        pPDrop.setAlpha(150);
-        pPDrop.setLabel("P");
-        pPDrop.setLabelMode(Marker.LabelMode.Left);
+        ghostPDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
+        ghostPDrop.setColor(pColor);
+        ghostPDrop.setAlpha(150);
+        ghostPDrop.setLabel("P");
+        ghostPDrop.setLabelMode(Marker.LabelMode.Left);
 
         sDrop = new Marker(this, 0, rock.origin.y, true, MARKER_RADIUS);
         sDrop.setColor(sColor);
         sDrop.setLabel("S");
         sDrop.setLabelMode(Marker.LabelMode.Bottom);
 
-        pSDrop = new Marker(this, 0, rock.origin.y, true, MARKER_RADIUS);
-        pSDrop.setColor(sColor);
-        pSDrop.setAlpha(150);
-        pSDrop.setLabel("S");
-        pSDrop.setLabelMode(Marker.LabelMode.Bottom);
+        ghostSDrop = new Marker(this, 0, rock.origin.y, true, MARKER_RADIUS);
+        ghostSDrop.setColor(sColor);
+        ghostSDrop.setAlpha(150);
+        ghostSDrop.setLabel("S");
+        ghostSDrop.setLabelMode(Marker.LabelMode.Bottom);
 
         setEnabled(false);
 
@@ -193,28 +193,27 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             if (mouseInTriangle) {
                 applet.noCursor();
                 if (current.isGrabbed()) {
-                    current.update(mouseX, mouseY);
                     calculateTargetStrats();
                     stratSlider[R].setGhostValue(targetStrat[R]);
                     stratSlider[P].setGhostValue(targetStrat[P]);
                     stratSlider[S].setGhostValue(targetStrat[S]);
                 } else {
-                    calculatePlannedStrats();
-                    planned.setVisible(true);
-                    planned.update(mouseX, mouseY);
+                    calculateGhostStrats();
+                    ghost.setVisible(true);
+                    ghost.update(mouseX, mouseY);
                 }
             } else {
                 if (current.isGrabbed()) {
                     current.release();
                 }
-                planned.setVisible(false);
+                ghost.setVisible(false);
                 applet.cursor();
             }
 
             if (!mouseInTriangle && applet.mousePressed) {
                 for (int i = R; i <= S; i++) {
                     if (stratSlider[i].isGhostGrabbed()) {
-                        planned.setVisible(true);
+                        ghost.setVisible(true);
                         if (applet.keyPressed && applet.key == PEmbed.CODED && applet.keyCode == PEmbed.CONTROL) {
 
                             float currentPos = stratSlider[i].getGhostPos();
@@ -227,11 +226,23 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
                             stratSlider[i].moveGhost(mouseX);
                         }
 
-                        balancePlannedStrats(i, stratSlider[i].getGhostValue());
-                        float[] coords = calculateStratCoords(plannedStrat[R], plannedStrat[P], plannedStrat[S]);
-                        planned.update(coords[0], coords[1]);
-
-                        adjustLabels();
+                        balanceStrats(ghostStrat, i, stratSlider[i].getGhostValue());
+                        switch (i) {
+                            case R:
+                                stratSlider[P].setGhostValue(ghostStrat[P]);
+                                stratSlider[S].setGhostValue(ghostStrat[S]);
+                                break;
+                            case P:
+                                stratSlider[R].setGhostValue(ghostStrat[R]);
+                                stratSlider[S].setGhostValue(ghostStrat[S]);
+                                break;
+                            case S:
+                                stratSlider[R].setGhostValue(ghostStrat[R]);
+                                stratSlider[P].setGhostValue(ghostStrat[P]);
+                                break;
+                        }
+                        float[] coords = calculateStratCoords(ghostStrat[R], ghostStrat[P], ghostStrat[S]);
+                        ghost.update(coords[0], coords[1]);
 
                         break;
                     }
@@ -239,31 +250,31 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             }
         }
 
-        if (planned.visible) {
-            updatePlannedDropLines();
+        if (ghost.visible) {
+            updateDropLines(ghost, ghostStrat, ghostRDrop, ghostPDrop, ghostSDrop);
             applet.strokeWeight(1);
             applet.stroke(0, 255, 255, 150);
-            applet.line(planned.origin.x, planned.origin.y, pRDrop.origin.x, pRDrop.origin.y);
-            applet.line(planned.origin.x, planned.origin.y, pPDrop.origin.x, pPDrop.origin.y);
-            applet.line(planned.origin.x, planned.origin.y, pSDrop.origin.x, pSDrop.origin.y);
+            applet.line(ghost.origin.x, ghost.origin.y, ghostRDrop.origin.x, ghostRDrop.origin.y);
+            applet.line(ghost.origin.x, ghost.origin.y, ghostPDrop.origin.x, ghostPDrop.origin.y);
+            applet.line(ghost.origin.x, ghost.origin.y, ghostSDrop.origin.x, ghostSDrop.origin.y);
 
-            planned.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, plannedStrat, opponentStrat));
+            ghost.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, ghostStrat, opponentStrat));
 
-            pRDrop.setLabel(plannedStrat[R]);
-            pPDrop.setLabel(plannedStrat[P]);
-            pSDrop.setLabel(plannedStrat[S]);
+            ghostRDrop.setLabel(ghostStrat[R]);
+            ghostPDrop.setLabel(ghostStrat[P]);
+            ghostSDrop.setLabel(ghostStrat[S]);
 
-            adjustPlannedLabels();
+            adjustLabels(ghostStrat, ghost, ghostPDrop, ghostRDrop);
 
-            pRDrop.draw(applet);
-            pPDrop.draw(applet);
-            pSDrop.draw(applet);
+            ghostRDrop.draw(applet);
+            ghostPDrop.draw(applet);
+            ghostSDrop.draw(applet);
         }
 
-        planned.draw(applet);
+        ghost.draw(applet);
 
         if (current.visible) {
-            updateCurrentDropLines();
+            updateDropLines(current, playedStrat, rDrop, pDrop, sDrop);
             applet.strokeWeight(1);
             applet.stroke(0, 255, 255);
             applet.line(current.origin.x, current.origin.y, rDrop.origin.x, rDrop.origin.y);
@@ -273,10 +284,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
 
         current.setLabel(periodConfig.payoffFunction.getPayoff(currentPercent, playedStrat, opponentStrat));
 
-        if (enabled) {
-            calculatePlayedStrats(current.origin.x - rock.origin.x, rock.origin.y - current.origin.y);
-        }
-        adjustLabels();
+        adjustLabels(playedStrat, current, pDrop, rDrop);
 
         rDrop.setLabel(playedStrat[R]);
         pDrop.setLabel(playedStrat[P]);
@@ -305,17 +313,17 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             float mouseX = e.getX() - origin.x;
             float mouseY = e.getY() - origin.y;
             if (mouseInTriangle) {
-                adjustLabels();
+                adjustLabels(playedStrat, current, pDrop, rDrop);
                 current.grab();
-                planned.setVisible(false);
+                ghost.setVisible(false);
             } else {
                 for (int i = 0; i < stratSlider.length; i++) {
                     if (stratSlider[i].mouseOnGhost(mouseX, mouseY)) {
                         stratSlider[i].grabGhost();
-                        planned.setVisible(true);
-                        balancePlannedStrats(i, stratSlider[i].getGhostValue());
-                        float[] coords = calculateStratCoords(plannedStrat[R], plannedStrat[P], plannedStrat[S]);
-                        planned.update(coords[0], coords[1]);
+                        ghost.setVisible(true);
+                        ghostStrat[R] = stratSlider[R].getStratValue();
+                        ghostStrat[P] = stratSlider[P].getStratValue();
+                        ghostStrat[S] = stratSlider[S].getStratValue();
                         break;
                     }
                 }
@@ -333,10 +341,9 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             for (int i = 0; i < stratSlider.length; i++) {
                 if (stratSlider[i].isGhostGrabbed()) {
                     stratSlider[i].releaseGhost();
-                    balanceTargetStrats(i, stratSlider[i].getGhostValue());
-                    float[] coords = calculateStratCoords(targetStrat[R], targetStrat[P], targetStrat[S]);
-                    current.update(coords[0], coords[1]);
-                    planned.setVisible(false);
+                    balanceStrats(ghostStrat, i, stratSlider[i].getGhostValue());
+                    setTargetRPS(ghostStrat[R], ghostStrat[P], ghostStrat[S]);
+                    ghost.setVisible(false);
                     break;
                 }
             }
@@ -351,18 +358,38 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     public void mouseExited(MouseEvent e) {
     }
 
-    public void setPlayerRPS(float newR, float newP, float newS) {
-        playedStrat[R] = newR;
-        playedStrat[P] = newP;
-        playedStrat[S] = newS;
+    public void setAllStrategies(float[] newStrats) {
+        playedStrat[R] = newStrats[R];
+        playedStrat[P] = newStrats[P];
+        playedStrat[S] = newStrats[S];
 
-        setTargetRPS(newR, newP, newS);
+        setTargetRPS(newStrats[R], newStrats[P], newStrats[S]);
+
+        ghostStrat[R] = newStrats[R];
+        ghostStrat[P] = newStrats[P];
+        ghostStrat[S] = newStrats[S];
 
         for (int i = R; i <= S; i++) {
             stratSlider[i].setStratValue(playedStrat[i]);
+            stratSlider[i].setGhostValue(ghostStrat[i]);
         }
 
-        float[] coords = calculateStratCoords(newR, newP, newS);
+        float[] coords = calculateStratCoords(newStrats[R],
+                                              newStrats[P],
+                                              newStrats[S]);
+        current.update(coords[0], coords[1]);
+    }
+
+    public void setCurrentStrategies(float[] currentStrat) {
+        playedStrat[R] = currentStrat[R];
+        playedStrat[P] = currentStrat[P];
+        playedStrat[S] = currentStrat[S];
+        for (int i = R; i <= S; ++i) {
+            stratSlider[i].setStratValue(currentStrat[i]);
+        }
+        float[] coords = calculateStratCoords(currentStrat[R],
+                                              currentStrat[P],
+                                              currentStrat[S]);
         current.update(coords[0], coords[1]);
     }
 
@@ -413,15 +440,16 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         setEnabled(false);
         for (int i = R; i <= S; i++) {
             axisDistance[i] = 0f;
-            plannedStrat[i] = 0f;
+            ghostStrat[i] = 0f;
             playedStrat[i] = 0f;
+            targetStrat[i] = 0f;
             opponentStrat[i] = 0f;
             stratSlider[i].setStratValue(0f);
             stratSlider[i].hideGhost();
         }
 
         current.setVisible(false);
-        planned.setVisible(false);
+        ghost.setVisible(false);
         opponent.setVisible(false);
         rDrop.setVisible(false);
         pDrop.setVisible(false);
@@ -442,69 +470,25 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         }
     }
 
-    // adjust the labeling modes of the Markers depending on the
-    // current strategies being played.
-    private void adjustLabels() {
-        if (playedStrat[S] < 0.2f) {
-            if (playedStrat[R] > playedStrat[P]) {
-                current.setLabelMode(Marker.LabelMode.Right);
-                pDrop.setLabelMode(Marker.LabelMode.Top);
-                rDrop.setLabelMode(Marker.LabelMode.Right);
+    // adjust the labeling mode of given marker based on strats in given
+    // array. also adjust labeling mode of given droplines
+    private void adjustLabels(float[] strats, Marker stratMarker,
+            Marker pDropMarker, Marker rDropMarker) {
+        if (strats[S] < 0.2f) {
+            if (strats[R] > strats[P]) {
+                stratMarker.setLabelMode(Marker.LabelMode.Right);
+                pDropMarker.setLabelMode(Marker.LabelMode.Top);
+                rDropMarker.setLabelMode(Marker.LabelMode.Right);
             } else {
-                current.setLabelMode(Marker.LabelMode.Left);
-                pDrop.setLabelMode(Marker.LabelMode.Left);
-                rDrop.setLabelMode(Marker.LabelMode.Top);
+                stratMarker.setLabelMode(Marker.LabelMode.Left);
+                pDropMarker.setLabelMode(Marker.LabelMode.Left);
+                rDropMarker.setLabelMode(Marker.LabelMode.Top);
             }
         } else {
-            current.setLabelMode(Marker.LabelMode.Bottom);
-            pDrop.setLabelMode(Marker.LabelMode.Left);
-            rDrop.setLabelMode(Marker.LabelMode.Right);
+            stratMarker.setLabelMode(Marker.LabelMode.Bottom);
+            pDropMarker.setLabelMode(Marker.LabelMode.Left);
+            rDropMarker.setLabelMode(Marker.LabelMode.Right);
         }
-    }
-
-    private void adjustPlannedLabels() {
-        if (plannedStrat[S] < 0.2f) {
-            if (plannedStrat[R] > plannedStrat[P]) {
-                planned.setLabelMode(Marker.LabelMode.Right);
-                pPDrop.setLabelMode(Marker.LabelMode.Top);
-                pRDrop.setLabelMode(Marker.LabelMode.Right);
-            } else {
-                planned.setLabelMode(Marker.LabelMode.Left);
-                pPDrop.setLabelMode(Marker.LabelMode.Left);
-                pRDrop.setLabelMode(Marker.LabelMode.Top);
-            }
-        } else {
-            planned.setLabelMode(Marker.LabelMode.Bottom);
-            pPDrop.setLabelMode(Marker.LabelMode.Left);
-            pRDrop.setLabelMode(Marker.LabelMode.Right);
-        }
-    }
-
-    // calculate playedR, playedP, playedS from x, y
-    private void calculatePlayedStrats(float x, float y) {
-        float newS = y / maxDist;
-
-        // constant factor for determining distance
-        float epsilon = y + (1 / PEmbed.sqrt(3)) * x;
-
-        // calculate distance from paper 3D axis
-        float deltaX = x - (PEmbed.sqrt(3) / 4) * epsilon;
-        float deltaY = y - .75f * epsilon;
-        float distP = PEmbed.sqrt(PEmbed.sq(deltaX) + PEmbed.sq(deltaY));
-
-        float newP = distP / maxDist;
-
-        float newR = 1 - newS - newP;
-
-        playedStrat[R] = newR;
-        playedStrat[P] = newP;
-        playedStrat[S] = newS;
-
-        for (int i = R; i <= S; i++) {
-            stratSlider[i].setStratValue(playedStrat[i]);
-        }
-
-        //server.strategyChanged(client.getID());
     }
 
     public float[] translate(float x, float y) {
@@ -569,11 +553,11 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         }
     }
 
-    // calculate plannedStrat entries
-    private void calculatePlannedStrats() {
-        plannedStrat[S] = axisDistance[S] / maxDist;
-        plannedStrat[P] = axisDistance[P] / maxDist;
-        plannedStrat[R] = 1 - plannedStrat[S] - plannedStrat[P];
+    // calculate ghostStrat entries
+    private void calculateGhostStrats() {
+        ghostStrat[S] = axisDistance[S] / maxDist;
+        ghostStrat[P] = axisDistance[P] / maxDist;
+        ghostStrat[R] = 1 - ghostStrat[S] - ghostStrat[P];
     }
 
     // calculate targetStrat entries
@@ -595,18 +579,18 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
     }
 
     // balance other strat values when using sliders
-    private void balanceTargetStrats(int strat, float value) {
+    private void balanceStrats(float[] strats, int strat, float value) {
         float pValue, deltaV, percentR, percentP, percentS;
         float newR, newP, newS;
         switch (strat) {
             case R:
-                pValue = targetStrat[R];
+                pValue = strats[R];
                 deltaV = value - pValue;
 
-                float PStotal = targetStrat[P] + targetStrat[S];
+                float PStotal = strats[P] + strats[S];
                 if (PStotal > 0) {
-                    percentP = targetStrat[P] / PStotal;
-                    percentS = targetStrat[S] / PStotal;
+                    percentP = strats[P] / PStotal;
+                    percentS = strats[S] / PStotal;
                 } else {
                     PStotal = 1 - value;
                     percentP = .50f;
@@ -616,17 +600,16 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
                 newR = value;
                 newP = (PStotal - deltaV) * percentP;
                 newS = 1 - newR - newP;
-                setTargetRPS(newR, newP, newS);
                 break;
 
             case P:
-                pValue = targetStrat[P];
+                pValue = strats[P];
                 deltaV = value - pValue;
 
-                float RStotal = targetStrat[R] + targetStrat[S];
+                float RStotal = strats[R] + strats[S];
                 if (RStotal > 0) {
-                    percentR = targetStrat[R] / RStotal;
-                    percentS = targetStrat[S] / RStotal;
+                    percentR = strats[R] / RStotal;
+                    percentS = strats[S] / RStotal;
                 } else {
                     RStotal = 1 - value;
                     percentR = .50f;
@@ -636,17 +619,16 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
                 newP = value;
                 newR = (RStotal - deltaV) * percentR;
                 newS = 1 - newR - newP;
-                setTargetRPS(newR, newP, newS);
                 break;
 
             case S:
-                pValue = targetStrat[S];
+                pValue = strats[S];
                 deltaV = value - pValue;
 
-                float RPtotal = targetStrat[R] + targetStrat[P];
+                float RPtotal = strats[R] + strats[P];
                 if (RPtotal > 0) {
-                    percentR = targetStrat[R] / RPtotal;
-                    percentP = targetStrat[P] / RPtotal;
+                    percentR = strats[R] / RPtotal;
+                    percentP = strats[P] / RPtotal;
                 } else {
                     RPtotal = 1 - value;
                     percentR = .50f;
@@ -656,107 +638,28 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
                 newS = value;
                 newR = (RPtotal - deltaV) * percentR;
                 newP = 1 - newR - newS;
-                setTargetRPS(newR, newP, newS);
                 break;
 
             default:
                 throw new RuntimeException("RPS Error: strat value " + "out of bounds in balanceStratValues()");
         }
+        strats[R] = newR;
+        strats[P] = newP;
+        strats[S] = newS;
     }
 
-    private void balancePlannedStrats(int strat, float value) {
-        float pValue, deltaV, percentR, percentP, percentS;
-        float newR, newP, newS;
-        switch (strat) {
-            case R:
-                pValue = plannedStrat[R];
-                deltaV = value - pValue;
-
-                float PStotal = plannedStrat[P] + plannedStrat[S];
-                if (PStotal > 0) {
-                    percentP = plannedStrat[P] / PStotal;
-                    percentS = plannedStrat[S] / PStotal;
-                } else {
-                    PStotal = 1 - value;
-                    percentP = .50f;
-                    percentS = .50f;
-                }
-
-                newR = value;
-                newP = (PStotal - deltaV) * percentP;
-                newS = 1 - newR - newP;
-                setPlannedRPS(newR, newP, newS);
-                break;
-
-            case P:
-                pValue = plannedStrat[P];
-                deltaV = value - pValue;
-
-                float RStotal = plannedStrat[R] + plannedStrat[S];
-                if (RStotal > 0) {
-                    percentR = plannedStrat[R] / RStotal;
-                    percentS = plannedStrat[S] / RStotal;
-                } else {
-                    RStotal = 1 - value;
-                    percentR = .50f;
-                    percentS = .50f;
-                }
-
-                newP = value;
-                newR = (RStotal - deltaV) * percentR;
-                newS = 1 - newR - newP;
-                setPlannedRPS(newR, newP, newS);
-                break;
-
-            case S:
-                pValue = plannedStrat[S];
-                deltaV = value - pValue;
-
-                float RPtotal = plannedStrat[R] + plannedStrat[P];
-                if (RPtotal > 0) {
-                    percentR = plannedStrat[R] / RPtotal;
-                    percentP = plannedStrat[P] / RPtotal;
-                } else {
-                    RPtotal = 1 - value;
-                    percentR = .50f;
-                    percentP = .50f;
-                }
-
-                newS = value;
-                newR = (RPtotal - deltaV) * percentR;
-                newP = 1 - newR - newS;
-                setPlannedRPS(newR, newP, newS);
-                break;
-
-            default:
-                throw new RuntimeException("RPS Error: strat value " + "out of bounds in balanceStratValues()");
-        }
-    }
-
-    private void updateCurrentDropLines() {
-        sDrop.update(current.origin.x, rock.origin.y);
+    private void updateDropLines(Marker stratMarker, float[] strats,
+            Marker rDropMarker, Marker pDropMarker, Marker sDropMarker) {
+        sDropMarker.update(stratMarker.origin.x, rock.origin.y);
 
         float x, y;
-        x = current.origin.x - maxDist * playedStrat[P] * PEmbed.cos(PEmbed.PI / 6);
-        y = current.origin.y - maxDist * playedStrat[P] * PEmbed.sin(PEmbed.PI / 6);
-        pDrop.update(x, y);
+        x = stratMarker.origin.x - maxDist * strats[P] * PEmbed.cos(PEmbed.PI / 6);
+        y = stratMarker.origin.y - maxDist * strats[P] * PEmbed.sin(PEmbed.PI / 6);
+        pDropMarker.update(x, y);
 
-        x = current.origin.x + maxDist * playedStrat[R] * PEmbed.cos(PEmbed.PI / 6);
-        y = current.origin.y - maxDist * playedStrat[R] * PEmbed.sin(PEmbed.PI / 6);
-        rDrop.update(x, y);
-    }
-
-    private void updatePlannedDropLines() {
-        pSDrop.update(planned.origin.x, rock.origin.y);
-
-        float x, y;
-        x = planned.origin.x - maxDist * plannedStrat[P] * PEmbed.cos(PEmbed.PI / 6);
-        y = planned.origin.y - maxDist * plannedStrat[P] * PEmbed.sin(PEmbed.PI / 6);
-        pPDrop.update(x, y);
-
-        x = planned.origin.x + maxDist * plannedStrat[R] * PEmbed.cos(PEmbed.PI / 6);
-        y = planned.origin.y - maxDist * plannedStrat[R] * PEmbed.sin(PEmbed.PI / 6);
-        pRDrop.update(x, y);
+        x = stratMarker.origin.x + maxDist * strats[R] * PEmbed.cos(PEmbed.PI / 6);
+        y = stratMarker.origin.y - maxDist * strats[R] * PEmbed.sin(PEmbed.PI / 6);
+        rDropMarker.update(x, y);
     }
 
     private void setTargetRPS(float targetR, float targetP, float targetS) {
@@ -766,12 +669,7 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         for (int i = R; i <= S; ++i) {
             stratSlider[i].setGhostValue(targetStrat[i]);
         }
-    }
-
-    private void setPlannedRPS(float plannedR, float plannedP, float plannedS) {
-        plannedStrat[R] = plannedR;
-        plannedStrat[P] = plannedP;
-        plannedStrat[S] = plannedS;
+        strategyChanger.setTargetStrategy(targetStrat);
     }
 
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {

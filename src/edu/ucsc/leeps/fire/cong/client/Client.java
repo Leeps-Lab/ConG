@@ -72,7 +72,7 @@ public class Client extends BaseClient implements ClientInterface {
         strategyChart = new Chart(
                 bimatrix.width + 80 + leftMargin, topMargin,
                 chartWidth, strategyChartHeight,
-                simplex, Chart.Mode.Strategy);
+                simplex, Chart.Mode.TwoStrategy);
         payoffChart = new Chart(
                 bimatrix.width + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight,
@@ -173,12 +173,25 @@ public class Client extends BaseClient implements ClientInterface {
         }
     }
 
+    public synchronized void initMyStrategy(float[] s) {
+        strategyChanger.setCurrentStrategy(s);
+        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            bimatrix.setMyStrategy(s[0]);
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            simplex.setAllStrategies(s);
+        } else {
+            assert false;
+        }
+        payoffChart.setMyStrategy(s);
+        strategyChart.setMyStrategy(s);
+    }
+
     public synchronized void setMyStrategy(float[] s) {
         strategyChanger.setCurrentStrategy(s);
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setMyStrategy(s[0]);
         } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            simplex.setPlayerRPS(s[0], s[1], s[2]);
+            simplex.setCurrentStrategies(s);
         } else {
             assert false;
         }

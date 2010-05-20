@@ -2,6 +2,8 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ServerInterface;
+import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.server.BasePeriodConfig;
 import edu.ucsc.leeps.fire.server.PeriodConfigurable;
 
@@ -20,6 +22,7 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
     private boolean isMoving;
     private float[] currentStrategy;
     private float[] targetStrategy;
+    private float[] deltaStrategy;
     private float[] hoverStrategy_A;
     private float[] hoverStrategy_a;
     private long tickTime = 100;
@@ -36,24 +39,24 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
 
     private void update() {
         synchronized (lock) {
-            float equalCount = 0;
+            float totalDelta = 0f;
             for (int i = 0; i < currentStrategy.length; i++) {
-                if (Math.abs(currentStrategy[i] - targetStrategy[i]) < tickDelta) {
-                    equalCount++;
-                } else if (targetStrategy[i] > currentStrategy[i]) {
-                    currentStrategy[i] += tickDelta;
-                } else if (targetStrategy[i] < currentStrategy[i]) {
-                    currentStrategy[i] -= tickDelta;
-                }
+                deltaStrategy[i] = targetStrategy[i] - currentStrategy[i];
+                totalDelta += Math.abs(deltaStrategy[i]);
             }
-            if (equalCount == currentStrategy.length) {
-                currentStrategy = targetStrategy;
-                sendUpdate();
-                client.setMyStrategy(currentStrategy);
+            if (totalDelta > tickDelta) {
+                for (int i = 0; i < deltaStrategy.length; ++i) {
+                    deltaStrategy[i] = tickDelta * (deltaStrategy[i] / totalDelta);
+                    currentStrategy[i] += deltaStrategy[i];
+                }
+            } else {
+                for(int i = 0; i < currentStrategy.length; ++i) {
+                    currentStrategy[i] = targetStrategy[i];
+                }
                 isMoving = false;
                 sleepTimeMillis = 100;
-                return;
             }
+
             long timestamp = System.nanoTime();
             sendUpdate();
             client.setMyStrategy(currentStrategy);
@@ -112,8 +115,14 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
         return targetStrategy;
     }
 
+    public float[] getCurrentStrategy() {
+        return currentStrategy;
+    }
+
     public void setCurrentStrategy(float[] strategy) {
-        this.currentStrategy = strategy;
+        for (int i = 0; i < currentStrategy.length; ++i) {
+            currentStrategy[i] = strategy[i];
+        }
     }
 
     public void setHoverStrategy(float[] strategy_A, float[] strategy_a) {
@@ -123,7 +132,9 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
 
     public void setTargetStrategy(float[] strategy) {
         synchronized (lock) {
-            this.targetStrategy = strategy;
+            for (int i = 0; i < targetStrategy.length; ++i) {
+                targetStrategy[i] = strategy[i];
+            }
             isMoving = true;
         }
     }
@@ -131,6 +142,15 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
     public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
         synchronized (lock) {
             this.periodConfig = (PeriodConfig) basePeriodConfig;
+            if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                currentStrategy = new float[1];
+                targetStrategy = new float[1];
+                deltaStrategy = new float[1];
+            } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                currentStrategy = new float[3];
+                targetStrategy = new float[3];
+                deltaStrategy = new float[3];
+            }
             recalculateTickDelta();
         }
     }

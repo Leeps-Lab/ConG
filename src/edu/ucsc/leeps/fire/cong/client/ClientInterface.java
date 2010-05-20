@@ -8,6 +8,8 @@ public interface ClientInterface extends edu.ucsc.leeps.fire.client.BaseClientIn
 
     public float[] getStrategy();
 
+    public void initMyStrategy(float[] s);
+
     public void setMyStrategy(float[] s);
 
     public void setCounterpartStrategy(float[] s);

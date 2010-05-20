@@ -36,6 +36,12 @@ public class Chart extends Sprite {
     private float currentBbPayoff;
     // Three strategy
     private ThreeStrategySelector simplex;
+    private float percent_R;
+    private float percent_r;
+    private float percent_P;
+    private float percent_p;
+    private float percent_S;
+    private float percent_s;
     private float currentRPayoff;
     private float currentPPayoff;
     private float currentSPayoff;
@@ -76,7 +82,7 @@ public class Chart extends Sprite {
 
     public enum Mode {
 
-        Payoff, Strategy
+        Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy
     };
     private Mode mode;
 
@@ -231,13 +237,15 @@ public class Chart extends Sprite {
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
                     drawTwoStrategyPayoffLines(applet);
-                } else if (mode == Mode.Strategy) {
+                } else if (mode == Mode.TwoStrategy) {
                     drawTwoStrategyLines(applet);
                 }
             } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
                     drawThreeStrategyPayoffLines(applet);
-                } else if (mode == Mode.Strategy) {
+                } else if (mode == Mode.RStrategy ||
+                           mode == Mode.PStrategy ||
+                           mode == Mode.SStrategy) {
                     drawThreeStrategyLines(applet);
                 }
             }
@@ -479,6 +487,10 @@ public class Chart extends Sprite {
     public void setMyStrategy(float[] s) {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_A = s[0];
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            percent_R = s[0];
+            percent_P = s[1];
+            percent_S = s[2];
         }
         strategyChanged();
     }
@@ -486,6 +498,10 @@ public class Chart extends Sprite {
     public void setCounterpartStrategy(float[] s) {
         if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_a = s[0];
+        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+           percent_r = s[0];
+           percent_p = s[1];
+           percent_s = s[2];
         }
         strategyChanged();
     }
