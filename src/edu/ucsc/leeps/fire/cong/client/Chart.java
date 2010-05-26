@@ -79,6 +79,12 @@ public class Chart extends Sprite {
     private Line futureSrPayoff;
     private Line futureSpPayoff;
     private Line futureSsPayoff;
+    private Line yourROverTime;
+    private Line counterpartROverTime;
+    private Line yourPOverTime;
+    private Line counterpartPOverTime;
+    private Line yourSOverTime;
+    private Line counterpartSOverTime;
 
     public enum Mode {
 
@@ -126,6 +132,13 @@ public class Chart extends Sprite {
         futureSrPayoff = new Line(0, 0, width, height);
         futureSpPayoff = new Line(0, 0, width, height);
         futureSsPayoff = new Line(0, 0, width, height);
+
+        yourROverTime = new Line(0, 0, width, height);
+        counterpartROverTime = new Line(0, 0, width, height);
+        yourPOverTime = new Line (0, 0, width, height);
+        counterpartPOverTime = new Line(0, 0, width, height);
+        yourSOverTime = new Line(0, 0, width, height);
+        counterpartSOverTime = new Line(0, 0, width, height);
 
         this.simplex = simplex;
 
@@ -226,6 +239,16 @@ public class Chart extends Sprite {
     }
 
     private void drawThreeStrategyLines(PEmbed applet) {
+        if (mode == Mode.RStrategy) {
+            yourROverTime.draw(applet);
+            counterpartROverTime.draw(applet);
+        } else if (mode == Mode.PStrategy) {
+            yourPOverTime.draw(applet);
+            counterpartPOverTime.draw(applet);
+        } else if (mode == Mode.SStrategy) {
+            yourSOverTime.draw(applet);
+            counterpartSOverTime.draw(applet);
+        }
     }
 
     @Override
@@ -409,6 +432,7 @@ public class Chart extends Sprite {
             } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 addThreeStrategyActualPayoffPoints();
                 addThreeStrategyFuturePayoffPoints();
+                addThreeStrategyPoints();
             }
             addStrategyPoint(yourStrategyOverTime, currentPercent, percent_A);
             addStrategyPoint(counterpartStrategyOverTime, currentPercent, percent_a);
@@ -429,6 +453,15 @@ public class Chart extends Sprite {
         addPayoffPoint(actualRPayoff, currentPercent, currentRPayoff);
         addPayoffPoint(actualPPayoff, currentPercent, currentPPayoff);
         addPayoffPoint(actualSPayoff, currentPercent, currentSPayoff);
+    }
+
+    private void addThreeStrategyPoints() {
+        addStrategyPoint(yourROverTime, currentPercent, percent_R);
+        addStrategyPoint(counterpartROverTime, currentPercent, percent_r);
+        addStrategyPoint(yourPOverTime, currentPercent, percent_P);
+        addStrategyPoint(counterpartPOverTime, currentPercent, percent_p);
+        addStrategyPoint(yourSOverTime, currentPercent, percent_S);
+        addStrategyPoint(counterpartSOverTime, currentPercent, percent_s);
     }
 
     private void twoStrategyChanged() {
@@ -526,6 +559,12 @@ public class Chart extends Sprite {
         actualPayoffCounterpart.configure(periodConfig.otherPayoff);
         yourStrategyOverTime.configure(periodConfig.yourStrategyOverTime);
         counterpartStrategyOverTime.configure(periodConfig.counterpartStrategyOverTime);
+        yourROverTime.configure(periodConfig.yourStrategyOverTime);
+        counterpartROverTime.configure(periodConfig.counterpartStrategyOverTime);
+        yourPOverTime.configure(periodConfig.yourStrategyOverTime);
+        counterpartPOverTime.configure(periodConfig.counterpartStrategyOverTime);
+        yourSOverTime.configure(periodConfig.yourStrategyOverTime);
+        counterpartSOverTime.configure(periodConfig.counterpartStrategyOverTime);
     }
 
     public void addPayoffPoint(Line line, float x, float y) {

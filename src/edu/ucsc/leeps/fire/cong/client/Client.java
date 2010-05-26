@@ -31,6 +31,7 @@ public class Client extends BaseClient implements ClientInterface {
     private TwoStrategySelector bimatrix;
     private ThreeStrategySelector simplex;
     private Chart payoffChart, strategyChart;
+    private Chart rChart, pChart, sChart;
     private ChartLegend legend;
     private boolean isCounterpart = false;
     private StrategyChanger strategyChanger;
@@ -68,6 +69,7 @@ public class Client extends BaseClient implements ClientInterface {
         int chartWidth = (int) (width - bimatrix.width - 2 * leftMargin - 80);
         int chartMargin = 30;
         int strategyChartHeight = 100;
+        int threeStrategyChartHeight = 30;
         int payoffChartHeight = (int) (height - strategyChartHeight - 2 * topMargin - chartMargin - 10);
         strategyChart = new Chart(
                 bimatrix.width + 80 + leftMargin, topMargin,
@@ -77,6 +79,18 @@ public class Client extends BaseClient implements ClientInterface {
                 bimatrix.width + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight,
                 simplex, Chart.Mode.Payoff);
+        rChart = new Chart(
+                bimatrix.width + 80 + leftMargin, topMargin,
+                chartWidth, threeStrategyChartHeight,
+                simplex, Chart.Mode.RStrategy);
+        pChart = new Chart(
+                bimatrix.width + 80 + leftMargin, topMargin + threeStrategyChartHeight + 5,
+                chartWidth, threeStrategyChartHeight,
+                simplex, Chart.Mode.PStrategy);
+        sChart = new Chart(
+                bimatrix.width + 80 + leftMargin, topMargin + 2 * (threeStrategyChartHeight + 5),
+                chartWidth, threeStrategyChartHeight,
+                simplex, Chart.Mode.SStrategy);
         legend = new ChartLegend(
                 (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
@@ -91,6 +105,9 @@ public class Client extends BaseClient implements ClientInterface {
         bimatrix.setEnabled(true);
         payoffChart.clearAll();
         strategyChart.clearAll();
+        rChart.clearAll();
+        pChart.clearAll();
+        sChart.clearAll();
         super.startPeriod();
     }
 
@@ -124,6 +141,9 @@ public class Client extends BaseClient implements ClientInterface {
         simplex.setPeriodConfig(periodConfig);
         payoffChart.setPeriodConfig(periodConfig);
         strategyChart.setPeriodConfig(periodConfig);
+        rChart.setPeriodConfig(periodConfig);
+        pChart.setPeriodConfig(periodConfig);
+        sChart.setPeriodConfig(periodConfig);
         legend.setPeriodConfig(periodConfig);
     }
 
@@ -153,6 +173,12 @@ public class Client extends BaseClient implements ClientInterface {
             payoffChart.updateLines();
             strategyChart.currentPercent = this.percent;
             strategyChart.updateLines();
+            rChart.currentPercent = this.percent;
+            rChart.updateLines();
+            pChart.currentPercent = this.percent;
+            pChart.updateLines();
+            sChart.currentPercent = this.percent;
+            sChart.updateLines();
             bimatrix.setCurrentPercent(this.percent);
             simplex.currentPercent = this.percent;
         }
@@ -184,6 +210,9 @@ public class Client extends BaseClient implements ClientInterface {
         }
         payoffChart.setMyStrategy(s);
         strategyChart.setMyStrategy(s);
+        rChart.setMyStrategy(s);
+        pChart.setMyStrategy(s);
+        sChart.setMyStrategy(s);
     }
 
     public synchronized void setMyStrategy(float[] s) {
@@ -197,6 +226,9 @@ public class Client extends BaseClient implements ClientInterface {
         }
         payoffChart.setMyStrategy(s);
         strategyChart.setMyStrategy(s);
+        rChart.setMyStrategy(s);
+        pChart.setMyStrategy(s);
+        sChart.setMyStrategy(s);
     }
 
     public synchronized void setCounterpartStrategy(float[] s) {
@@ -209,6 +241,9 @@ public class Client extends BaseClient implements ClientInterface {
         }
         payoffChart.setCounterpartStrategy(s);
         strategyChart.setCounterpartStrategy(s);
+        rChart.setCounterpartStrategy(s);
+        pChart.setCounterpartStrategy(s);
+        sChart.setCounterpartStrategy(s);
     }
 
     @Override
@@ -278,7 +313,15 @@ public class Client extends BaseClient implements ClientInterface {
                 background(255);
                 bimatrix.draw(embed);
                 simplex.draw(embed);
-                strategyChart.draw(embed);
+                if (periodConfig != null) {
+                    if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                        strategyChart.draw(embed);
+                    } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                        rChart.draw(embed);
+                        pChart.draw(embed);
+                        sChart.draw(embed);
+                    }
+                }
                 payoffChart.draw(embed);
                 legend.draw(embed);
                 countdown.draw(embed);
