@@ -304,6 +304,12 @@ public class Chart extends Sprite {
         actualBbPayoff.clear();
         yourStrategyOverTime.clear();
         counterpartStrategyOverTime.clear();
+        yourPOverTime.clear();
+        yourROverTime.clear();
+        yourSOverTime.clear();
+        counterpartROverTime.clear();
+        counterpartPOverTime.clear();
+        counterpartSOverTime.clear();
 
         clearFuture();
     }
