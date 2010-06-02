@@ -11,9 +11,9 @@ import java.awt.event.MouseEvent;
 
 public class ThreeStrategySelector extends Sprite implements PeriodConfigurable, MouseListener {
 
-    public String rLabel = "Rock";
-    public String pLabel = "Paper";
-    public String sLabel = "Scissors";
+    private String rLabel = "";
+    private String pLabel = "";
+    private String sLabel = "";
     private final int MARKER_RADIUS = 7;
     private final int R = 0;
     private final int P = 1;
@@ -197,11 +197,11 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
                     stratSlider[R].setGhostValue(targetStrat[R]);
                     stratSlider[P].setGhostValue(targetStrat[P]);
                     stratSlider[S].setGhostValue(targetStrat[S]);
-                } else {
-                    calculateGhostStrats();
-                    ghost.setVisible(true);
-                    ghost.update(mouseX, mouseY);
                 }
+                
+                calculateGhostStrats();
+                ghost.setVisible(true);
+                ghost.update(mouseX, mouseY);
             } else {
                 if (current.isGrabbed()) {
                     current.release();
@@ -315,7 +315,6 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
             if (mouseInTriangle) {
                 adjustLabels(playedStrat, current, pDrop, rDrop);
                 current.grab();
-                ghost.setVisible(false);
             } else {
                 for (int i = 0; i < stratSlider.length; i++) {
                     if (stratSlider[i].mouseOnGhost(mouseX, mouseY)) {
@@ -676,6 +675,15 @@ public class ThreeStrategySelector extends Sprite implements PeriodConfigurable,
         periodConfig = (PeriodConfig) basePeriodConfig;
         if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             heatmap.setPeriodConfig(periodConfig);
+            rLabel = periodConfig.rLabel;
+            stratSlider[R].setLabel(rLabel);
+            pLabel = periodConfig.pLabel;
+            stratSlider[P].setLabel(pLabel);
+            sLabel = periodConfig.sLabel;
+            stratSlider[S].setLabel(sLabel);
+            rock.setLabel(periodConfig.shortRLabel);
+            paper.setLabel(periodConfig.shortPLabel);
+            scissors.setLabel(periodConfig.shortSLabel);
             setVisible(true);
         } else {
             setVisible(false);

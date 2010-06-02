@@ -133,12 +133,12 @@ public class Chart extends Sprite {
         futureSpPayoff = new Line(0, 0, width, height);
         futureSsPayoff = new Line(0, 0, width, height);
 
-        yourROverTime = new Line(0, 0, width, height);
-        counterpartROverTime = new Line(0, 0, width, height);
-        yourPOverTime = new Line (0, 0, width, height);
-        counterpartPOverTime = new Line(0, 0, width, height);
-        yourSOverTime = new Line(0, 0, width, height);
-        counterpartSOverTime = new Line(0, 0, width, height);
+        yourROverTime = new Line(0, scaledMargin, width, scaledHeight);
+        counterpartROverTime = new Line(0, scaledMargin, width, scaledHeight);
+        yourPOverTime = new Line (0, scaledMargin, width, scaledHeight);
+        counterpartPOverTime = new Line(0, scaledMargin, width, scaledHeight);
+        yourSOverTime = new Line(0, scaledMargin, width, scaledHeight);
+        counterpartSOverTime = new Line(0, scaledMargin, width, scaledHeight);
 
         this.simplex = simplex;
 
@@ -192,6 +192,19 @@ public class Chart extends Sprite {
                 }
                 String label = String.format("%.1f", payoff);
                 applet.text(label, origin.x - 1.2f * applet.textWidth(label), y0 + origin.y);
+            }
+        } else {
+            applet.textAlign(PEmbed.RIGHT);
+            applet.fill(0);
+            if (mode == Mode.RStrategy) {
+                applet.text(periodConfig.rLabel, origin.x - 10, 
+                        origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
+            } else if (mode == Mode.PStrategy) {
+                applet.text(periodConfig.pLabel, origin.x - 10,
+                        origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
+            } else if (mode == Mode.SStrategy) {
+                applet.text(periodConfig.sLabel, origin.x - 10,
+                        origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
             }
         }
     }
@@ -559,12 +572,21 @@ public class Chart extends Sprite {
         actualPayoffCounterpart.configure(periodConfig.otherPayoff);
         yourStrategyOverTime.configure(periodConfig.yourStrategyOverTime);
         counterpartStrategyOverTime.configure(periodConfig.counterpartStrategyOverTime);
-        yourROverTime.configure(periodConfig.yourStrategyOverTime);
-        counterpartROverTime.configure(periodConfig.counterpartStrategyOverTime);
-        yourPOverTime.configure(periodConfig.yourStrategyOverTime);
-        counterpartPOverTime.configure(periodConfig.counterpartStrategyOverTime);
-        yourSOverTime.configure(periodConfig.yourStrategyOverTime);
-        counterpartSOverTime.configure(periodConfig.counterpartStrategyOverTime);
+        yourROverTime.configure(periodConfig.yourPayoff);
+        yourROverTime.mode = Line.Mode.Solid;
+        yourROverTime.weight = 2f;
+        counterpartROverTime.configure(periodConfig.otherPayoff);
+        counterpartROverTime.mode = Line.Mode.Solid;
+        yourPOverTime.configure(periodConfig.yourPayoff);
+        yourPOverTime.mode = Line.Mode.Solid;
+        yourPOverTime.weight = 2f;
+        counterpartPOverTime.configure(periodConfig.otherPayoff);
+        counterpartPOverTime.mode = Line.Mode.Solid;
+        yourSOverTime.configure(periodConfig.yourPayoff);
+        yourSOverTime.mode = Line.Mode.Solid;
+        yourSOverTime.weight = 2f;
+        counterpartSOverTime.configure(periodConfig.otherPayoff);
+        counterpartSOverTime.mode = Line.Mode.Solid;
     }
 
     public void addPayoffPoint(Line line, float x, float y) {

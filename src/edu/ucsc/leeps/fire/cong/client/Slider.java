@@ -155,6 +155,10 @@ public class Slider {
         ghostGrabbed = false;
     }
 
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
     public boolean mouseOnHandle(float mouseX, float mouseY) {
         return (mouseX < sliderPos + HANDLE_WIDTH / 2 && mouseX > sliderPos - HANDLE_WIDTH / 2 && mouseY < sliderY + HANDLE_HEIGHT / 2 && mouseY > sliderY - HANDLE_HEIGHT / 2);
     }

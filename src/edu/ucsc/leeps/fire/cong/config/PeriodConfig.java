@@ -32,6 +32,7 @@ public class PeriodConfig extends BasePeriodConfig {
     public Line payoffAa, payoffAb, payoffBa, payoffBb, yourPayoff, otherPayoff;
     public Line yourStrategyOverTime, counterpartStrategyOverTime;
     public int heatmapColorLow, heatmapColorMid, heatmapColorHigh;
+    public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
@@ -91,5 +92,11 @@ public class PeriodConfig extends BasePeriodConfig {
         counterpartStrategyOverTime.b = 0;
         counterpartStrategyOverTime.alpha = 255;
         counterpartStrategyOverTime.weight = 2f;
+        rLabel = "Rock";
+        pLabel = "Paper";
+        sLabel = "Scissors";
+        shortRLabel = "R";
+        shortPLabel = "P";
+        shortSLabel = "S";
     }
 }
