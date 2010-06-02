@@ -29,10 +29,6 @@ public class TickLog extends BaseLog {
     public PayoffFunction counterpartPayoffFunction;
 
     public TickLog() {
-        try {
-            init("ticks");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        init("ticks");
     }
 }

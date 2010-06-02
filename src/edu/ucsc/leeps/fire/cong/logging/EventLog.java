@@ -29,10 +29,6 @@ public class EventLog extends BaseLog {
     public PayoffFunction counterpartPayoffFunction;
 
     public EventLog() {
-        try {
-            init("events");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        init("events");
     }
 }
