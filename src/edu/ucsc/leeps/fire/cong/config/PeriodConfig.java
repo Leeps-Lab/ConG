@@ -4,7 +4,7 @@
  */
 package edu.ucsc.leeps.fire.cong.config;
 
-import edu.ucsc.leeps.fire.cong.client.Line;
+import edu.ucsc.leeps.fire.cong.client.gui.Line;
 import edu.ucsc.leeps.fire.cong.server.PairedPopulation;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.Population;
@@ -14,7 +14,7 @@ import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoPopulation;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.UltimatumPayoffFunction;
-import edu.ucsc.leeps.fire.server.BasePeriodConfig;
+import edu.ucsc.leeps.fire.config.BasePeriodConfig;
 
 /**
  *
@@ -42,7 +42,6 @@ public class PeriodConfig extends BasePeriodConfig {
     public static final Class twoPopulation = TwoPopulation.class;
     public static final Class paired = PairedPopulation.class;
     public static final Class line = Line.class;
-
     // only for testing framerate
     public boolean serverInitHeatmaps = false;
 

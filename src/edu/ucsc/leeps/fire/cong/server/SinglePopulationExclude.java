@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.cong.client.ClientState;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
-import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.io.Serializable;
@@ -20,23 +16,23 @@ import java.util.Map;
  */
 public class SinglePopulationExclude implements Population, Serializable {
 
-    private List<ClientInterface> members;
+    private List<ClientState> members;
     private long periodStartTime;
     private long lastEvalTime;
-    private Map<ClientInterface, float[]> lastStrategiesMine;
-    private Map<ClientInterface, float[]> lastStrategiesOpposing;
+    private Map<ClientState, float[]> lastStrategiesMine;
+    private Map<ClientState, float[]> lastStrategiesOpposing;
 
     public SinglePopulationExclude() {
-        members = new LinkedList<ClientInterface>();
-        lastStrategiesMine = new HashMap<ClientInterface, float[]>();
-        lastStrategiesOpposing = new HashMap<ClientInterface, float[]>();
+        members = new LinkedList<ClientState>();
+        lastStrategiesMine = new HashMap<ClientState, float[]>();
+        lastStrategiesOpposing = new HashMap<ClientState, float[]>();
     }
 
     public void setMembers(
-            List<ClientInterface> members,
+            List<ClientState> members,
             Map<Integer, Population> membership) {
         this.members = members;
-        for (ClientInterface client : members) {
+        for (ClientState client : members) {
             membership.put(client.getID(), this);
         }
     }
@@ -50,7 +46,7 @@ public class SinglePopulationExclude implements Population, Serializable {
     }
 
     private void updatePayoffs(
-            ClientInterface client,
+            ClientState client,
             float percent, float percentInStrategyTime, float inStrategyTime,
             PeriodConfig periodConfig) {
         float[] myLast = lastStrategiesMine.get(client);
@@ -66,7 +62,7 @@ public class SinglePopulationExclude implements Population, Serializable {
     }
 
     private void updateStrategies(PeriodConfig periodConfig) {
-        for (ClientInterface client : members) {
+        for (ClientState client : members) {
             float[] averageStrategy = null;
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 averageStrategy = new float[1];
@@ -79,9 +75,9 @@ public class SinglePopulationExclude implements Population, Serializable {
             } else {
                 assert false;
             }
-            for (ClientInterface other : members) {
+            for (ClientState other : members) {
                 if (other != client) {
-                    float[] strategy = other.getStrategy();
+                    float[] strategy = other.client.getStrategy();
                     for (int i = 0; i < averageStrategy.length; i++) {
                         averageStrategy[i] += strategy[i];
                     }
@@ -90,8 +86,8 @@ public class SinglePopulationExclude implements Population, Serializable {
             for (int i = 0; i < averageStrategy.length; i++) {
                 averageStrategy[i] /= (members.size() - 1);
             }
-            client.setCounterpartStrategy(averageStrategy);
-            lastStrategiesMine.put(client, client.getStrategy());
+            client.client.setCounterpartStrategy(averageStrategy);
+            lastStrategiesMine.put(client, client.client.getStrategy());
             lastStrategiesOpposing.put(client, averageStrategy);
         }
     }
@@ -108,7 +104,7 @@ public class SinglePopulationExclude implements Population, Serializable {
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         long inStrategyTime = System.currentTimeMillis() - lastEvalTime;
         float percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
-        for (ClientInterface client : members) {
+        for (ClientState client : members) {
             updatePayoffs(
                     client, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
         }

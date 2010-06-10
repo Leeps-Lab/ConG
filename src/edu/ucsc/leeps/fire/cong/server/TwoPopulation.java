@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.cong.client.ClientInterface;
+import edu.ucsc.leeps.fire.cong.client.ClientState;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
@@ -20,18 +16,18 @@ import java.util.Map;
  */
 public class TwoPopulation implements Population, Serializable {
 
-    private Map<Integer, ClientInterface> members1, members2;
+    private Map<Integer, ClientState> members1, members2;
     private long periodStartTime;
     private long lastEvalTime1, lastEvalTime2;
-    private Map<ClientInterface, float[]> lastStrategiesMine;
-    private Map<ClientInterface, float[]> lastStrategiesOpposing;
+    private Map<ClientState, float[]> lastStrategiesMine;
+    private Map<ClientState, float[]> lastStrategiesOpposing;
 
     public void setMembers(
-            List<ClientInterface> members,
+            List<ClientState> members,
             Map<Integer, Population> membership) {
-        members1 = new HashMap<Integer, ClientInterface>();
-        members2 = new HashMap<Integer, ClientInterface>();
-        for (ClientInterface client : members) {
+        members1 = new HashMap<Integer, ClientState>();
+        members2 = new HashMap<Integer, ClientState>();
+        for (ClientState client : members) {
             if (members1.size() >= members2.size()) {
                 members1.put(client.getID(), client);
             } else {
@@ -45,8 +41,8 @@ public class TwoPopulation implements Population, Serializable {
         periodStartTime = timestamp;
         lastEvalTime1 = timestamp;
         lastEvalTime2 = timestamp;
-        lastStrategiesMine = new HashMap<ClientInterface, float[]>();
-        lastStrategiesOpposing = new HashMap<ClientInterface, float[]>();
+        lastStrategiesMine = new HashMap<ClientState, float[]>();
+        lastStrategiesOpposing = new HashMap<ClientState, float[]>();
         updateStrategies(members1.values(), periodConfig);
         updateStrategies(members2.values(), periodConfig);
     }
@@ -62,7 +58,7 @@ public class TwoPopulation implements Population, Serializable {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         float percentInStrategyTime;
-        Collection<ClientInterface> membersPaid, membersChanged;
+        Collection<ClientState> membersPaid, membersChanged;
         if (members1.containsKey(id)) {
             long inStrategyTime = System.currentTimeMillis() - lastEvalTime2;
             percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
@@ -83,22 +79,22 @@ public class TwoPopulation implements Population, Serializable {
             membersChanged = null;
             membersPaid = null;
         }
-        for (ClientInterface client : membersPaid) {
+        for (ClientState client : membersPaid) {
             updatePayoffs(
                     client, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
         }
         updateStrategies(membersChanged, periodConfig);
-        ClientInterface changed = null;
+        ClientState changed = null;
         if (members1.containsKey(id)) {
             changed = members1.get(id);
         } else if (members2.containsKey(id)) {
             changed = members2.get(id);
         }
-        changed.setMyStrategy(lastStrategiesMine.get(changed));
+        changed.client.setMyStrategy(lastStrategiesMine.get(changed));
     }
 
     private void updatePayoffs(
-            ClientInterface client,
+            ClientState client,
             float percent, float percentInStrategyTime, float inStrategyTime,
             PeriodConfig periodConfig) {
         float[] myLast = lastStrategiesMine.get(client);
@@ -113,8 +109,8 @@ public class TwoPopulation implements Population, Serializable {
         client.addToPeriodPoints(points);
     }
 
-    private void updateStrategies(Collection<ClientInterface> members, PeriodConfig periodConfig) {
-        for (ClientInterface client : members) {
+    private void updateStrategies(Collection<ClientState> members, PeriodConfig periodConfig) {
+        for (ClientState client : members) {
             float[] averageStrategy = null;
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 averageStrategy = new float[1];
@@ -127,9 +123,9 @@ public class TwoPopulation implements Population, Serializable {
             } else {
                 assert false;
             }
-            for (ClientInterface other : members) {
+            for (ClientState other : members) {
                 if (other != client) {
-                    float[] strategy = other.getStrategy();
+                    float[] strategy = other.client.getStrategy();
                     for (int i = 0; i < averageStrategy.length; i++) {
                         averageStrategy[i] += strategy[i];
                     }
@@ -138,8 +134,8 @@ public class TwoPopulation implements Population, Serializable {
             for (int i = 0; i < averageStrategy.length; i++) {
                 averageStrategy[i] /= (members.size() - 1);
             }
-            client.setCounterpartStrategy(averageStrategy);
-            lastStrategiesMine.put(client, client.getStrategy());
+            client.client.setCounterpartStrategy(averageStrategy);
+            lastStrategiesMine.put(client, client.client.getStrategy());
             lastStrategiesOpposing.put(client, averageStrategy);
         }
     }

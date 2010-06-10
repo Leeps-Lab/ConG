@@ -1,9 +1,9 @@
-package edu.ucsc.leeps.fire.cong.client;
+package edu.ucsc.leeps.fire.cong.client.gui;
 
 public class FPoint {
 
-    float x, y;
-    boolean visible;
+    public float x, y;
+    public boolean visible;
 
     public FPoint() {
         x = 0;

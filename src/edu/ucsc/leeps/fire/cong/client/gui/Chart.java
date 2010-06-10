@@ -1,9 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package edu.ucsc.leeps.fire.cong.client;
+package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
@@ -18,8 +15,6 @@ public class Chart extends Sprite {
 
     // Variables to modify that manipulate the chart
     public float currentPercent;
-    private PeriodConfig periodConfig;
-    private boolean isCounterpart;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private float currentPayoffYou, currentPayoffCounterpart;
     private float maxPayoff;
@@ -135,7 +130,7 @@ public class Chart extends Sprite {
 
         yourROverTime = new Line(0, scaledMargin, width, scaledHeight);
         counterpartROverTime = new Line(0, scaledMargin, width, scaledHeight);
-        yourPOverTime = new Line (0, scaledMargin, width, scaledHeight);
+        yourPOverTime = new Line(0, scaledMargin, width, scaledHeight);
         counterpartPOverTime = new Line(0, scaledMargin, width, scaledHeight);
         yourSOverTime = new Line(0, scaledMargin, width, scaledHeight);
         counterpartSOverTime = new Line(0, scaledMargin, width, scaledHeight);
@@ -197,13 +192,13 @@ public class Chart extends Sprite {
             applet.textAlign(PEmbed.RIGHT);
             applet.fill(0);
             if (mode == Mode.RStrategy) {
-                applet.text(periodConfig.rLabel, origin.x - 10, 
+                applet.text(Client.state.getPeriodConfig().rLabel, origin.x - 10,
                         origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
             } else if (mode == Mode.PStrategy) {
-                applet.text(periodConfig.pLabel, origin.x - 10,
+                applet.text(Client.state.getPeriodConfig().pLabel, origin.x - 10,
                         origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
             } else if (mode == Mode.SStrategy) {
-                applet.text(periodConfig.sLabel, origin.x - 10,
+                applet.text(Client.state.getPeriodConfig().sLabel, origin.x - 10,
                         origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
             }
         }
@@ -266,22 +261,26 @@ public class Chart extends Sprite {
 
     @Override
     public void draw(PEmbed applet) {
+        if (!visible) {
+            return;
+        }
+        configure(Client.state.getPeriodConfig());
         applet.rectMode(PEmbed.CORNER);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
-        if (periodConfig != null) {
-            if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (Client.state.getPeriodConfig() != null) {
+            if (Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
                     drawTwoStrategyPayoffLines(applet);
                 } else if (mode == Mode.TwoStrategy) {
                     drawTwoStrategyLines(applet);
                 }
-            } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            } else if (Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
                     drawThreeStrategyPayoffLines(applet);
-                } else if (mode == Mode.RStrategy ||
-                           mode == Mode.PStrategy ||
-                           mode == Mode.SStrategy) {
+                } else if (mode == Mode.RStrategy
+                        || mode == Mode.PStrategy
+                        || mode == Mode.SStrategy) {
                     drawThreeStrategyLines(applet);
                 }
             }
@@ -304,12 +303,6 @@ public class Chart extends Sprite {
         actualBbPayoff.clear();
         yourStrategyOverTime.clear();
         counterpartStrategyOverTime.clear();
-        yourPOverTime.clear();
-        yourROverTime.clear();
-        yourSOverTime.clear();
-        counterpartROverTime.clear();
-        counterpartPOverTime.clear();
-        counterpartSOverTime.clear();
 
         clearFuture();
     }
@@ -445,10 +438,10 @@ public class Chart extends Sprite {
         if (currentPercent < 1.0) {
             addPayoffPoint(actualPayoffYou, currentPercent, currentPayoffYou);
             addPayoffPoint(actualPayoffCounterpart, currentPercent, currentPayoffCounterpart);
-            if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            if (Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                 addTwoStrategyActualPayoffPoints();
                 addTwoStrategyFuturePayoffPoints();
-            } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            } else if (Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 addThreeStrategyActualPayoffPoints();
                 addThreeStrategyFuturePayoffPoints();
                 addThreeStrategyPoints();
@@ -527,9 +520,9 @@ public class Chart extends Sprite {
     }
 
     private void strategyChanged() {
-        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             twoStrategyChanged();
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             threeStrategyChanged();
         } else {
             assert false;
@@ -537,9 +530,9 @@ public class Chart extends Sprite {
     }
 
     public void setMyStrategy(float[] s) {
-        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_A = s[0];
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             percent_R = s[0];
             percent_P = s[1];
             percent_S = s[2];
@@ -548,29 +541,39 @@ public class Chart extends Sprite {
     }
 
     public void setCounterpartStrategy(float[] s) {
-        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_a = s[0];
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-           percent_r = s[0];
-           percent_p = s[1];
-           percent_s = s[2];
+        } else if (Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            percent_r = s[0];
+            percent_p = s[1];
+            percent_s = s[2];
         }
         strategyChanged();
     }
 
     public void setIsCounterpart(boolean isCounterpart) {
-        this.isCounterpart = isCounterpart;
         if (isCounterpart) {
-            payoffFunction = periodConfig.counterpartPayoffFunction;
-            counterpartPayoffFunction = periodConfig.payoffFunction;
+            payoffFunction = Client.state.getPeriodConfig().counterpartPayoffFunction;
+            counterpartPayoffFunction = Client.state.getPeriodConfig().payoffFunction;
         } else {
-            payoffFunction = periodConfig.payoffFunction;
-            counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
+            payoffFunction = Client.state.getPeriodConfig().payoffFunction;
+            counterpartPayoffFunction = Client.state.getPeriodConfig().counterpartPayoffFunction;
         }
     }
 
-    public void setPeriodConfig(PeriodConfig periodConfig) {
-        this.periodConfig = periodConfig;
+    public void addPayoffPoint(Line line, float x, float y) {
+        line.setPoint(
+                Math.round(line.width * x),
+                Math.round(line.height * (1 - (y / maxPayoff))));
+    }
+
+    public void addStrategyPoint(Line line, float x, float y) {
+        line.setPoint(
+                Math.round(line.width * x),
+                Math.round(line.height * (1 - y)));
+    }
+
+    private void configure(PeriodConfig periodConfig) {
         payoffFunction = periodConfig.payoffFunction;
         counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
         maxPayoff = periodConfig.payoffFunction.getMax();
@@ -593,17 +596,5 @@ public class Chart extends Sprite {
         yourSOverTime.weight = 2f;
         counterpartSOverTime.configure(periodConfig.otherPayoff);
         counterpartSOverTime.mode = Line.Mode.Solid;
-    }
-
-    public void addPayoffPoint(Line line, float x, float y) {
-        line.setPoint(
-                Math.round(line.width * x),
-                Math.round(line.height * (1 - (y / maxPayoff))));
-    }
-
-    public void addStrategyPoint(Line line, float x, float y) {
-        line.setPoint(
-                Math.round(line.width * x),
-                Math.round(line.height * (1 - y)));
     }
 }

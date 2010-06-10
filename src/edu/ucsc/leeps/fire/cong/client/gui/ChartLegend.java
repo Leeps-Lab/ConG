@@ -2,23 +2,17 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.ucsc.leeps.fire.cong.client;
+package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
-import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
-import edu.ucsc.leeps.fire.server.BasePeriodConfig;
-import edu.ucsc.leeps.fire.server.PeriodConfigurable;
-import java.awt.Color;
 import processing.core.PApplet;
 
 /**
  *
  * @author jpettit
  */
-public class ChartLegend extends Sprite implements PeriodConfigurable {
-
-    private PeriodConfig periodConfig;
-    private Line youLine, otherLine;
+public class ChartLegend extends Sprite {
 
     public ChartLegend(int x, int y, int width, int height) {
         super(x, y, width, height);
@@ -27,10 +21,15 @@ public class ChartLegend extends Sprite implements PeriodConfigurable {
     @Override
     public void draw(PEmbed applet) {
 
+        if (!visible) {
+            return;
+        }
+
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
 
-        if (youLine != null && otherLine != null) {
+        if (Client.state.getPeriodConfig().yourPayoff != null
+                && Client.state.getPeriodConfig().otherPayoff != null) {
             String youLabel = "You";
             String otherLabel = "Other";
             float w1 = applet.textWidth(youLabel);
@@ -41,13 +40,19 @@ public class ChartLegend extends Sprite implements PeriodConfigurable {
             applet.strokeWeight(10);
             applet.textAlign(PApplet.LEFT, PApplet.CENTER);
 
-            applet.stroke(youLine.r, youLine.g, youLine.b);
+            applet.stroke(
+                    Client.state.getPeriodConfig().yourPayoff.r,
+                    Client.state.getPeriodConfig().yourPayoff.g,
+                    Client.state.getPeriodConfig().yourPayoff.b);
             applet.line(4, height / 2f, 4 + 10, height / 2f);
             applet.text(youLabel,
                     origin.x + 4 + 10 + 4 - width,
                     origin.y + (height / 2f));
 
-            applet.stroke(otherLine.r, otherLine.g, otherLine.b);
+            applet.stroke(
+                    Client.state.getPeriodConfig().otherPayoff.r,
+                    Client.state.getPeriodConfig().otherPayoff.g,
+                    Client.state.getPeriodConfig().otherPayoff.b);
             applet.line(4 + 10 + 4 + w1 + 4, height / 2f, 4 + 10 + 4 + w1 + 4 + 10, height / 2f);
             applet.text(otherLabel,
                     origin.x + 4 + 10 + 4 + w1 + 4 + 10 + 4 - width,
@@ -64,11 +69,5 @@ public class ChartLegend extends Sprite implements PeriodConfigurable {
         applet.rect(0, 0, width, height);
 
         applet.popMatrix();
-    }
-
-    public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
-        periodConfig = (PeriodConfig) basePeriodConfig;
-        youLine = periodConfig.yourPayoff;
-        otherLine = periodConfig.otherPayoff;
     }
 }

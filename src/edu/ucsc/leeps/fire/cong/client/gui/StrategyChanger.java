@@ -1,21 +1,17 @@
-package edu.ucsc.leeps.fire.cong.client;
+package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
-import edu.ucsc.leeps.fire.cong.server.ServerInterface;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.server.BasePeriodConfig;
-import edu.ucsc.leeps.fire.server.PeriodConfigurable;
 
 /**
  *
  * @author jpettit
  */
-public class StrategyChanger extends Thread implements PeriodConfigurable {
+public class StrategyChanger extends Thread {
 
     private final Object lock = new Object();
-    private ServerInterface server;
-    private ClientInterface client;
     private PeriodConfig periodConfig;
     private volatile boolean running;
     private volatile boolean shouldUpdate;
@@ -30,9 +26,7 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
     private long sleepTimeMillis;
     private float changeTimeEMA = 0;
 
-    public StrategyChanger(ServerInterface server, ClientInterface client) {
-        this.server = server;
-        this.client = client;
+    public StrategyChanger() {
         isMoving = false;
         start();
     }
@@ -59,7 +53,7 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
 
             long timestamp = System.nanoTime();
             sendUpdate();
-            client.setMyStrategy(currentStrategy);
+            Client.state.client.setMyStrategy(currentStrategy);
             float elapsed = (System.nanoTime() - timestamp) / 1000000f;
             changeTimeEMA += 0.1 * (elapsed - changeTimeEMA);
             long estimatedLag = Math.round(changeTimeEMA);
@@ -77,12 +71,12 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
     }
 
     private void sendUpdate() {
-        server.strategyChanged(
+        Client.state.server.strategyChanged(
                 currentStrategy,
                 targetStrategy,
                 hoverStrategy_A,
                 hoverStrategy_a,
-                client.getID());
+                Client.state.getID());
     }
 
     @Override
@@ -139,7 +133,7 @@ public class StrategyChanger extends Thread implements PeriodConfigurable {
         }
     }
 
-    public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
+    public void setPeriodConfig(PeriodConfig basePeriodConfig) {
         synchronized (lock) {
             this.periodConfig = (PeriodConfig) basePeriodConfig;
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {

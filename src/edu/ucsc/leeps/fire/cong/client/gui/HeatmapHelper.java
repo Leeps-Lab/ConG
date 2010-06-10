@@ -2,13 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.ucsc.leeps.fire.cong.client;
+package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
-import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
-import edu.ucsc.leeps.fire.server.BasePeriodConfig;
-import edu.ucsc.leeps.fire.server.PeriodConfigurable;
 import java.util.ArrayList;
 import java.util.List;
 import processing.core.PApplet;
@@ -18,9 +16,8 @@ import processing.core.PImage;
  *
  * @author jpettit
  */
-public class HeatmapHelper extends Sprite implements PeriodConfigurable {
+public class HeatmapHelper extends Sprite {
 
-    private PeriodConfig periodConfig;
     private float[][] payoff;
     //private PImage buffer;
     private List<PImage> buffers;
@@ -43,14 +40,10 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
         this.isCounterpart = isCounterpart;
     }
 
-    public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
-        periodConfig = (PeriodConfig) basePeriodConfig;
-    }
-
     public void setTwoStrategyHeatmapBuffers(float[][][] payoff) {
         buffers = new ArrayList<PImage>();
         int size = payoff[0].length;
-        for (int tick = 0; tick < periodConfig.length; tick++) {
+        for (int tick = 0; tick < Client.state.getPeriodConfig().length; tick++) {
             PImage buffer = applet.createImage(size, size, PEmbed.RGB);
             buffer.loadPixels();
             for (int x = 0; x < size; x++) {
@@ -73,9 +66,13 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
     // Chooses whether to interpolate between low and mid, or low and high
     public int getRGB(float u) {
         if (u < .5) {
-            return interpolateRGB(u * 2.0f, periodConfig.heatmapColorLow, periodConfig.heatmapColorMid);
+            return interpolateRGB(u * 2.0f,
+                    Client.state.getPeriodConfig().heatmapColorLow,
+                    Client.state.getPeriodConfig().heatmapColorMid);
         } else {
-            return interpolateRGB((u - 0.5f) * 2.0f, periodConfig.heatmapColorMid, periodConfig.heatmapColorHigh);
+            return interpolateRGB((u - 0.5f) * 2.0f,
+                    Client.state.getPeriodConfig().heatmapColorMid,
+                    Client.state.getPeriodConfig().heatmapColorHigh);
         }
     }
 
@@ -115,13 +112,13 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
                     float A = 1 - (y / (float) size);
                     float a = 1 - (x / (float) size);
                     if (mine && isCounterpart) {
-                        u = periodConfig.counterpartPayoffFunction;
+                        u = Client.state.getPeriodConfig().counterpartPayoffFunction;
                     } else if (mine && !isCounterpart) {
-                        u = periodConfig.payoffFunction;
+                        u = Client.state.getPeriodConfig().payoffFunction;
                     } else if (!mine && isCounterpart) {
-                        u = periodConfig.payoffFunction;
+                        u = Client.state.getPeriodConfig().payoffFunction;
                     } else if (!mine && !isCounterpart) {
-                        u = periodConfig.counterpartPayoffFunction;
+                        u = Client.state.getPeriodConfig().counterpartPayoffFunction;
                     } else {
                         assert false;
                         u = null;
@@ -129,10 +126,10 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
                     float value;
                     if (mine) {
                         value = u.getPayoff(currentPercent,
-                            new float[]{A}, new float[]{a}) / u.getMax();
+                                new float[]{A}, new float[]{a}) / u.getMax();
                     } else {
                         value = u.getPayoff(currentPercent,
-                            new float[]{a}, new float[]{A}) / u.getMax();
+                                new float[]{a}, new float[]{A}) / u.getMax();
                     }
                     currentBuffer.pixels[y * size + x] = getRGB(value);
                 }
@@ -140,7 +137,8 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
             currentBuffer.updatePixels();
             currentBuffer.resize(width, height);
         } else {
-            currentBuffer = buffers.get(Math.round(currentPercent * periodConfig.length));
+            currentBuffer = buffers.get(
+                    Math.round(currentPercent * Client.state.getPeriodConfig().length));
         }
     }
 
@@ -157,9 +155,9 @@ public class HeatmapHelper extends Sprite implements PeriodConfigurable {
                     float u, max;
                     PayoffFunction payoffFunction;
                     if (mine) {
-                        payoffFunction = periodConfig.payoffFunction;
+                        payoffFunction = Client.state.getPeriodConfig().payoffFunction;
                     } else {
-                        payoffFunction = periodConfig.counterpartPayoffFunction;
+                        payoffFunction = Client.state.getPeriodConfig().counterpartPayoffFunction;
                     }
                     u = payoffFunction.getPayoff(
                             currentPercent,

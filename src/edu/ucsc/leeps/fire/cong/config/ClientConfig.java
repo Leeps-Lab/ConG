@@ -4,7 +4,7 @@
  */
 package edu.ucsc.leeps.fire.cong.config;
 
-import edu.ucsc.leeps.fire.server.BaseClientConfig;
+import edu.ucsc.leeps.fire.config.BaseClientConfig;
 
 /**
  *

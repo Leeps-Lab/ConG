@@ -4,8 +4,8 @@
  */
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.cong.client.ClientState;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
-import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.util.List;
@@ -18,7 +18,7 @@ import java.util.Map;
 public interface Population {
 
     public void setMembers(
-            List<ClientInterface> members,
+            List<ClientState> members,
             Map<Integer, Population> membership);
 
     public void initialize(long timestamp, PeriodConfig periodConfig);

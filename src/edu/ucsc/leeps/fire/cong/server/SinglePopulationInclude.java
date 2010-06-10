@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.cong.client.ClientState;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
-import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.io.Serializable;
@@ -20,22 +16,22 @@ import java.util.Map;
  */
 public class SinglePopulationInclude implements Population, Serializable {
 
-    private List<ClientInterface> members;
+    private List<ClientState> members;
     private long periodStartTime;
     private long lastEvalTime;
     private float[] averageStrategy;
-    private Map<ClientInterface, float[]> lastStrategies;
+    private Map<ClientState, float[]> lastStrategies;
 
     public SinglePopulationInclude() {
-        members = new LinkedList<ClientInterface>();
-        lastStrategies = new HashMap<ClientInterface, float[]>();
+        members = new LinkedList<ClientState>();
+        lastStrategies = new HashMap<ClientState, float[]>();
     }
 
     public void setMembers(
-            List<ClientInterface> members,
+            List<ClientState> members,
             Map<Integer, Population> membership) {
         this.members = members;
-        for (ClientInterface client : members) {
+        for (ClientState client : members) {
             membership.put(client.getID(), this);
         }
     }
@@ -43,15 +39,15 @@ public class SinglePopulationInclude implements Population, Serializable {
     public void initialize(long timestamp, PeriodConfig periodConfig) {
         periodStartTime = timestamp;
         lastEvalTime = timestamp;
-        lastStrategies = new HashMap<ClientInterface, float[]>();
-        for (ClientInterface client : members) {
-            lastStrategies.put(client, client.getStrategy());
+        lastStrategies = new HashMap<ClientState, float[]>();
+        for (ClientState client : members) {
+            lastStrategies.put(client, client.client.getStrategy());
         }
         updateStrategies(periodConfig);
     }
 
     private void updatePayoffs(
-            ClientInterface client,
+            ClientState client,
             float percent, float percentInStrategyTime, float inStrategyTime,
             PeriodConfig periodConfig) {
         float[] last = lastStrategies.get(client);
@@ -75,8 +71,8 @@ public class SinglePopulationInclude implements Population, Serializable {
             averageStrategy[1] = 0;
             averageStrategy[2] = 0;
         }
-        for (ClientInterface client : members) {
-            float[] strategy = client.getStrategy();
+        for (ClientState client : members) {
+            float[] strategy = client.client.getStrategy();
             for (int i = 0; i < averageStrategy.length; i++) {
                 averageStrategy[i] += strategy[i];
             }
@@ -84,9 +80,9 @@ public class SinglePopulationInclude implements Population, Serializable {
         for (int i = 0; i < averageStrategy.length; i++) {
             averageStrategy[i] /= members.size();
         }
-        for (ClientInterface client : members) {
-            client.setCounterpartStrategy(averageStrategy);
-            lastStrategies.put(client, client.getStrategy());
+        for (ClientState client : members) {
+            client.client.setCounterpartStrategy(averageStrategy);
+            lastStrategies.put(client, client.client.getStrategy());
         }
     }
 
@@ -102,7 +98,7 @@ public class SinglePopulationInclude implements Population, Serializable {
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         long inStrategyTime = System.currentTimeMillis() - lastEvalTime;
         float percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
-        for (ClientInterface client : members) {
+        for (ClientState client : members) {
             updatePayoffs(
                     client, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
         }

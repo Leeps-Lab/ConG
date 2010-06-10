@@ -2,15 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.ucsc.leeps.fire.cong.client;
+package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
-import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.config.TwoStrategySelectionType;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.server.BasePeriodConfig;
-import edu.ucsc.leeps.fire.server.PeriodConfigurable;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -20,10 +18,9 @@ import java.awt.event.MouseListener;
  *
  * @author jpettit
  */
-public class TwoStrategySelector extends Sprite implements PeriodConfigurable, MouseListener, KeyListener {
+public class TwoStrategySelector extends Sprite implements MouseListener, KeyListener {
 
     private PEmbed applet;
-    private PeriodConfig periodConfig;
     private float percent_A, percent_a;
     private boolean enabled;
     private HeatmapHelper heatmap, counterpartHeatmap;
@@ -151,11 +148,11 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     public void setIsCounterpart(boolean isCounterpart) {
         this.isCounterpart = isCounterpart;
         if (isCounterpart) {
-            payoffFunction = periodConfig.counterpartPayoffFunction;
-            counterpartPayoffFunction = periodConfig.payoffFunction;
+            payoffFunction = Client.state.getPeriodConfig().counterpartPayoffFunction;
+            counterpartPayoffFunction = Client.state.getPeriodConfig().payoffFunction;
         } else {
-            payoffFunction = periodConfig.payoffFunction;
-            counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
+            payoffFunction = Client.state.getPeriodConfig().payoffFunction;
+            counterpartPayoffFunction = Client.state.getPeriodConfig().counterpartPayoffFunction;
         }
         heatmap.setIsCounterpart(isCounterpart);
         counterpartHeatmap.setIsCounterpart(isCounterpart);
@@ -310,7 +307,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
                 hover.draw(applet);
             }
         }
-        if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+        if (Client.state.getPeriodConfig().twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
             float x, y, w, h;
             x = counterpartHeatmap.origin.x;
             y = counterpartHeatmap.origin.y;
@@ -345,7 +342,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     private void drawHeatmap() {
         heatmap.draw(applet);
 
-        if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+        if (Client.state.getPeriodConfig().twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
             counterpartHeatmap.draw(applet);
         }
 
@@ -354,7 +351,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
         myHeatmapBa.draw(applet);
         myHeatmapBb.draw(applet);
 
-        if (periodConfig.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+        if (Client.state.getPeriodConfig().twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
             counterpartHeatmapAa.draw(applet);
             cuonterpartHeatmapAb.draw(applet);
             counterpartHeatmapBa.draw(applet);
@@ -364,9 +361,22 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
 
     @Override
     public void draw(PEmbed applet) {
-        if (!visible) {
+        if (!visible
+                || !(Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction)) {
             return;
         }
+        switch (Client.state.getPeriodConfig().twoStrategySelectionType) {
+            case Matrix:
+                setModeMatrix();
+                break;
+            case HeatmapSingle:
+                setModeHeatmapSingle();
+                break;
+            case HeatmapBoth:
+                setModeHeatmapBoth();
+                break;
+        }
+
         try {
             if (!inRect(applet.mouseX, applet.mouseY) || applet.pmouseX != applet.mouseX || applet.pmouseY != applet.mouseY) {
                 hoverTimestamp = System.currentTimeMillis();
@@ -375,7 +385,7 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
-            switch (periodConfig.twoStrategySelectionType) {
+            switch (Client.state.getPeriodConfig().twoStrategySelectionType) {
                 case HeatmapSingle:
                 case HeatmapBoth:
                     drawHeatmap();
@@ -427,27 +437,6 @@ public class TwoStrategySelector extends Sprite implements PeriodConfigurable, M
     }
 
     public void mouseExited(MouseEvent me) {
-    }
-
-    public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
-        periodConfig = (PeriodConfig) basePeriodConfig;
-        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            heatmap.setPeriodConfig(periodConfig);
-            counterpartHeatmap.setPeriodConfig(periodConfig);
-            switch (periodConfig.twoStrategySelectionType) {
-                case Matrix:
-                    setModeMatrix();
-                    break;
-                case HeatmapSingle:
-                    setModeHeatmapSingle();
-                    break;
-                case HeatmapBoth:
-                    setModeHeatmapBoth();
-                    break;
-            }
-        } else {
-            setVisible(false);
-        }
     }
 
     public void keyTyped(KeyEvent ke) {

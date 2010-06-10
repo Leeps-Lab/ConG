@@ -1,15 +1,18 @@
 package edu.ucsc.leeps.fire.cong.client;
 
-import edu.ucsc.leeps.fire.client.BaseClient;
-import edu.ucsc.leeps.fire.cong.config.ClientConfig;
-import edu.ucsc.leeps.fire.cong.server.ServerInterface;
-import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.client.gui.TwoStrategySelector;
+import edu.ucsc.leeps.fire.cong.client.gui.Countdown;
+import edu.ucsc.leeps.fire.cong.client.gui.ChartLegend;
+import edu.ucsc.leeps.fire.cong.client.gui.StrategyChanger;
+import edu.ucsc.leeps.fire.cong.client.gui.PointsDisplay;
+import edu.ucsc.leeps.fire.cong.client.gui.ThreeStrategySelector;
+import edu.ucsc.leeps.fire.cong.client.gui.Chart;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.server.BasePeriodConfig;
 import java.io.IOException;
 import java.io.InputStream;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import processing.core.PApplet;
 import processing.core.PFont;
 
@@ -17,15 +20,12 @@ import processing.core.PFont;
  *
  * @author jpettit
  */
-public class Client extends BaseClient implements ClientInterface {
+public class Client extends JPanel implements ClientInterface {
 
     public static final boolean DEBUG = false;
     private int width, height;
     private PEmbed embed;
-    private ServerInterface server;
     private float percent;
-    private PeriodConfig periodConfig;
-    private ClientConfig clientConfig;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
     private TwoStrategySelector bimatrix;
@@ -35,11 +35,10 @@ public class Client extends BaseClient implements ClientInterface {
     private ChartLegend legend;
     private boolean isCounterpart = false;
     private StrategyChanger strategyChanger;
-    public final static int QUICK_TICK_TIME = 100;
+    public static ClientState state;
 
-    //@Override
-    public void init(edu.ucsc.leeps.fire.server.BaseServerInterface server) {
-        this.server = (ServerInterface) server;
+    public void initialize(edu.ucsc.leeps.fire.client.ClientState state) {
+        Client.state = (ClientState) state;
         removeAll();
         width = 900;
         height = 500;
@@ -54,7 +53,7 @@ public class Client extends BaseClient implements ClientInterface {
         //int matrixSize = (int) (height - (4 * textHeight) - 120);
         int matrixSize = 320;
         int counterpartMatrixSize = 100;
-        strategyChanger = new StrategyChanger(this.server, this);
+        strategyChanger = new StrategyChanger();
         bimatrix = new TwoStrategySelector(
                 leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, counterpartMatrixSize,
@@ -95,9 +94,12 @@ public class Client extends BaseClient implements ClientInterface {
                 (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
         embed.running = true;
+        JFrame frame = new JFrame();
+        frame.add(this);
+        frame.setSize(getPreferredSize());
+        frame.setVisible(true);
     }
 
-    @Override
     public void startPeriod() {
         this.percent = 0;
         strategyChanger.startPeriod();
@@ -108,59 +110,35 @@ public class Client extends BaseClient implements ClientInterface {
         rChart.clearAll();
         pChart.clearAll();
         sChart.clearAll();
-        super.startPeriod();
     }
 
-    @Override
     public void endPeriod() {
         strategyChanger.endPeriod();
         simplex.reset();
         bimatrix.setEnabled(false);
-        super.endPeriod();
     }
 
-    @Override
-    public void setPause(boolean paused) {
-        strategyChanger.setPause(paused);
-        if (paused) {
+    public void setIsPaused(boolean isPaused) {
+        strategyChanger.setPause(isPaused);
+        if (isPaused) {
             simplex.setEnabled(true);
         } else {
             simplex.pause();
         }
-        bimatrix.setEnabled(!paused);
-        super.setPause(paused);
+        bimatrix.setEnabled(!isPaused);
     }
 
-    @Override
-    public void setPeriodConfig(BasePeriodConfig basePeriodConfig) {
-        super.setPeriodConfig(basePeriodConfig);
-        periodConfig = (PeriodConfig) basePeriodConfig;
-        //this.clientConfig = (ClientConfig) superPeriodConfig.clientConfigs.get(getID());
-        strategyChanger.setPeriodConfig(periodConfig);
-        bimatrix.setPeriodConfig(periodConfig);
-        simplex.setPeriodConfig(periodConfig);
-        payoffChart.setPeriodConfig(periodConfig);
-        strategyChart.setPeriodConfig(periodConfig);
-        rChart.setPeriodConfig(periodConfig);
-        pChart.setPeriodConfig(periodConfig);
-        sChart.setPeriodConfig(periodConfig);
-        legend.setPeriodConfig(periodConfig);
+    public void setClientState(edu.ucsc.leeps.fire.client.ClientState state) {
+        Client.state = (ClientState) state;
+
+        pointsDisplay.setPoints(state.getPeriodPoints(), state.getTotalPoints());
+        pointsDisplay.setPoints(state.getPeriodPoints(), state.getTotalPoints());
+
+        embed.running = true;
     }
 
-    @Override
-    public void setPeriodPoints(float periodPoints) {
-        super.setPeriodPoints(periodPoints);
-        pointsDisplay.setPoints(periodPoints, totalPoints);
-    }
-
-    @Override
-    public void addToPeriodPoints(float points) {
-        super.addToPeriodPoints(points);
-        pointsDisplay.setPoints(periodPoints, totalPoints);
-    }
-
-    public void localTick(int secondsLeft) {
-        this.percent = embed.width * (1 - (secondsLeft / (float) periodConfig.length));
+    public void tick(int secondsLeft) {
+        this.percent = embed.width * (1 - (secondsLeft / (float) state.getPeriodConfig().length));
         countdown.setSecondsLeft(secondsLeft);
         bimatrix.update();
         simplex.update();
@@ -168,7 +146,7 @@ public class Client extends BaseClient implements ClientInterface {
 
     public void quickTick(int millisLeft) {
         if (millisLeft > 0) {
-            this.percent = (1 - (millisLeft / ((float) periodConfig.length * 1000)));
+            this.percent = (1 - (millisLeft / ((float) state.getPeriodConfig().length * 1000)));
             payoffChart.currentPercent = this.percent;
             payoffChart.updateLines();
             strategyChart.currentPercent = this.percent;
@@ -184,14 +162,10 @@ public class Client extends BaseClient implements ClientInterface {
         }
     }
 
-    public void setActionsEnabled(boolean enabled) {
-        simplex.setEnabled(enabled);
-    }
-
     public synchronized float[] getStrategy() {
-        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             return bimatrix.getMyStrategy();
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             return simplex.getPlayerRPS();
         } else {
             assert false;
@@ -201,9 +175,9 @@ public class Client extends BaseClient implements ClientInterface {
 
     public synchronized void initMyStrategy(float[] s) {
         strategyChanger.setCurrentStrategy(s);
-        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setMyStrategy(s[0]);
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setAllStrategies(s);
         } else {
             assert false;
@@ -217,9 +191,9 @@ public class Client extends BaseClient implements ClientInterface {
 
     public synchronized void setMyStrategy(float[] s) {
         strategyChanger.setCurrentStrategy(s);
-        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setMyStrategy(s[0]);
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setCurrentStrategies(s);
         } else {
             assert false;
@@ -232,9 +206,9 @@ public class Client extends BaseClient implements ClientInterface {
     }
 
     public synchronized void setCounterpartStrategy(float[] s) {
-        if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setCounterpartStrategy(s[0]);
-        } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setCounterpartRPS(s[0], s[1], s[2]);
         } else {
             assert false;
@@ -244,11 +218,6 @@ public class Client extends BaseClient implements ClientInterface {
         rChart.setCounterpartStrategy(s);
         pChart.setCounterpartStrategy(s);
         sChart.setCounterpartStrategy(s);
-    }
-
-    @Override
-    public int getQuickTickInterval() {
-        return QUICK_TICK_TIME;
     }
 
     public void setIsCounterpart(boolean isCounterpart) {
@@ -263,6 +232,17 @@ public class Client extends BaseClient implements ClientInterface {
         } else {
             bimatrix.setTwoStrategyHeatmapBuffers(payoff, counterpartPayoff);
         }
+    }
+
+    public boolean readyForNextPeriod() {
+        return true;
+    }
+
+    public void disconnect() {
+        System.exit(0);
+    }
+
+    public void receiveMessage(String message) {
     }
 
     public class PEmbed extends PApplet {
@@ -313,10 +293,10 @@ public class Client extends BaseClient implements ClientInterface {
                 background(255);
                 bimatrix.draw(embed);
                 simplex.draw(embed);
-                if (periodConfig != null) {
-                    if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                if (state.getPeriodConfig() != null) {
+                    if (state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                         strategyChart.draw(embed);
-                    } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                    } else if (state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                         rChart.draw(embed);
                         pChart.draw(embed);
                         sChart.draw(embed);
@@ -350,11 +330,7 @@ public class Client extends BaseClient implements ClientInterface {
     public static void main(String[] args) throws Exception {
         Client client = new Client();
         if (args.length == 3) {
-            Client.start(
-                    args[0], args[1], args[2],
-                    client, ServerInterface.class, ClientInterface.class);
         } else {
-            Client.start(client, ServerInterface.class, ClientInterface.class);
         }
     }
 }

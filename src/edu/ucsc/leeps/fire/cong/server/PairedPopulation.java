@@ -1,10 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.cong.client.ClientInterface;
+import edu.ucsc.leeps.fire.cong.client.ClientState;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
@@ -23,23 +19,23 @@ import java.util.Set;
  */
 public class PairedPopulation implements Population, Serializable {
 
-    private Map<Integer, ClientInterface> members;
-    private Map<ClientInterface, Integer> ids;
+    private Map<Integer, ClientState> members;
+    private Map<ClientState, Integer> ids;
     private long periodStartTime;
-    private Set<ClientInterface> counterparts;
-    private Map<ClientInterface, ClientInterface> pairs;
-    private Map<ClientInterface, Long> lastEvalTimes;
-    private Map<ClientInterface, float[]> lastStrategies;
-    private Map<ClientInterface, float[]> lastTargetStrategies;
-    private Map<ClientInterface, float[]> lastHoverStrategies_A;
-    private Map<ClientInterface, float[]> lastHoverStrategies_a;
+    private Set<ClientState> counterparts;
+    private Map<ClientState, ClientState> pairs;
+    private Map<ClientState, Long> lastEvalTimes;
+    private Map<ClientState, float[]> lastStrategies;
+    private Map<ClientState, float[]> lastTargetStrategies;
+    private Map<ClientState, float[]> lastHoverStrategies_A;
+    private Map<ClientState, float[]> lastHoverStrategies_a;
 
     public void setMembers(
-            List<ClientInterface> members,
+            List<ClientState> members,
             Map<Integer, Population> membership) {
-        this.members = new HashMap<Integer, ClientInterface>();
-        this.ids = new HashMap<ClientInterface, Integer>();
-        for (ClientInterface client : members) {
+        this.members = new HashMap<Integer, ClientState>();
+        this.ids = new HashMap<ClientState, Integer>();
+        for (ClientState client : members) {
             int id = client.getID();
             this.members.put(id, client);
             this.ids.put(client, id);
@@ -49,29 +45,29 @@ public class PairedPopulation implements Population, Serializable {
 
     public void initialize(long timestamp, PeriodConfig periodConfig) {
         periodStartTime = timestamp;
-        lastEvalTimes = new HashMap<ClientInterface, Long>();
-        for (ClientInterface client : members.values()) {
+        lastEvalTimes = new HashMap<ClientState, Long>();
+        for (ClientState client : members.values()) {
             lastEvalTimes.put(client, timestamp);
         }
-        lastStrategies = new HashMap<ClientInterface, float[]>();
-        lastTargetStrategies = new HashMap<ClientInterface, float[]>();
-        lastHoverStrategies_A = new HashMap<ClientInterface, float[]>();
-        lastHoverStrategies_a = new HashMap<ClientInterface, float[]>();
-        pairs = new HashMap<ClientInterface, ClientInterface>();
-        List<ClientInterface> partners = new ArrayList<ClientInterface>();
+        lastStrategies = new HashMap<ClientState, float[]>();
+        lastTargetStrategies = new HashMap<ClientState, float[]>();
+        lastHoverStrategies_A = new HashMap<ClientState, float[]>();
+        lastHoverStrategies_a = new HashMap<ClientState, float[]>();
+        pairs = new HashMap<ClientState, ClientState>();
+        List<ClientState> partners = new ArrayList<ClientState>();
         partners.addAll(members.values());
         Collections.shuffle(partners);
         if (partners.size() % 2 != 0) {
             System.err.println("Error while making pairs, odd number of subjects to pair up");
         }
-        this.counterparts = new HashSet<ClientInterface>();
+        this.counterparts = new HashSet<ClientState>();
         while (partners.size() > 0) {
-            ClientInterface client1 = partners.remove(0);
-            ClientInterface client2 = partners.remove(0);
+            ClientState client1 = partners.remove(0);
+            ClientState client2 = partners.remove(0);
             pairs.put(client1, client2);
             pairs.put(client2, client1);
-            client1.setIsCounterpart(false);
-            client2.setIsCounterpart(true);
+            client1.client.setIsCounterpart(false);
+            client2.client.setIsCounterpart(true);
             counterparts.add(client2);
         }
         updateAllStrategies();
@@ -88,8 +84,8 @@ public class PairedPopulation implements Population, Serializable {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         float percentInStrategyTime;
-        ClientInterface changed = members.get(id);
-        ClientInterface other = pairs.get(changed);
+        ClientState changed = members.get(id);
+        ClientState other = pairs.get(changed);
         long inStrategyTime = timestamp - lastEvalTimes.get(changed);
         percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
         lastEvalTimes.put(changed, timestamp);
@@ -150,7 +146,7 @@ public class PairedPopulation implements Population, Serializable {
                 eventLog.counterpartHoverStrategy_a[i] = Float.NaN;
             }
         }
-        eventLog.commit();
+        //eventLog.commit();
         // save the strategies
         lastTargetStrategies.put(changed, targetStrategy);
         lastHoverStrategies_A.put(changed, hoverStrategy_A);
@@ -159,7 +155,7 @@ public class PairedPopulation implements Population, Serializable {
 
     private void updatePayoffs(
             float[] newStrategy,
-            ClientInterface changed, ClientInterface other,
+            ClientState changed, ClientState other,
             float percent, float percentInStrategyTime, float inStrategyTime,
             PeriodConfig periodConfig) {
         PayoffFunction changedPayoff, otherPayoff;
@@ -189,24 +185,24 @@ public class PairedPopulation implements Population, Serializable {
     }
 
     private void updateStrategiesFast(
-            float[] newStrategy, ClientInterface changed, ClientInterface other) {
+            float[] newStrategy, ClientState changed, ClientState other) {
         float[] c1s = newStrategy;
-        other.setCounterpartStrategy(c1s);
+        other.client.setCounterpartStrategy(c1s);
         lastStrategies.put(changed, c1s);
     }
 
-    private void updateStrategiesSlow(ClientInterface client1, ClientInterface client2) {
-        float[] c1s = client1.getStrategy();
-        float[] c2s = client2.getStrategy();
-        client1.setCounterpartStrategy(c2s);
-        client2.setCounterpartStrategy(c1s);
+    private void updateStrategiesSlow(ClientState client1, ClientState client2) {
+        float[] c1s = client1.client.getStrategy();
+        float[] c2s = client2.client.getStrategy();
+        client1.client.setCounterpartStrategy(c2s);
+        client2.client.setCounterpartStrategy(c1s);
         lastStrategies.put(client1, c1s);
         lastStrategies.put(client2, c2s);
     }
 
     private void updateAllStrategies() {
-        Set<ClientInterface> notified = new HashSet<ClientInterface>();
-        for (ClientInterface client : members.values()) {
+        Set<ClientState> notified = new HashSet<ClientState>();
+        for (ClientState client : members.values()) {
             if (!notified.contains(client)) {
                 updateStrategiesSlow(client, pairs.get(client));
                 notified.add(client);
@@ -217,8 +213,8 @@ public class PairedPopulation implements Population, Serializable {
 
     public void endPeriod(PeriodConfig periodConfig) {
         float percentInStrategyTime;
-        for (ClientInterface client1 : counterparts) {
-            ClientInterface client2 = pairs.get(client1);
+        for (ClientState client1 : counterparts) {
+            ClientState client2 = pairs.get(client1);
             long lastEvalTime1 = lastEvalTimes.get(client1);
             long lastEvalTime2 = lastEvalTimes.get(client2);
             long lastEvalTime = Math.max(lastEvalTime1, lastEvalTime2);
@@ -232,9 +228,9 @@ public class PairedPopulation implements Population, Serializable {
     }
 
     public void logTick(TickLog tickLog, PeriodConfig periodConfig) {
-        for (Map.Entry<ClientInterface, ClientInterface> pair : pairs.entrySet()) {
-            ClientInterface p1 = pair.getKey();
-            ClientInterface p2 = pair.getValue();
+        for (Map.Entry<ClientState, ClientState> pair : pairs.entrySet()) {
+            ClientState p1 = pair.getKey();
+            ClientState p2 = pair.getValue();
             tickLog.id = ids.get(p1);
             tickLog.counterpartId = ids.get(p2);
             tickLog.currentStrategy = lastStrategies.get(p1);
@@ -275,7 +271,7 @@ public class PairedPopulation implements Population, Serializable {
                     tickLog.counterpartHoverStrategy_a[i] = Float.NaN;
                 }
             }
-            tickLog.commit();
+            //tickLog.commit();
         }
     }
 }

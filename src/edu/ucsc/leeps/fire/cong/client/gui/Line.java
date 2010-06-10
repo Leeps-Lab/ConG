@@ -1,4 +1,4 @@
-package edu.ucsc.leeps.fire.cong.client;
+package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import java.io.Serializable;
