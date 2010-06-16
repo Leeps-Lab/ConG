@@ -1,13 +1,12 @@
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.cong.client.ClientState;
+import edu.ucsc.leeps.fire.cong.FIRE;
+import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,38 +15,38 @@ import java.util.Map;
  */
 public class SinglePopulationInclude implements Population, Serializable {
 
-    private List<ClientState> members;
+    private Map<Integer, ClientInterface> members;
     private long periodStartTime;
     private long lastEvalTime;
     private float[] averageStrategy;
-    private Map<ClientState, float[]> lastStrategies;
+    private Map<Integer, float[]> lastStrategies;
 
     public SinglePopulationInclude() {
-        members = new LinkedList<ClientState>();
-        lastStrategies = new HashMap<ClientState, float[]>();
+        members = new HashMap<Integer, ClientInterface>();
+        lastStrategies = new HashMap<Integer, float[]>();
     }
 
     public void setMembers(
-            List<ClientState> members,
+            Map<Integer, ClientInterface> members,
             Map<Integer, Population> membership) {
         this.members = members;
-        for (ClientState client : members) {
-            membership.put(client.getID(), this);
+        for (Integer clientID : members.keySet()) {
+            membership.put(clientID, this);
         }
     }
 
     public void initialize(long timestamp, PeriodConfig periodConfig) {
         periodStartTime = timestamp;
         lastEvalTime = timestamp;
-        lastStrategies = new HashMap<ClientState, float[]>();
-        for (ClientState client : members) {
-            lastStrategies.put(client, client.client.getStrategy());
+        lastStrategies = new HashMap<Integer, float[]>();
+        for (Integer client : members.keySet()) {
+            lastStrategies.put(client, members.get(client).getStrategy());
         }
         updateStrategies(periodConfig);
     }
 
     private void updatePayoffs(
-            ClientState client,
+            Integer client,
             float percent, float percentInStrategyTime, float inStrategyTime,
             PeriodConfig periodConfig) {
         float[] last = lastStrategies.get(client);
@@ -58,7 +57,7 @@ public class SinglePopulationInclude implements Population, Serializable {
         } else {
             points *= inStrategyTime / 1000f;
         }
-        client.addToPeriodPoints(points);
+        FIRE.server.addToPeriodPoints(client, points);
     }
 
     private void updateStrategies(PeriodConfig periodConfig) {
@@ -71,8 +70,8 @@ public class SinglePopulationInclude implements Population, Serializable {
             averageStrategy[1] = 0;
             averageStrategy[2] = 0;
         }
-        for (ClientState client : members) {
-            float[] strategy = client.client.getStrategy();
+        for (Integer client : members.keySet()) {
+            float[] strategy = members.get(client).getStrategy();
             for (int i = 0; i < averageStrategy.length; i++) {
                 averageStrategy[i] += strategy[i];
             }
@@ -80,9 +79,9 @@ public class SinglePopulationInclude implements Population, Serializable {
         for (int i = 0; i < averageStrategy.length; i++) {
             averageStrategy[i] /= members.size();
         }
-        for (ClientState client : members) {
-            client.client.setCounterpartStrategy(averageStrategy);
-            lastStrategies.put(client, client.client.getStrategy());
+        for (Integer client : members.keySet()) {
+            members.get(client).setCounterpartStrategy(averageStrategy);
+            lastStrategies.put(client, members.get(client).getStrategy());
         }
     }
 
@@ -98,7 +97,7 @@ public class SinglePopulationInclude implements Population, Serializable {
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         long inStrategyTime = System.currentTimeMillis() - lastEvalTime;
         float percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
-        for (ClientState client : members) {
+        for (Integer client : members.keySet()) {
             updatePayoffs(
                     client, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
         }

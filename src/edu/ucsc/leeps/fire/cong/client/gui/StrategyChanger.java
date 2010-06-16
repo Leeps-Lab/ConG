@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
@@ -53,7 +54,7 @@ public class StrategyChanger extends Thread {
 
             long timestamp = System.nanoTime();
             sendUpdate();
-            Client.state.client.setMyStrategy(currentStrategy);
+            FIRE.client.getClient().setMyStrategy(currentStrategy);
             float elapsed = (System.nanoTime() - timestamp) / 1000000f;
             changeTimeEMA += 0.1 * (elapsed - changeTimeEMA);
             long estimatedLag = Math.round(changeTimeEMA);
@@ -71,12 +72,12 @@ public class StrategyChanger extends Thread {
     }
 
     private void sendUpdate() {
-        Client.state.server.strategyChanged(
+        FIRE.client.getServer().strategyChanged(
                 currentStrategy,
                 targetStrategy,
                 hoverStrategy_A,
                 hoverStrategy_a,
-                Client.state.getID());
+                FIRE.client.getID());
     }
 
     @Override

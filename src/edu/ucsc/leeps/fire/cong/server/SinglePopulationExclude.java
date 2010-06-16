@@ -1,13 +1,12 @@
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.cong.client.ClientState;
+import edu.ucsc.leeps.fire.cong.FIRE;
+import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,24 +15,24 @@ import java.util.Map;
  */
 public class SinglePopulationExclude implements Population, Serializable {
 
-    private List<ClientState> members;
+    private Map<Integer, ClientInterface> members;
     private long periodStartTime;
     private long lastEvalTime;
-    private Map<ClientState, float[]> lastStrategiesMine;
-    private Map<ClientState, float[]> lastStrategiesOpposing;
+    private Map<Integer, float[]> lastStrategiesMine;
+    private Map<Integer, float[]> lastStrategiesOpposing;
 
     public SinglePopulationExclude() {
-        members = new LinkedList<ClientState>();
-        lastStrategiesMine = new HashMap<ClientState, float[]>();
-        lastStrategiesOpposing = new HashMap<ClientState, float[]>();
+        members = new HashMap<Integer, ClientInterface>();
+        lastStrategiesMine = new HashMap<Integer, float[]>();
+        lastStrategiesOpposing = new HashMap<Integer, float[]>();
     }
 
     public void setMembers(
-            List<ClientState> members,
+            Map<Integer, ClientInterface> members,
             Map<Integer, Population> membership) {
         this.members = members;
-        for (ClientState client : members) {
-            membership.put(client.getID(), this);
+        for (Integer clientID : members.keySet()) {
+            membership.put(clientID, this);
         }
     }
 
@@ -46,7 +45,7 @@ public class SinglePopulationExclude implements Population, Serializable {
     }
 
     private void updatePayoffs(
-            ClientState client,
+            int client,
             float percent, float percentInStrategyTime, float inStrategyTime,
             PeriodConfig periodConfig) {
         float[] myLast = lastStrategiesMine.get(client);
@@ -58,11 +57,11 @@ public class SinglePopulationExclude implements Population, Serializable {
         } else {
             points *= inStrategyTime / 1000f;
         }
-        client.addToPeriodPoints(points);
+        FIRE.server.addToPeriodPoints(client, points);
     }
 
     private void updateStrategies(PeriodConfig periodConfig) {
-        for (ClientState client : members) {
+        for (Integer client : members.keySet()) {
             float[] averageStrategy = null;
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 averageStrategy = new float[1];
@@ -75,9 +74,9 @@ public class SinglePopulationExclude implements Population, Serializable {
             } else {
                 assert false;
             }
-            for (ClientState other : members) {
+            for (Integer other : members.keySet()) {
                 if (other != client) {
-                    float[] strategy = other.client.getStrategy();
+                    float[] strategy = members.get(other).getStrategy();
                     for (int i = 0; i < averageStrategy.length; i++) {
                         averageStrategy[i] += strategy[i];
                     }
@@ -86,8 +85,8 @@ public class SinglePopulationExclude implements Population, Serializable {
             for (int i = 0; i < averageStrategy.length; i++) {
                 averageStrategy[i] /= (members.size() - 1);
             }
-            client.client.setCounterpartStrategy(averageStrategy);
-            lastStrategiesMine.put(client, client.client.getStrategy());
+            members.get(client).setCounterpartStrategy(averageStrategy);
+            lastStrategiesMine.put(client, members.get(client).getStrategy());
             lastStrategiesOpposing.put(client, averageStrategy);
         }
     }
@@ -104,7 +103,7 @@ public class SinglePopulationExclude implements Population, Serializable {
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         long inStrategyTime = System.currentTimeMillis() - lastEvalTime;
         float percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
-        for (ClientState client : members) {
+        for (Integer client : members.keySet()) {
             updatePayoffs(
                     client, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
         }
@@ -113,10 +112,10 @@ public class SinglePopulationExclude implements Population, Serializable {
     }
 
     public void endPeriod(PeriodConfig periodConfig) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void logTick(TickLog tickLog, PeriodConfig periodConfig) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 }

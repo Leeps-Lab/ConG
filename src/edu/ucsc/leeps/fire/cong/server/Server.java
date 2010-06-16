@@ -1,12 +1,12 @@
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.cong.client.ClientState;
+import edu.ucsc.leeps.fire.FIREServerInterface;
+import edu.ucsc.leeps.fire.cong.FIRE;
+import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -14,11 +14,9 @@ import java.util.Random;
  *
  * @author jpettit
  */
-public class Server implements
-        ServerInterface,
-        edu.ucsc.leeps.fire.server.ServerInterface<PeriodConfig> {
+public class Server implements ServerInterface, FIREServerInterface<ClientInterface, PeriodConfig> {
 
-    private Map<Integer, ClientState> clients;
+    private Map<Integer, ClientInterface> clients;
     private PeriodConfig periodConfig;
     private TickLog tickLog;
     private EventLog eventLog;
@@ -29,7 +27,7 @@ public class Server implements
     public Server() {
         tickLog = new TickLog();
         eventLog = new EventLog();
-        clients = new HashMap<Integer, ClientState>();
+        clients = new HashMap<Integer, ClientInterface>();
         random = new Random();
     }
 
@@ -53,19 +51,12 @@ public class Server implements
         this.periodConfig = periodConfig;
     }
 
-    public void initPeriod() {
+    public void startPeriod() {
         long periodStartTime = System.currentTimeMillis();
         tickLog.periodStartTime = periodStartTime;
         eventLog.periodStartTime = periodStartTime;
         initPopulations();
         initStrategies(periodStartTime);
-        /*
-        if (periodConfig.serverInitHeatmaps
-        && periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-        initHeatmaps();
-        }
-         * 
-         */
     }
 
     public void endPeriod() {
@@ -87,19 +78,19 @@ public class Server implements
 
     private void initPopulations() {
         membership = new HashMap<Integer, Population>();
-        List<ClientState> members = new LinkedList<ClientState>();
+        Map<Integer, ClientInterface> members = new HashMap<Integer, ClientInterface>();
         members.clear();
-        members.addAll(clients.values());
+        members.putAll(clients);
         population = periodConfig.population;
         population.setMembers(members, membership);
     }
 
     private void initStrategies(long periodStartTime) {
-        for (ClientState client : clients.values()) {
+        for (ClientInterface client : clients.values()) {
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                client.client.initMyStrategy(new float[]{random.nextFloat()});
+                client.initMyStrategy(new float[]{random.nextFloat()});
             } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                client.client.initMyStrategy(new float[]{0.33f, 0.33f, 0.33f});
+                client.initMyStrategy(new float[]{0.33f, 0.33f, 0.33f});
             } else {
                 assert false;
             }
@@ -107,50 +98,16 @@ public class Server implements
         population.initialize(periodStartTime, periodConfig);
     }
 
-    public void register(edu.ucsc.leeps.fire.client.ClientState client) {
-        clients.put(client.getID(), (ClientState) client);
-    }
-
     public void unregister(int id) {
         clients.remove(id);
     }
 
-    /*
-    private void initHeatmaps() {
-    int size = 50;
-    final float[][][] payoffBuffer = new float[periodConfig.length][size][size];
-    final float[][][] counterpartPayoffBuffer = new float[periodConfig.length][size][size];
-    for (int tick = 0; tick < periodConfig.length; tick++) {
-    for (int x = 0; x < size; x++) {
-    for (int y = 0; y < size; y++) {
-    float A = 1 - (y / (float) size);
-    float a = 1 - (x / (float) size);
-    payoffBuffer[tick][x][y] = periodConfig.payoffFunction.getPayoff(
-    tick / (float) periodConfig.length,
-    new float[]{A},
-    new float[]{a}) / periodConfig.payoffFunction.getMax();
-    counterpartPayoffBuffer[tick][x][y] = periodConfig.counterpartPayoffFunction.getPayoff(
-    tick / (float) periodConfig.length,
-    new float[]{A},
-    new float[]{a}) / periodConfig.counterpartPayoffFunction.getMax();
+    public static void main(String[] args) {
+        FIRE.startServer();
     }
-    }
-    }
-    final List<ClientState<ServerInterface, ClientInterface, PeriodConfig>> finished = new LinkedList<ClientState<ServerInterface, ClientInterface, PeriodConfig>>();
-    for (final ClientState<ServerInterface, ClientInterface, PeriodConfig> client : clients.values()) {
-    new Thread() {
 
-    @Override
-    public void run() {
-    client.setTwoStrategyHeatmapBuffers(payoffBuffer, counterpartPayoffBuffer);
-    finished.add(client);
+    public boolean register(int id, ClientInterface client) {
+        clients.put(id, client);
+        return true;
     }
-    }.start();
-    }
-    while (finished.size() != clients.size()) {
-    Thread.yield();
-    }
-    }
-     * 
-     */
 }

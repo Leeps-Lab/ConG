@@ -1,14 +1,15 @@
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.cong.client.ClientState;
+import edu.ucsc.leeps.fire.cong.FIRE;
+import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  *
@@ -16,24 +17,24 @@ import java.util.Map;
  */
 public class TwoPopulation implements Population, Serializable {
 
-    private Map<Integer, ClientState> members1, members2;
+    private Map<Integer, ClientInterface> members1, members2;
     private long periodStartTime;
     private long lastEvalTime1, lastEvalTime2;
-    private Map<ClientState, float[]> lastStrategiesMine;
-    private Map<ClientState, float[]> lastStrategiesOpposing;
+    private Map<Integer, float[]> lastStrategiesMine;
+    private Map<Integer, float[]> lastStrategiesOpposing;
 
     public void setMembers(
-            List<ClientState> members,
+            Map<Integer, ClientInterface> members,
             Map<Integer, Population> membership) {
-        members1 = new HashMap<Integer, ClientState>();
-        members2 = new HashMap<Integer, ClientState>();
-        for (ClientState client : members) {
+        members1 = new HashMap<Integer, ClientInterface>();
+        members2 = new HashMap<Integer, ClientInterface>();
+        for (Entry<Integer, ClientInterface> entry : members.entrySet()) {
             if (members1.size() >= members2.size()) {
-                members1.put(client.getID(), client);
+                members1.put(entry.getKey(), entry.getValue());
             } else {
-                members2.put(client.getID(), client);
+                members2.put(entry.getKey(), entry.getValue());
             }
-            membership.put(client.getID(), this);
+            membership.put(entry.getKey(), this);
         }
     }
 
@@ -41,10 +42,10 @@ public class TwoPopulation implements Population, Serializable {
         periodStartTime = timestamp;
         lastEvalTime1 = timestamp;
         lastEvalTime2 = timestamp;
-        lastStrategiesMine = new HashMap<ClientState, float[]>();
-        lastStrategiesOpposing = new HashMap<ClientState, float[]>();
-        updateStrategies(members1.values(), periodConfig);
-        updateStrategies(members2.values(), periodConfig);
+        lastStrategiesMine = new HashMap<Integer, float[]>();
+        lastStrategiesOpposing = new HashMap<Integer, float[]>();
+        updateStrategies(members1.keySet(), periodConfig);
+        updateStrategies(members2.keySet(), periodConfig);
     }
 
     public void strategyChanged(
@@ -52,25 +53,25 @@ public class TwoPopulation implements Population, Serializable {
             float[] targetStrategy,
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
-            Integer id, long timestamp,
+            Integer changed, long timestamp,
             PeriodConfig periodConfig,
             EventLog eventLog) {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (periodConfig.length * 1000f);
         float percentInStrategyTime;
-        Collection<ClientState> membersPaid, membersChanged;
-        if (members1.containsKey(id)) {
+        Collection<Integer> membersPaid, membersChanged;
+        if (members1.containsKey(changed)) {
             long inStrategyTime = System.currentTimeMillis() - lastEvalTime2;
             percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
             lastEvalTime2 = timestamp;
-            membersChanged = members1.values();
-            membersPaid = members2.values();
-        } else if (members2.containsKey(id)) {
+            membersChanged = members1.keySet();
+            membersPaid = members2.keySet();
+        } else if (members2.containsKey(changed)) {
             long inStrategyTime = System.currentTimeMillis() - lastEvalTime1;
             percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
             lastEvalTime1 = timestamp;
-            membersChanged = members2.values();
-            membersPaid = members1.values();
+            membersChanged = members2.keySet();
+            membersPaid = members1.keySet();
         } else {
             assert false;
             percentInStrategyTime = Float.NaN;
@@ -79,22 +80,22 @@ public class TwoPopulation implements Population, Serializable {
             membersChanged = null;
             membersPaid = null;
         }
-        for (ClientState client : membersPaid) {
+        for (Integer client : membersPaid) {
             updatePayoffs(
                     client, percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
         }
         updateStrategies(membersChanged, periodConfig);
-        ClientState changed = null;
-        if (members1.containsKey(id)) {
-            changed = members1.get(id);
-        } else if (members2.containsKey(id)) {
-            changed = members2.get(id);
+        if (members1.containsKey(changed)) {
+            members1.get(changed).setMyStrategy(lastStrategiesMine.get(changed));
+        } else if (members2.containsKey(changed)) {
+            members2.get(changed).setMyStrategy(lastStrategiesMine.get(changed));
+        } else {
+            assert false;
         }
-        changed.client.setMyStrategy(lastStrategiesMine.get(changed));
     }
 
     private void updatePayoffs(
-            ClientState client,
+            int client,
             float percent, float percentInStrategyTime, float inStrategyTime,
             PeriodConfig periodConfig) {
         float[] myLast = lastStrategiesMine.get(client);
@@ -106,11 +107,11 @@ public class TwoPopulation implements Population, Serializable {
         } else {
             points *= inStrategyTime / 1000f;
         }
-        client.addToPeriodPoints(points);
+        FIRE.server.addToPeriodPoints(client, points);
     }
 
-    private void updateStrategies(Collection<ClientState> members, PeriodConfig periodConfig) {
-        for (ClientState client : members) {
+    private void updateStrategies(Collection<Integer> members, PeriodConfig periodConfig) {
+        for (Integer client : members) {
             float[] averageStrategy = null;
             if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 averageStrategy = new float[1];
@@ -123,9 +124,17 @@ public class TwoPopulation implements Population, Serializable {
             } else {
                 assert false;
             }
-            for (ClientState other : members) {
+            for (Integer other : members) {
                 if (other != client) {
-                    float[] strategy = other.client.getStrategy();
+                    float[] strategy;
+                    if (members1.containsKey(other)) {
+                        strategy = members1.get(other).getStrategy();
+                    } else if (members2.containsKey(other)) {
+                        strategy = members2.get(other).getStrategy();
+                    } else {
+                        assert false;
+                        strategy = null;
+                    }
                     for (int i = 0; i < averageStrategy.length; i++) {
                         averageStrategy[i] += strategy[i];
                     }
@@ -134,17 +143,24 @@ public class TwoPopulation implements Population, Serializable {
             for (int i = 0; i < averageStrategy.length; i++) {
                 averageStrategy[i] /= (members.size() - 1);
             }
-            client.client.setCounterpartStrategy(averageStrategy);
-            lastStrategiesMine.put(client, client.client.getStrategy());
+            if (members1.containsKey(client)) {
+                members1.get(client).setCounterpartStrategy(averageStrategy);
+                lastStrategiesMine.put(client, members1.get(client).getStrategy());
+            } else if (members2.containsKey(client)) {
+                members2.get(client).setCounterpartStrategy(averageStrategy);
+                lastStrategiesMine.put(client, members2.get(client).getStrategy());
+            } else {
+                assert false;
+            }
             lastStrategiesOpposing.put(client, averageStrategy);
         }
     }
 
     public void endPeriod(PeriodConfig periodConfig) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void logTick(TickLog tickLog, PeriodConfig periodConfig) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 }

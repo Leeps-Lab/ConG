@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
@@ -192,13 +193,13 @@ public class Chart extends Sprite {
             applet.textAlign(PEmbed.RIGHT);
             applet.fill(0);
             if (mode == Mode.RStrategy) {
-                applet.text(Client.state.getPeriodConfig().rLabel, origin.x - 10,
+                applet.text(FIRE.client.getPeriodConfig().rLabel, origin.x - 10,
                         origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
             } else if (mode == Mode.PStrategy) {
-                applet.text(Client.state.getPeriodConfig().pLabel, origin.x - 10,
+                applet.text(FIRE.client.getPeriodConfig().pLabel, origin.x - 10,
                         origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
             } else if (mode == Mode.SStrategy) {
-                applet.text(Client.state.getPeriodConfig().sLabel, origin.x - 10,
+                applet.text(FIRE.client.getPeriodConfig().sLabel, origin.x - 10,
                         origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
             }
         }
@@ -264,18 +265,18 @@ public class Chart extends Sprite {
         if (!visible) {
             return;
         }
-        configure(Client.state.getPeriodConfig());
+        configure(FIRE.client.getPeriodConfig());
         applet.rectMode(PEmbed.CORNER);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
-        if (Client.state.getPeriodConfig() != null) {
-            if (Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getPeriodConfig() != null) {
+            if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
                     drawTwoStrategyPayoffLines(applet);
                 } else if (mode == Mode.TwoStrategy) {
                     drawTwoStrategyLines(applet);
                 }
-            } else if (Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
                     drawThreeStrategyPayoffLines(applet);
                 } else if (mode == Mode.RStrategy
@@ -438,10 +439,10 @@ public class Chart extends Sprite {
         if (currentPercent < 1.0) {
             addPayoffPoint(actualPayoffYou, currentPercent, currentPayoffYou);
             addPayoffPoint(actualPayoffCounterpart, currentPercent, currentPayoffCounterpart);
-            if (Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+            if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                 addTwoStrategyActualPayoffPoints();
                 addTwoStrategyFuturePayoffPoints();
-            } else if (Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 addThreeStrategyActualPayoffPoints();
                 addThreeStrategyFuturePayoffPoints();
                 addThreeStrategyPoints();
@@ -520,9 +521,9 @@ public class Chart extends Sprite {
     }
 
     private void strategyChanged() {
-        if (Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             twoStrategyChanged();
-        } else if (Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             threeStrategyChanged();
         } else {
             assert false;
@@ -530,9 +531,9 @@ public class Chart extends Sprite {
     }
 
     public void setMyStrategy(float[] s) {
-        if (Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_A = s[0];
-        } else if (Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             percent_R = s[0];
             percent_P = s[1];
             percent_S = s[2];
@@ -541,9 +542,9 @@ public class Chart extends Sprite {
     }
 
     public void setCounterpartStrategy(float[] s) {
-        if (Client.state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_a = s[0];
-        } else if (Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             percent_r = s[0];
             percent_p = s[1];
             percent_s = s[2];
@@ -553,11 +554,11 @@ public class Chart extends Sprite {
 
     public void setIsCounterpart(boolean isCounterpart) {
         if (isCounterpart) {
-            payoffFunction = Client.state.getPeriodConfig().counterpartPayoffFunction;
-            counterpartPayoffFunction = Client.state.getPeriodConfig().payoffFunction;
+            payoffFunction = FIRE.client.getPeriodConfig().counterpartPayoffFunction;
+            counterpartPayoffFunction = FIRE.client.getPeriodConfig().payoffFunction;
         } else {
-            payoffFunction = Client.state.getPeriodConfig().payoffFunction;
-            counterpartPayoffFunction = Client.state.getPeriodConfig().counterpartPayoffFunction;
+            payoffFunction = FIRE.client.getPeriodConfig().payoffFunction;
+            counterpartPayoffFunction = FIRE.client.getPeriodConfig().counterpartPayoffFunction;
         }
     }
 

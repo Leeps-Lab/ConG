@@ -4,6 +4,7 @@
  */
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
@@ -43,7 +44,7 @@ public class HeatmapHelper extends Sprite {
     public void setTwoStrategyHeatmapBuffers(float[][][] payoff) {
         buffers = new ArrayList<PImage>();
         int size = payoff[0].length;
-        for (int tick = 0; tick < Client.state.getPeriodConfig().length; tick++) {
+        for (int tick = 0; tick < FIRE.client.getPeriodConfig().length; tick++) {
             PImage buffer = applet.createImage(size, size, PEmbed.RGB);
             buffer.loadPixels();
             for (int x = 0; x < size; x++) {
@@ -67,12 +68,12 @@ public class HeatmapHelper extends Sprite {
     public int getRGB(float u) {
         if (u < .5) {
             return interpolateRGB(u * 2.0f,
-                    Client.state.getPeriodConfig().heatmapColorLow,
-                    Client.state.getPeriodConfig().heatmapColorMid);
+                    FIRE.client.getPeriodConfig().heatmapColorLow,
+                    FIRE.client.getPeriodConfig().heatmapColorMid);
         } else {
             return interpolateRGB((u - 0.5f) * 2.0f,
-                    Client.state.getPeriodConfig().heatmapColorMid,
-                    Client.state.getPeriodConfig().heatmapColorHigh);
+                    FIRE.client.getPeriodConfig().heatmapColorMid,
+                    FIRE.client.getPeriodConfig().heatmapColorHigh);
         }
     }
 
@@ -112,13 +113,13 @@ public class HeatmapHelper extends Sprite {
                     float A = 1 - (y / (float) size);
                     float a = 1 - (x / (float) size);
                     if (mine && isCounterpart) {
-                        u = Client.state.getPeriodConfig().counterpartPayoffFunction;
+                        u = FIRE.client.getPeriodConfig().counterpartPayoffFunction;
                     } else if (mine && !isCounterpart) {
-                        u = Client.state.getPeriodConfig().payoffFunction;
+                        u = FIRE.client.getPeriodConfig().payoffFunction;
                     } else if (!mine && isCounterpart) {
-                        u = Client.state.getPeriodConfig().payoffFunction;
+                        u = FIRE.client.getPeriodConfig().payoffFunction;
                     } else if (!mine && !isCounterpart) {
-                        u = Client.state.getPeriodConfig().counterpartPayoffFunction;
+                        u = FIRE.client.getPeriodConfig().counterpartPayoffFunction;
                     } else {
                         assert false;
                         u = null;
@@ -138,7 +139,7 @@ public class HeatmapHelper extends Sprite {
             currentBuffer.resize(width, height);
         } else {
             currentBuffer = buffers.get(
-                    Math.round(currentPercent * Client.state.getPeriodConfig().length));
+                    Math.round(currentPercent * FIRE.client.getPeriodConfig().length));
         }
     }
 
@@ -155,9 +156,9 @@ public class HeatmapHelper extends Sprite {
                     float u, max;
                     PayoffFunction payoffFunction;
                     if (mine) {
-                        payoffFunction = Client.state.getPeriodConfig().payoffFunction;
+                        payoffFunction = FIRE.client.getPeriodConfig().payoffFunction;
                     } else {
-                        payoffFunction = Client.state.getPeriodConfig().counterpartPayoffFunction;
+                        payoffFunction = FIRE.client.getPeriodConfig().counterpartPayoffFunction;
                     }
                     u = payoffFunction.getPayoff(
                             currentPercent,

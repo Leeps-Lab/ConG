@@ -1,5 +1,7 @@
 package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.FIREClientInterface;
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.gui.TwoStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Countdown;
 import edu.ucsc.leeps.fire.cong.client.gui.ChartLegend;
@@ -20,7 +22,7 @@ import processing.core.PFont;
  *
  * @author jpettit
  */
-public class Client extends JPanel implements ClientInterface {
+public class Client extends JPanel implements ClientInterface, FIREClientInterface {
 
     public static final boolean DEBUG = false;
     private int width, height;
@@ -35,10 +37,8 @@ public class Client extends JPanel implements ClientInterface {
     private ChartLegend legend;
     private boolean isCounterpart = false;
     private StrategyChanger strategyChanger;
-    public static ClientState state;
 
-    public void initialize(edu.ucsc.leeps.fire.client.ClientState state) {
-        Client.state = (ClientState) state;
+    public Client() {
         removeAll();
         width = 900;
         height = 500;
@@ -128,17 +128,8 @@ public class Client extends JPanel implements ClientInterface {
         bimatrix.setEnabled(!isPaused);
     }
 
-    public void setClientState(edu.ucsc.leeps.fire.client.ClientState state) {
-        Client.state = (ClientState) state;
-
-        pointsDisplay.setPoints(state.getPeriodPoints(), state.getTotalPoints());
-        pointsDisplay.setPoints(state.getPeriodPoints(), state.getTotalPoints());
-
-        embed.running = true;
-    }
-
     public void tick(int secondsLeft) {
-        this.percent = embed.width * (1 - (secondsLeft / (float) state.getPeriodConfig().length));
+        this.percent = embed.width * (1 - (secondsLeft / (float) FIRE.client.getPeriodConfig().length));
         countdown.setSecondsLeft(secondsLeft);
         bimatrix.update();
         simplex.update();
@@ -146,7 +137,7 @@ public class Client extends JPanel implements ClientInterface {
 
     public void quickTick(int millisLeft) {
         if (millisLeft > 0) {
-            this.percent = (1 - (millisLeft / ((float) state.getPeriodConfig().length * 1000)));
+            this.percent = (1 - (millisLeft / ((float) FIRE.client.getPeriodConfig().length * 1000)));
             payoffChart.currentPercent = this.percent;
             payoffChart.updateLines();
             strategyChart.currentPercent = this.percent;
@@ -163,9 +154,9 @@ public class Client extends JPanel implements ClientInterface {
     }
 
     public synchronized float[] getStrategy() {
-        if (state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             return bimatrix.getMyStrategy();
-        } else if (state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             return simplex.getPlayerRPS();
         } else {
             assert false;
@@ -175,9 +166,9 @@ public class Client extends JPanel implements ClientInterface {
 
     public synchronized void initMyStrategy(float[] s) {
         strategyChanger.setCurrentStrategy(s);
-        if (state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setMyStrategy(s[0]);
-        } else if (state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setAllStrategies(s);
         } else {
             assert false;
@@ -191,9 +182,9 @@ public class Client extends JPanel implements ClientInterface {
 
     public synchronized void setMyStrategy(float[] s) {
         strategyChanger.setCurrentStrategy(s);
-        if (state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setMyStrategy(s[0]);
-        } else if (state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setCurrentStrategies(s);
         } else {
             assert false;
@@ -206,9 +197,9 @@ public class Client extends JPanel implements ClientInterface {
     }
 
     public synchronized void setCounterpartStrategy(float[] s) {
-        if (state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setCounterpartStrategy(s[0]);
-        } else if (state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setCounterpartRPS(s[0], s[1], s[2]);
         } else {
             assert false;
@@ -293,10 +284,10 @@ public class Client extends JPanel implements ClientInterface {
                 background(255);
                 bimatrix.draw(embed);
                 simplex.draw(embed);
-                if (state.getPeriodConfig() != null) {
-                    if (state.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+                if (FIRE.client.getPeriodConfig() != null) {
+                    if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                         strategyChart.draw(embed);
-                    } else if (state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                    } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                         rChart.draw(embed);
                         pChart.draw(embed);
                         sChart.draw(embed);
@@ -327,10 +318,7 @@ public class Client extends JPanel implements ClientInterface {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        Client client = new Client();
-        if (args.length == 3) {
-        } else {
-        }
+    public static void main(String[] args) {
+        FIRE.startClient();
     }
 }

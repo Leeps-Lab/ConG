@@ -1,6 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
-import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import java.awt.Color;
@@ -9,9 +9,6 @@ import java.awt.event.MouseEvent;
 
 public class ThreeStrategySelector extends Sprite implements MouseListener {
 
-    private String rLabel = "";
-    private String pLabel = "";
-    private String sLabel = "";
     private final int MARKER_RADIUS = 7;
     private final int R = 0;
     private final int P = 1;
@@ -94,11 +91,11 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
 
         // set up Sliders
         stratSlider[R] = new Slider(this, 50, width - 50, height / 3 + 50,
-                rColor, rLabel, 1f);
+                rColor, "", 1f);
         stratSlider[P] = new Slider(this, 50, width - 50, height / 3 + 100,
-                pColor, pLabel, 1f);
+                pColor, "", 1f);
         stratSlider[S] = new Slider(this, 50, width - 50, height / 3 + 150,
-                sColor, sLabel, 1f);
+                sColor, "", 1f);
 
 
         // set up dropline Markers
@@ -157,19 +154,16 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
 
     @Override
     public synchronized void draw(PEmbed applet) {
-        if (!visible || !(Client.state.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction)) {
+        if (!visible || !(FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction)) {
             return;
         }
 
-        rLabel = Client.state.getPeriodConfig().rLabel;
-        stratSlider[R].setLabel(rLabel);
-        pLabel = Client.state.getPeriodConfig().pLabel;
-        stratSlider[P].setLabel(pLabel);
-        sLabel = Client.state.getPeriodConfig().sLabel;
-        stratSlider[S].setLabel(sLabel);
-        rock.setLabel(Client.state.getPeriodConfig().shortRLabel);
-        paper.setLabel(Client.state.getPeriodConfig().shortPLabel);
-        scissors.setLabel(Client.state.getPeriodConfig().shortSLabel);
+        stratSlider[R].setLabel(FIRE.client.getPeriodConfig().rLabel);
+        stratSlider[P].setLabel(FIRE.client.getPeriodConfig().pLabel);
+        stratSlider[S].setLabel(FIRE.client.getPeriodConfig().sLabel);
+        rock.setLabel(FIRE.client.getPeriodConfig().shortRLabel);
+        paper.setLabel(FIRE.client.getPeriodConfig().shortPLabel);
+        scissors.setLabel(FIRE.client.getPeriodConfig().shortSLabel);
 
         heatmap.draw(applet);
 
@@ -265,7 +259,8 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             applet.line(ghost.origin.x, ghost.origin.y, ghostPDrop.origin.x, ghostPDrop.origin.y);
             applet.line(ghost.origin.x, ghost.origin.y, ghostSDrop.origin.x, ghostSDrop.origin.y);
 
-            ghost.setLabel(Client.state.getPeriodConfig().payoffFunction.getPayoff(currentPercent, ghostStrat, opponentStrat));
+            ghost.setLabel(FIRE.client.getPeriodConfig().payoffFunction.getPayoff(
+                    currentPercent, ghostStrat, opponentStrat));
 
             ghostRDrop.setLabel(ghostStrat[R]);
             ghostPDrop.setLabel(ghostStrat[P]);
@@ -289,7 +284,8 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             applet.line(current.origin.x, current.origin.y, sDrop.origin.x, sDrop.origin.y);
         }
 
-        current.setLabel(Client.state.getPeriodConfig().payoffFunction.getPayoff(currentPercent, playedStrat, opponentStrat));
+        current.setLabel(FIRE.client.getPeriodConfig().payoffFunction.getPayoff(
+                currentPercent, playedStrat, opponentStrat));
 
         adjustLabels(playedStrat, current, pDrop, rDrop);
 

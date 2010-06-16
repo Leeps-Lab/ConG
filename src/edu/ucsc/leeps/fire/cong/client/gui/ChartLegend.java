@@ -4,6 +4,7 @@
  */
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import processing.core.PApplet;
@@ -28,8 +29,8 @@ public class ChartLegend extends Sprite {
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
 
-        if (Client.state.getPeriodConfig().yourPayoff != null
-                && Client.state.getPeriodConfig().otherPayoff != null) {
+        if (FIRE.client.getPeriodConfig().yourPayoff != null
+                && FIRE.client.getPeriodConfig().otherPayoff != null) {
             String youLabel = "You";
             String otherLabel = "Other";
             float w1 = applet.textWidth(youLabel);
@@ -41,18 +42,18 @@ public class ChartLegend extends Sprite {
             applet.textAlign(PApplet.LEFT, PApplet.CENTER);
 
             applet.stroke(
-                    Client.state.getPeriodConfig().yourPayoff.r,
-                    Client.state.getPeriodConfig().yourPayoff.g,
-                    Client.state.getPeriodConfig().yourPayoff.b);
+                    FIRE.client.getPeriodConfig().yourPayoff.r,
+                    FIRE.client.getPeriodConfig().yourPayoff.g,
+                    FIRE.client.getPeriodConfig().yourPayoff.b);
             applet.line(4, height / 2f, 4 + 10, height / 2f);
             applet.text(youLabel,
                     origin.x + 4 + 10 + 4 - width,
                     origin.y + (height / 2f));
 
             applet.stroke(
-                    Client.state.getPeriodConfig().otherPayoff.r,
-                    Client.state.getPeriodConfig().otherPayoff.g,
-                    Client.state.getPeriodConfig().otherPayoff.b);
+                    FIRE.client.getPeriodConfig().otherPayoff.r,
+                    FIRE.client.getPeriodConfig().otherPayoff.g,
+                    FIRE.client.getPeriodConfig().otherPayoff.b);
             applet.line(4 + 10 + 4 + w1 + 4, height / 2f, 4 + 10 + 4 + w1 + 4 + 10, height / 2f);
             applet.text(otherLabel,
                     origin.x + 4 + 10 + 4 + w1 + 4 + 10 + 4 - width,
