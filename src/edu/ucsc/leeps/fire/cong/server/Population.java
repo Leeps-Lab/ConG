@@ -1,9 +1,6 @@
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
-import edu.ucsc.leeps.fire.cong.logging.EventLog;
-import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -24,10 +21,9 @@ public interface Population extends Serializable {
             float[] targetStrategy,
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
-            Integer id, long timestamp,
-            EventLog eventLog);
+            Integer id, long timestamp);
 
-    public void logTick(TickLog tickLog);
+    public void logTick();
 
     public void endPeriod();
 }

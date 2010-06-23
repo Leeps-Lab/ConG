@@ -3,9 +3,9 @@ package edu.ucsc.leeps.fire.cong.server;
 import edu.ucsc.leeps.fire.FIREServerInterface;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
-import edu.ucsc.leeps.fire.cong.logging.EventLog;
+import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.logging.TickLog;
+import edu.ucsc.leeps.fire.cong.logging.TickEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -17,15 +17,13 @@ import java.util.Random;
 public class Server implements ServerInterface, FIREServerInterface<ClientInterface, Config> {
 
     private Map<Integer, ClientInterface> clients;
-    private TickLog tickLog;
-    private EventLog eventLog;
+    private TickEvent tickLog;
+    private StrategyChangeEvent eventLog;
     private Population population;
     private Map<Integer, Population> membership;
     private Random random;
 
     public Server() {
-        tickLog = new TickLog();
-        eventLog = new EventLog();
         clients = new HashMap<Integer, ClientInterface>();
         random = new Random();
     }
@@ -39,7 +37,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         long timestamp = System.currentTimeMillis();
         membership.get(id).strategyChanged(
                 newStrategy, targetStrategy, hoverStrategy_A, hoverStrategy_a,
-                id, timestamp, eventLog);
+                id, timestamp);
     }
 
     public boolean readyToStart() {
@@ -51,10 +49,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         configureStrategies();
     }
 
-    public void startPeriod() {
-        long periodStartTime = System.currentTimeMillis();
-        tickLog.periodStartTime = periodStartTime;
-        eventLog.periodStartTime = periodStartTime;
+    public void startPeriod(long periodStartTime) {
         population.initialize(periodStartTime);
     }
 
@@ -67,12 +62,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void quickTick(int millisLeft) {
-        tickLog.period = FIRE.server.getConfig().number;
-        tickLog.timestamp = System.currentTimeMillis();
-        tickLog.millisLeft = millisLeft;
-        tickLog.payoffFunction = FIRE.server.getConfig().payoffFunction;
-        tickLog.counterpartPayoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
-        population.logTick(tickLog);
+        population.logTick();
     }
 
     private void configurePopulations() {

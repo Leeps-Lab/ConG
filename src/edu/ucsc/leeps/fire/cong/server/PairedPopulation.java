@@ -2,8 +2,8 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
-import edu.ucsc.leeps.fire.cong.logging.EventLog;
-import edu.ucsc.leeps.fire.cong.logging.TickLog;
+import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
+import edu.ucsc.leeps.fire.cong.logging.TickEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,8 +87,7 @@ public class PairedPopulation implements Population {
             float[] targetStrategy,
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
-            Integer changed, long timestamp,
-            EventLog eventLog) {
+            Integer changed, long timestamp) {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (FIRE.server.getConfig().length * 1000f);
         float percentInStrategyTime;
@@ -102,58 +101,55 @@ public class PairedPopulation implements Population {
                 changed, other,
                 percent, percentInStrategyTime, percentInStrategyTime);
         // log the event
-        eventLog.period = FIRE.server.getConfig().number;
-        eventLog.timestamp = timestamp;
-        eventLog.changedId = changed;
-        eventLog.counterpartId = other;
-        eventLog.currentStrategy = newStrategy;
-        eventLog.targetStrategy = targetStrategy;
-        eventLog.hoverStrategy_A = hoverStrategy_A;
-        eventLog.hoverStrategy_a = hoverStrategy_a;
-        eventLog.counterpartCurrentStrategy = lastStrategies.get(other);
-        eventLog.counterpartTargetStrategy = lastTargetStrategies.get(other);
-        eventLog.counterpartHoverStrategy_A = lastHoverStrategies_A.get(other);
-        eventLog.counterpartHoverStrategy_a = lastHoverStrategies_a.get(other);
+        StrategyChangeEvent event = new StrategyChangeEvent();
+        event.changedId = changed;
+        event.counterpartId = other;
+        event.currentStrategy = newStrategy;
+        event.targetStrategy = targetStrategy;
+        event.hoverStrategy_A = hoverStrategy_A;
+        event.hoverStrategy_a = hoverStrategy_a;
+        event.counterpartCurrentStrategy = lastStrategies.get(other);
+        event.counterpartTargetStrategy = lastTargetStrategies.get(other);
+        event.counterpartHoverStrategy_A = lastHoverStrategies_A.get(other);
+        event.counterpartHoverStrategy_a = lastHoverStrategies_a.get(other);
         if (counterparts.contains(changed)) {
-            eventLog.isCounterpart = true;
-            eventLog.payoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
-            eventLog.counterpartPayoffFunction = FIRE.server.getConfig().payoffFunction;
+            event.payoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
+            event.counterpartPayoffFunction = FIRE.server.getConfig().payoffFunction;
         } else {
-            eventLog.isCounterpart = false;
-            eventLog.payoffFunction = FIRE.server.getConfig().payoffFunction;
-            eventLog.counterpartPayoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
+            event.payoffFunction = FIRE.server.getConfig().payoffFunction;
+            event.counterpartPayoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
         }
-        if (eventLog.targetStrategy == null) {
-            eventLog.targetStrategy = eventLog.currentStrategy;
+        if (event.targetStrategy == null) {
+            event.targetStrategy = event.currentStrategy;
         }
-        if (eventLog.counterpartTargetStrategy == null) {
-            eventLog.counterpartTargetStrategy = eventLog.counterpartCurrentStrategy;
+        if (event.counterpartTargetStrategy == null) {
+            event.counterpartTargetStrategy = event.counterpartCurrentStrategy;
         }
-        if (eventLog.hoverStrategy_A == null) {
-            eventLog.hoverStrategy_A = new float[eventLog.currentStrategy.length];
-            for (int i = 0; i < eventLog.hoverStrategy_A.length; i++) {
-                eventLog.hoverStrategy_A[i] = Float.NaN;
+        if (event.hoverStrategy_A == null) {
+            event.hoverStrategy_A = new float[event.currentStrategy.length];
+            for (int i = 0; i < event.hoverStrategy_A.length; i++) {
+                event.hoverStrategy_A[i] = Float.NaN;
             }
         }
-        if (eventLog.hoverStrategy_a == null) {
-            eventLog.hoverStrategy_a = new float[eventLog.currentStrategy.length];
-            for (int i = 0; i < eventLog.hoverStrategy_a.length; i++) {
-                eventLog.hoverStrategy_a[i] = Float.NaN;
+        if (event.hoverStrategy_a == null) {
+            event.hoverStrategy_a = new float[event.currentStrategy.length];
+            for (int i = 0; i < event.hoverStrategy_a.length; i++) {
+                event.hoverStrategy_a[i] = Float.NaN;
             }
         }
-        if (eventLog.counterpartHoverStrategy_A == null) {
-            eventLog.counterpartHoverStrategy_A = new float[eventLog.currentStrategy.length];
-            for (int i = 0; i < eventLog.counterpartHoverStrategy_A.length; i++) {
-                eventLog.counterpartHoverStrategy_A[i] = Float.NaN;
+        if (event.counterpartHoverStrategy_A == null) {
+            event.counterpartHoverStrategy_A = new float[event.currentStrategy.length];
+            for (int i = 0; i < event.counterpartHoverStrategy_A.length; i++) {
+                event.counterpartHoverStrategy_A[i] = Float.NaN;
             }
         }
-        if (eventLog.counterpartHoverStrategy_a == null) {
-            eventLog.counterpartHoverStrategy_a = new float[eventLog.currentStrategy.length];
-            for (int i = 0; i < eventLog.counterpartHoverStrategy_a.length; i++) {
-                eventLog.counterpartHoverStrategy_a[i] = Float.NaN;
+        if (event.counterpartHoverStrategy_a == null) {
+            event.counterpartHoverStrategy_a = new float[event.currentStrategy.length];
+            for (int i = 0; i < event.counterpartHoverStrategy_a.length; i++) {
+                event.counterpartHoverStrategy_a[i] = Float.NaN;
             }
         }
-        //eventLog.commit();
+        FIRE.server.commit(event);
         // save the strategies
         lastTargetStrategies.put(changed, targetStrategy);
         lastHoverStrategies_A.put(changed, hoverStrategy_A);
@@ -233,51 +229,52 @@ public class PairedPopulation implements Population {
         }
     }
 
-    public void logTick(TickLog tickLog) {
+    public void logTick() {
+        TickEvent event = new TickEvent();
         for (Entry<Integer, Integer> pair : pairs.entrySet()) {
             Integer p1 = pair.getKey();
             Integer p2 = pair.getValue();
-            tickLog.id = p1;
-            tickLog.counterpartId = p2;
-            tickLog.currentStrategy = lastStrategies.get(p1);
-            tickLog.targetStrategy = lastTargetStrategies.get(p1);
-            tickLog.hoverStrategy_A = lastHoverStrategies_A.get(p1);
-            tickLog.hoverStrategy_a = lastHoverStrategies_a.get(p1);
-            tickLog.counterpartCurrentStrategy = lastStrategies.get(p2);
-            tickLog.counterpartTargetStrategy = lastTargetStrategies.get(p2);
-            tickLog.counterpartHoverStrategy_A = lastHoverStrategies_A.get(p2);
-            tickLog.counterpartHoverStrategy_a = lastHoverStrategies_a.get(p2);
-            if (tickLog.targetStrategy == null) {
-                tickLog.targetStrategy = tickLog.currentStrategy;
+            event.id = p1;
+            event.counterpartId = p2;
+            event.currentStrategy = lastStrategies.get(p1);
+            event.targetStrategy = lastTargetStrategies.get(p1);
+            event.hoverStrategy_A = lastHoverStrategies_A.get(p1);
+            event.hoverStrategy_a = lastHoverStrategies_a.get(p1);
+            event.counterpartCurrentStrategy = lastStrategies.get(p2);
+            event.counterpartTargetStrategy = lastTargetStrategies.get(p2);
+            event.counterpartHoverStrategy_A = lastHoverStrategies_A.get(p2);
+            event.counterpartHoverStrategy_a = lastHoverStrategies_a.get(p2);
+            if (event.targetStrategy == null) {
+                event.targetStrategy = event.currentStrategy;
             }
-            if (tickLog.counterpartTargetStrategy == null) {
-                tickLog.counterpartTargetStrategy = tickLog.counterpartCurrentStrategy;
+            if (event.counterpartTargetStrategy == null) {
+                event.counterpartTargetStrategy = event.counterpartCurrentStrategy;
             }
-            if (tickLog.hoverStrategy_A == null) {
-                tickLog.hoverStrategy_A = new float[tickLog.currentStrategy.length];
-                for (int i = 0; i < tickLog.hoverStrategy_A.length; i++) {
-                    tickLog.hoverStrategy_A[i] = Float.NaN;
+            if (event.hoverStrategy_A == null) {
+                event.hoverStrategy_A = new float[event.currentStrategy.length];
+                for (int i = 0; i < event.hoverStrategy_A.length; i++) {
+                    event.hoverStrategy_A[i] = Float.NaN;
                 }
             }
-            if (tickLog.hoverStrategy_a == null) {
-                tickLog.hoverStrategy_a = new float[tickLog.currentStrategy.length];
-                for (int i = 0; i < tickLog.hoverStrategy_a.length; i++) {
-                    tickLog.hoverStrategy_a[i] = Float.NaN;
+            if (event.hoverStrategy_a == null) {
+                event.hoverStrategy_a = new float[event.currentStrategy.length];
+                for (int i = 0; i < event.hoverStrategy_a.length; i++) {
+                    event.hoverStrategy_a[i] = Float.NaN;
                 }
             }
-            if (tickLog.counterpartHoverStrategy_A == null) {
-                tickLog.counterpartHoverStrategy_A = new float[tickLog.currentStrategy.length];
-                for (int i = 0; i < tickLog.counterpartHoverStrategy_A.length; i++) {
-                    tickLog.counterpartHoverStrategy_A[i] = Float.NaN;
+            if (event.counterpartHoverStrategy_A == null) {
+                event.counterpartHoverStrategy_A = new float[event.currentStrategy.length];
+                for (int i = 0; i < event.counterpartHoverStrategy_A.length; i++) {
+                    event.counterpartHoverStrategy_A[i] = Float.NaN;
                 }
             }
-            if (tickLog.counterpartHoverStrategy_a == null) {
-                tickLog.counterpartHoverStrategy_a = new float[tickLog.currentStrategy.length];
-                for (int i = 0; i < tickLog.counterpartHoverStrategy_a.length; i++) {
-                    tickLog.counterpartHoverStrategy_a[i] = Float.NaN;
+            if (event.counterpartHoverStrategy_a == null) {
+                event.counterpartHoverStrategy_a = new float[event.currentStrategy.length];
+                for (int i = 0; i < event.counterpartHoverStrategy_a.length; i++) {
+                    event.counterpartHoverStrategy_a[i] = Float.NaN;
                 }
             }
-            //tickLog.commit();
+            FIRE.server.commit(event);
         }
     }
 }

@@ -2,8 +2,6 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
-import edu.ucsc.leeps.fire.cong.logging.EventLog;
-import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,8 +54,7 @@ public class TwoPopulation implements Population {
             float[] targetStrategy,
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
-            Integer changed, long timestamp,
-            EventLog eventLog) {
+            Integer changed, long timestamp) {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (FIRE.server.getConfig().length * 1000f);
         float percentInStrategyTime;
@@ -161,7 +158,7 @@ public class TwoPopulation implements Population {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void logTick(TickLog tickLog) {
+    public void logTick() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

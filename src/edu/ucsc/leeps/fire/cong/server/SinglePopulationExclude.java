@@ -2,8 +2,6 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
-import edu.ucsc.leeps.fire.cong.logging.EventLog;
-import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -93,8 +91,7 @@ public class SinglePopulationExclude implements Population {
             float[] targetStrategy,
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
-            Integer id, long timestamp,
-            EventLog eventLog) {
+            Integer id, long timestamp) {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (FIRE.server.getConfig().length * 1000f);
         long inStrategyTime = System.currentTimeMillis() - lastEvalTime;
@@ -111,7 +108,7 @@ public class SinglePopulationExclude implements Population {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void logTick(TickLog tickLog) {
+    public void logTick() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

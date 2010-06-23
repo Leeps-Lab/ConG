@@ -1,15 +1,16 @@
 package edu.ucsc.leeps.fire.cong.logging;
 
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.logging.LogEvent;
 
-public class EventLog {
+/**
+ *
+ * @author dev
+ */
+public class TickEvent implements LogEvent {
 
-    public int period;
-    public long timestamp;
-    public long periodStartTime;
-    public int changedId;
+    public int id;
     public int counterpartId;
-    public boolean isCounterpart;
     public float[] currentStrategy;
     public float[] targetStrategy;
     public float[] hoverStrategy_A, hoverStrategy_a;
