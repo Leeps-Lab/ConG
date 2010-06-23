@@ -108,17 +108,10 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
                     PayoffFunction u;
                     float A = 1 - (y / (float) size);
                     float a = 1 - (x / (float) size);
-                    if (mine && config.isCounterpart) {
-                        u = config.counterpartPayoffFunction;
-                    } else if (mine && !config.isCounterpart) {
+                    if (mine) {
                         u = config.payoffFunction;
-                    } else if (!mine && config.isCounterpart) {
-                        u = config.payoffFunction;
-                    } else if (!mine && !config.isCounterpart) {
-                        u = config.counterpartPayoffFunction;
                     } else {
-                        assert false;
-                        u = null;
+                        u = config.counterpartPayoffFunction;
                     }
                     float value;
                     if (mine) {

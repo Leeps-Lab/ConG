@@ -65,7 +65,11 @@ public class PairedPopulation implements Population {
             pairs.put(client1, client2);
             pairs.put(client2, client1);
             FIRE.server.getConfig(client1).isCounterpart = false;
+            FIRE.server.getConfig(client1).payoffFunction = FIRE.server.getConfig().payoffFunction;
+            FIRE.server.getConfig(client1).counterpartPayoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
             FIRE.server.getConfig(client2).isCounterpart = true;
+            FIRE.server.getConfig(client1).payoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
+            FIRE.server.getConfig(client1).counterpartPayoffFunction = FIRE.server.getConfig().payoffFunction;
             counterparts.add(client2);
         }
     }

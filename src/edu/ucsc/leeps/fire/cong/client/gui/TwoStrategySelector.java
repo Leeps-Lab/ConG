@@ -155,25 +155,14 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     private void updateLabels() {
         float myAa, counterAa, myAb, counterAb, myBa, counterBa, myBb, counterBb;
-        if (FIRE.client.getConfig().isCounterpart) {
-            myAa = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
-            counterAa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
-            myAb = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
-            counterAb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
-            myBa = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
-            counterBa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
-            myBb = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
-            counterBb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
-        } else {
-            myAa = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
-            counterAa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
-            myAb = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
-            counterAb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
-            myBa = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
-            counterBa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
-            myBb = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
-            counterBb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
-        }
+        myAa = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
+        counterAa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
+        myAb = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
+        counterAb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
+        myBa = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{1});
+        counterBa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
+        myBb = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
+        counterBb = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{0});
 
         myHeatmapAa.setLabel(myAa);
         myHeatmapAb.setLabel(myAb);
@@ -307,7 +296,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
             counterpart.setVisible(true);
             counterpart.setLabel(counterpartPayoffFunction.getPayoff(
-                    currentPercent, new float[]{percent_a}, new float[]{percent_A}));
+                    currentPercent, new float[]{percent_A}, new float[]{percent_a}));
             counterpart.update(
                     counterpartHeatmap.origin.x + (1 - percent_a) * counterpartHeatmap.width,
                     counterpartHeatmap.origin.y + (1 - percent_A) * counterpartHeatmap.height);
