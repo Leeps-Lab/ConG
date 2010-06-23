@@ -1,14 +1,20 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import java.awt.Color;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 
-public class ThreeStrategySelector extends Sprite implements MouseListener {
+public class ThreeStrategySelector extends Sprite implements Configurable<Config>, MouseListener {
 
+    private String rLabel = "";
+    private String pLabel = "";
+    private String sLabel = "";
     private final int MARKER_RADIUS = 7;
     private final int R = 0;
     private final int P = 1;
@@ -28,6 +34,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
     private boolean mouseInTriangle;
     private Color rColor, pColor, sColor;
     private boolean enabled;
+    private Config config;
     private HeatmapHelper heatmap;
     private PEmbed applet;
     public float currentPercent;
@@ -91,11 +98,11 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
 
         // set up Sliders
         stratSlider[R] = new Slider(this, 50, width - 50, height / 3 + 50,
-                rColor, "", 1f);
+                rColor, rLabel, 1f);
         stratSlider[P] = new Slider(this, 50, width - 50, height / 3 + 100,
-                pColor, "", 1f);
+                pColor, pLabel, 1f);
         stratSlider[S] = new Slider(this, 50, width - 50, height / 3 + 150,
-                sColor, "", 1f);
+                sColor, sLabel, 1f);
 
 
         // set up dropline Markers
@@ -141,6 +148,8 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
                 true, applet);
         heatmap.setVisible(true);
         currentPercent = 0f;
+
+        FIRE.client.addConfigListener(this);
     }
 
     public void update() {
@@ -154,16 +163,9 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
 
     @Override
     public synchronized void draw(PEmbed applet) {
-        if (!visible || !(FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction)) {
+        if (!visible) {
             return;
         }
-
-        stratSlider[R].setLabel(FIRE.client.getPeriodConfig().rLabel);
-        stratSlider[P].setLabel(FIRE.client.getPeriodConfig().pLabel);
-        stratSlider[S].setLabel(FIRE.client.getPeriodConfig().sLabel);
-        rock.setLabel(FIRE.client.getPeriodConfig().shortRLabel);
-        paper.setLabel(FIRE.client.getPeriodConfig().shortPLabel);
-        scissors.setLabel(FIRE.client.getPeriodConfig().shortSLabel);
 
         heatmap.draw(applet);
 
@@ -199,7 +201,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
                     stratSlider[P].setGhostValue(targetStrat[P]);
                     stratSlider[S].setGhostValue(targetStrat[S]);
                 }
-
+                
                 calculateGhostStrats();
                 ghost.setVisible(true);
                 ghost.update(mouseX, mouseY);
@@ -259,8 +261,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             applet.line(ghost.origin.x, ghost.origin.y, ghostPDrop.origin.x, ghostPDrop.origin.y);
             applet.line(ghost.origin.x, ghost.origin.y, ghostSDrop.origin.x, ghostSDrop.origin.y);
 
-            ghost.setLabel(FIRE.client.getPeriodConfig().payoffFunction.getPayoff(
-                    currentPercent, ghostStrat, opponentStrat));
+            ghost.setLabel(config.payoffFunction.getPayoff(currentPercent, ghostStrat, opponentStrat));
 
             ghostRDrop.setLabel(ghostStrat[R]);
             ghostPDrop.setLabel(ghostStrat[P]);
@@ -284,8 +285,7 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             applet.line(current.origin.x, current.origin.y, sDrop.origin.x, sDrop.origin.y);
         }
 
-        current.setLabel(FIRE.client.getPeriodConfig().payoffFunction.getPayoff(
-                currentPercent, playedStrat, opponentStrat));
+        current.setLabel(config.payoffFunction.getPayoff(currentPercent, playedStrat, opponentStrat));
 
         adjustLabels(playedStrat, current, pDrop, rDrop);
 
@@ -377,8 +377,8 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
         }
 
         float[] coords = calculateStratCoords(newStrats[R],
-                newStrats[P],
-                newStrats[S]);
+                                              newStrats[P],
+                                              newStrats[S]);
         current.update(coords[0], coords[1]);
     }
 
@@ -390,8 +390,8 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             stratSlider[i].setStratValue(currentStrat[i]);
         }
         float[] coords = calculateStratCoords(currentStrat[R],
-                currentStrat[P],
-                currentStrat[S]);
+                                              currentStrat[P],
+                                              currentStrat[S]);
         current.update(coords[0], coords[1]);
     }
 
@@ -672,5 +672,23 @@ public class ThreeStrategySelector extends Sprite implements MouseListener {
             stratSlider[i].setGhostValue(targetStrat[i]);
         }
         strategyChanger.setTargetStrategy(targetStrat);
+    }
+
+    public void configChanged(Config config) {
+        this.config = config;
+        if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            rLabel = config.rLabel;
+            stratSlider[R].setLabel(rLabel);
+            pLabel = config.pLabel;
+            stratSlider[P].setLabel(pLabel);
+            sLabel = config.sLabel;
+            stratSlider[S].setLabel(sLabel);
+            rock.setLabel(config.shortRLabel);
+            paper.setLabel(config.shortPLabel);
+            scissors.setLabel(config.shortSLabel);
+            setVisible(true);
+        } else {
+            setVisible(false);
+        }
     }
 }

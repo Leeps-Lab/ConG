@@ -1,13 +1,10 @@
 package edu.ucsc.leeps.fire.cong.server;
 
-import java.io.Serializable;
-import java.util.Collections;
-
 /**
  *
  * @author jpettit
  */
-public class ThreeStrategyPayoffFunction implements PayoffFunction, Serializable {
+public class ThreeStrategyPayoffFunction implements PayoffFunction {
 
     public float Rr, Rp, Rs,
             Pr, Pp, Ps,

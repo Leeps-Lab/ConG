@@ -4,7 +4,7 @@ import edu.ucsc.leeps.fire.FIREServerInterface;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
-import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,10 +14,9 @@ import java.util.Random;
  *
  * @author jpettit
  */
-public class Server implements ServerInterface, FIREServerInterface<ClientInterface, PeriodConfig> {
+public class Server implements ServerInterface, FIREServerInterface<ClientInterface, Config> {
 
     private Map<Integer, ClientInterface> clients;
-    private PeriodConfig periodConfig;
     private TickLog tickLog;
     private EventLog eventLog;
     private Population population;
@@ -40,27 +39,27 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         long timestamp = System.currentTimeMillis();
         membership.get(id).strategyChanged(
                 newStrategy, targetStrategy, hoverStrategy_A, hoverStrategy_a,
-                id, timestamp, periodConfig, eventLog);
+                id, timestamp, eventLog);
     }
 
     public boolean readyToStart() {
         return clients.size() >= 1;
     }
 
-    public void setPeriodConfig(PeriodConfig periodConfig) {
-        this.periodConfig = periodConfig;
+    public void configurePeriod() {
+        configurePopulations();
+        configureStrategies();
     }
 
     public void startPeriod() {
         long periodStartTime = System.currentTimeMillis();
         tickLog.periodStartTime = periodStartTime;
         eventLog.periodStartTime = periodStartTime;
-        initPopulations();
-        initStrategies(periodStartTime);
+        population.initialize(periodStartTime);
     }
 
     public void endPeriod() {
-        population.endPeriod(periodConfig);
+        population.endPeriod();
     }
 
     public void tick(int secondsLeft) {
@@ -68,34 +67,33 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void quickTick(int millisLeft) {
-        tickLog.period = periodConfig.number;
+        tickLog.period = FIRE.server.getConfig().number;
         tickLog.timestamp = System.currentTimeMillis();
         tickLog.millisLeft = millisLeft;
-        tickLog.payoffFunction = periodConfig.payoffFunction;
-        tickLog.counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
-        population.logTick(tickLog, periodConfig);
+        tickLog.payoffFunction = FIRE.server.getConfig().payoffFunction;
+        tickLog.counterpartPayoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
+        population.logTick(tickLog);
     }
 
-    private void initPopulations() {
+    private void configurePopulations() {
         membership = new HashMap<Integer, Population>();
         Map<Integer, ClientInterface> members = new HashMap<Integer, ClientInterface>();
         members.clear();
         members.putAll(clients);
-        population = periodConfig.population;
+        population = FIRE.server.getConfig().population;
         population.setMembers(members, membership);
     }
 
-    private void initStrategies(long periodStartTime) {
-        for (ClientInterface client : clients.values()) {
-            if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                client.initMyStrategy(new float[]{random.nextFloat()});
-            } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                client.initMyStrategy(new float[]{0.33f, 0.33f, 0.33f});
+    private void configureStrategies() {
+        for (Integer client : clients.keySet()) {
+            if (FIRE.server.getConfig(client).payoffFunction instanceof TwoStrategyPayoffFunction) {
+                FIRE.server.getConfig(client).initialStrategy = new float[]{random.nextFloat()};
+            } else if (FIRE.server.getConfig(client).payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                FIRE.server.getConfig(client).initialStrategy = new float[]{0.33f, 0.33f, 0.33f};
             } else {
                 assert false;
             }
         }
-        population.initialize(periodStartTime, periodConfig);
     }
 
     public void unregister(int id) {

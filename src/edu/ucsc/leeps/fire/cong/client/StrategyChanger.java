@@ -1,8 +1,8 @@
-package edu.ucsc.leeps.fire.cong.client.gui;
+package edu.ucsc.leeps.fire.cong.client;
 
+import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client;
-import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 
@@ -10,10 +10,10 @@ import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
  *
  * @author jpettit
  */
-public class StrategyChanger extends Thread {
+public class StrategyChanger extends Thread implements Configurable<Config> {
 
     private final Object lock = new Object();
-    private PeriodConfig periodConfig;
+    private Config config;
     private volatile boolean running;
     private volatile boolean shouldUpdate;
     private boolean isMoving;
@@ -30,6 +30,23 @@ public class StrategyChanger extends Thread {
     public StrategyChanger() {
         isMoving = false;
         start();
+        FIRE.client.addConfigListener(this);
+    }
+
+    public void configChanged(Config config) {
+        synchronized (lock) {
+            this.config = config;
+            if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                currentStrategy = new float[1];
+                targetStrategy = new float[1];
+                deltaStrategy = new float[1];
+            } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                currentStrategy = new float[3];
+                targetStrategy = new float[3];
+                deltaStrategy = new float[3];
+            }
+            recalculateTickDelta();
+        }
     }
 
     private void update() {
@@ -45,7 +62,7 @@ public class StrategyChanger extends Thread {
                     currentStrategy[i] += deltaStrategy[i];
                 }
             } else {
-                for(int i = 0; i < currentStrategy.length; ++i) {
+                for (int i = 0; i < currentStrategy.length; ++i) {
                     currentStrategy[i] = targetStrategy[i];
                 }
                 isMoving = false;
@@ -96,7 +113,7 @@ public class StrategyChanger extends Thread {
     }
 
     private void recalculateTickDelta() {
-        tickDelta = periodConfig.percentChangePerSecond / (1000f / tickTime);
+        tickDelta = config.percentChangePerSecond / (1000f / tickTime);
     }
 
     public boolean strategyIsMoving() {
@@ -131,22 +148,6 @@ public class StrategyChanger extends Thread {
                 targetStrategy[i] = strategy[i];
             }
             isMoving = true;
-        }
-    }
-
-    public void setPeriodConfig(PeriodConfig basePeriodConfig) {
-        synchronized (lock) {
-            this.periodConfig = (PeriodConfig) basePeriodConfig;
-            if (periodConfig.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                currentStrategy = new float[1];
-                targetStrategy = new float[1];
-                deltaStrategy = new float[1];
-            } else if (periodConfig.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                currentStrategy = new float[3];
-                targetStrategy = new float[3];
-                deltaStrategy = new float[3];
-            }
-            recalculateTickDelta();
         }
     }
 

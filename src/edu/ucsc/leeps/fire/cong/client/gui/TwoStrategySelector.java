@@ -1,15 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.config.TwoStrategySelectionType;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.cong.client.Client;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -19,9 +17,10 @@ import java.awt.event.MouseListener;
  *
  * @author jpettit
  */
-public class TwoStrategySelector extends Sprite implements MouseListener, KeyListener {
+public class TwoStrategySelector extends Sprite implements Configurable<Config>, MouseListener, KeyListener {
 
     private PEmbed applet;
+    private Config config;
     private float percent_A, percent_a;
     private boolean enabled;
     private HeatmapHelper heatmap, counterpartHeatmap;
@@ -41,7 +40,6 @@ public class TwoStrategySelector extends Sprite implements MouseListener, KeyLis
     private Marker current, planned, dragged, hover, counterpart;
     private long hoverTimestamp;
     private long hoverTimeMillis = 0;
-    private boolean isCounterpart;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private StrategyChanger strategyChanger;
 
@@ -112,6 +110,7 @@ public class TwoStrategySelector extends Sprite implements MouseListener, KeyLis
         counterpart.setLabelMode(Marker.LabelMode.Top);
 
         this.strategyChanger = strategyChanger;
+        FIRE.client.addConfigListener(this);
     }
 
     public void setEnabled(boolean enabled) {
@@ -146,20 +145,6 @@ public class TwoStrategySelector extends Sprite implements MouseListener, KeyLis
         percent_a = a;
     }
 
-    public void setIsCounterpart(boolean isCounterpart) {
-        this.isCounterpart = isCounterpart;
-        if (isCounterpart) {
-            payoffFunction = FIRE.client.getPeriodConfig().counterpartPayoffFunction;
-            counterpartPayoffFunction = FIRE.client.getPeriodConfig().payoffFunction;
-        } else {
-            payoffFunction = FIRE.client.getPeriodConfig().payoffFunction;
-            counterpartPayoffFunction = FIRE.client.getPeriodConfig().counterpartPayoffFunction;
-        }
-        heatmap.setIsCounterpart(isCounterpart);
-        counterpartHeatmap.setIsCounterpart(isCounterpart);
-        setVisible(true);
-    }
-
     public void update() {
         if (visible) {
             heatmap.updateTwoStrategyHeatmap(currentPercent);
@@ -170,7 +155,7 @@ public class TwoStrategySelector extends Sprite implements MouseListener, KeyLis
 
     private void updateLabels() {
         float myAa, counterAa, myAb, counterAb, myBa, counterBa, myBb, counterBb;
-        if (isCounterpart) {
+        if (FIRE.client.getConfig().isCounterpart) {
             myAa = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
             counterAa = counterpartPayoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{1});
             myAb = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{0});
@@ -308,7 +293,7 @@ public class TwoStrategySelector extends Sprite implements MouseListener, KeyLis
                 hover.draw(applet);
             }
         }
-        if (FIRE.client.getPeriodConfig().twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+        if (config.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
             float x, y, w, h;
             x = counterpartHeatmap.origin.x;
             y = counterpartHeatmap.origin.y;
@@ -343,7 +328,7 @@ public class TwoStrategySelector extends Sprite implements MouseListener, KeyLis
     private void drawHeatmap() {
         heatmap.draw(applet);
 
-        if (FIRE.client.getPeriodConfig().twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+        if (config.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
             counterpartHeatmap.draw(applet);
         }
 
@@ -352,7 +337,7 @@ public class TwoStrategySelector extends Sprite implements MouseListener, KeyLis
         myHeatmapBa.draw(applet);
         myHeatmapBb.draw(applet);
 
-        if (FIRE.client.getPeriodConfig().twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+        if (config.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
             counterpartHeatmapAa.draw(applet);
             cuonterpartHeatmapAb.draw(applet);
             counterpartHeatmapBa.draw(applet);
@@ -362,22 +347,9 @@ public class TwoStrategySelector extends Sprite implements MouseListener, KeyLis
 
     @Override
     public void draw(PEmbed applet) {
-        if (!visible
-                || !(FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction)) {
+        if (!visible) {
             return;
         }
-        switch (FIRE.client.getPeriodConfig().twoStrategySelectionType) {
-            case Matrix:
-                setModeMatrix();
-                break;
-            case HeatmapSingle:
-                setModeHeatmapSingle();
-                break;
-            case HeatmapBoth:
-                setModeHeatmapBoth();
-                break;
-        }
-
         try {
             if (!inRect(applet.mouseX, applet.mouseY) || applet.pmouseX != applet.mouseX || applet.pmouseY != applet.mouseY) {
                 hoverTimestamp = System.currentTimeMillis();
@@ -386,7 +358,7 @@ public class TwoStrategySelector extends Sprite implements MouseListener, KeyLis
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
-            switch (FIRE.client.getPeriodConfig().twoStrategySelectionType) {
+            switch (config.twoStrategySelectionType) {
                 case HeatmapSingle:
                 case HeatmapBoth:
                     drawHeatmap();
@@ -438,6 +410,28 @@ public class TwoStrategySelector extends Sprite implements MouseListener, KeyLis
     }
 
     public void mouseExited(MouseEvent me) {
+    }
+
+    public void configChanged(Config config) {
+        this.config = config;
+        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            this.payoffFunction = config.payoffFunction;
+            this.counterpartPayoffFunction = config.counterpartPayoffFunction;
+            switch (config.twoStrategySelectionType) {
+                case Matrix:
+                    setModeMatrix();
+                    break;
+                case HeatmapSingle:
+                    setModeHeatmapSingle();
+                    break;
+                case HeatmapBoth:
+                    setModeHeatmapBoth();
+                    break;
+            }
+            setVisible(true);
+        } else {
+            setVisible(false);
+        }
     }
 
     public void keyTyped(KeyEvent ke) {

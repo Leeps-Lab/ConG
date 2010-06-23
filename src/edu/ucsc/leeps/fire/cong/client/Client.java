@@ -5,12 +5,12 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.gui.TwoStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Countdown;
 import edu.ucsc.leeps.fire.cong.client.gui.ChartLegend;
-import edu.ucsc.leeps.fire.cong.client.gui.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.gui.PointsDisplay;
 import edu.ucsc.leeps.fire.cong.client.gui.ThreeStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chart;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.swing.JFrame;
@@ -35,7 +35,6 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
     private ChartLegend legend;
-    private boolean isCounterpart = false;
     private StrategyChanger strategyChanger;
 
     public Client() {
@@ -96,11 +95,28 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         embed.running = true;
         JFrame frame = new JFrame();
         frame.add(this);
-        frame.setSize(getPreferredSize());
+        Dimension size = getPreferredSize();
+        size.height += 20;
+        frame.setSize(size);
         frame.setVisible(true);
     }
 
     public void startPeriod() {
+
+        strategyChanger.setCurrentStrategy(FIRE.client.getConfig().initialStrategy);
+        if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+            bimatrix.setMyStrategy(FIRE.client.getConfig().initialStrategy[0]);
+        } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            simplex.setAllStrategies(FIRE.client.getConfig().initialStrategy);
+        } else {
+            assert false;
+        }
+        payoffChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+        strategyChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+        rChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+        pChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+        sChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+
         this.percent = 0;
         strategyChanger.startPeriod();
         simplex.setEnabled(true);
@@ -129,7 +145,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     }
 
     public void tick(int secondsLeft) {
-        this.percent = embed.width * (1 - (secondsLeft / (float) FIRE.client.getPeriodConfig().length));
+        this.percent = embed.width * (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
         countdown.setSecondsLeft(secondsLeft);
         bimatrix.update();
         simplex.update();
@@ -137,7 +153,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
 
     public void quickTick(int millisLeft) {
         if (millisLeft > 0) {
-            this.percent = (1 - (millisLeft / ((float) FIRE.client.getPeriodConfig().length * 1000)));
+            this.percent = (1 - (millisLeft / ((float) FIRE.client.getConfig().length * 1000)));
             payoffChart.currentPercent = this.percent;
             payoffChart.updateLines();
             strategyChart.currentPercent = this.percent;
@@ -154,9 +170,9 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     }
 
     public synchronized float[] getStrategy() {
-        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             return bimatrix.getMyStrategy();
-        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             return simplex.getPlayerRPS();
         } else {
             assert false;
@@ -164,27 +180,11 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         }
     }
 
-    public synchronized void initMyStrategy(float[] s) {
-        strategyChanger.setCurrentStrategy(s);
-        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-            bimatrix.setMyStrategy(s[0]);
-        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            simplex.setAllStrategies(s);
-        } else {
-            assert false;
-        }
-        payoffChart.setMyStrategy(s);
-        strategyChart.setMyStrategy(s);
-        rChart.setMyStrategy(s);
-        pChart.setMyStrategy(s);
-        sChart.setMyStrategy(s);
-    }
-
     public synchronized void setMyStrategy(float[] s) {
         strategyChanger.setCurrentStrategy(s);
-        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setMyStrategy(s[0]);
-        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setCurrentStrategies(s);
         } else {
             assert false;
@@ -197,9 +197,9 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     }
 
     public synchronized void setCounterpartStrategy(float[] s) {
-        if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             bimatrix.setCounterpartStrategy(s[0]);
-        } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             simplex.setCounterpartRPS(s[0], s[1], s[2]);
         } else {
             assert false;
@@ -211,18 +211,15 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         sChart.setCounterpartStrategy(s);
     }
 
-    public void setIsCounterpart(boolean isCounterpart) {
-        this.isCounterpart = isCounterpart;
-        bimatrix.setIsCounterpart(isCounterpart);
-        payoffChart.setIsCounterpart(isCounterpart);
-    }
-
     public void setTwoStrategyHeatmapBuffers(float[][][] payoff, float[][][] counterpartPayoff) {
-        if (isCounterpart) {
+        /*
+        if (FIRE.client.getConfig().isCounterpart) {
             bimatrix.setTwoStrategyHeatmapBuffers(counterpartPayoff, payoff);
         } else {
             bimatrix.setTwoStrategyHeatmapBuffers(payoff, counterpartPayoff);
         }
+         * 
+         */
     }
 
     public boolean readyForNextPeriod() {
@@ -231,9 +228,6 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
 
     public void disconnect() {
         System.exit(0);
-    }
-
-    public void receiveMessage(String message) {
     }
 
     public class PEmbed extends PApplet {
@@ -284,10 +278,10 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
                 background(255);
                 bimatrix.draw(embed);
                 simplex.draw(embed);
-                if (FIRE.client.getPeriodConfig() != null) {
-                    if (FIRE.client.getPeriodConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+                if (FIRE.client.getConfig() != null) {
+                    if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                         strategyChart.draw(embed);
-                    } else if (FIRE.client.getPeriodConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                    } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                         rChart.draw(embed);
                         pChart.draw(embed);
                         sChart.draw(embed);

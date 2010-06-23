@@ -1,26 +1,23 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
-import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  *
  * @author dev
  */
-public interface Population {
+public interface Population extends Serializable {
 
     public void setMembers(
             Map<Integer, ClientInterface> members,
             Map<Integer, Population> membership);
 
-    public void initialize(long timestamp, PeriodConfig periodConfig);
+    public void initialize(long timestamp);
 
     public void strategyChanged(
             float[] newStrategy,
@@ -28,10 +25,9 @@ public interface Population {
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
             Integer id, long timestamp,
-            PeriodConfig periodConfig,
             EventLog eventLog);
 
-    public void logTick(TickLog tickLog, PeriodConfig periodConfig);
+    public void logTick(TickLog tickLog);
 
-    public void endPeriod(PeriodConfig periodConfig);
+    public void endPeriod();
 }

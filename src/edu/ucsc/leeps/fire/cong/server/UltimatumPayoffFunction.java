@@ -1,16 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.server;
-
-import java.io.Serializable;
 
 /**
  *
  * @author jpettit
  */
-public class UltimatumPayoffFunction extends TwoStrategyPayoffFunction implements Serializable {
+public class UltimatumPayoffFunction extends TwoStrategyPayoffFunction {
 
     public float MAX;
     public boolean sender;

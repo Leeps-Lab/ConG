@@ -1,14 +1,12 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.server;
+
+import java.io.Serializable;
 
 /**
  *
  * @author dev
  */
-public interface PayoffFunction {
+public interface PayoffFunction extends Serializable {
 
     public float getMin();
 

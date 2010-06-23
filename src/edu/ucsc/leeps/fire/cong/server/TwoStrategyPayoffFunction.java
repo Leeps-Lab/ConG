@@ -1,16 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.server;
-
-import java.io.Serializable;
 
 /**
  *
  * @author jpettit
  */
-public class TwoStrategyPayoffFunction implements PayoffFunction, Serializable {
+public class TwoStrategyPayoffFunction implements PayoffFunction {
 
     public String name;
     public float Aa;

@@ -1,36 +1,32 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import processing.core.PApplet;
 
 /**
  *
  * @author jpettit
  */
-public class ChartLegend extends Sprite {
+public class ChartLegend extends Sprite implements Configurable<Config> {
+
+    private Config config;
+    private Line youLine, otherLine;
 
     public ChartLegend(int x, int y, int width, int height) {
         super(x, y, width, height);
+        FIRE.client.addConfigListener(this);
     }
 
     @Override
     public void draw(PEmbed applet) {
 
-        if (!visible) {
-            return;
-        }
-
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
 
-        if (FIRE.client.getPeriodConfig().yourPayoff != null
-                && FIRE.client.getPeriodConfig().otherPayoff != null) {
+        if (youLine != null && otherLine != null) {
             String youLabel = "You";
             String otherLabel = "Other";
             float w1 = applet.textWidth(youLabel);
@@ -41,19 +37,13 @@ public class ChartLegend extends Sprite {
             applet.strokeWeight(10);
             applet.textAlign(PApplet.LEFT, PApplet.CENTER);
 
-            applet.stroke(
-                    FIRE.client.getPeriodConfig().yourPayoff.r,
-                    FIRE.client.getPeriodConfig().yourPayoff.g,
-                    FIRE.client.getPeriodConfig().yourPayoff.b);
+            applet.stroke(youLine.r, youLine.g, youLine.b);
             applet.line(4, height / 2f, 4 + 10, height / 2f);
             applet.text(youLabel,
                     origin.x + 4 + 10 + 4 - width,
                     origin.y + (height / 2f));
 
-            applet.stroke(
-                    FIRE.client.getPeriodConfig().otherPayoff.r,
-                    FIRE.client.getPeriodConfig().otherPayoff.g,
-                    FIRE.client.getPeriodConfig().otherPayoff.b);
+            applet.stroke(otherLine.r, otherLine.g, otherLine.b);
             applet.line(4 + 10 + 4 + w1 + 4, height / 2f, 4 + 10 + 4 + w1 + 4 + 10, height / 2f);
             applet.text(otherLabel,
                     origin.x + 4 + 10 + 4 + w1 + 4 + 10 + 4 - width,
@@ -70,5 +60,11 @@ public class ChartLegend extends Sprite {
         applet.rect(0, 0, width, height);
 
         applet.popMatrix();
+    }
+
+    public void configChanged(Config config) {
+        this.config = config;
+        youLine = config.yourPayoff;
+        otherLine = config.otherPayoff;
     }
 }

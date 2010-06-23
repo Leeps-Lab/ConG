@@ -2,10 +2,8 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
-import edu.ucsc.leeps.fire.cong.config.PeriodConfig;
 import edu.ucsc.leeps.fire.cong.logging.EventLog;
 import edu.ucsc.leeps.fire.cong.logging.TickLog;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +17,7 @@ import java.util.Set;
  *
  * @author jpettit
  */
-public class PairedPopulation implements Population, Serializable {
+public class PairedPopulation implements Population {
 
     private Map<Integer, ClientInterface> members;
     private long periodStartTime;
@@ -31,6 +29,16 @@ public class PairedPopulation implements Population, Serializable {
     private Map<Integer, float[]> lastHoverStrategies_A;
     private Map<Integer, float[]> lastHoverStrategies_a;
 
+    public PairedPopulation() {
+        lastEvalTimes = new HashMap<Integer, Long>();
+        lastStrategies = new HashMap<Integer, float[]>();
+        lastTargetStrategies = new HashMap<Integer, float[]>();
+        lastHoverStrategies_A = new HashMap<Integer, float[]>();
+        lastHoverStrategies_a = new HashMap<Integer, float[]>();
+        pairs = new HashMap<Integer, Integer>();
+        counterparts = new HashSet<Integer>();
+    }
+
     public void setMembers(
             Map<Integer, ClientInterface> members,
             Map<Integer, Population> membership) {
@@ -38,34 +46,34 @@ public class PairedPopulation implements Population, Serializable {
         for (Integer id : members.keySet()) {
             membership.put(id, this);
         }
-    }
-
-    public void initialize(long timestamp, PeriodConfig periodConfig) {
-        periodStartTime = timestamp;
-        lastEvalTimes = new HashMap<Integer, Long>();
-        for (Integer id : members.keySet()) {
-            lastEvalTimes.put(id, timestamp);
-        }
-        lastStrategies = new HashMap<Integer, float[]>();
-        lastTargetStrategies = new HashMap<Integer, float[]>();
-        lastHoverStrategies_A = new HashMap<Integer, float[]>();
-        lastHoverStrategies_a = new HashMap<Integer, float[]>();
-        pairs = new HashMap<Integer, Integer>();
+        lastEvalTimes.clear();
+        lastStrategies.clear();
+        lastTargetStrategies.clear();
+        lastHoverStrategies_A.clear();
+        lastHoverStrategies_a.clear();
+        pairs.clear();
+        counterparts.clear();
         List<Integer> partners = new ArrayList<Integer>();
         partners.addAll(members.keySet());
         Collections.shuffle(partners);
         if (partners.size() % 2 != 0) {
             System.err.println("Error while making pairs, odd number of subjects to pair up");
         }
-        this.counterparts = new HashSet<Integer>();
         while (partners.size() > 0) {
             Integer client1 = partners.remove(0);
             Integer client2 = partners.remove(0);
             pairs.put(client1, client2);
             pairs.put(client2, client1);
-            members.get(client1).setIsCounterpart(false);
-            members.get(client2).setIsCounterpart(true);
+            FIRE.server.getConfig(client1).isCounterpart = false;
+            FIRE.server.getConfig(client2).isCounterpart = true;
             counterparts.add(client2);
+        }
+    }
+
+    public void initialize(long timestamp) {
+        periodStartTime = timestamp;
+        for (Integer id : members.keySet()) {
+            lastEvalTimes.put(id, timestamp);
         }
         updateAllStrategies();
     }
@@ -76,22 +84,21 @@ public class PairedPopulation implements Population, Serializable {
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
             Integer changed, long timestamp,
-            PeriodConfig periodConfig,
             EventLog eventLog) {
         long periodTimeElapsed = timestamp - periodStartTime;
-        float percent = periodTimeElapsed / (periodConfig.length * 1000f);
+        float percent = periodTimeElapsed / (FIRE.server.getConfig().length * 1000f);
         float percentInStrategyTime;
         int other = pairs.get(changed);
         long inStrategyTime = timestamp - lastEvalTimes.get(changed);
-        percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
+        percentInStrategyTime = inStrategyTime / (FIRE.server.getConfig().length * 1000f);
         lastEvalTimes.put(changed, timestamp);
         lastEvalTimes.put(other, timestamp);
         updatePayoffs(
                 newStrategy,
                 changed, other,
-                percent, percentInStrategyTime, percentInStrategyTime, periodConfig);
+                percent, percentInStrategyTime, percentInStrategyTime);
         // log the event
-        eventLog.period = periodConfig.number;
+        eventLog.period = FIRE.server.getConfig().number;
         eventLog.timestamp = timestamp;
         eventLog.changedId = changed;
         eventLog.counterpartId = other;
@@ -105,12 +112,12 @@ public class PairedPopulation implements Population, Serializable {
         eventLog.counterpartHoverStrategy_a = lastHoverStrategies_a.get(other);
         if (counterparts.contains(changed)) {
             eventLog.isCounterpart = true;
-            eventLog.payoffFunction = periodConfig.counterpartPayoffFunction;
-            eventLog.counterpartPayoffFunction = periodConfig.payoffFunction;
+            eventLog.payoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
+            eventLog.counterpartPayoffFunction = FIRE.server.getConfig().payoffFunction;
         } else {
             eventLog.isCounterpart = false;
-            eventLog.payoffFunction = periodConfig.payoffFunction;
-            eventLog.counterpartPayoffFunction = periodConfig.counterpartPayoffFunction;
+            eventLog.payoffFunction = FIRE.server.getConfig().payoffFunction;
+            eventLog.counterpartPayoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
         }
         if (eventLog.targetStrategy == null) {
             eventLog.targetStrategy = eventLog.currentStrategy;
@@ -152,15 +159,14 @@ public class PairedPopulation implements Population, Serializable {
     private void updatePayoffs(
             float[] newStrategy,
             int changed, int other,
-            float percent, float percentInStrategyTime, float inStrategyTime,
-            PeriodConfig periodConfig) {
+            float percent, float percentInStrategyTime, float inStrategyTime) {
         PayoffFunction changedPayoff, otherPayoff;
         if (counterparts.contains(changed)) {
-            changedPayoff = periodConfig.counterpartPayoffFunction;
-            otherPayoff = periodConfig.payoffFunction;
+            changedPayoff = FIRE.server.getConfig().counterpartPayoffFunction;
+            otherPayoff = FIRE.server.getConfig().payoffFunction;
         } else {
-            changedPayoff = periodConfig.payoffFunction;
-            otherPayoff = periodConfig.counterpartPayoffFunction;
+            changedPayoff = FIRE.server.getConfig().payoffFunction;
+            otherPayoff = FIRE.server.getConfig().counterpartPayoffFunction;
         }
         float[] changedLast = lastStrategies.get(changed);
         float[] otherLast = lastStrategies.get(other);
@@ -168,7 +174,7 @@ public class PairedPopulation implements Population, Serializable {
                 percent, changedLast, otherLast);
         float otherPoints = otherPayoff.getPayoff(
                 percent, otherLast, changedLast);
-        if (!periodConfig.pointsPerSecond) {
+        if (!FIRE.server.getConfig().pointsPerSecond) {
             changedPoints *= percentInStrategyTime;
             otherPoints *= percentInStrategyTime;
         } else {
@@ -207,23 +213,23 @@ public class PairedPopulation implements Population, Serializable {
         }
     }
 
-    public void endPeriod(PeriodConfig periodConfig) {
+    public void endPeriod() {
         float percentInStrategyTime;
         for (Integer client1 : counterparts) {
             Integer client2 = pairs.get(client1);
             long lastEvalTime1 = lastEvalTimes.get(client1);
             long lastEvalTime2 = lastEvalTimes.get(client2);
             long lastEvalTime = Math.max(lastEvalTime1, lastEvalTime2);
-            long inStrategyTime = (periodStartTime + (periodConfig.length * 1000)) - lastEvalTime;
-            percentInStrategyTime = inStrategyTime / (periodConfig.length * 1000f);
+            long inStrategyTime = (periodStartTime + (FIRE.server.getConfig().length * 1000)) - lastEvalTime;
+            percentInStrategyTime = inStrategyTime / (FIRE.server.getConfig().length * 1000f);
             updatePayoffs(
                     lastStrategies.get(client1),
                     client1, client2,
-                    1.0f, percentInStrategyTime, percentInStrategyTime, periodConfig);
+                    1.0f, percentInStrategyTime, percentInStrategyTime);
         }
     }
 
-    public void logTick(TickLog tickLog, PeriodConfig periodConfig) {
+    public void logTick(TickLog tickLog) {
         for (Entry<Integer, Integer> pair : pairs.entrySet()) {
             Integer p1 = pair.getKey();
             Integer p2 = pair.getValue();

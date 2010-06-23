@@ -14,15 +14,14 @@ import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoPopulation;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.UltimatumPayoffFunction;
-import edu.ucsc.leeps.fire.config.BasePeriodConfig;
+import edu.ucsc.leeps.fire.config.BaseConfig;
 
 /**
  *
  * @author jpettit
  */
-public class PeriodConfig extends BasePeriodConfig {
+public class Config extends BaseConfig {
 
-    public float initialStrategy;
     public boolean pointsPerSecond;
     public float percentChangePerSecond;
     public PayoffFunction payoffFunction;
@@ -42,22 +41,17 @@ public class PeriodConfig extends BasePeriodConfig {
     public static final Class twoPopulation = TwoPopulation.class;
     public static final Class paired = PairedPopulation.class;
     public static final Class line = Line.class;
-    // only for testing framerate
-    public boolean serverInitHeatmaps = false;
+    // per-client
+    public float[] initialStrategy;
+    public int matchID;
+    public boolean isCounterpart;
 
-    /*
-     * Setup whatever defaults you like here.
-     */
-    public PeriodConfig() {
+    public Config() {
         timeConstrained = true;
         paid = true;
         length = 120;
-
-        initialStrategy = 0.0f;
         pointsPerSecond = false;
         percentChangePerSecond = 0.1f;
-        payoffFunction = new ThreeStrategyPayoffFunction();
-        counterpartPayoffFunction = new ThreeStrategyPayoffFunction();
         population = new SinglePopulationInclude();
         //twoStrategySelectionType = TwoStrategySelectionType.HeatmapBoth;
         yourPayoff = new Line();
