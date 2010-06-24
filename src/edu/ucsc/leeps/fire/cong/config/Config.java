@@ -15,6 +15,7 @@ import edu.ucsc.leeps.fire.cong.server.TwoPopulation;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.UltimatumPayoffFunction;
 import edu.ucsc.leeps.fire.config.BaseConfig;
+import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 
 /**
  *
@@ -41,6 +42,7 @@ public class Config extends BaseConfig {
     public static final Class twoPopulation = TwoPopulation.class;
     public static final Class paired = PairedPopulation.class;
     public static final Class line = Line.class;
+    public static final Class threshold = ThresholdPayoffFunction.class;
     // per-client
     public float[] initialStrategy;
     public int matchID;
