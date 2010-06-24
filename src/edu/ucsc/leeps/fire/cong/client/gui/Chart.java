@@ -82,6 +82,7 @@ public class Chart extends Sprite implements Configurable<Config> {
     private Line counterpartPOverTime;
     private Line yourSOverTime;
     private Line counterpartSOverTime;
+    private Line threshold;
 
     public enum Mode {
 
@@ -136,6 +137,9 @@ public class Chart extends Sprite implements Configurable<Config> {
         counterpartPOverTime = new Line(0, scaledMargin, width, scaledHeight);
         yourSOverTime = new Line(0, scaledMargin, width, scaledHeight);
         counterpartSOverTime = new Line(0, scaledMargin, width, scaledHeight);
+
+        // Threshold
+        threshold = new Line(0, 0, width, height);
 
         this.simplex = simplex;
 
