@@ -1,3 +1,3 @@
 period,timeConstrained,paid,length,initialStrategy,pointsPerSecond,percentChangePerSecond,payoffFunction,counterpartPayoffFunction,population,yourPayoff,mode,r,g,b,otherPayoff,mode,r,g,b,weight,heatmapColorLow,heatmapColorMid,heatmapColorHigh
 1,TRUE,TRUE,60,0,FALSE,0.1,rps,rps,singlePopulationInclude,line,shaded,100,255,100,line,solid,100,150,255,2,0xFF0000,0xFFFF00,0x00FF00
-
+2,TRUE,TRUE,60,0,FALSE,0.1,rps,rps,singlePopulationInclude,line,shaded,100,255,100,line,solid,100,150,255,2,0xFF0000,0xFFFF00,0x00FF00
