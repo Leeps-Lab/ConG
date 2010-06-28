@@ -15,7 +15,8 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private String rLabel = "";
     private String pLabel = "";
     private String sLabel = "";
-    private final int MARKER_RADIUS = 7;
+    private final int CORNER_MARKER_R = 10;
+    private final int BASE_MARKER_R = 7;
     private final int R = 0;
     private final int P = 1;
     private final int S = 2;
@@ -72,28 +73,28 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         sideLength = width - 10;
         maxDist = (PEmbed.sqrt(3) / 2f) * sideLength;
 
-        rock = new Marker(this, 5, height / 3, true, 10);
+        rock = new Marker(this, 5, height / 3, true, CORNER_MARKER_R);
         rock.setColor(rColor);
         rock.setLabel("R");
         rock.setLabelMode(Marker.LabelMode.Bottom);
-        paper = new Marker(this, rock.origin.x + sideLength, rock.origin.y, true, 10);
+        paper = new Marker(this, rock.origin.x + sideLength, rock.origin.y, true, CORNER_MARKER_R);
         paper.setColor(pColor);
         paper.setLabel("P");
         paper.setLabelMode(Marker.LabelMode.Bottom);
         scissors = new Marker(this, rock.origin.x + sideLength / 2,
-                rock.origin.y - (int) maxDist, true, 10);
+                rock.origin.y - (int) maxDist, true, CORNER_MARKER_R);
         scissors.setColor(sColor);
         scissors.setLabel("S");
         scissors.setLabelMode(Marker.LabelMode.Top);
 
         // set up strategy markers
-        current = new Marker(this, 0, 0, false, MARKER_RADIUS + 2);
+        current = new Marker(this, 0, 0, false, BASE_MARKER_R + 2);
         current.setColor(50, 255, 50);
         current.setLabel("$$");
         current.setLabelMode(Marker.LabelMode.Bottom);
-        ghost = new Marker(this, 0, 0, false, MARKER_RADIUS);
+        ghost = new Marker(this, 0, 0, false, BASE_MARKER_R);
         ghost.setColor(25, 255, 25, 140);
-        opponent = new Marker(this, 0, 0, false, MARKER_RADIUS);
+        opponent = new Marker(this, 0, 0, false, BASE_MARKER_R);
         opponent.setColor(200, 40, 40);
 
         // set up Sliders
@@ -106,34 +107,34 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
 
         // set up dropline Markers
-        rDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
+        rDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
         rDrop.setColor(rColor);
         rDrop.setLabel("R");
         rDrop.setLabelMode(Marker.LabelMode.Right);
 
-        ghostRDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
+        ghostRDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
         ghostRDrop.setColor(rColor);
         ghostRDrop.setAlpha(150);
         ghostRDrop.setLabel("R");
         ghostRDrop.setLabelMode(Marker.LabelMode.Right);
 
-        pDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
+        pDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
         pDrop.setColor(pColor);
         pDrop.setLabel("P");
         pDrop.setLabelMode(Marker.LabelMode.Left);
 
-        ghostPDrop = new Marker(this, 0, 0, true, MARKER_RADIUS);
+        ghostPDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
         ghostPDrop.setColor(pColor);
         ghostPDrop.setAlpha(150);
         ghostPDrop.setLabel("P");
         ghostPDrop.setLabelMode(Marker.LabelMode.Left);
 
-        sDrop = new Marker(this, 0, rock.origin.y, true, MARKER_RADIUS);
+        sDrop = new Marker(this, 0, rock.origin.y, true, BASE_MARKER_R);
         sDrop.setColor(sColor);
         sDrop.setLabel("S");
         sDrop.setLabelMode(Marker.LabelMode.Bottom);
 
-        ghostSDrop = new Marker(this, 0, rock.origin.y, true, MARKER_RADIUS);
+        ghostSDrop = new Marker(this, 0, rock.origin.y, true, BASE_MARKER_R);
         ghostSDrop.setColor(sColor);
         ghostSDrop.setAlpha(150);
         ghostSDrop.setLabel("S");
@@ -185,6 +186,18 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         scissors.draw(applet);
 
         if (enabled) {
+            rock.shrink();
+            paper.shrink();
+            scissors.shrink();
+            
+            if (rock.circularIsHit(mouseX, mouseY)) {
+                rock.enlarge();
+            } else if (paper.circularIsHit(mouseX, mouseY)) {
+                paper.enlarge();
+            } else if (scissors.circularIsHit(mouseX, mouseY)) {
+                scissors.enlarge();
+            }
+
             calculateAxisDistance(mouseX - rock.origin.x, rock.origin.y - mouseY);
 
             if (axisDistance[R] <= maxDist && axisDistance[R] >= 0 && axisDistance[P] <= maxDist && axisDistance[P] >= 0 && axisDistance[S] <= maxDist && axisDistance[S] >= 0) {
@@ -318,6 +331,12 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             if (mouseInTriangle) {
                 adjustLabels(playedStrat, current, pDrop, rDrop);
                 current.grab();
+            } else if (rock.isEnlarged()) {
+                setTargetRPS(1, 0, 0);
+            } else if (paper.isEnlarged()) {
+                setTargetRPS(0, 1, 0);
+            } else if (scissors.isEnlarged()) {
+                setTargetRPS(0, 0, 1);
             } else {
                 for (int i = 0; i < stratSlider.length; i++) {
                     if (stratSlider[i].mouseOnGhost(mouseX, mouseY)) {

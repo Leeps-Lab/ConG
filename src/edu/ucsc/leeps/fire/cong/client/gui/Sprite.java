@@ -15,7 +15,7 @@ public abstract class Sprite implements Serializable {
         origin = new FPoint(x, y);
         this.width = width;
         this.height = height;
-        screenLocation = new FPoint();
+        screenLocation = new FPoint(x, y);
     }
 
     public abstract void draw(PEmbed applet);

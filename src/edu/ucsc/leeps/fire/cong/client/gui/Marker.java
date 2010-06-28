@@ -7,10 +7,12 @@ public class Marker extends Sprite {
 
     protected float R, G, B, alpha;
     protected float radius;
+    protected float largeRadius;
     protected String label1;
     protected String label2;
     protected FPoint labelOrigin;
     protected boolean grabbed;
+    protected boolean enlarged;
     protected Sprite parent;
     protected LabelMode mode;
 
@@ -20,10 +22,11 @@ public class Marker extends Sprite {
     };
 
     public Marker(Sprite parent, float x, float y, boolean visible, float radius) {
-        super(x, y, 0, 0);
+        super(x, y, (int)radius, (int)radius);
         this.parent = parent;
         this.visible = visible;
         this.radius = radius;
+        largeRadius = radius * 1.5f;
 
         R = 0;
         G = 0;
@@ -36,6 +39,7 @@ public class Marker extends Sprite {
         label2 = null;
 
         grabbed = false;
+        enlarged = false;
 
         labelOrigin = new FPoint(x, y);
     }
@@ -115,6 +119,22 @@ public class Marker extends Sprite {
         return grabbed;
     }
 
+    public void enlarge() {
+        width = (int)largeRadius;
+        height = (int)largeRadius;
+        enlarged = true;
+    }
+
+    public void shrink() {
+        width = (int)radius;
+        height = (int)radius;
+        enlarged = false;
+    }
+
+    public boolean isEnlarged() {
+        return enlarged;
+    }
+
     public void update(float x, float y) {
         origin.x = x;
         origin.y = y;
@@ -158,6 +178,10 @@ public class Marker extends Sprite {
         applet.noStroke();
         applet.fill(R, G, B, alpha);
         applet.ellipseMode(PEmbed.CENTER);
-        applet.ellipse(origin.x, origin.y, radius, radius);
+        if (!enlarged) {
+            applet.ellipse(origin.x, origin.y, radius, radius);
+        } else {
+            applet.ellipse(origin.x, origin.y, largeRadius, largeRadius);
+        }
     }
 }
