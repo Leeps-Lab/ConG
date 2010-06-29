@@ -12,5 +12,5 @@ public interface ClientInterface {
 
     public void setCounterpartStrategy(float[] s);
 
-    public void setTwoStrategyHeatmapBuffers(float[][][] payoff, float[][][] counterpartPayoff);
+    public void endSubperiod(int subperiod);
 }

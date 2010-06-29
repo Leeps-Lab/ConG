@@ -29,6 +29,7 @@ public class Config extends BaseConfig {
     public PayoffFunction counterpartPayoffFunction;
     public Population population;
     public boolean mixedStrategySelection;
+    public int subperiods;
     public TwoStrategySelectionType twoStrategySelectionType;
     public Line payoffAa, payoffAb, payoffBa, payoffBb, yourPayoff, otherPayoff;
     public Line yourStrategyOverTime, counterpartStrategyOverTime;
@@ -55,6 +56,7 @@ public class Config extends BaseConfig {
         length = 120;
         pointsPerSecond = false;
         percentChangePerSecond = 0.1f;
+        subperiods = 0;
         population = new SinglePopulationInclude();
         twoStrategySelectionType = TwoStrategySelectionType.HeatmapBoth;
         mixedStrategySelection = true;

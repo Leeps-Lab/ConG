@@ -211,15 +211,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         sChart.setCounterpartStrategy(s);
     }
 
-    public void setTwoStrategyHeatmapBuffers(float[][][] payoff, float[][][] counterpartPayoff) {
-        /*
-        if (FIRE.client.getConfig().isCounterpart) {
-            bimatrix.setTwoStrategyHeatmapBuffers(counterpartPayoff, payoff);
-        } else {
-            bimatrix.setTwoStrategyHeatmapBuffers(payoff, counterpartPayoff);
-        }
-         * 
-         */
+    public void endSubperiod(int subperiod) {
     }
 
     public boolean readyForNextPeriod() {

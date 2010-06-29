@@ -9,6 +9,7 @@ import edu.ucsc.leeps.fire.cong.logging.TickEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.TimerTask;
 
 /**
  *
@@ -47,6 +48,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public void configurePeriod() {
         configurePopulations();
         configureStrategies();
+        configureSubperiods();
     }
 
     public void startPeriod(long periodStartTime) {
@@ -94,6 +96,28 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
                 assert false;
             }
         }
+    }
+
+    private void configureSubperiods() {
+        if (FIRE.server.getConfig().subperiods == 0) {
+            return;
+        }
+        long millisPerSubperiod = Math.round(
+                (FIRE.server.getConfig().length / (float) FIRE.server.getConfig().subperiods) * 1000);
+        FIRE.server.getTimer().scheduleAtFixedRate(new TimerTask() {
+
+            private int subperiod = 1;
+
+            @Override
+            public void run() {
+                if (subperiod < FIRE.server.getConfig().subperiods) {
+                    for (ClientInterface client : clients.values()) {
+                        client.endSubperiod(subperiod);
+                    }
+                    subperiod++;
+                }
+            }
+        }, millisPerSubperiod, millisPerSubperiod);
     }
 
     public void unregister(int id) {
