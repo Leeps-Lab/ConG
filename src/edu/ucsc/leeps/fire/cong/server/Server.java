@@ -63,6 +63,16 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     public void quickTick(int millisLeft) {
         population.logTick();
+        boolean impulseTime = false;
+        if (impulseTime) {
+            for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
+                int id = entry.getKey();
+                ClientInterface client = entry.getValue();
+                float[] newStrategy = new float[]{random.nextFloat()};
+                client.setMyStrategy(newStrategy);
+                strategyChanged(newStrategy, null, null, null, id);
+            }
+        }
     }
 
     private void configurePopulations() {
