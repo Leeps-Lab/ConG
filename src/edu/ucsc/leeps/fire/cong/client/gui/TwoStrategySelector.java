@@ -23,7 +23,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private Config config;
     private float percent_A, percent_a;
     private boolean enabled;
-    private boolean matrixMode;
     private HeatmapHelper heatmap, counterpartHeatmap;
     private float currentPercent;
     private Marker myHeatmapAa;
@@ -34,16 +33,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private Marker cuonterpartHeatmapAb;
     private Marker counterpartHeatmapBa;
     private Marker counterpartHeatmapBb;
-    private Marker matrixTopLeft;
-    private Marker matrixTopRight;
-    private Marker matrixBotLeft;
-    private Marker matrixBotRight;
-    private Marker matrixAa;
-    private Marker matrixAb;
-    private Marker matrixBa;
-    private Marker matrixBb;
     private Marker current, planned, dragged, hover, counterpart;
-    private RadioButtonGroup buttons;
     private long hoverTimestamp;
     private long hoverTimeMillis = 0;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
@@ -56,7 +46,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             StrategyChanger strategyChanger) {
         super(x, y, matrixSize, matrixSize);
         this.applet = applet;
-        matrixMode = false;
         heatmap = new HeatmapHelper(
                 0, 0, matrixSize, matrixSize,
                 true,
@@ -92,25 +81,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         counterpartHeatmapBb = new Marker(this, counterpartHeatmap.origin.x + counterpartHeatmap.width, counterpartHeatmap.origin.y + counterpartHeatmap.height, true, 0);
         counterpartHeatmapBb.setLabelMode(Marker.LabelMode.Bottom);
 
-        matrixTopLeft = new Marker(this, width / 4, width / 8, true, 0);
-        matrixTopRight = new Marker(this, width, width / 8, true, 0);
-        matrixBotLeft = new Marker(this, width / 4, 7 * (width / 8), true, 0);
-        matrixBotRight = new Marker(this, width, 7 * (width / 8), true, 0);
-
-        float matrixSideLength = matrixTopRight.origin.x - matrixTopLeft.origin.x;
-
-        matrixAa = new Marker(this, matrixTopLeft.origin.x + matrixSideLength / 4, matrixTopLeft.origin.y + matrixSideLength / 4, true, 0);
-        matrixAa.setLabelMode(Marker.LabelMode.Top);
-
-        matrixAb = new Marker(this, matrixTopLeft.origin.x + 3 * matrixSideLength / 4, matrixTopLeft.origin.y + matrixSideLength / 4, true, 0);
-        matrixAb.setLabelMode(Marker.LabelMode.Top);
-
-        matrixBa = new Marker(this, matrixTopLeft.origin.x + matrixSideLength / 4, matrixTopLeft.origin.y + 3 * matrixSideLength / 4, true, 0);
-        matrixBa.setLabelMode(Marker.LabelMode.Bottom);
-
-        matrixBb = new Marker(this, matrixTopLeft.origin.x + 3 * matrixSideLength / 4, matrixTopLeft.origin.y + 3 * matrixSideLength / 4, true, 0);
-        matrixBb.setLabelMode(Marker.LabelMode.Bottom);
-
         current = new Marker(this, 0, 0, true, 10);
         current.setLabelMode(Marker.LabelMode.Top);
         dragged = new Marker(this, 0, 0, false, 10);
@@ -122,8 +92,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         hoverTimestamp = System.currentTimeMillis();
         counterpart = new Marker(this, 0, 0, false, 10);
         counterpart.setLabelMode(Marker.LabelMode.Top);
-
-        buttons = new RadioButtonGroup(this, width / 16, width / 8, 3 * (width / 4), 2, RadioButtonGroup.Alignment.Vertical, 10, applet);
 
         this.strategyChanger = strategyChanger;
         FIRE.client.addConfigListener(this);
@@ -189,34 +157,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         cuonterpartHeatmapAb.setLabel(counterAb);
         counterpartHeatmapBa.setLabel(counterBa);
         counterpartHeatmapBb.setLabel(counterBb);
-
-        matrixAa.setLabel(myAa, counterAa);
-        matrixAb.setLabel(myAb, counterAb);
-        matrixBa.setLabel(myBa, counterBa);
-        matrixBb.setLabel(myBb, counterBb);
-    }
-
-    private void setModeMatrix() {
-        matrixMode = true;
-        heatmap.setVisible(false);
-        counterpartHeatmap.setVisible(false);
-        myHeatmapAa.setVisible(false);
-        myHeatmapAb.setVisible(false);
-        myHeatmapBa.setVisible(false);
-        myHeatmapBb.setVisible(false);
-        counterpartHeatmapAa.setVisible(false);
-        cuonterpartHeatmapAb.setVisible(false);
-        counterpartHeatmapBa.setVisible(false);
-        counterpartHeatmapBb.setVisible(false);
-        matrixAa.setVisible(true);
-        matrixAb.setVisible(true);
-        matrixBa.setVisible(true);
-        matrixBb.setVisible(true);
-        buttons.setVisible(true);
     }
 
     private void setModeHeatmapSingle() {
-        matrixMode = false;
         heatmap.setVisible(true);
         counterpartHeatmap.setVisible(false);
         myHeatmapAa.setVisible(true);
@@ -227,14 +170,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         cuonterpartHeatmapAb.setVisible(false);
         counterpartHeatmapBa.setVisible(false);
         counterpartHeatmapBb.setVisible(false);
-        matrixAa.setVisible(false);
-        matrixAb.setVisible(false);
-        matrixBa.setVisible(false);
-        matrixBb.setVisible(false);
     }
 
     private void setModeHeatmapBoth() {
-        matrixMode = false;
         heatmap.setVisible(true);
         counterpartHeatmap.setVisible(true);
         myHeatmapAa.setVisible(true);
@@ -245,10 +183,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         cuonterpartHeatmapAb.setVisible(true);
         counterpartHeatmapBa.setVisible(true);
         counterpartHeatmapBb.setVisible(true);
-        matrixAa.setVisible(false);
-        matrixAb.setVisible(false);
-        matrixBa.setVisible(false);
-        matrixBb.setVisible(false);
     }
 
     private void drawStrategyInfo() {
@@ -324,23 +258,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         }
     }
 
-    private void drawMatrix() {
-        applet.line(matrixTopLeft.origin.x, matrixTopLeft.origin.y, matrixTopRight.origin.x, matrixTopRight.origin.y);
-        applet.line(matrixTopRight.origin.x, matrixTopRight.origin.y, matrixBotRight.origin.x, matrixBotRight.origin.y);
-        applet.line(matrixBotLeft.origin.x, matrixBotLeft.origin.y, matrixBotRight.origin.x, matrixBotRight.origin.y);
-        applet.line(matrixTopLeft.origin.x, matrixTopLeft.origin.y, matrixBotLeft.origin.x, matrixBotLeft.origin.y);
-
-        float midpointX = (matrixTopRight.origin.x + matrixTopLeft.origin.x) / 2f;
-        float midpointY = (matrixBotLeft.origin.y + matrixTopLeft.origin.y) / 2f;
-        applet.line(midpointX, matrixTopLeft.origin.y, midpointX, matrixBotLeft.origin.y);
-        applet.line(matrixTopLeft.origin.x, midpointY, matrixTopRight.origin.x, midpointY);
-
-        matrixAa.draw(applet);
-        matrixAb.draw(applet);
-        matrixBa.draw(applet);
-        matrixBb.draw(applet);
-    }
-
     private void drawHeatmap() {
         heatmap.draw(applet);
 
@@ -374,13 +291,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
-            if (!matrixMode) {
-                drawHeatmap();
-                drawStrategyInfo();
-            } else {
-                drawMatrix();
-                buttons.draw(applet);
-            }
+            drawHeatmap();
+            drawStrategyInfo();
+            
 
             applet.popMatrix();
         } catch (NullPointerException ex) {
@@ -393,7 +306,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public void mouseClicked(MouseEvent me) {
-        if (!enabled || matrixMode) {
+        if (!enabled) {
             return;
         }
         int mouseX = me.getX();
@@ -408,7 +321,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public void mouseReleased(MouseEvent me) {
-        if (!enabled || matrixMode) {
+        if (!enabled) {
             return;
         }
         int mouseX = me.getX();
@@ -431,9 +344,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             this.payoffFunction = config.payoffFunction;
             this.counterpartPayoffFunction = config.counterpartPayoffFunction;
             switch (config.twoStrategySelectionType) {
-                case Matrix:
-                    setModeMatrix();
-                    break;
                 case HeatmapSingle:
                     setModeHeatmapSingle();
                     break;
@@ -451,7 +361,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public void keyPressed(KeyEvent ke) {
-        if (!enabled || matrixMode) {
+        if (!enabled) {
             return;
         }
         if (ke.isActionKey()) {
