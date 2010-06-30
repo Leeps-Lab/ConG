@@ -593,7 +593,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 Math.round(line.width * x),
                 Math.round(line.height * (1 - (y / maxPayoff))),
                 !shocked);
-        if (Math.abs(currentPercent - config.shock.end) < 0.01) {
+        if (FIRE.client.getConfig().shock.backfill && Math.abs(currentPercent - config.shock.end) < 0.01) {
             line.clearShocks();
         }
     }
