@@ -155,17 +155,19 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         if (millisLeft > 0) {
             this.percent = (1 - (millisLeft / ((float) FIRE.client.getConfig().length * 1000)));
             payoffChart.currentPercent = this.percent;
-            payoffChart.updateLines();
             strategyChart.currentPercent = this.percent;
-            strategyChart.updateLines();
             rChart.currentPercent = this.percent;
-            rChart.updateLines();
             pChart.currentPercent = this.percent;
-            pChart.updateLines();
             sChart.currentPercent = this.percent;
-            sChart.updateLines();
             bimatrix.setCurrentPercent(this.percent);
             simplex.currentPercent = this.percent;
+            if (FIRE.client.getConfig().subperiods == 0) {
+                payoffChart.updateLines();
+                strategyChart.updateLines();
+                rChart.updateLines();
+                pChart.updateLines();
+                sChart.updateLines();
+            }
         }
     }
 

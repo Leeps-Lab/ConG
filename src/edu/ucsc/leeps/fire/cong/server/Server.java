@@ -50,12 +50,12 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public void configurePeriod() {
         configurePopulations();
         configureStrategies();
-        configureImpulses();
-        configureSubperiods();
     }
 
     public void startPeriod(long periodStartTime) {
         population.initialize(periodStartTime);
+        configureImpulses();
+        configureSubperiods();
     }
 
     public void endPeriod() {

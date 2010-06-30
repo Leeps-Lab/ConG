@@ -83,6 +83,8 @@ public class Chart extends Sprite implements Configurable<Config> {
     private Line yourSOverTime;
     private Line counterpartSOverTime;
     private Line threshold;
+    // draw lock
+    private final Object lock = new Object();
 
     public enum Mode {
 
@@ -279,34 +281,28 @@ public class Chart extends Sprite implements Configurable<Config> {
 
     @Override
     public void draw(PEmbed applet) {
-        applet.rectMode(PEmbed.CORNER);
-        applet.pushMatrix();
-        applet.translate(origin.x, origin.y);
-        if (config != null) {
-            drawShockZone(applet);
-            if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                if (mode == Mode.Payoff) {
-                    drawTwoStrategyPayoffLines(applet);
-                } else if (mode == Mode.TwoStrategy) {
-                    drawTwoStrategyLines(applet);
+        synchronized (lock) {
+            applet.rectMode(PEmbed.CORNER);
+            applet.pushMatrix();
+            applet.translate(origin.x, origin.y);
+            if (config != null) {
+                drawShockZone(applet);
+                if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                    if (mode == Mode.Payoff) {
+                        drawTwoStrategyPayoffLines(applet);
+                    } else if (mode == Mode.TwoStrategy) {
+                        drawTwoStrategyLines(applet);
+                    }
+                    if (mode == Mode.Payoff) {
+                        actualPayoffYou.draw(applet);
+                        actualPayoffCounterpart.draw(applet);
+                    }
                 }
-            } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                if (mode == Mode.Payoff) {
-                    drawThreeStrategyPayoffLines(applet);
-                } else if (mode == Mode.RStrategy
-                        || mode == Mode.PStrategy
-                        || mode == Mode.SStrategy) {
-                    drawThreeStrategyLines(applet);
-                }
-            }
-            if (mode == Mode.Payoff) {
-                actualPayoffYou.draw(applet);
-                actualPayoffCounterpart.draw(applet);
+                drawPercentLine(applet);
+                drawAxis(applet);
+                applet.popMatrix();
             }
         }
-        drawPercentLine(applet);
-        drawAxis(applet);
-        applet.popMatrix();
     }
 
     public void clearAll() {
@@ -456,21 +452,19 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     public void updateLines() {
-        if (FIRE.client.getConfig().subperiods == 0) {
-            if (currentPercent < 1.0) {
-                addPayoffPoint(actualPayoffYou, currentPercent, currentPayoffYou);
-                addPayoffPoint(actualPayoffCounterpart, currentPercent, currentPayoffCounterpart);
-                if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                    addTwoStrategyActualPayoffPoints();
-                    addTwoStrategyFuturePayoffPoints();
-                } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                    addThreeStrategyActualPayoffPoints();
-                    addThreeStrategyFuturePayoffPoints();
-                    addThreeStrategyPoints();
-                }
-                addStrategyPoint(yourStrategyOverTime, currentPercent, percent_A);
-                addStrategyPoint(counterpartStrategyOverTime, currentPercent, percent_a);
+        if (currentPercent <= 1.0) {
+            addPayoffPoint(actualPayoffYou, currentPercent, currentPayoffYou);
+            addPayoffPoint(actualPayoffCounterpart, currentPercent, currentPayoffCounterpart);
+            if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                addTwoStrategyActualPayoffPoints();
+                addTwoStrategyFuturePayoffPoints();
+            } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                addThreeStrategyActualPayoffPoints();
+                addThreeStrategyFuturePayoffPoints();
+                addThreeStrategyPoints();
             }
+            addStrategyPoint(yourStrategyOverTime, currentPercent, percent_A);
+            addStrategyPoint(counterpartStrategyOverTime, currentPercent, percent_a);
         }
     }
 
@@ -575,16 +569,27 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            percent_A = subperiodStrategy[0];
-            percent_a = counterpartSubperiodStrategy[0];
-        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            percent_R = subperiodStrategy[0];
-            percent_P = subperiodStrategy[1];
-            percent_S = subperiodStrategy[2];
-            percent_r = counterpartSubperiodStrategy[0];
-            percent_p = counterpartSubperiodStrategy[1];
-            percent_s = counterpartSubperiodStrategy[2];
+        synchronized (lock) {
+            if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                percent_A = subperiodStrategy[0];
+                percent_a = counterpartSubperiodStrategy[0];
+            } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                percent_R = subperiodStrategy[0];
+                percent_P = subperiodStrategy[1];
+                percent_S = subperiodStrategy[2];
+                percent_r = counterpartSubperiodStrategy[0];
+                percent_p = counterpartSubperiodStrategy[1];
+                percent_s = counterpartSubperiodStrategy[2];
+            }
+            float percentStart = (float) (subperiod - 1) / FIRE.client.getConfig().subperiods;
+            float percentEnd = (float) subperiod / FIRE.client.getConfig().subperiods;
+            float tmpCurrentPercent = currentPercent;
+            currentPayoffYou = payoffFunction.getPayoff(tmpCurrentPercent, subperiodStrategy, counterpartSubperiodStrategy);
+            currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(tmpCurrentPercent, counterpartSubperiodStrategy, subperiodStrategy);
+            for (currentPercent = percentStart; currentPercent <= percentEnd; currentPercent += 0.001) {
+                updateLines();
+            }
+            currentPercent = tmpCurrentPercent;
         }
     }
 
