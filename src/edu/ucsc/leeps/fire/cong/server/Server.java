@@ -50,7 +50,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         configurePopulations();
         configureStrategies();
         configureImpulses();
-        //configureSubperiods();
+        configureSubperiods();
     }
 
     public void startPeriod(long periodStartTime) {
@@ -67,18 +67,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     public void quickTick(int millisLeft) {
         population.logTick();
-        if (impulse) {
-            if (millisLeft <= (1 - FIRE.server.getConfig().impulse) * FIRE.server.getConfig().length * 1000) {
-                impulse = false;
-                for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
-                    int id = entry.getKey();
-                    ClientInterface client = entry.getValue();
-                    float[] newStrategy = new float[]{random.nextFloat()};
-                    client.setMyStrategy(newStrategy);
-                    strategyChanged(newStrategy, null, null, null, id);
-                }
-            }
-        }
     }
 
     private void configurePopulations() {
@@ -102,7 +90,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         }
     }
 
-    /* private void configureSubperiods() {
+    private void configureSubperiods() {
         if (FIRE.server.getConfig().subperiods == 0) {
             return;
         }
@@ -122,10 +110,29 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
                 }
             }
         }, millisPerSubperiod, millisPerSubperiod);
-    } */
+    }
+
     private void configureImpulses() {
         if (FIRE.server.getConfig().impulse != 0f) {
-            impulse = true;
+            long impulseTimeMillis = Math.round(
+                    (FIRE.server.getConfig().length * 1000f) * FIRE.server.getConfig().impulse);
+            FIRE.server.getTimer().schedule(new TimerTask() {
+
+                @Override
+                public void run() {
+                    doImpulse();
+                }
+            }, impulseTimeMillis);
+        }
+    }
+
+    private void doImpulse() {
+        for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
+            int id = entry.getKey();
+            ClientInterface client = entry.getValue();
+            float[] newStrategy = new float[]{random.nextFloat()};
+            client.setMyStrategy(newStrategy);
+            strategyChanged(newStrategy, null, null, null, id);
         }
     }
 

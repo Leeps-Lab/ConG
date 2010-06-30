@@ -127,7 +127,6 @@ public class Line extends Sprite implements Serializable {
             applet.strokeWeight(weight);
 
             applet.beginShape();
-            applet.vertex(0, height);
             FPoint last = null;
             int i = 0;
             for (FPoint p : points) {
@@ -136,7 +135,17 @@ public class Line extends Sprite implements Serializable {
                 }
                 if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
                     if (p != null) {
-                        applet.vertex(p.x, p.y);
+                        if (last == null) {
+                            applet.vertex(p.x, height);
+                            // for some reason, the polygon render fails if the
+                            // next point has y value equal to the last point,
+                            // we eliminate that vertex in this special case
+                            if (Math.abs(p.y - height) > Float.MIN_NORMAL) {
+                                applet.vertex(p.x, p.y);
+                            }
+                        } else {
+                            applet.vertex(p.x, p.y);
+                        }
                         last = p;
                     }
                 }
