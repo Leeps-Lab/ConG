@@ -36,6 +36,7 @@ public class Config extends BaseConfig {
     public int heatmapColorLow, heatmapColorMid, heatmapColorHigh;
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
     public ShockZone shock;
+    public float impulse;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
@@ -100,7 +101,8 @@ public class Config extends BaseConfig {
         shortPLabel = "P";
         shortSLabel = "S";
         shock = new ShockZone();
-        shock.start = 0.25f;
-        shock.end = 0.75f;
+        shock.start = 0f;
+        shock.end = 0f;
+        impulse = 0f;
     }
 }

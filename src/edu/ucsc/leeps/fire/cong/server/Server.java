@@ -23,6 +23,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     private Population population;
     private Map<Integer, Population> membership;
     private Random random;
+    private boolean impulse = false;
 
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
@@ -48,6 +49,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public void configurePeriod() {
         configurePopulations();
         configureStrategies();
+        configureImpulses();
         //configureSubperiods();
     }
 
@@ -65,14 +67,16 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     public void quickTick(int millisLeft) {
         population.logTick();
-        boolean impulseTime = false;
-        if (impulseTime) {
-            for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
-                int id = entry.getKey();
-                ClientInterface client = entry.getValue();
-                float[] newStrategy = new float[]{random.nextFloat()};
-                client.setMyStrategy(newStrategy);
-                strategyChanged(newStrategy, null, null, null, id);
+        if (impulse) {
+            if (millisLeft <= (1 - FIRE.server.getConfig().impulse) * FIRE.server.getConfig().length * 1000) {
+                impulse = false;
+                for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
+                    int id = entry.getKey();
+                    ClientInterface client = entry.getValue();
+                    float[] newStrategy = new float[]{random.nextFloat()};
+                    client.setMyStrategy(newStrategy);
+                    strategyChanged(newStrategy, null, null, null, id);
+                }
             }
         }
     }
@@ -119,6 +123,11 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             }
         }, millisPerSubperiod, millisPerSubperiod);
     } */
+    private void configureImpulses() {
+        if (FIRE.server.getConfig().impulse != 0f) {
+            impulse = true;
+        }
+    }
 
     public void unregister(int id) {
         clients.remove(id);
