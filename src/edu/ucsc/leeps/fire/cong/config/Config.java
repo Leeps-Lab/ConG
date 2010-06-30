@@ -103,6 +103,7 @@ public class Config extends BaseConfig {
         shock = new ShockZone();
         shock.start = 0f;
         shock.end = 0f;
+        shock.backfill = false;
         impulse = 0f;
     }
 }

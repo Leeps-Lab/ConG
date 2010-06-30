@@ -23,7 +23,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     private Population population;
     private Map<Integer, Population> membership;
     private Random random;
-    private boolean impulse = false;
 
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();

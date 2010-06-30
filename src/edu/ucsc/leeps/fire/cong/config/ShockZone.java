@@ -13,5 +13,5 @@ import java.io.Serializable;
 public class ShockZone implements Serializable {
 
     public float start, end;
-    public boolean backfill = false;
+    public boolean backfill;
 }

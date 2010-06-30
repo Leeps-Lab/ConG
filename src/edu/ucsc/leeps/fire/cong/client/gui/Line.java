@@ -16,6 +16,7 @@ public class Line extends Sprite implements Serializable {
     public int r, g, b, alpha;
     public Mode mode;
     public int SAMPLE_RATE = 2;
+    public boolean showShock = true;
     private transient HashMap<Integer, FPoint> definedPoints;
     private transient LinkedList<FPoint> points;
 
@@ -42,6 +43,7 @@ public class Line extends Sprite implements Serializable {
         this.alpha = config.alpha;
         this.weight = config.weight;
         this.mode = config.mode;
+        this.showShock = config.showShock;
     }
 
     public synchronized void setPoint(int x, int y, boolean visible) {

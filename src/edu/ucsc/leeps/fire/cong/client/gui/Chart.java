@@ -148,6 +148,18 @@ public class Chart extends Sprite implements Configurable<Config> {
         FIRE.client.addConfigListener(this);
     }
 
+    private void drawShockZone(PEmbed applet) {
+        applet.fill(100, 100, 100, 50);
+        //applet.stroke(100, 100, 100, 50);
+        //applet.strokeWeight(2);
+        float x0, y0, x1, y1;
+        x0 = width * FIRE.client.getConfig().shock.start;
+        y0 = 0;
+        x1 = width * FIRE.client.getConfig().shock.end;
+        y1 = scaledHeight + scaledMargin * 2;
+        applet.rect(x0 - 1, y0, x1 - x0 + 2, y1);
+    }
+
     private void drawAxis(PEmbed applet) {
 
         applet.noFill();
@@ -273,6 +285,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
         if (config != null) {
+            drawShockZone(applet);
             if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
                     drawTwoStrategyPayoffLines(applet);
@@ -604,7 +617,7 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     public void addPayoffPoint(Line line, float x, float y) {
-        boolean shocked = currentPercent > config.shock.start && currentPercent < config.shock.end;
+        boolean shocked = currentPercent > config.shock.start && currentPercent < config.shock.end && line.showShock;
         line.setPoint(
                 Math.round(line.width * x),
                 Math.round(line.height * (1 - (y / maxPayoff))),
@@ -615,9 +628,13 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     public void addStrategyPoint(Line line, float x, float y) {
+        boolean shocked = currentPercent > config.shock.start && currentPercent < config.shock.end && line.showShock;
         line.setPoint(
                 Math.round(line.width * x),
                 Math.round(line.height * (1 - y)),
-                true);
+                !shocked);
+        if (FIRE.client.getConfig().shock.backfill && Math.abs(currentPercent - config.shock.end) < 0.01) {
+            line.clearShocks();
+        }
     }
 }
