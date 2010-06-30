@@ -297,11 +297,19 @@ public class Chart extends Sprite implements Configurable<Config> {
                         actualPayoffYou.draw(applet);
                         actualPayoffCounterpart.draw(applet);
                     }
+                } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                    if (mode == Mode.Payoff) {
+                        drawThreeStrategyPayoffLines(applet);
+                    } else if (mode == Mode.RStrategy
+                            || mode == Mode.PStrategy
+                            || mode == Mode.SStrategy) {
+                        drawThreeStrategyLines(applet);
+                    }
                 }
-                drawPercentLine(applet);
-                drawAxis(applet);
-                applet.popMatrix();
             }
+            drawPercentLine(applet);
+            drawAxis(applet);
+            applet.popMatrix();
         }
     }
 
