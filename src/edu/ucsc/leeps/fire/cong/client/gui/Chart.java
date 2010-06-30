@@ -150,8 +150,6 @@ public class Chart extends Sprite implements Configurable<Config> {
 
     private void drawShockZone(PEmbed applet) {
         applet.fill(100, 100, 100, 50);
-        //applet.stroke(100, 100, 100, 50);
-        //applet.strokeWeight(2);
         float x0, y0, x1, y1;
         x0 = width * FIRE.client.getConfig().shock.start;
         y0 = 0;
