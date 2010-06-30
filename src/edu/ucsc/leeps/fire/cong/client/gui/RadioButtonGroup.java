@@ -1,15 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
-import edu.ucsc.leeps.fire.config.Configurable;
-import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
-import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
-import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.config.TwoStrategySelectionType;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -54,35 +45,78 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
         spacing = (float)length / (float)numButtons;
 
+        // buffer space at beginning and end of row of buttons
+        float buffer = spacing / 2f;
+
         // initialize buttons
-        for (int i = 0; i < numButtons; ++i) {
-            buttons[i] = new RadioButton(0, i * spacing, buttonRadius);
+        if (alignment == Alignment.Vertical) {
+            for (int i = 0; i < numButtons; ++i) {
+                buttons[i] = new RadioButton(0, buffer + i * spacing, buttonRadius);
+            }
+        } else {
+            for (int i = 0; i < numButtons; ++i) {
+                buttons[i] = new RadioButton(buffer + i * spacing, 0, buttonRadius);
+            }
         }
     }
 
     @Override
     public void draw(PEmbed applet) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (visible) {
+            applet.pushMatrix();
+            applet.translate(origin.x, origin.y);
+
+            for(int i = 0; i < numButtons; ++i) {
+                buttons[i].draw(applet);
+            }
+
+            applet.popMatrix();
+        }
     }
 
     public void mouseClicked(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void mouseEntered(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void mouseExited(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void mousePressed(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // adjust mouse position
+        float mouseX = e.getX() - origin.x;
+        float mouseY = e.getY() - origin.y;
+        // check to see if any of the buttons in the group were clicked on
+        for (int i = 0; i < numButtons; ++i) {
+            if (buttons[i].circularIsHit(mouseX, mouseY)) {
+                if (selectedButton != NO_BUTTON) {
+                    buttons[selectedButton].setSelected(false);
+                }
+                buttons[i].setSelected(true);
+                selectedButton = i;
+            }
+        }
     }
 
     public void mouseReleased(MouseEvent e) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void setSelection(int selection) {
+        if (selectedButton != NO_BUTTON) {
+            buttons[selectedButton].setSelected(false);
+        }
+        selectedButton = selection;
+        buttons[selectedButton].setSelected(true);
+    }
+
+    public void clearSelections() {
+        if (selectedButton == NO_BUTTON) {
+            return;
+        }
+
+        buttons[selectedButton].setSelected(false);
+        selectedButton = NO_BUTTON;
     }
     
     private class RadioButton extends Sprite {
@@ -105,11 +139,12 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         public void draw(PEmbed applet) {
             if (visible) {
                 applet.ellipseMode(PEmbed.CENTER);
+                applet.strokeWeight(1);
+                applet.stroke(0);
                 if (selected) {
                     applet.fill(0);
                 } else {
                     applet.fill(255);
-                    applet.stroke(0);
                 }
 
                 applet.ellipse(origin.x, origin.y, width, height);

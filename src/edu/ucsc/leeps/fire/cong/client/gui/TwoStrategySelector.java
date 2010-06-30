@@ -23,6 +23,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private Config config;
     private float percent_A, percent_a;
     private boolean enabled;
+    private boolean matrixMode;
     private HeatmapHelper heatmap, counterpartHeatmap;
     private float currentPercent;
     private Marker myHeatmapAa;
@@ -38,6 +39,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private Marker matrixBa;
     private Marker matrixBb;
     private Marker current, planned, dragged, hover, counterpart;
+    private RadioButtonGroup buttons;
     private long hoverTimestamp;
     private long hoverTimeMillis = 0;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
@@ -50,6 +52,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             StrategyChanger strategyChanger) {
         super(x, y, matrixSize, matrixSize);
         this.applet = applet;
+        matrixMode = false;
         heatmap = new HeatmapHelper(
                 0, 0, matrixSize, matrixSize,
                 true,
@@ -181,6 +184,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     private void setModeMatrix() {
+        matrixMode = true;
         heatmap.setVisible(false);
         counterpartHeatmap.setVisible(false);
         myHeatmapAa.setVisible(false);
@@ -198,6 +202,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     private void setModeHeatmapSingle() {
+        matrixMode = false;
         heatmap.setVisible(true);
         counterpartHeatmap.setVisible(false);
         myHeatmapAa.setVisible(true);
@@ -215,6 +220,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     private void setModeHeatmapBoth() {
+        matrixMode = false;
         heatmap.setVisible(true);
         counterpartHeatmap.setVisible(true);
         myHeatmapAa.setVisible(true);
@@ -347,16 +353,12 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
-            switch (config.twoStrategySelectionType) {
-                case HeatmapSingle:
-                case HeatmapBoth:
-                    drawHeatmap();
-                    break;
-                case Matrix:
-                    drawMatrix();
+            if (!matrixMode) {
+                drawHeatmap();
+                drawStrategyInfo();
+            } else {
+                drawMatrix();
             }
-
-            drawStrategyInfo();
 
             applet.popMatrix();
         } catch (NullPointerException ex) {
@@ -369,7 +371,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public void mouseClicked(MouseEvent me) {
-        if (!enabled) {
+        if (!enabled || matrixMode) {
             return;
         }
         int mouseX = me.getX();
@@ -384,7 +386,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public void mouseReleased(MouseEvent me) {
-        if (!enabled) {
+        if (!enabled || matrixMode) {
             return;
         }
         int mouseX = me.getX();
@@ -427,7 +429,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public void keyPressed(KeyEvent ke) {
-        if (!enabled) {
+        if (!enabled || matrixMode) {
             return;
         }
         if (ke.isActionKey()) {
