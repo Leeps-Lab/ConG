@@ -36,10 +36,12 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
             Integer id) {
-        long timestamp = System.currentTimeMillis();
-        membership.get(id).strategyChanged(
-                newStrategy, targetStrategy, hoverStrategy_A, hoverStrategy_a,
-                id, timestamp);
+        if (FIRE.server.getConfig().subperiods == 0) {
+            long timestamp = System.currentTimeMillis();
+            membership.get(id).strategyChanged(
+                    newStrategy, targetStrategy, hoverStrategy_A, hoverStrategy_a,
+                    id, timestamp);
+        }
     }
 
     public boolean readyToStart() {
@@ -103,13 +105,18 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             @Override
             public void run() {
                 if (subperiod < FIRE.server.getConfig().subperiods) {
-                    for (ClientInterface client : clients.values()) {
-                        client.endSubperiod(subperiod);
-                    }
+                    endSubperiod(subperiod);
                     subperiod++;
                 }
             }
         }, millisPerSubperiod, millisPerSubperiod);
+    }
+
+    private void endSubperiod(int subperiod) {
+        population.endSubperiod();
+        for (ClientInterface client : clients.values()) {
+            client.endSubperiod(subperiod);
+        }
     }
 
     private void configureImpulses() {

@@ -98,11 +98,15 @@ public class SinglePopulationInclude implements Population {
         updateStrategies();
     }
 
+    public void endSubperiod() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public void endPeriod() {
-        //throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void logTick() {
-        //throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

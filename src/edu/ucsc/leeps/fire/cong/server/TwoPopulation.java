@@ -154,6 +154,10 @@ public class TwoPopulation implements Population {
         }
     }
 
+    public void endSubperiod() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public void endPeriod() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
