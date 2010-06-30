@@ -50,6 +50,9 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     }
 
     private void update() {
+        if (FIRE.client.getConfig().percentChangePerSecond >= 1.0f) {
+            return;
+        }
         synchronized (lock) {
             float totalDelta = 0f;
             for (int i = 0; i < currentStrategy.length; i++) {
@@ -143,11 +146,21 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     }
 
     public void setTargetStrategy(float[] strategy) {
-        synchronized (lock) {
+        if (FIRE.client.getConfig().percentChangePerSecond >= 1.0f) {
             for (int i = 0; i < targetStrategy.length; ++i) {
+                currentStrategy[i] = strategy[i];
                 targetStrategy[i] = strategy[i];
             }
-            isMoving = true;
+            FIRE.client.getClient().setMyStrategy(strategy);
+            sendUpdate();
+            return;
+        } else {
+            synchronized (lock) {
+                for (int i = 0; i < targetStrategy.length; ++i) {
+                    targetStrategy[i] = strategy[i];
+                }
+                isMoving = true;
+            }
         }
     }
 

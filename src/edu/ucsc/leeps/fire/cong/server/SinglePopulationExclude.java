@@ -104,7 +104,7 @@ public class SinglePopulationExclude implements Population {
         updateStrategies();
     }
 
-    public void endSubperiod() {
+    public void endSubperiod(int subperiod) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

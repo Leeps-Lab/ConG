@@ -213,7 +213,7 @@ public class PairedPopulation implements Population {
         }
     }
 
-    public void endSubperiod() {
+    public void endSubperiod(int subperiod) {
         long timestamp = System.currentTimeMillis();
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (FIRE.server.getConfig().length * 1000f);
@@ -225,6 +225,11 @@ public class PairedPopulation implements Population {
                     lastStrategies.get(client1),
                     client1, client2,
                     percent, subperiodPercent, subperiodPercent);
+        }
+        for (Entry<Integer, ClientInterface> entry : members.entrySet()) {
+            float[] subperiodStrategy = lastStrategies.get(entry.getKey());
+            float[] counterpartSubperiodStrategy = lastStrategies.get(pairs.get(entry.getKey()));
+            entry.getValue().endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
         }
     }
 

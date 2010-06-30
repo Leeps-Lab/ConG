@@ -445,19 +445,21 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     public void updateLines() {
-        if (currentPercent < 1.0) {
-            addPayoffPoint(actualPayoffYou, currentPercent, currentPayoffYou);
-            addPayoffPoint(actualPayoffCounterpart, currentPercent, currentPayoffCounterpart);
-            if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                addTwoStrategyActualPayoffPoints();
-                addTwoStrategyFuturePayoffPoints();
-            } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                addThreeStrategyActualPayoffPoints();
-                addThreeStrategyFuturePayoffPoints();
-                addThreeStrategyPoints();
+        if (FIRE.client.getConfig().subperiods == 0) {
+            if (currentPercent < 1.0) {
+                addPayoffPoint(actualPayoffYou, currentPercent, currentPayoffYou);
+                addPayoffPoint(actualPayoffCounterpart, currentPercent, currentPayoffCounterpart);
+                if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                    addTwoStrategyActualPayoffPoints();
+                    addTwoStrategyFuturePayoffPoints();
+                } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                    addThreeStrategyActualPayoffPoints();
+                    addThreeStrategyFuturePayoffPoints();
+                    addThreeStrategyPoints();
+                }
+                addStrategyPoint(yourStrategyOverTime, currentPercent, percent_A);
+                addStrategyPoint(counterpartStrategyOverTime, currentPercent, percent_a);
             }
-            addStrategyPoint(yourStrategyOverTime, currentPercent, percent_A);
-            addStrategyPoint(counterpartStrategyOverTime, currentPercent, percent_a);
         }
     }
 
@@ -559,6 +561,20 @@ public class Chart extends Sprite implements Configurable<Config> {
             percent_s = s[2];
         }
         strategyChanged();
+    }
+
+    public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
+        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            percent_A = subperiodStrategy[0];
+            percent_a = counterpartSubperiodStrategy[0];
+        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            percent_R = subperiodStrategy[0];
+            percent_P = subperiodStrategy[1];
+            percent_S = subperiodStrategy[2];
+            percent_r = counterpartSubperiodStrategy[0];
+            percent_p = counterpartSubperiodStrategy[1];
+            percent_s = counterpartSubperiodStrategy[2];
+        }
     }
 
     public void configChanged(Config config) {

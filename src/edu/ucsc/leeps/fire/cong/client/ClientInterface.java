@@ -12,5 +12,5 @@ public interface ClientInterface {
 
     public void setCounterpartStrategy(float[] s);
 
-    public void endSubperiod(int subperiod);
+    public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy);
 }

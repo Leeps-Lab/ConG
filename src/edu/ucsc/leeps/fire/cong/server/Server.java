@@ -60,7 +60,9 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void endPeriod() {
-        population.endPeriod();
+        if (FIRE.server.getConfig().subperiods == 0) {
+            population.endPeriod();
+        }
     }
 
     public void tick(int secondsLeft) {
@@ -104,19 +106,12 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
             @Override
             public void run() {
-                if (subperiod < FIRE.server.getConfig().subperiods) {
-                    endSubperiod(subperiod);
+                if (subperiod <= FIRE.server.getConfig().subperiods) {
+                    population.endSubperiod(subperiod);
                     subperiod++;
                 }
             }
         }, millisPerSubperiod, millisPerSubperiod);
-    }
-
-    private void endSubperiod(int subperiod) {
-        population.endSubperiod();
-        for (ClientInterface client : clients.values()) {
-            client.endSubperiod(subperiod);
-        }
     }
 
     private void configureImpulses() {

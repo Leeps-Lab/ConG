@@ -211,7 +211,25 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         sChart.setCounterpartStrategy(s);
     }
 
-    public void endSubperiod(int subperiod) {
+    public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
+        strategyChanger.setCurrentStrategy(subperiodStrategy);
+        if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+            bimatrix.setMyStrategy(subperiodStrategy[0]);
+            bimatrix.setCounterpartStrategy(counterpartSubperiodStrategy[0]);
+        } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            simplex.setCurrentStrategies(subperiodStrategy);
+            simplex.setCounterpartRPS(
+                    counterpartSubperiodStrategy[0],
+                    counterpartSubperiodStrategy[1],
+                    counterpartSubperiodStrategy[2]);
+        } else {
+            assert false;
+        }
+        payoffChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
+        strategyChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
+        rChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
+        pChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
+        sChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
     }
 
     public boolean readyForNextPeriod() {

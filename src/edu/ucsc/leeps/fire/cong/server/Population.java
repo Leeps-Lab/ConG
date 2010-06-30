@@ -25,7 +25,7 @@ public interface Population extends Serializable {
 
     public void logTick();
 
-    public void endSubperiod();
+    public void endSubperiod(int subperiod);
 
     public void endPeriod();
 }
