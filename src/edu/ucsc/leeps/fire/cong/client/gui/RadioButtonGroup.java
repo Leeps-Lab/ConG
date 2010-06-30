@@ -14,6 +14,12 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
     private final int NO_BUTTON = -1;
 
+    // parent Sprite - used to adjust mouse position on clicks
+    private Sprite parent;
+    // applet in which button group exists - used to add and remove
+    // group as a MouseListener
+    private PEmbed applet;
+
     // number of buttons in group
     private int numButtons;
     // how the buttons are aligned
@@ -27,11 +33,13 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
     // distance between buttons - buttons are evenly spaced
     private float spacing;
 
-    public RadioButtonGroup(float x, float y, int length,
-            int numButtons, Alignment alignment, int buttonRadius) {
+    public RadioButtonGroup(Sprite parent, float x, float y, int length,
+            int numButtons, Alignment alignment, int buttonRadius, PEmbed applet) {
         super(x, y, 0, 0);
+        this.parent = parent;
         this.numButtons = numButtons;
         this.alignment = alignment;
+        this.applet = applet;
         // group has only a height or a width, depending on alignment
         if (alignment == Alignment.Horizontal) {
             width = length;
@@ -87,6 +95,10 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         // adjust mouse position
         float mouseX = e.getX() - origin.x;
         float mouseY = e.getY() - origin.y;
+        if (parent != null) {
+            mouseX -= parent.origin.x;
+            mouseY -= parent.origin.y;
+        }
         // check to see if any of the buttons in the group were clicked on
         for (int i = 0; i < numButtons; ++i) {
             if (buttons[i].circularIsHit(mouseX, mouseY)) {
@@ -100,6 +112,20 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
     }
 
     public void mouseReleased(MouseEvent e) {
+    }
+
+    @Override
+    public void setVisible(boolean isVisible) {
+        visible = isVisible;
+        for (int i = 0; i < numButtons; ++i) {
+            buttons[i].setVisible(isVisible);
+        }
+
+        if (isVisible) {
+            applet.addMouseListener(this);
+        } else {
+            applet.removeMouseListener(this);
+        }
     }
 
     public void setSelection(int selection) {
