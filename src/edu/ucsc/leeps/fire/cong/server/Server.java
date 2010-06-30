@@ -48,7 +48,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public void configurePeriod() {
         configurePopulations();
         configureStrategies();
-        configureSubperiods();
+        //configureSubperiods();
     }
 
     public void startPeriod(long periodStartTime) {
@@ -98,7 +98,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         }
     }
 
-    private void configureSubperiods() {
+    /* private void configureSubperiods() {
         if (FIRE.server.getConfig().subperiods == 0) {
             return;
         }
@@ -118,7 +118,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
                 }
             }
         }, millisPerSubperiod, millisPerSubperiod);
-    }
+    } */
 
     public void unregister(int id) {
         clients.remove(id);

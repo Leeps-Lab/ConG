@@ -68,13 +68,12 @@ public class Line extends Sprite implements Serializable {
             FPoint last = null;
             int i = 0;
             for (FPoint p : points) {
+                if (!p.visible) {
+                    continue;
+                }
                 if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
                     if (last != null) {
-                        if (!p.visible) {
-                            applet.stroke(r, g, b, 0);
-                        } else {
-                            applet.stroke(r, g, b, alpha);
-                        }
+                        applet.stroke(r, g, b, alpha);
                         applet.line(last.x, last.y, p.x, p.y);
                     }
                     last = p;
@@ -92,6 +91,9 @@ public class Line extends Sprite implements Serializable {
                 if (i % 2 == 0) {
                     FPoint p0 = points.get(i);
                     FPoint p1 = points.get(i + 1);
+                    if (!p0.visible || !p1.visible) {
+                        continue;
+                    }
                     if (p0.visible && p1.visible) {
                         applet.line(
                                 p0.x, p0.y,
@@ -129,6 +131,9 @@ public class Line extends Sprite implements Serializable {
             FPoint last = null;
             int i = 0;
             for (FPoint p : points) {
+                if (!p.visible) {
+                    continue;
+                }
                 if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
                     if (p != null) {
                         applet.vertex(p.x, p.y);
