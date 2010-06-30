@@ -5,7 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.config.TwoStrategySelectionType;
+import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.event.KeyEvent;
@@ -236,7 +236,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
                 hover.draw(applet);
             }
         }
-        if (config.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+        if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth) {
             float x, y, w, h;
             x = counterpartHeatmap.origin.x;
             y = counterpartHeatmap.origin.y;
@@ -261,7 +261,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private void drawHeatmap() {
         heatmap.draw(applet);
 
-        if (config.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+        if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth) {
             counterpartHeatmap.draw(applet);
         }
 
@@ -270,7 +270,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         myHeatmapBa.draw(applet);
         myHeatmapBb.draw(applet);
 
-        if (config.twoStrategySelectionType == TwoStrategySelectionType.HeatmapBoth) {
+        if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth) {
             counterpartHeatmapAa.draw(applet);
             cuonterpartHeatmapAb.draw(applet);
             counterpartHeatmapBa.draw(applet);
@@ -343,7 +343,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             this.payoffFunction = config.payoffFunction;
             this.counterpartPayoffFunction = config.counterpartPayoffFunction;
-            switch (config.twoStrategySelectionType) {
+            switch (config.strategySelectionDisplayType) {
                 case HeatmapSingle:
                     setModeHeatmapSingle();
                     break;

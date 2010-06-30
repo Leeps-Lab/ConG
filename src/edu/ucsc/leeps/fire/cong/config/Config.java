@@ -30,7 +30,7 @@ public class Config extends BaseConfig {
     public Population population;
     public boolean mixedStrategySelection;
     public int subperiods;
-    public TwoStrategySelectionType twoStrategySelectionType;
+    public StrategySelectionDisplayType strategySelectionDisplayType;
     public Line payoffAa, payoffAb, payoffBa, payoffBb, yourPayoff, otherPayoff;
     public Line yourStrategyOverTime, counterpartStrategyOverTime;
     public int heatmapColorLow, heatmapColorMid, heatmapColorHigh;
@@ -61,7 +61,7 @@ public class Config extends BaseConfig {
         percentChangePerSecond = 0.1f;
         subperiods = 0;
         population = new SinglePopulationInclude();
-        twoStrategySelectionType = TwoStrategySelectionType.HeatmapBoth;
+        strategySelectionDisplayType = StrategySelectionDisplayType.HeatmapBoth;
         mixedStrategySelection = true;
         yourPayoff = new Line();
         yourPayoff.r = 0;
