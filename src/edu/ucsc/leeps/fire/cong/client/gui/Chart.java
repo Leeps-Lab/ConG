@@ -588,14 +588,20 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     public void addPayoffPoint(Line line, float x, float y) {
+        boolean shocked = currentPercent > config.shock.start && currentPercent < config.shock.end;
         line.setPoint(
                 Math.round(line.width * x),
-                Math.round(line.height * (1 - (y / maxPayoff))));
+                Math.round(line.height * (1 - (y / maxPayoff))),
+                !shocked);
+        if (Math.abs(currentPercent - config.shock.end) < 0.01) {
+            line.clearShocks();
+        }
     }
 
     public void addStrategyPoint(Line line, float x, float y) {
         line.setPoint(
                 Math.round(line.width * x),
-                Math.round(line.height * (1 - y)));
+                Math.round(line.height * (1 - y)),
+                true);
     }
 }

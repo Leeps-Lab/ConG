@@ -35,6 +35,7 @@ public class Config extends BaseConfig {
     public Line yourStrategyOverTime, counterpartStrategyOverTime;
     public int heatmapColorLow, heatmapColorMid, heatmapColorHigh;
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
+    public ShockZone shock;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
@@ -45,6 +46,7 @@ public class Config extends BaseConfig {
     public static final Class paired = PairedPopulation.class;
     public static final Class line = Line.class;
     public static final Class threshold = ThresholdPayoffFunction.class;
+    public static final Class shockZone = ShockZone.class;
     // per-client
     public float[] initialStrategy;
     public int matchID;
@@ -97,5 +99,8 @@ public class Config extends BaseConfig {
         shortRLabel = "R";
         shortPLabel = "P";
         shortSLabel = "S";
+        shock = new ShockZone();
+        shock.start = 0.25f;
+        shock.end = 0.75f;
     }
 }

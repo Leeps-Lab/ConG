@@ -44,12 +44,10 @@ public class Line extends Sprite implements Serializable {
         this.mode = config.mode;
     }
 
-    public synchronized void setPoint(int x, int y) {
-        if (!visible) {
-            return;
-        }
+    public synchronized void setPoint(int x, int y, boolean visible) {
         if (!definedPoints.containsKey(x)) {
             FPoint point = new FPoint(x, y);
+            point.visible = visible;
             definedPoints.put(x, point);
             points.add(point);
         }
@@ -72,6 +70,11 @@ public class Line extends Sprite implements Serializable {
             for (FPoint p : points) {
                 if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
                     if (last != null) {
+                        if (!p.visible) {
+                            applet.stroke(r, g, b, 0);
+                        } else {
+                            applet.stroke(r, g, b, alpha);
+                        }
                         applet.line(last.x, last.y, p.x, p.y);
                     }
                     last = p;
@@ -170,5 +173,11 @@ public class Line extends Sprite implements Serializable {
     public synchronized void removeFirst() {
         FPoint first = points.removeFirst();
         definedPoints.remove(Math.round(first.x));
+    }
+
+    public synchronized void clearShocks() {
+        for (FPoint point : points) {
+            point.visible = true;
+        }
     }
 }
