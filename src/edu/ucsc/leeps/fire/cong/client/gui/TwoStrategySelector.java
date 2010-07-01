@@ -114,7 +114,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public float[] getMyStrategy() {
-        return new float[]{percent_A};
+        return new float[]{percent_A, 0};
     }
 
     public void setCurrentPercent(float percent) {
@@ -294,7 +294,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             drawHeatmap();
             drawStrategyInfo();
             
-
             applet.popMatrix();
         } catch (NullPointerException ex) {
             ex.printStackTrace();
@@ -340,7 +339,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (config.mixedStrategySelection &&
+                config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             this.payoffFunction = config.payoffFunction;
             this.counterpartPayoffFunction = config.counterpartPayoffFunction;
             switch (config.strategySelectionDisplayType) {

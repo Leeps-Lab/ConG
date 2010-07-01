@@ -83,12 +83,22 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     private void configureStrategies() {
         for (Integer client : clients.keySet()) {
-            if (FIRE.server.getConfig(client).payoffFunction instanceof TwoStrategyPayoffFunction) {
-                FIRE.server.getConfig(client).initialStrategy = new float[]{random.nextFloat()};
-            } else if (FIRE.server.getConfig(client).payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                FIRE.server.getConfig(client).initialStrategy = new float[]{0.33f, 0.33f, 0.33f};
+            if (FIRE.server.getConfig(client).mixedStrategySelection) {
+                if (FIRE.server.getConfig(client).payoffFunction instanceof TwoStrategyPayoffFunction) {
+                    FIRE.server.getConfig(client).initialStrategy = new float[]{random.nextFloat()};
+                } else if (FIRE.server.getConfig(client).payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                    FIRE.server.getConfig(client).initialStrategy = new float[]{0.33f, 0.33f, 0.33f};
+                } else {
+                    assert false;
+                }
             } else {
-                assert false;
+                if (FIRE.server.getConfig(client).payoffFunction instanceof TwoStrategyPayoffFunction) {
+                    FIRE.server.getConfig(client).initialStrategy = new float[]{1, 0};
+                } else if (FIRE.server.getConfig(client).payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                    FIRE.server.getConfig(client).initialStrategy = new float[]{1, 0, 0};
+                } else {
+                    assert false;
+                }
             }
         }
     }

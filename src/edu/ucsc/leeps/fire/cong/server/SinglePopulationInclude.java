@@ -57,8 +57,9 @@ public class SinglePopulationInclude implements Population {
 
     private void updateStrategies() {
         if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-            averageStrategy = new float[1];
+            averageStrategy = new float[2];
             averageStrategy[0] = 0;
+            averageStrategy[1] = 0;
         } else if (FIRE.server.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
             averageStrategy = new float[3];
             averageStrategy[0] = 0;
@@ -107,6 +108,6 @@ public class SinglePopulationInclude implements Population {
     }
 
     public void logTick() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 }

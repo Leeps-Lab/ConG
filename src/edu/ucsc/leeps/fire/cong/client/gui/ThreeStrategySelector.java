@@ -423,11 +423,11 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     }
 
     public float[] getPlayerRPS() {
-        return playedStrat;
+        return new float[] {playedStrat[R], playedStrat[P], playedStrat[S]};
     }
 
     public float[] getOpponentRPS() {
-        return opponentStrat;
+        return new float[] {opponentStrat[R], opponentStrat[P], opponentStrat[S]};
     }
 
     public void setEnabled(boolean enabled) {
@@ -695,7 +695,8 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        if (config.mixedStrategySelection &&
+                config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             rLabel = config.rLabel;
             stratSlider[R].setLabel(rLabel);
             pLabel = config.pLabel;

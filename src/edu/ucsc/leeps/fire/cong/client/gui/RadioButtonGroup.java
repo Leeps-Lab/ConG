@@ -33,6 +33,9 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
     // distance between buttons - buttons are evenly spaced
     private float spacing;
 
+    // whether or not group is enabled
+    private boolean enabled;
+
     public RadioButtonGroup(Sprite parent, float x, float y, int length,
             int numButtons, Alignment alignment, int buttonRadius, PEmbed applet) {
         super(x, y, 0, 0);
@@ -66,6 +69,8 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
                 buttons[i] = new RadioButton(buffer + i * spacing, 0, buttonRadius);
             }
         }
+
+        enabled = false;
     }
 
     @Override
@@ -92,26 +97,32 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
     }
 
     public void mousePressed(MouseEvent e) {
-        // adjust mouse position
-        float mouseX = e.getX() - origin.x;
-        float mouseY = e.getY() - origin.y;
-        if (parent != null) {
-            mouseX -= parent.origin.x;
-            mouseY -= parent.origin.y;
-        }
-        // check to see if any of the buttons in the group were clicked on
-        for (int i = 0; i < numButtons; ++i) {
-            if (buttons[i].circularIsHit(mouseX, mouseY)) {
-                if (selectedButton != NO_BUTTON) {
-                    buttons[selectedButton].setSelected(false);
+        if (enabled) {
+            // adjust mouse position
+            float mouseX = e.getX() - origin.x;
+            float mouseY = e.getY() - origin.y;
+            if (parent != null) {
+                mouseX -= parent.origin.x;
+                mouseY -= parent.origin.y;
+            }
+            // check to see if any of the buttons in the group were clicked on
+            for (int i = 0; i < numButtons; ++i) {
+                if (buttons[i].circularIsHit(mouseX, mouseY)) {
+                    if (selectedButton != NO_BUTTON) {
+                        buttons[selectedButton].setSelected(false);
+                    }
+                    buttons[i].setSelected(true);
+                    selectedButton = i;
                 }
-                buttons[i].setSelected(true);
-                selectedButton = i;
             }
         }
     }
 
     public void mouseReleased(MouseEvent e) {
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     @Override
