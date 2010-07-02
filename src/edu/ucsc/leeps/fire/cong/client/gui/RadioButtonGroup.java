@@ -3,6 +3,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import processing.core.PImage;
 
 /**
  *
@@ -162,10 +163,13 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
     
     private class RadioButton extends Sprite {
         private boolean selected;
+        private PImage idleTexture;
+        private PImage selectedTexture;
 
         public RadioButton(float x, float y, int radius) {
             super(x, y, radius, radius);
             selected = false;
+            textureSetup();
         }
 
         public boolean isSelected() {
@@ -179,17 +183,82 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         @Override
         public void draw(PEmbed applet) {
             if (visible) {
-                applet.ellipseMode(PEmbed.CENTER);
-                applet.strokeWeight(1);
-                applet.stroke(0);
+                applet.imageMode(PEmbed.CENTER);
                 if (selected) {
-                    applet.fill(0);
+                    applet.image(selectedTexture, origin.x, origin.y);
                 } else {
-                    applet.fill(255);
+                    applet.image(idleTexture, origin.x, origin.y);
                 }
 
+                applet.ellipseMode(PEmbed.CENTER);
+                applet.stroke(0);
+                applet.strokeWeight(1);
+                applet.noFill();
                 applet.ellipse(origin.x, origin.y, width, height);
             }
+        }
+
+        private void textureSetup() {
+            idleTexture = applet.createImage(width, height, PEmbed.RGB);
+            idleTexture.loadPixels();
+            selectedTexture = applet.createImage(width, height, PEmbed.RGB);
+            selectedTexture.loadPixels();
+            float centerX = width / 2 - 1;
+            float centerY = width / 2 - 1;
+            for(int i = 0; i < idleTexture.pixels.length; ++i) {
+                float x = i % width;
+                float y = i / width;
+                float distance = PEmbed.dist(x, y, centerX, centerY);
+                if (distance < width / 2) {
+                    idleTexture.pixels[i] = applet.color(175, 175, 175);
+                    selectedTexture.pixels[i] = applet.color(0, 32, 113);
+                } else {
+                    idleTexture.pixels[i] = applet.color(255, 255, 255);
+                    selectedTexture.pixels[i] = applet.color(255, 255, 255);
+                }
+            }
+
+            centerX = width / 2 - 1;
+            centerY = 0;
+            for(int i = 0; i < idleTexture.pixels.length; ++i) {
+                float x = i % width;
+                float y = i / width;
+                float distance = PEmbed.dist(x, y, centerX, centerY);
+                if (distance < width / 2 &&
+                    idleTexture.pixels[i] != applet.color(255, 255, 255)) {
+                    float adjustment = distance * 10;
+                    idleTexture.pixels[i] = applet.color(237 - adjustment, 237 - adjustment, 237 - adjustment);
+                    selectedTexture.pixels[i] = applet.color(50 - adjustment, 140 - adjustment, 250 - adjustment);
+                }
+            }
+
+            centerX = width / 2 - 1;
+            centerY = height - 1;
+            for(int i = 0; i < idleTexture.pixels.length; ++i) {
+                float x = i % width;
+                float y = i / width;
+                float distance = PEmbed.dist(x, y, centerX, centerY);
+                if (distance < width / 2 &&
+                    idleTexture.pixels[i] != applet.color(255, 255, 255)) {
+                    float adjustment = distance * 10;
+                    idleTexture.pixels[i] = applet.color(237 - adjustment, 237 - adjustment, 237 - adjustment);
+                    selectedTexture.pixels[i] = applet.color(50 - adjustment, 140 - adjustment, 250 - adjustment);
+                }
+            }
+
+            centerX = width / 2 - 1;
+            centerY = width / 2 - 1;
+            for(int i = 0; i < idleTexture.pixels.length; ++i) {
+                float x = i % width;
+                float y = i / width;
+                if (PEmbed.dist(x, y, centerX, centerY) < width / 4) {
+                    idleTexture.pixels[i] = applet.color(175, 175, 175);
+                    selectedTexture.pixels[i] = applet.color(0, 0, 0);
+                }
+            }
+
+            idleTexture.updatePixels();
+            selectedTexture.updatePixels();
         }
     }
 }
