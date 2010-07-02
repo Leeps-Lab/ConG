@@ -5,6 +5,7 @@
 package edu.ucsc.leeps.fire.cong.config;
 
 import edu.ucsc.leeps.fire.cong.client.gui.Line;
+import edu.ucsc.leeps.fire.cong.client.gui.HeatmapLegend;
 import edu.ucsc.leeps.fire.cong.server.PairedPopulation;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.Population;
@@ -37,6 +38,7 @@ public class Config extends BaseConfig {
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
     public ShockZone shock;
     public float impulse;
+    public boolean showHeatmapLegend;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
@@ -105,5 +107,6 @@ public class Config extends BaseConfig {
         shock.end = 0f;
         shock.backfill = false;
         impulse = 0f;
+        showHeatmapLegend = true;
     }
 }

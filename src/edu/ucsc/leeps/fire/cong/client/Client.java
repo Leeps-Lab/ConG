@@ -9,6 +9,7 @@ import edu.ucsc.leeps.fire.cong.client.gui.PointsDisplay;
 import edu.ucsc.leeps.fire.cong.client.gui.ThreeStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chart;
 import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
+import edu.ucsc.leeps.fire.cong.client.gui.HeatmapLegend;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Dimension;
@@ -37,6 +38,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
     private ChartLegend legend;
+    private HeatmapLegend heatmapLegend;
     private StrategyChanger strategyChanger;
 
     public Client() {
@@ -97,6 +99,8 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         legend = new ChartLegend(
                 (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
+        heatmapLegend = new HeatmapLegend(
+                bimatrix.width + 10 + leftMargin, strategyChart.height + topMargin + chartMargin, 20, payoffChartHeight);
         embed.running = true;
         JFrame frame = new JFrame();
         frame.add(this);
@@ -136,6 +140,9 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         rChart.clearAll();
         pChart.clearAll();
         sChart.clearAll();
+        if (FIRE.client.getConfig().showHeatmapLegend == true) {
+            heatmapLegend.visible = true;
+        }
     }
 
     public void endPeriod() {
@@ -319,6 +326,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         public void draw() {
             if (running) {
                 background(255);
+                        heatmapLegend.draw(embed);
                 bimatrix.draw(embed);
                 simplex.draw(embed);
                 pureMatrix.draw(embed);
