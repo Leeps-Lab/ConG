@@ -14,4 +14,5 @@ public class ShockZone implements Serializable {
 
     public float start, end;
     public boolean backfill;
+    public boolean showZone;
 }

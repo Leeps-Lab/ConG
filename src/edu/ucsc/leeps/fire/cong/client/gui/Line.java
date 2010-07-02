@@ -78,10 +78,11 @@ public class Line extends Sprite implements Serializable {
             for (FPoint p : points) {
                 if (!p.visible) {
                     last = p;
+                    i++;
                     continue;
                 }
                 if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
-                    if (last != null) {
+                    if (last != null && last.visible) {
                         applet.stroke(r, g, b, alpha);
                         if (stepFunction && i >= 2) {
                             applet.line(last.x, p.y, p.x, p.y);
@@ -157,6 +158,7 @@ public class Line extends Sprite implements Serializable {
                 }
                 if (!p.visible) {
                     last = p;
+                    i++;
                     continue;
                 }
                 if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
