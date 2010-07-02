@@ -146,34 +146,7 @@ public class Marker extends Sprite {
             return;
         }
         if (label1 != null) {
-            applet.textFont(applet.size14);
-            float textWidth = applet.textWidth(label1);
-            if (label2 != null) {
-                applet.textFont(applet.size14Bold);
-                textWidth += applet.textWidth(label2);
-            }
-            if (textWidth > 16 && mode == LabelMode.Left) {
-                labelOrigin.x = origin.x - radius - textWidth / 2;
-            } else if (textWidth > 16 && mode == LabelMode.Right) {
-                labelOrigin.x = origin.x + radius + textWidth / 2;
-            }
-            float textHeight = applet.textAscent() + applet.textDescent();
-            applet.rectMode(PEmbed.CENTER);
-            applet.fill(255);
-            applet.noStroke();
-            applet.rect(labelOrigin.x, labelOrigin.y, textWidth, textHeight);
-            applet.textAlign(PEmbed.CENTER, PEmbed.CENTER);
-            applet.fill(0);
-            if (label1 != null && label2 != null) {
-                float label1Width = applet.textWidth(label1);
-                applet.textFont(applet.size14Bold);
-                applet.text(label1, parent.origin.x + labelOrigin.x - label1Width / 2, parent.origin.y + labelOrigin.y);
-                applet.textFont(applet.size14);
-                applet.text("," + label2, parent.origin.x + labelOrigin.x + label1Width / 2, parent.origin.y + labelOrigin.y);
-            } else if (label1 != null) {
-                applet.textFont(applet.size14);
-                applet.text(label1, parent.origin.x + labelOrigin.x, parent.origin.y + labelOrigin.y);
-            }
+            drawLabels(applet);
         }
         applet.noStroke();
         applet.fill(R, G, B, alpha);
@@ -182,6 +155,37 @@ public class Marker extends Sprite {
             applet.ellipse(origin.x, origin.y, radius, radius);
         } else {
             applet.ellipse(origin.x, origin.y, largeRadius, largeRadius);
+        }
+    }
+
+    protected void drawLabels(PEmbed applet) {
+        applet.textFont(applet.size14);
+        float textWidth = applet.textWidth(label1);
+        if (label2 != null) {
+            applet.textFont(applet.size14Bold);
+            textWidth += applet.textWidth(label2);
+        }
+        if (textWidth > 16 && mode == LabelMode.Left) {
+            labelOrigin.x = origin.x - radius - textWidth / 2;
+        } else if (textWidth > 16 && mode == LabelMode.Right) {
+            labelOrigin.x = origin.x + radius + textWidth / 2;
+        }
+        float textHeight = applet.textAscent() + applet.textDescent();
+        applet.rectMode(PEmbed.CENTER);
+        applet.fill(255);
+        applet.noStroke();
+        applet.rect(labelOrigin.x, labelOrigin.y, textWidth, textHeight);
+        applet.textAlign(PEmbed.CENTER, PEmbed.CENTER);
+        applet.fill(0);
+        if (label1 != null && label2 != null) {
+            float label1Width = applet.textWidth(label1);
+            applet.textFont(applet.size14Bold);
+            applet.text(label1, parent.origin.x + labelOrigin.x - label1Width / 2, parent.origin.y + labelOrigin.y);
+            applet.textFont(applet.size14);
+            applet.text("," + label2, parent.origin.x + labelOrigin.x + label1Width / 2, parent.origin.y + labelOrigin.y);
+        } else if (label1 != null) {
+            applet.textFont(applet.size14);
+            applet.text(label1, parent.origin.x + labelOrigin.x, parent.origin.y + labelOrigin.y);
         }
     }
 }

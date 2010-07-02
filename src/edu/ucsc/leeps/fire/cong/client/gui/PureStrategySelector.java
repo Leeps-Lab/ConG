@@ -7,6 +7,7 @@ import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 
 /**
@@ -14,6 +15,7 @@ import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
  * @author swolpert
  */
 public class PureStrategySelector extends Sprite implements Configurable<Config> {
+    private final int BUTTON_RADIUS = 15;
     private PEmbed applet;
     private float currentPercent;
     private float[] myStrat;
@@ -23,7 +25,9 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     private Marker matrixBotLeft;
     private Marker matrixBotRight;
     private float matrixSideLength;
-    private Marker[][] cellMarker;
+    private Marker matrixLabel;
+    private Marker[][] cellMarkers;
+    private Marker[] columnLabels;
     private RadioButtonGroup buttons;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private StrategyChanger strategyChanger;
@@ -44,6 +48,12 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
         matrixSideLength = matrixTopRight.origin.x - matrixTopLeft.origin.x;
 
+        matrixLabel = new Marker(this, matrixTopLeft.origin.x + matrixSideLength / 2,
+                matrixTopLeft.origin.y - (applet.textAscent() + applet.textDescent()),
+                true, 0);
+        matrixLabel.setLabelMode(Marker.LabelMode.Top);
+        matrixLabel.setLabel("Matrix");
+
         this.strategyChanger = strategyChanger;
 
         FIRE.client.addConfigListener(this);
@@ -61,6 +71,14 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
+            matrixLabel.draw(applet);
+            for (int i = 0; i < columnLabels.length; ++i) {
+                columnLabels[i].draw(applet);
+            }
+
+            applet.stroke(0);
+            applet.strokeWeight(2);
+            
             applet.line(matrixTopLeft.origin.x, matrixTopLeft.origin.y, matrixTopRight.origin.x, matrixTopRight.origin.y);
             applet.line(matrixTopRight.origin.x, matrixTopRight.origin.y, matrixBotRight.origin.x, matrixBotRight.origin.y);
             applet.line(matrixBotLeft.origin.x, matrixBotLeft.origin.y, matrixBotRight.origin.x, matrixBotRight.origin.y);
@@ -73,9 +91,9 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
             buttons.draw(applet);
 
-            for (int i = 0; i < cellMarker.length; ++i) {
-                for (int j = 0; j < cellMarker[i].length; ++j) {
-                    cellMarker[i][j].draw(applet);
+            for (int i = 0; i < cellMarkers.length; ++i) {
+                for (int j = 0; j < cellMarkers[i].length; ++j) {
+                    cellMarkers[i][j].draw(applet);
                 }
             }
 
@@ -152,25 +170,65 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
         if (numStrategies != 0) {
             this.payoffFunction = config.payoffFunction;
             this.counterpartPayoffFunction = config.counterpartPayoffFunction;
+
             myStrat = new float[numStrategies];
             opponentStrat = new float[numStrategies];
-            cellMarker = new Marker[numStrategies][numStrategies];
+
+            if (payoffFunction instanceof ThresholdPayoffFunction) {
+                float threshold = ((ThresholdPayoffFunction)payoffFunction).threshold;
+                matrixLabel.setLabel("Threshold: " + threshold);
+                matrixLabel.setVisible(true);
+            } else {
+                matrixLabel.setVisible(false);
+            }
+
+            cellMarkers = new Marker[numStrategies][numStrategies];
             float interval = matrixSideLength / (numStrategies * 2f);
+            int offsetX = 1;
             int offsetY = 1;
             for (int i = 0; i < numStrategies; ++i) {
-                int offsetX = 1;
+                offsetX = 1;
                 for (int j = 0; j < numStrategies; ++j) {
-                    cellMarker[i][j] = new Marker(this, matrixTopLeft.origin.x + (j + offsetX) * interval,
+                    cellMarkers[i][j] = new Marker(this, matrixTopLeft.origin.x + (j + offsetX) * interval,
                             matrixTopLeft.origin.y + (i + offsetY) * interval, true, 0);
-                    cellMarker[i][j].setLabelMode(Marker.LabelMode.Bottom);
+                    cellMarkers[i][j].setLabelMode(Marker.LabelMode.Bottom);
                     ++offsetX;
                 }
                 ++offsetY;
             }
 
-            buttons = new RadioButtonGroup(this, width / 16, matrixTopLeft.origin.y,
+            columnLabels = new Marker[numStrategies];
+            offsetX = 1;
+            for (int i = 0; i < numStrategies; ++i) {
+                columnLabels[i] = new Marker(this, matrixBotLeft.origin.x + (i + offsetX) * interval,
+                        matrixBotLeft.origin.y + applet.textAscent() + applet.textDescent(),
+                        true, 0);
+                columnLabels[i].setLabelMode(Marker.LabelMode.Bottom);
+                ++offsetX;
+            }
+
+            buttons = new RadioButtonGroup(this, BUTTON_RADIUS, matrixTopLeft.origin.y,
                     (int)matrixSideLength, numStrategies,
-                    RadioButtonGroup.Alignment.Vertical, 15, applet);
+                    RadioButtonGroup.Alignment.Vertical, BUTTON_RADIUS, applet);
+            buttons.setLabelMode(Marker.LabelMode.Right);
+
+            if (payoffFunction instanceof ThresholdPayoffFunction) {
+                columnLabels[0].setLabel("met");
+                columnLabels[1].setLabel("not met");
+
+                buttons.setLabels(new String[] {"A", "B"});
+            } else if (payoffFunction instanceof TwoStrategyPayoffFunction) {
+                columnLabels[0].setLabel("a");
+                columnLabels[1].setLabel("b");
+
+                buttons.setLabels(new String[] {"A", "B"});
+            } else if (payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                columnLabels[0].setLabel("a");
+                columnLabels[1].setLabel("b");
+                columnLabels[2].setLabel("c");
+
+                buttons.setLabels(new String[] {"A", "B", "C"});
+            }
             buttons.setEnabled(false);
         }
         
@@ -182,12 +240,12 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     }
 
     private void updateLabels() {
-        float[] myStrategy = new float[cellMarker.length];
-        float[] opponentStrategy = new float[cellMarker.length];
+        float[] myStrategy = new float[cellMarkers.length];
+        float[] opponentStrategy = new float[cellMarkers.length];
 
-        for (int i = 0; i < cellMarker.length; ++i) {
-            for (int j = 0; j < cellMarker[i].length; ++j) {
-                for (int k = 0; k < cellMarker.length; ++k) {
+        for (int i = 0; i < cellMarkers.length; ++i) {
+            for (int j = 0; j < cellMarkers[i].length; ++j) {
+                for (int k = 0; k < cellMarkers.length; ++k) {
                     myStrategy[k] = 0f;
                     opponentStrategy[k] = 0f;
                 }
@@ -198,7 +256,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 float myPayoff = payoffFunction.getPayoff(currentPercent, myStrategy, opponentStrategy);
                 float opponentPayoff = payoffFunction.getPayoff(currentPercent, opponentStrategy, myStrategy);
 
-                cellMarker[i][j].setLabel(myPayoff, opponentPayoff);
+                cellMarkers[i][j].setLabel(myPayoff, opponentPayoff);
             }
         }
     }

@@ -63,11 +63,11 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         // initialize buttons
         if (alignment == Alignment.Vertical) {
             for (int i = 0; i < numButtons; ++i) {
-                buttons[i] = new RadioButton(0, buffer + i * spacing, buttonRadius);
+                buttons[i] = new RadioButton(parent, 0, buffer + i * spacing, buttonRadius, this);
             }
         } else {
             for (int i = 0; i < numButtons; ++i) {
-                buttons[i] = new RadioButton(buffer + i * spacing, 0, buttonRadius);
+                buttons[i] = new RadioButton(parent, buffer + i * spacing, 0, buttonRadius, this);
             }
         }
 
@@ -160,14 +160,29 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         buttons[selectedButton].setSelected(false);
         selectedButton = NO_BUTTON;
     }
+
+    public void setLabelMode(Marker.LabelMode labelMode) {
+        for (RadioButton button : buttons) {
+            button.setLabelMode(labelMode);
+        }
+    }
     
-    private class RadioButton extends Sprite {
+    public void setLabels(String[] labels) {
+        for (int i = 0; i < numButtons; ++i) {
+            buttons[i].setLabel(labels[i]);
+        }
+    }
+    
+    private class RadioButton extends Marker {
+        private RadioButtonGroup group;
         private boolean selected;
         private PImage idleTexture;
         private PImage selectedTexture;
 
-        public RadioButton(float x, float y, int radius) {
-            super(x, y, radius, radius);
+        public RadioButton(Sprite parent, float x, float y, int radius,
+                RadioButtonGroup group) {
+            super(parent, x, y, true, radius);
+            this.group = group;
             selected = false;
             textureSetup();
         }
@@ -179,10 +194,14 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         public void setSelected(boolean selected) {
             this.selected = selected;
         }
-        
+
         @Override
         public void draw(PEmbed applet) {
             if (visible) {
+                if (label1 != null) {
+                    drawLabels(applet);
+                }
+
                 applet.ellipseMode(PEmbed.CENTER);
                 applet.imageMode(PEmbed.CENTER);
 
@@ -263,6 +282,38 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
             idleTexture.updatePixels();
             selectedTexture.updatePixels();
+        }
+
+        @Override
+        protected void drawLabels(PEmbed applet) {
+            applet.textFont(applet.size14);
+            float textWidth = applet.textWidth(label1);
+            if (label2 != null) {
+                applet.textFont(applet.size14Bold);
+                textWidth += applet.textWidth(label2);
+            }
+            if (textWidth > 16 && mode == LabelMode.Left) {
+                labelOrigin.x = origin.x - radius - textWidth / 2;
+            } else if (textWidth > 16 && mode == LabelMode.Right) {
+                labelOrigin.x = origin.x + radius + textWidth / 2;
+            }
+            float textHeight = applet.textAscent() + applet.textDescent();
+            applet.rectMode(PEmbed.CENTER);
+            applet.fill(255);
+            applet.noStroke();
+            applet.rect(labelOrigin.x, labelOrigin.y, textWidth, textHeight);
+            applet.textAlign(PEmbed.CENTER, PEmbed.CENTER);
+            applet.fill(0);
+            if (label1 != null && label2 != null) {
+                float label1Width = applet.textWidth(label1);
+                applet.textFont(applet.size14Bold);
+                applet.text(label1, parent.origin.x + group.origin.x + labelOrigin.x - label1Width / 2, parent.origin.y + group.origin.y + labelOrigin.y);
+                applet.textFont(applet.size14);
+                applet.text("," + label2, parent.origin.x + group.origin.x + labelOrigin.x + label1Width / 2, parent.origin.y + group.origin.y + labelOrigin.y);
+            } else if (label1 != null) {
+                applet.textFont(applet.size14);
+                applet.text(label1, parent.origin.x + group.origin.x + labelOrigin.x, parent.origin.y + group.origin.y + labelOrigin.y);
+            }
         }
     }
 }
