@@ -12,7 +12,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
     public static enum Alignment {Horizontal, Vertical};
 
-    private final int NO_BUTTON = -1;
+    public static final int NO_BUTTON = -1;
 
     // parent Sprite - used to adjust mouse position on clicks
     private Sprite parent;
@@ -145,6 +145,10 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         }
         selectedButton = selection;
         buttons[selectedButton].setSelected(true);
+    }
+
+    public int getSelection() {
+        return selectedButton;
     }
 
     public void clearSelections() {

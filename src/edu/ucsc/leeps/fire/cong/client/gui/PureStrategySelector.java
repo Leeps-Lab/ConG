@@ -15,8 +15,6 @@ import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
  */
 public class PureStrategySelector extends Sprite implements Configurable<Config> {
     private PEmbed applet;
-    private Config config;
-    private boolean enabled;
     private float currentPercent;
     private float[] myStrat;
     private float[] opponentStrat;
@@ -35,7 +33,6 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
         super(x, y, size, size);
         visible = false;
         this.applet = applet;
-        enabled = false;
 
         myStrat = new float[] {0};
         opponentStrat = new float[] {0};
@@ -81,6 +78,22 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                     cellMarker[i][j].draw(applet);
                 }
             }
+
+            int selection = buttons.getSelection();
+            if (selection != RadioButtonGroup.NO_BUTTON &&
+                    myStrat[selection] != 1) {
+                for (int i = 0; i < myStrat.length; ++i) {
+                    myStrat[i] = 0;
+                }
+                myStrat[selection] = 1;
+
+                float[] strategy = new float[myStrat.length];
+                for(int i = 0; i < myStrat.length; ++i) {
+                    strategy[i] = myStrat[i];
+                }
+                strategyChanger.setTargetStrategy(strategy);
+                strategyChanger.setCurrentStrategy(strategy);
+            }
             
             applet.popMatrix();
         }
@@ -93,7 +106,6 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     }
 
     public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
         buttons.setEnabled(enabled);
     }
 
@@ -130,7 +142,6 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     }
 
     public void configChanged(Config config) {
-        this.config = config;
         int numStrategies = 0;
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             numStrategies = 2;
@@ -160,6 +171,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             buttons = new RadioButtonGroup(this, width / 16, matrixTopLeft.origin.y,
                     (int)matrixSideLength, numStrategies,
                     RadioButtonGroup.Alignment.Vertical, 10, applet);
+            buttons.setEnabled(false);
         }
         
         if (config.mixedStrategySelection) {

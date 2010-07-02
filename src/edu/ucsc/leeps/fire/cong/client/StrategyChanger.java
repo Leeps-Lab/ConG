@@ -37,9 +37,9 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         synchronized (lock) {
             this.config = config;
             if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                currentStrategy = new float[1];
-                targetStrategy = new float[1];
-                deltaStrategy = new float[1];
+                currentStrategy = new float[2];
+                targetStrategy = new float[2];
+                deltaStrategy = new float[2];
             } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 currentStrategy = new float[3];
                 targetStrategy = new float[3];
