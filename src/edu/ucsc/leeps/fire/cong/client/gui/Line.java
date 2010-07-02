@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ public class Line extends Sprite implements Serializable {
     public Mode mode;
     public int SAMPLE_RATE = 2;
     public boolean showShock = true;
+    public boolean stepFunction;
     private transient HashMap<Integer, FPoint> definedPoints;
     private transient LinkedList<FPoint> points;
 
@@ -44,6 +46,10 @@ public class Line extends Sprite implements Serializable {
         this.weight = config.weight;
         this.mode = config.mode;
         this.showShock = config.showShock;
+        stepFunction = FIRE.client.getConfig().subperiods != 0;
+        if (stepFunction) {
+            SAMPLE_RATE = 1;
+        }
     }
 
     public synchronized void setPoint(int x, int y, boolean visible) {
@@ -77,7 +83,12 @@ public class Line extends Sprite implements Serializable {
                 if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
                     if (last != null) {
                         applet.stroke(r, g, b, alpha);
-                        applet.line(last.x, last.y, p.x, p.y);
+                        if (stepFunction && i >= 2) {
+                            applet.line(last.x, p.y, p.x, p.y);
+                            applet.line(last.x, last.y, last.x, p.y);
+                        } else {
+                            applet.line(last.x, last.y, p.x, p.y);
+                        }
                     }
                     last = p;
                 }
@@ -149,20 +160,21 @@ public class Line extends Sprite implements Serializable {
                     continue;
                 }
                 if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
-                    if (p != null) {
-                        if (last == null) {
-                            applet.vertex(p.x, height);
-                            // for some reason, the polygon render fails if the
-                            // next point has y value equal to the last point,
-                            // we eliminate that vertex in this special case
-                            if (Math.abs(p.y - height) > Float.MIN_NORMAL) {
-                                applet.vertex(p.x, p.y);
-                            }
-                        } else {
+                    if (last == null) {
+                        applet.vertex(p.x, height);
+                        // for some reason, the polygon render fails if the
+                        // next point has y value equal to the last point,
+                        // we eliminate that vertex in this special case
+                        if (Math.abs(p.y - height) > Float.MIN_NORMAL) {
                             applet.vertex(p.x, p.y);
                         }
-                        last = p;
+                    } else {
+                        if (stepFunction && i >= 2 && Math.abs(last.y - p.y) > Float.MIN_NORMAL) {
+                            applet.vertex(last.x, p.y);
+                        }
+                        applet.vertex(p.x, p.y);
                     }
+                    last = p;
                 }
                 i++;
             }

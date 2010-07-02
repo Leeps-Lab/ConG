@@ -202,7 +202,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 applet.line(x0, y0, width, y1);
                 applet.fill(0);
                 float payoff = (1 - y) * maxPayoff;
-                if (payoff == -0.0f) {
+                if (payoff < 0) {
                     payoff = 0f;
                 }
                 String label = String.format("%.1f", payoff);
@@ -594,9 +594,10 @@ public class Chart extends Sprite implements Configurable<Config> {
             float tmpCurrentPercent = currentPercent;
             currentPayoffYou = payoffFunction.getPayoff(tmpCurrentPercent, subperiodStrategy, counterpartSubperiodStrategy);
             currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(tmpCurrentPercent, counterpartSubperiodStrategy, subperiodStrategy);
-            for (currentPercent = percentStart; currentPercent <= percentEnd; currentPercent += 0.001) {
-                updateLines();
-            }
+            currentPercent = percentStart;
+            updateLines();
+            currentPercent = percentEnd;
+            updateLines();
             currentPercent = tmpCurrentPercent;
         }
     }
