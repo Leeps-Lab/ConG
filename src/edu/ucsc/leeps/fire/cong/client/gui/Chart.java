@@ -155,7 +155,7 @@ public class Chart extends Sprite implements Configurable<Config> {
             applet.fill(100, 100, 100, 50);
             applet.noStroke();
             float x0, y0, x1, y1;
-            x0 = width * FIRE.client.getConfig().shock.start;
+            x0 = width * FIRE.client.getConfig().shock.start - 1;
             y0 = 0;
             x1 = width * FIRE.client.getConfig().shock.end;
             y1 = scaledHeight + scaledMargin * 2;
