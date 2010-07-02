@@ -18,11 +18,11 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
 
     private Config config;
     private float[][] payoff;
-    //private PImage buffer;
     private List<PImage> buffers;
     private PImage currentBuffer;
     private boolean mine;
     private PApplet applet;
+    private List<Integer> colors;
 
     public HeatmapHelper(int x, int y, int width, int height,
             boolean mine,
@@ -33,6 +33,17 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         this.payoff = new float[width][height];
         this.mine = mine;
         this.applet = applet;
+
+        colors = new ArrayList<Integer>();
+        colors.add(0xFFC24FED); // dark purple
+        colors.add(0xFFE4B2FF); // light purple
+        colors.add(0xFF214DC1); // dark blue
+        colors.add(0xFF4099F5); // light blue
+        colors.add(0xFF90C7FF); // sky blue
+        colors.add(0xFF4DED43); // bright green
+        colors.add(0xFFFAF567); // pastel yellow
+        colors.add(0xFFF57023); // orange
+        colors.add(0xFFEA3E05); // red
 
         FIRE.client.addConfigListener(this);
     }
@@ -64,38 +75,15 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         }
     }
 
-    // Chooses whether to interpolate between low and mid, or low and high
-    public int getRGB(float u) {
-        if (u < .5) {
-            return interpolateRGB(u * 2.0f, config.heatmapColorLow, config.heatmapColorMid);
-        } else {
-            return interpolateRGB((u - 0.5f) * 2.0f, config.heatmapColorMid, config.heatmapColorHigh);
-        }
-    }
-
-    // Linearly interpolates u between low and high
-    private static int interpolateRGB(float u, int low, int high) {
-        int red = (high & 0x00FF0000) >> 16;
-        red -= ((low & 0x00FF0000) >> 16);
-        red *= u;
-        red += ((low & 0x00FF0000) >> 16);
-
-        int green = (high & 0x0000FF00) >> 8;
-        green -= ((low & 0x0000FF00) >> 8);
-        green *= u;
-        green += ((low & 0x0000FF00) >> 8);
-
-        int blue = (high & 0x000000FF);
-        blue -= (low & 0x000000FF);
-        blue *= u;
-        blue += (low & 0x000000FF);
-
-        int color = 0xFF000000;
-        color += (red << 16);
-        color += (green << 8);
-        color += blue;
-
-        return color;
+    public int getRGB(float percent) {
+        int floorIndex = PApplet.floor((colors.size() - 1) * percent);
+        int ceilIndex = floorIndex + 1;
+        int colorFloor = colors.get(floorIndex);
+        int colorCeil = colors.get(ceilIndex);
+        float ppf = 1 / (float) (colors.size() - 1);
+        float amt = (percent - (ppf * floorIndex)) / ppf;
+        int c = applet.lerpColor(colorFloor, colorCeil, amt);
+        return c;
     }
 
     public void updateTwoStrategyHeatmap(float currentPercent) {
@@ -116,10 +104,10 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
                     float value;
                     if (mine) {
                         value = u.getPayoff(currentPercent,
-                            new float[]{A}, new float[]{a}) / u.getMax();
+                                new float[]{A}, new float[]{a}) / u.getMax();
                     } else {
                         value = u.getPayoff(currentPercent,
-                            new float[]{a}, new float[]{A}) / u.getMax();
+                                new float[]{a}, new float[]{A}) / u.getMax();
                     }
                     currentBuffer.pixels[y * size + x] = getRGB(value);
                 }

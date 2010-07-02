@@ -230,8 +230,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
                 hover.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
                 hover.update((1 - hoverPercent_a) * width, (1 - hoverPercent_A) * height);
                 strategyChanger.setHoverStrategy(
-                        new float[]{hoverPercent_A},
-                        new float[]{hoverPercent_a});
+                        new float[]{hoverPercent_A, 1 - hoverPercent_A},
+                        new float[]{hoverPercent_a, 1 - hoverPercent_a});
                 hover.setVisible(true);
                 hover.draw(applet);
             }
@@ -293,7 +293,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
             drawHeatmap();
             drawStrategyInfo();
-            
+
             applet.popMatrix();
         } catch (NullPointerException ex) {
             ex.printStackTrace();
@@ -312,7 +312,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
             float targetPercentA = 1 - ((mouseY - origin.y) / height);
-            strategyChanger.setTargetStrategy(new float[]{targetPercentA});
+            strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
         }
     }
 
@@ -327,7 +327,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
             float targetPercentA = 1 - ((mouseY - origin.y) / height);
-            strategyChanger.setTargetStrategy(new float[]{targetPercentA});
+            strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
         }
     }
 
@@ -339,8 +339,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.mixedStrategySelection &&
-                config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (config.mixedStrategySelection
+                && config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             this.payoffFunction = config.payoffFunction;
             this.counterpartPayoffFunction = config.counterpartPayoffFunction;
             switch (config.strategySelectionDisplayType) {
@@ -369,12 +369,12 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
                 float targetPercentA = strategyChanger.getTargetStrategy()[0];
                 targetPercentA += 0.01f;
                 targetPercentA = PEmbed.constrain(targetPercentA, 0, 1);
-                strategyChanger.setTargetStrategy(new float[]{targetPercentA});
+                strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
             } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
                 float targetPercentA = strategyChanger.getTargetStrategy()[0];
                 targetPercentA -= 0.01f;
                 targetPercentA = PEmbed.constrain(targetPercentA, 0, 1);
-                strategyChanger.setTargetStrategy(new float[]{targetPercentA});
+                strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
             }
         }
     }

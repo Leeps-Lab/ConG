@@ -60,12 +60,12 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 totalDelta += Math.abs(deltaStrategy[i]);
             }
             if (totalDelta > tickDelta) {
-                for (int i = 0; i < deltaStrategy.length; ++i) {
+                for (int i = 0; i < deltaStrategy.length; i++) {
                     deltaStrategy[i] = tickDelta * (deltaStrategy[i] / totalDelta);
                     currentStrategy[i] += deltaStrategy[i];
                 }
             } else {
-                for (int i = 0; i < currentStrategy.length; ++i) {
+                for (int i = 0; i < currentStrategy.length; i++) {
                     currentStrategy[i] = targetStrategy[i];
                 }
                 isMoving = false;
@@ -135,7 +135,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     }
 
     public void setCurrentStrategy(float[] strategy) {
-        for (int i = 0; i < currentStrategy.length; ++i) {
+        for (int i = 0; i < currentStrategy.length; i++) {
             currentStrategy[i] = strategy[i];
         }
     }
@@ -147,7 +147,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
 
     public void setTargetStrategy(float[] strategy) {
         if (FIRE.client.getConfig().percentChangePerSecond >= 1.0f) {
-            for (int i = 0; i < targetStrategy.length; ++i) {
+            for (int i = 0; i < targetStrategy.length; i++) {
                 currentStrategy[i] = strategy[i];
                 targetStrategy[i] = strategy[i];
             }
@@ -156,7 +156,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
             return;
         } else {
             synchronized (lock) {
-                for (int i = 0; i < targetStrategy.length; ++i) {
+                for (int i = 0; i < targetStrategy.length; i++) {
                     targetStrategy[i] = strategy[i];
                 }
                 isMoving = true;
