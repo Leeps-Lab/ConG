@@ -142,7 +142,8 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
             int id = entry.getKey();
             ClientInterface client = entry.getValue();
-            float[] newStrategy = new float[]{random.nextFloat()};
+            float r = random.nextFloat();
+            float[] newStrategy = new float[]{r, 1 - r};
             client.setMyStrategy(newStrategy);
             strategyChanged(newStrategy, null, null, null, id);
         }
