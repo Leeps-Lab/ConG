@@ -170,7 +170,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
             buttons = new RadioButtonGroup(this, width / 16, matrixTopLeft.origin.y,
                     (int)matrixSideLength, numStrategies,
-                    RadioButtonGroup.Alignment.Vertical, 14, applet);
+                    RadioButtonGroup.Alignment.Vertical, 15, applet);
             buttons.setEnabled(false);
         }
         

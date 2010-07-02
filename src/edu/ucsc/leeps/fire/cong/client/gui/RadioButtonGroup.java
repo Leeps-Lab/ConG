@@ -183,25 +183,29 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         @Override
         public void draw(PEmbed applet) {
             if (visible) {
+                applet.ellipseMode(PEmbed.CENTER);
                 applet.imageMode(PEmbed.CENTER);
+
+                applet.noStroke();
+                applet.fill(245, 245, 245);
+                applet.ellipse(origin.x, origin.y, width + 3, height + 3);
+                
+                applet.fill(0, 0, 0);
+                applet.ellipse(origin.x, origin.y, width + 1, height + 1);
+                
                 if (selected) {
                     applet.image(selectedTexture, origin.x, origin.y);
                 } else {
                     applet.image(idleTexture, origin.x, origin.y);
                 }
 
-                applet.ellipseMode(PEmbed.CENTER);
-                applet.stroke(0);
-                applet.strokeWeight(1);
-                applet.noFill();
-                applet.ellipse(origin.x, origin.y, width, height);
             }
         }
 
         private void textureSetup() {
-            idleTexture = applet.createImage(width, height, PEmbed.RGB);
+            idleTexture = applet.createImage(width, height, PEmbed.ARGB);
             idleTexture.loadPixels();
-            selectedTexture = applet.createImage(width, height, PEmbed.RGB);
+            selectedTexture = applet.createImage(width, height, PEmbed.ARGB);
             selectedTexture.loadPixels();
             float centerX = width / 2 - 1;
             float centerY = width / 2 - 1;
@@ -210,11 +214,11 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
                 float y = i / width;
                 float distance = PEmbed.dist(x, y, centerX, centerY);
                 if (distance < width / 2) {
-                    idleTexture.pixels[i] = applet.color(175, 175, 175);
-                    selectedTexture.pixels[i] = applet.color(0, 32, 113);
+                    idleTexture.pixels[i] = applet.color(175, 175, 175, 255);
+                    selectedTexture.pixels[i] = applet.color(0, 32, 113, 255);
                 } else {
-                    idleTexture.pixels[i] = applet.color(255, 255, 255);
-                    selectedTexture.pixels[i] = applet.color(255, 255, 255);
+                    idleTexture.pixels[i] = applet.color(255, 255, 255, 0);
+                    selectedTexture.pixels[i] = applet.color(255, 255, 255, 0);
                 }
             }
 
@@ -225,10 +229,10 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
                 float y = i / width;
                 float distance = PEmbed.dist(x, y, centerX, centerY);
                 if (distance < width / 2 &&
-                    idleTexture.pixels[i] != applet.color(255, 255, 255)) {
+                    idleTexture.pixels[i] != applet.color(255, 255, 255, 0)) {
                     float adjustment = distance * 10;
-                    idleTexture.pixels[i] = applet.color(237 - adjustment, 237 - adjustment, 237 - adjustment);
-                    selectedTexture.pixels[i] = applet.color(50 - adjustment, 140 - adjustment, 250 - adjustment);
+                    idleTexture.pixels[i] = applet.color(237 - adjustment, 237 - adjustment, 237 - adjustment, 255);
+                    selectedTexture.pixels[i] = applet.color(50 - adjustment, 140 - adjustment, 250 - adjustment, 255);
                 }
             }
 
@@ -239,10 +243,10 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
                 float y = i / width;
                 float distance = PEmbed.dist(x, y, centerX, centerY);
                 if (distance < width / 2 &&
-                    idleTexture.pixels[i] != applet.color(255, 255, 255)) {
+                    idleTexture.pixels[i] != applet.color(255, 255, 255, 0)) {
                     float adjustment = distance * 10;
-                    idleTexture.pixels[i] = applet.color(237 - adjustment, 237 - adjustment, 237 - adjustment);
-                    selectedTexture.pixels[i] = applet.color(50 - adjustment, 140 - adjustment, 250 - adjustment);
+                    idleTexture.pixels[i] = applet.color(237 - adjustment, 237 - adjustment, 237 - adjustment, 255);
+                    selectedTexture.pixels[i] = applet.color(50 - adjustment, 140 - adjustment, 250 - adjustment, 255);
                 }
             }
 
@@ -252,8 +256,8 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
                 float x = i % width;
                 float y = i / width;
                 if (PEmbed.dist(x, y, centerX, centerY) < width / 4) {
-                    idleTexture.pixels[i] = applet.color(175, 175, 175);
-                    selectedTexture.pixels[i] = applet.color(0, 0, 0);
+                    idleTexture.pixels[i] = applet.color(175, 175, 175, 255);
+                    selectedTexture.pixels[i] = applet.color(0, 0, 0, 255);
                 }
             }
 
