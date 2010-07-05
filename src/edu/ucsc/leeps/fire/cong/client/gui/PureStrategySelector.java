@@ -76,6 +76,23 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 columnLabels[i].draw(applet);
             }
 
+            int numStrategies = myStrat.length;
+            float interval = matrixSideLength / (float)numStrategies;
+            
+            applet.noStroke();
+            applet.fill(0, 95, 205, 125);
+            applet.rectMode(PEmbed.CORNER);
+
+            int playedStrat = buttons.getSelection();
+            applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y + playedStrat * interval, matrixSideLength, interval);
+            if (payoffFunction instanceof ThresholdPayoffFunction) {
+                if (((ThresholdPayoffFunction)payoffFunction).thresholdMet(currentPercent, myStrat, opponentStrat)) {
+                    applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y, interval, matrixSideLength);
+                } else {
+                    applet.rect(matrixTopLeft.origin.x + interval, matrixTopLeft.origin.y, interval, matrixSideLength);
+                }
+            }
+
             applet.stroke(0);
             applet.strokeWeight(2);
             
@@ -84,10 +101,12 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             applet.line(matrixBotLeft.origin.x, matrixBotLeft.origin.y, matrixBotRight.origin.x, matrixBotRight.origin.y);
             applet.line(matrixTopLeft.origin.x, matrixTopLeft.origin.y, matrixBotLeft.origin.x, matrixBotLeft.origin.y);
 
-            float midpointX = (matrixTopRight.origin.x + matrixTopLeft.origin.x) / 2f;
-            float midpointY = (matrixBotLeft.origin.y + matrixTopLeft.origin.y) / 2f;
-            applet.line(midpointX, matrixTopLeft.origin.y, midpointX, matrixBotLeft.origin.y);
-            applet.line(matrixTopLeft.origin.x, midpointY, matrixTopRight.origin.x, midpointY);
+            for (int i = 1; i < numStrategies; ++i) {
+                float x = matrixTopLeft.origin.x + i * interval;
+                float y = matrixTopLeft.origin.y + i * interval;
+                applet.line(x, matrixTopLeft.origin.y, x, matrixBotLeft.origin.y);
+                applet.line(matrixTopLeft.origin.x, y, matrixTopRight.origin.x, y);
+            }
 
             buttons.draw(applet);
 

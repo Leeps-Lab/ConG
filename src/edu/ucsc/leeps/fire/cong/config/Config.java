@@ -5,7 +5,6 @@
 package edu.ucsc.leeps.fire.cong.config;
 
 import edu.ucsc.leeps.fire.cong.client.gui.Line;
-import edu.ucsc.leeps.fire.cong.client.gui.HeatmapLegend;
 import edu.ucsc.leeps.fire.cong.server.PairedPopulation;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.Population;
@@ -34,6 +33,7 @@ public class Config extends BaseConfig {
     public StrategySelectionDisplayType strategySelectionDisplayType;
     public Line payoffAa, payoffAb, payoffBa, payoffBb, yourPayoff, otherPayoff;
     public Line yourStrategyOverTime, counterpartStrategyOverTime;
+    public Line thresholdLine;
     public int heatmapColorLow, heatmapColorMid, heatmapColorHigh;
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
     public ShockZone shock;
@@ -96,6 +96,13 @@ public class Config extends BaseConfig {
         counterpartStrategyOverTime.b = 0;
         counterpartStrategyOverTime.alpha = 255;
         counterpartStrategyOverTime.weight = 2f;
+        thresholdLine = new Line();
+        thresholdLine.mode = Line.Mode.Dashed;
+        thresholdLine.r = 255;
+        thresholdLine.g = 170;
+        thresholdLine.b = 0;
+        thresholdLine.alpha = 255;
+        thresholdLine.weight = 2f;
         rLabel = "Rock";
         pLabel = "Paper";
         sLabel = "Scissors";

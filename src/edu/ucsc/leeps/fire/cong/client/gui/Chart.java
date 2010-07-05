@@ -6,6 +6,7 @@ import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 
 /**
@@ -82,6 +83,7 @@ public class Chart extends Sprite implements Configurable<Config> {
     private Line counterpartPOverTime;
     private Line yourSOverTime;
     private Line counterpartSOverTime;
+    // threshold
     private Line threshold;
     // draw lock
     private final Object lock = new Object();
@@ -295,6 +297,14 @@ public class Chart extends Sprite implements Configurable<Config> {
                         drawTwoStrategyPayoffLines(applet);
                     } else if (mode == Mode.TwoStrategy) {
                         drawTwoStrategyLines(applet);
+                        threshold.draw(applet);
+                        if (config.payoffFunction instanceof ThresholdPayoffFunction) {
+                            applet.noStroke();
+                            applet.fill(255, 255, 0, 75);
+                            applet.rectMode(PEmbed.CORNER);
+                            applet.rect(0, 0, width,
+                                    height * (1 - ((ThresholdPayoffFunction)config.payoffFunction).threshold));
+                        }
                     }
                     if (mode == Mode.Payoff) {
                         actualPayoffYou.draw(applet);
@@ -629,6 +639,18 @@ public class Chart extends Sprite implements Configurable<Config> {
         yourSOverTime.weight = 2f;
         counterpartSOverTime.configure(config.otherPayoff);
         counterpartSOverTime.mode = Line.Mode.Solid;
+        threshold.configure(config.thresholdLine);
+        if (config.payoffFunction instanceof ThresholdPayoffFunction) {
+            threshold.clear();
+            for (float percent = 0f; percent < 1.0f; percent += .01f) {
+                threshold.setPoint(Math.round(threshold.width * percent), 
+                        Math.round(threshold.height * (1 - ((ThresholdPayoffFunction)config.payoffFunction).threshold)),
+                        true);
+            }
+            threshold.visible = true;
+        } else {
+            threshold.visible = false;
+        }
     }
 
     public void addPayoffPoint(Line line, float x, float y) {
