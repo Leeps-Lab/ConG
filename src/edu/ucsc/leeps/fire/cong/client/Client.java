@@ -326,7 +326,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         public void draw() {
             if (running) {
                 background(255);
-                        heatmapLegend.draw(embed);
+                heatmapLegend.draw(embed);
                 bimatrix.draw(embed);
                 simplex.draw(embed);
                 pureMatrix.draw(embed);

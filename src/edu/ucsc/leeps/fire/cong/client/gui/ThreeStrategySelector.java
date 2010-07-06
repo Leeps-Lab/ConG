@@ -98,11 +98,11 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         opponent.setColor(200, 40, 40);
 
         // set up Sliders
-        stratSlider[R] = new Slider(this, 50, width - 50, height / 3 + 50,
+        stratSlider[R] = new Slider(applet, this, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 50,
                 rColor, rLabel, 1f);
-        stratSlider[P] = new Slider(this, 50, width - 50, height / 3 + 100,
+        stratSlider[P] = new Slider(applet, this, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 100,
                 pColor, pLabel, 1f);
-        stratSlider[S] = new Slider(this, 50, width - 50, height / 3 + 150,
+        stratSlider[S] = new Slider(applet, this, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 150,
                 sColor, sLabel, 1f);
 
 
