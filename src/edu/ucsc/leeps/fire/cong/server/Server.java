@@ -35,12 +35,10 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
             Integer id) {
-        if (FIRE.server.getConfig().subperiods == 0) {
-            long timestamp = System.currentTimeMillis();
-            membership.get(id).strategyChanged(
-                    newStrategy, targetStrategy, hoverStrategy_A, hoverStrategy_a,
-                    id, timestamp);
-        }
+        long timestamp = System.currentTimeMillis();
+        membership.get(id).strategyChanged(
+                newStrategy, targetStrategy, hoverStrategy_A, hoverStrategy_a,
+                id, timestamp);
     }
 
     public boolean readyToStart() {

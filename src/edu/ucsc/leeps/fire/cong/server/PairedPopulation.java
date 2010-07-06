@@ -88,72 +88,76 @@ public class PairedPopulation implements Population {
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
             Integer changed, long timestamp) {
-        long periodTimeElapsed = timestamp - periodStartTime;
-        float percent = periodTimeElapsed / (FIRE.server.getConfig().length * 1000f);
-        float percentInStrategyTime;
-        int other = pairs.get(changed);
-        long inStrategyTime = timestamp - lastEvalTimes.get(changed);
-        percentInStrategyTime = inStrategyTime / (FIRE.server.getConfig().length * 1000f);
-        lastEvalTimes.put(changed, timestamp);
-        lastEvalTimes.put(other, timestamp);
-        updatePayoffs(
-                newStrategy,
-                changed, other,
-                percent, percentInStrategyTime, percentInStrategyTime);
-        // log the event
-        StrategyChangeEvent event = new StrategyChangeEvent();
-        event.changedId = changed;
-        event.counterpartId = other;
-        event.currentStrategy = newStrategy;
-        event.targetStrategy = targetStrategy;
-        event.hoverStrategy_A = hoverStrategy_A;
-        event.hoverStrategy_a = hoverStrategy_a;
-        event.counterpartCurrentStrategy = lastStrategies.get(other);
-        event.counterpartTargetStrategy = lastTargetStrategies.get(other);
-        event.counterpartHoverStrategy_A = lastHoverStrategies_A.get(other);
-        event.counterpartHoverStrategy_a = lastHoverStrategies_a.get(other);
-        if (counterparts.contains(changed)) {
-            event.payoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
-            event.counterpartPayoffFunction = FIRE.server.getConfig().payoffFunction;
+        if (FIRE.server.getConfig().subperiods == 0) {
+            long periodTimeElapsed = timestamp - periodStartTime;
+            float percent = periodTimeElapsed / (FIRE.server.getConfig().length * 1000f);
+            float percentInStrategyTime;
+            int other = pairs.get(changed);
+            long inStrategyTime = timestamp - lastEvalTimes.get(changed);
+            percentInStrategyTime = inStrategyTime / (FIRE.server.getConfig().length * 1000f);
+            lastEvalTimes.put(changed, timestamp);
+            lastEvalTimes.put(other, timestamp);
+            updatePayoffs(
+                    newStrategy,
+                    changed, other,
+                    percent, percentInStrategyTime, percentInStrategyTime);
+            // log the event
+            StrategyChangeEvent event = new StrategyChangeEvent();
+            event.changedId = changed;
+            event.counterpartId = other;
+            event.currentStrategy = newStrategy;
+            event.targetStrategy = targetStrategy;
+            event.hoverStrategy_A = hoverStrategy_A;
+            event.hoverStrategy_a = hoverStrategy_a;
+            event.counterpartCurrentStrategy = lastStrategies.get(other);
+            event.counterpartTargetStrategy = lastTargetStrategies.get(other);
+            event.counterpartHoverStrategy_A = lastHoverStrategies_A.get(other);
+            event.counterpartHoverStrategy_a = lastHoverStrategies_a.get(other);
+            if (counterparts.contains(changed)) {
+                event.payoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
+                event.counterpartPayoffFunction = FIRE.server.getConfig().payoffFunction;
+            } else {
+                event.payoffFunction = FIRE.server.getConfig().payoffFunction;
+                event.counterpartPayoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
+            }
+            if (event.targetStrategy == null) {
+                event.targetStrategy = event.currentStrategy;
+            }
+            if (event.counterpartTargetStrategy == null) {
+                event.counterpartTargetStrategy = event.counterpartCurrentStrategy;
+            }
+            if (event.hoverStrategy_A == null) {
+                event.hoverStrategy_A = new float[event.currentStrategy.length];
+                for (int i = 0; i < event.hoverStrategy_A.length; i++) {
+                    event.hoverStrategy_A[i] = Float.NaN;
+                }
+            }
+            if (event.hoverStrategy_a == null) {
+                event.hoverStrategy_a = new float[event.currentStrategy.length];
+                for (int i = 0; i < event.hoverStrategy_a.length; i++) {
+                    event.hoverStrategy_a[i] = Float.NaN;
+                }
+            }
+            if (event.counterpartHoverStrategy_A == null) {
+                event.counterpartHoverStrategy_A = new float[event.currentStrategy.length];
+                for (int i = 0; i < event.counterpartHoverStrategy_A.length; i++) {
+                    event.counterpartHoverStrategy_A[i] = Float.NaN;
+                }
+            }
+            if (event.counterpartHoverStrategy_a == null) {
+                event.counterpartHoverStrategy_a = new float[event.currentStrategy.length];
+                for (int i = 0; i < event.counterpartHoverStrategy_a.length; i++) {
+                    event.counterpartHoverStrategy_a[i] = Float.NaN;
+                }
+            }
+            FIRE.server.commit(event);
+            // save the strategies
+            lastTargetStrategies.put(changed, targetStrategy);
+            lastHoverStrategies_A.put(changed, hoverStrategy_A);
+            lastHoverStrategies_a.put(changed, hoverStrategy_a);
         } else {
-            event.payoffFunction = FIRE.server.getConfig().payoffFunction;
-            event.counterpartPayoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
+            lastStrategies.put(changed, newStrategy);
         }
-        if (event.targetStrategy == null) {
-            event.targetStrategy = event.currentStrategy;
-        }
-        if (event.counterpartTargetStrategy == null) {
-            event.counterpartTargetStrategy = event.counterpartCurrentStrategy;
-        }
-        if (event.hoverStrategy_A == null) {
-            event.hoverStrategy_A = new float[event.currentStrategy.length];
-            for (int i = 0; i < event.hoverStrategy_A.length; i++) {
-                event.hoverStrategy_A[i] = Float.NaN;
-            }
-        }
-        if (event.hoverStrategy_a == null) {
-            event.hoverStrategy_a = new float[event.currentStrategy.length];
-            for (int i = 0; i < event.hoverStrategy_a.length; i++) {
-                event.hoverStrategy_a[i] = Float.NaN;
-            }
-        }
-        if (event.counterpartHoverStrategy_A == null) {
-            event.counterpartHoverStrategy_A = new float[event.currentStrategy.length];
-            for (int i = 0; i < event.counterpartHoverStrategy_A.length; i++) {
-                event.counterpartHoverStrategy_A[i] = Float.NaN;
-            }
-        }
-        if (event.counterpartHoverStrategy_a == null) {
-            event.counterpartHoverStrategy_a = new float[event.currentStrategy.length];
-            for (int i = 0; i < event.counterpartHoverStrategy_a.length; i++) {
-                event.counterpartHoverStrategy_a[i] = Float.NaN;
-            }
-        }
-        FIRE.server.commit(event);
-        // save the strategies
-        lastTargetStrategies.put(changed, targetStrategy);
-        lastHoverStrategies_A.put(changed, hoverStrategy_A);
-        lastHoverStrategies_a.put(changed, hoverStrategy_a);
     }
 
     private void updatePayoffs(
@@ -218,7 +222,6 @@ public class PairedPopulation implements Population {
         long periodTimeElapsed = timestamp - periodStartTime;
         float percent = periodTimeElapsed / (FIRE.server.getConfig().length * 1000f);
         float subperiodPercent = 1f / FIRE.server.getConfig().subperiods;
-        updateAllStrategies();
         for (Integer client1 : counterparts) {
             Integer client2 = pairs.get(client1);
             updatePayoffs(

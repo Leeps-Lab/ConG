@@ -79,23 +79,23 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         strategyChart = new Chart(
                 bimatrix.width + 80 + leftMargin, topMargin,
                 chartWidth, strategyChartHeight,
-                simplex, Chart.Mode.TwoStrategy);
+                simplex, Chart.Mode.TwoStrategy, strategyChanger);
         payoffChart = new Chart(
                 bimatrix.width + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight,
-                simplex, Chart.Mode.Payoff);
+                simplex, Chart.Mode.Payoff, strategyChanger);
         rChart = new Chart(
                 bimatrix.width + 80 + leftMargin, topMargin,
                 chartWidth, threeStrategyChartHeight,
-                simplex, Chart.Mode.RStrategy);
+                simplex, Chart.Mode.RStrategy, strategyChanger);
         pChart = new Chart(
                 bimatrix.width + 80 + leftMargin, topMargin + threeStrategyChartHeight + 5,
                 chartWidth, threeStrategyChartHeight,
-                simplex, Chart.Mode.PStrategy);
+                simplex, Chart.Mode.PStrategy, strategyChanger);
         sChart = new Chart(
                 bimatrix.width + 80 + leftMargin, topMargin + 2 * (threeStrategyChartHeight + 5),
                 chartWidth, threeStrategyChartHeight,
-                simplex, Chart.Mode.SStrategy);
+                simplex, Chart.Mode.SStrategy, strategyChanger);
         legend = new ChartLegend(
                 (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);

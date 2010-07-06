@@ -38,6 +38,7 @@ public class Config extends BaseConfig {
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
     public ShockZone shock;
     public float impulse;
+    public float changeCost;
     public boolean showHeatmapLegend;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
@@ -61,6 +62,7 @@ public class Config extends BaseConfig {
         length = 120;
         pointsPerSecond = false;
         percentChangePerSecond = 0.1f;
+        changeCost = 0;
         subperiods = 0;
         population = new SinglePopulationInclude();
         strategySelectionDisplayType = StrategySelectionDisplayType.HeatmapBoth;

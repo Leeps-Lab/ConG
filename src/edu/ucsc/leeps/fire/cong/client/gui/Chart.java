@@ -3,6 +3,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
@@ -85,6 +86,7 @@ public class Chart extends Sprite implements Configurable<Config> {
     private Line counterpartSOverTime;
     // threshold
     private Line threshold;
+    private StrategyChanger strategyChanger;
     // draw lock
     private final Object lock = new Object();
 
@@ -94,8 +96,10 @@ public class Chart extends Sprite implements Configurable<Config> {
     };
     private Mode mode;
 
-    public Chart(int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode) {
+    public Chart(int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode, StrategyChanger strategyChanger) {
         super(x, y, width, height);
+
+        this.strategyChanger = strategyChanger;
 
         scaledHeight = Math.round(0.9f * height);
         scaledMargin = Math.round((height - scaledHeight) / 2f);
@@ -284,6 +288,10 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
+    private void drawSubperiodMarkers(PEmbed applet) {
+
+    }
+
     @Override
     public void draw(PEmbed applet) {
         synchronized (lock) {
@@ -320,7 +328,11 @@ public class Chart extends Sprite implements Configurable<Config> {
                     }
                 }
             }
+            if (mode == Mode.Payoff) {
+                actualPayoffYou.drawCostArea(applet, strategyChanger.getCost());
+            }
             drawPercentLine(applet);
+            drawSubperiodMarkers(applet);
             drawAxis(applet);
             applet.popMatrix();
         }

@@ -17,6 +17,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private volatile boolean running;
     private volatile boolean shouldUpdate;
     private boolean isMoving;
+    private float[] previousStrategy;
     private float[] currentStrategy;
     private float[] targetStrategy;
     private float[] deltaStrategy;
@@ -26,6 +27,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private float tickDelta;
     private long sleepTimeMillis;
     private float changeTimeEMA = 0;
+    private float strategyDelta;
 
     public StrategyChanger() {
         isMoving = false;
@@ -37,6 +39,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         synchronized (lock) {
             this.config = config;
             if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                previousStrategy = new float[2];
                 currentStrategy = new float[2];
                 targetStrategy = new float[2];
                 deltaStrategy = new float[2];
@@ -92,6 +95,11 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     }
 
     private void sendUpdate() {
+        float total = 0;
+        for (int i = 0; i < previousStrategy.length; i++) {
+            total += Math.abs(previousStrategy[i] - currentStrategy[i]);
+        }
+        strategyDelta += total / 2;
         FIRE.client.getServer().strategyChanged(
                 currentStrategy,
                 targetStrategy,
@@ -136,6 +144,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
 
     public void setCurrentStrategy(float[] strategy) {
         for (int i = 0; i < currentStrategy.length; i++) {
+            previousStrategy[i] = strategy[i];
             currentStrategy[i] = strategy[i];
         }
     }
@@ -164,8 +173,16 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         }
     }
 
+    public float getCost() {
+        if (config == null) {
+            return 0f;
+        }
+        return strategyDelta * config.changeCost;
+    }
+
     public void startPeriod() {
         shouldUpdate = true;
+        strategyDelta = 0;
     }
 
     public void setPause(boolean paused) {

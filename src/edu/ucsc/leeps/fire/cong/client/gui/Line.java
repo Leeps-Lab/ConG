@@ -185,6 +185,51 @@ public class Line extends Sprite implements Serializable {
         }
     }
 
+    public synchronized void drawCostArea(PEmbed applet, float cost) {
+        if (cost == 0) {
+            return;
+        }
+        float pixelCost = cost * width * height;
+        int xEnd = 0;
+        for (FPoint p : points) {
+            pixelCost -= p.y;
+            if (pixelCost <= 0) {
+                break;
+            }
+            xEnd++;
+        }
+        applet.pushMatrix();
+        applet.translate(origin.x, origin.y);
+        applet.fill(0xFFB40406);
+        applet.stroke(0xFFB40406);
+        applet.strokeWeight(weight);
+        applet.noStroke();
+        applet.beginShape();
+        FPoint last = null;
+        int i = 0;
+        for (FPoint p : points) {
+            if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
+                if (last == null) {
+                    applet.vertex(p.x, height);
+                    if (Math.abs(p.y - height) > Float.MIN_NORMAL) {
+                        applet.vertex(p.x, p.y);
+                    }
+                } else {
+                    applet.vertex(p.x, p.y);
+                }
+                last = p;
+            }
+            i++;
+            xEnd--;
+            if (xEnd == 0) {
+                break;
+            }
+        }
+        applet.vertex(last.x, height);
+        applet.endShape(PApplet.CLOSE);
+        applet.popMatrix();
+    }
+
     public synchronized void draw(PEmbed applet) {
         if (!visible) {
             return;
