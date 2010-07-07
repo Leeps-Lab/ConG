@@ -61,6 +61,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             population.endPeriod();
         } else {
             population.endSubperiod(FIRE.server.getConfig().subperiods);
+            population.logTick(FIRE.server.getConfig().subperiods, 0);
         }
     }
 
@@ -69,7 +70,9 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void quickTick(int millisLeft) {
-        population.logTick();
+        if (FIRE.server.getConfig().subperiods == 0) {
+            population.logTick(0, millisLeft);
+        }
     }
 
     private void configurePopulations() {
@@ -118,6 +121,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             public void run() {
                 if (subperiod <= FIRE.server.getConfig().subperiods) {
                     population.endSubperiod(subperiod);
+                    population.logTick(subperiod, 0);
                     subperiod++;
                 }
             }

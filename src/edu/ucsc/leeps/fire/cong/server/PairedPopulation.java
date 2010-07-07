@@ -28,6 +28,7 @@ public class PairedPopulation implements Population {
     private Map<Integer, float[]> lastTargetStrategies;
     private Map<Integer, float[]> lastHoverStrategies_A;
     private Map<Integer, float[]> lastHoverStrategies_a;
+    private Map<Integer, float[]> cachedStrategies;
 
     public PairedPopulation() {
         lastEvalTimes = new HashMap<Integer, Long>();
@@ -35,6 +36,7 @@ public class PairedPopulation implements Population {
         lastTargetStrategies = new HashMap<Integer, float[]>();
         lastHoverStrategies_A = new HashMap<Integer, float[]>();
         lastHoverStrategies_a = new HashMap<Integer, float[]>();
+        cachedStrategies = new HashMap<Integer, float[]>();
         pairs = new HashMap<Integer, Integer>();
         counterparts = new HashSet<Integer>();
     }
@@ -156,7 +158,7 @@ public class PairedPopulation implements Population {
             lastHoverStrategies_A.put(changed, hoverStrategy_A);
             lastHoverStrategies_a.put(changed, hoverStrategy_a);
         } else {
-            lastStrategies.put(changed, newStrategy);
+            cachedStrategies.put(changed, newStrategy);
         }
     }
 
@@ -224,6 +226,12 @@ public class PairedPopulation implements Population {
         float subperiodPercent = 1f / FIRE.server.getConfig().subperiods;
         for (Integer client1 : counterparts) {
             Integer client2 = pairs.get(client1);
+            if (cachedStrategies.containsKey(client1)) {
+                lastStrategies.put(client1, cachedStrategies.get(client1));
+            }
+            if (cachedStrategies.containsKey(client2)) {
+                lastStrategies.put(client2, cachedStrategies.get(client2));
+            }
             updatePayoffs(
                     lastStrategies.get(client1),
                     client1, client2,
@@ -252,11 +260,13 @@ public class PairedPopulation implements Population {
         }
     }
 
-    public void logTick() {
+    public void logTick(int subperiod, int millisLeft) {
         TickEvent event = new TickEvent();
         for (Entry<Integer, Integer> pair : pairs.entrySet()) {
             Integer p1 = pair.getKey();
             Integer p2 = pair.getValue();
+            event.subperiod = subperiod;
+            event.millisLeft = millisLeft;
             event.id = p1;
             event.counterpartId = p2;
             event.currentStrategy = lastStrategies.get(p1);

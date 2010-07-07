@@ -23,7 +23,7 @@ public interface Population extends Serializable {
             float[] hoverStrategy_a,
             Integer id, long timestamp);
 
-    public void logTick();
+    public void logTick(int subperiod, int millisLeft);
 
     public void endSubperiod(int subperiod);
 

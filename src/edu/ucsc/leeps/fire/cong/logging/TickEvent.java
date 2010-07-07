@@ -9,6 +9,8 @@ import edu.ucsc.leeps.fire.logging.LogEvent;
  */
 public class TickEvent implements LogEvent {
 
+    public int subperiod;
+    public int millisLeft;
     public int id;
     public int counterpartId;
     public float[] currentStrategy;

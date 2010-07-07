@@ -162,7 +162,7 @@ public class TwoPopulation implements Population {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public void logTick() {
+    public void logTick(int subperiod, int millisLeft) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }
