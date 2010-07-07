@@ -4,15 +4,7 @@
  */
 package edu.ucsc.leeps.fire.cong.client.gui;
 
-import edu.ucsc.leeps.fire.config.Configurable;
-import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
-import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
-import java.util.ArrayList;
-import java.util.List;
-import processing.core.PApplet;
-import processing.core.PImage;
 
 /**
  *

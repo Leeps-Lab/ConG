@@ -11,12 +11,14 @@ import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import java.awt.Color;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 /**
  *
  * @author swolpert
  */
-public class OneStrategyStripSelector extends Sprite implements Configurable<Config> {
+public class OneStrategyStripSelector extends Sprite implements Configurable<Config>, MouseListener{
     public static enum Alignment { Horizontal, Vertical };
 
     private Alignment align;
@@ -41,13 +43,27 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             slider = new Slider(applet, this, Slider.Alignment.Vertical, 0, height, width / 2f, Color.black, "A", 1f);
         }
     }
+    
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    public void mousePressed(MouseEvent e) {
+    }
+
+    public void mouseReleased(MouseEvent e) {
+    }
+
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    public void mouseExited(MouseEvent e) {
+    }
+
     @Override
     public void draw(PEmbed applet) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void configChanged(Config config) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
 }

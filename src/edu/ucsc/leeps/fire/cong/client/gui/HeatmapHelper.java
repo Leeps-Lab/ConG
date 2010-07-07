@@ -172,9 +172,11 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
             return;
         }
         if (currentBuffer != null) {
+            applet.imageMode(PEmbed.CORNER);
             applet.image(currentBuffer, origin.x, origin.y);
         }
         //if (visible && buffer != null) {
+        //    applet.imageMode(PEmbed.CORNER);
         //    applet.image(buffer, origin.x, origin.y);
         //}
     }

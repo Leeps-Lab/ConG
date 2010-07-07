@@ -8,7 +8,7 @@ public class Slider {
     public static enum Alignment { Horizontal, Vertical };
 
     private final int HANDLE_WIDTH = 10;
-    private final int HANDLE_HEIGHT = 25;
+    private final int HANDLE_HEIGHT = 27;
     private final String FORMAT = "%4.2f";
     private final float ERROR_MARGIN = .01f;
     private Alignment align;

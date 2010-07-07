@@ -44,6 +44,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 targetStrategy = new float[2];
                 deltaStrategy = new float[2];
             } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                previousStrategy = new float[3];
                 currentStrategy = new float[3];
                 targetStrategy = new float[3];
                 deltaStrategy = new float[3];
