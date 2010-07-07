@@ -86,10 +86,10 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         return c;
     }
 
-    public void updateTwoStrategyHeatmap(float currentPercent) {
+    public synchronized void updateTwoStrategyHeatmap(float currentPercent) {
         if (buffers == null) {
             int size = 100;
-            currentBuffer = applet.createImage(size, size, PEmbed.RGB);
+            currentBuffer = applet.createGraphics(size, size, PEmbed.P2D);
             currentBuffer.loadPixels();
             for (int x = 0; x < size; x++) {
                 for (int y = 0; y < size; y++) {
@@ -119,7 +119,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         }
     }
 
-    public void updateThreeStrategyHeatmap(
+    public synchronized void updateThreeStrategyHeatmap(
             float currentPercent,
             float r, float p, float s,
             ThreeStrategySelector threeStrategySelector) {
@@ -167,7 +167,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     }
 
     @Override
-    public void draw(PEmbed applet) {
+    public synchronized void draw(PEmbed applet) {
         if (!visible) {
             return;
         }
