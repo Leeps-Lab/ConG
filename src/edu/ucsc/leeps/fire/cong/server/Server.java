@@ -59,6 +59,8 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public void endPeriod() {
         if (FIRE.server.getConfig().subperiods == 0) {
             population.endPeriod();
+        } else {
+            population.endSubperiod(FIRE.server.getConfig().subperiods);
         }
     }
 

@@ -81,8 +81,9 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
             FIRE.client.getClient().setMyStrategy(currentStrategy);
             float elapsed = (System.nanoTime() - timestamp) / 1000000f;
             changeTimeEMA += 0.1 * (elapsed - changeTimeEMA);
-            long estimatedLag = Math.round(changeTimeEMA);
             sleepTimeMillis = tickTime - Math.round(changeTimeEMA);
+            /*
+            long estimatedLag = Math.round(changeTimeEMA);
             if (tickTime > 20.0 * estimatedLag) {
                 tickTime = Math.round(5.0 * estimatedLag);
                 sleepTimeMillis = tickTime - Math.round(changeTimeEMA);
@@ -92,6 +93,8 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 sleepTimeMillis = 0;
                 recalculateTickDelta();
             }
+             *
+             */
         }
     }
 
