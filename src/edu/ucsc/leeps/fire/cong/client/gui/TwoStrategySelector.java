@@ -250,7 +250,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
             counterpart.setVisible(true);
             counterpart.setLabel(counterpartPayoffFunction.getPayoff(
-                    currentPercent, new float[]{percent_A}, new float[]{percent_a}));
+                    currentPercent, new float[]{percent_a}, new float[]{percent_A}));
             counterpart.update(
                     counterpartHeatmap.origin.x + (1 - percent_a) * counterpartHeatmap.width,
                     counterpartHeatmap.origin.y + (1 - percent_A) * counterpartHeatmap.height);
