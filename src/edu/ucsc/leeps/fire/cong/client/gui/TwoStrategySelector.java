@@ -339,7 +339,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.mixedStrategySelection
+        if (config.mixedStrategySelection && !config.stripStrategySelection
                 && config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             this.payoffFunction = config.payoffFunction;
             this.counterpartPayoffFunction = config.counterpartPayoffFunction;

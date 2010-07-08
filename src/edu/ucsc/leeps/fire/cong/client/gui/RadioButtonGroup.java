@@ -126,6 +126,10 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         this.enabled = enabled;
     }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
     @Override
     public void setVisible(boolean isVisible) {
         visible = isVisible;
@@ -150,6 +154,14 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
     public int getSelection() {
         return selectedButton;
+    }
+
+    public int getNumButtons() {
+        return numButtons;
+    }
+
+    public Alignment getAlignment() {
+        return alignment;
     }
 
     public void clearSelections() {

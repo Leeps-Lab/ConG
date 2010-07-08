@@ -10,6 +10,7 @@ import edu.ucsc.leeps.fire.cong.client.gui.ThreeStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chart;
 import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.HeatmapLegend;
+import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Dimension;
@@ -35,6 +36,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     private TwoStrategySelector bimatrix;
     private ThreeStrategySelector simplex;
     private PureStrategySelector pureMatrix;
+    private OneStrategyStripSelector strip;
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
     private ChartLegend legend;
@@ -67,6 +69,9 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         pureMatrix = new PureStrategySelector(
                 leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, embed, strategyChanger);
+        strip = new OneStrategyStripSelector(leftMargin + matrixSize / 2,
+                topMargin + counterpartMatrixSize + 30,
+                matrixSize / 8, matrixSize, embed, strategyChanger);
         countdown = new Countdown(
                 counterpartMatrixSize + 4 * leftMargin, 40 + topMargin, embed);
         pointsDisplay = new PointsDisplay(
@@ -140,9 +145,6 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         rChart.clearAll();
         pChart.clearAll();
         sChart.clearAll();
-        if (FIRE.client.getConfig().showHeatmapLegend == true) {
-            heatmapLegend.visible = true;
-        }
     }
 
     public void endPeriod() {
@@ -330,6 +332,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
                 bimatrix.draw(embed);
                 simplex.draw(embed);
                 pureMatrix.draw(embed);
+                strip.draw(embed);
                 if (FIRE.client.getConfig() != null) {
                     if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                         strategyChart.draw(embed);

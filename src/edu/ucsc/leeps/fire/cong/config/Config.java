@@ -29,6 +29,7 @@ public class Config extends BaseConfig {
     public PayoffFunction counterpartPayoffFunction;
     public Population population;
     public boolean mixedStrategySelection;
+    public boolean stripStrategySelection;
     public int subperiods;
     public StrategySelectionDisplayType strategySelectionDisplayType;
     public Line payoffAa, payoffAb, payoffBa, payoffBb, yourPayoff, otherPayoff;
@@ -65,8 +66,9 @@ public class Config extends BaseConfig {
         changeCost = 0;
         subperiods = 0;
         population = new SinglePopulationInclude();
-        strategySelectionDisplayType = StrategySelectionDisplayType.HeatmapBoth;
+        strategySelectionDisplayType = StrategySelectionDisplayType.Matrix;
         mixedStrategySelection = true;
+        stripStrategySelection = false;
         yourPayoff = new Line();
         yourPayoff.r = 0;
         yourPayoff.g = 255;

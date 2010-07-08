@@ -9,12 +9,14 @@ import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 /**
  *
  * @author swolpert
  */
-public class PureStrategySelector extends Sprite implements Configurable<Config> {
+public class PureStrategySelector extends Sprite implements Configurable<Config>, KeyListener {
     private final int BUTTON_RADIUS = 15;
     private PEmbed applet;
     private float currentPercent;
@@ -139,11 +141,20 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     @Override
     public void setVisible(boolean isVisible) {
         visible = isVisible;
+        if (isVisible) {
+            applet.addKeyListener(this);
+        } else {
+            applet.removeKeyListener(this);
+        }
         buttons.setVisible(isVisible);
     }
 
     public void setEnabled(boolean enabled) {
         buttons.setEnabled(enabled);
+    }
+
+    public boolean isEnabled() {
+        return buttons.isEnabled();
     }
 
     public float[] getMyStrategy() {
@@ -176,6 +187,67 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
         for (int i = 0; i < opponentStrat.length; ++i) {
             opponentStrat[i] = strategy[i];
         }
+    }
+
+    public void keyTyped(KeyEvent e) {
+    }
+
+    public void keyPressed(KeyEvent e) {
+        if (!buttons.isEnabled()) {
+            return;
+        }
+        if (e.isActionKey()) {
+            if ((buttons.getAlignment() == RadioButtonGroup.Alignment.Vertical && 
+                    e.getKeyCode() == KeyEvent.VK_DOWN) ||
+                (buttons.getAlignment() == RadioButtonGroup.Alignment.Horizontal &&
+                    e.getKeyCode() == KeyEvent.VK_RIGHT)) {
+                int selection = buttons.getSelection();
+                if (selection < buttons.getNumButtons() - 1) {
+                    ++selection;
+                } else {
+                    return;
+                }
+
+                buttons.setSelection(selection);
+                for (int i = 0; i < myStrat.length; ++i) {
+                    myStrat[i] = 0;
+                }
+                myStrat[selection] = 1;
+
+                float[] strategy = new float[myStrat.length];
+                for(int i = 0; i < myStrat.length; ++i) {
+                    strategy[i] = myStrat[i];
+                }
+                strategyChanger.setTargetStrategy(strategy);
+                strategyChanger.setCurrentStrategy(strategy);
+            } else if ((buttons.getAlignment() == RadioButtonGroup.Alignment.Vertical &&
+                            e.getKeyCode() == KeyEvent.VK_UP) ||
+                        (buttons.getAlignment() == RadioButtonGroup.Alignment.Horizontal &&
+                            e.getKeyCode() == KeyEvent.VK_LEFT)) {
+                int selection = buttons.getSelection();
+                if (selection > 0) {
+                    --selection;
+                } else {
+                    return;
+                }
+
+                buttons.setSelection(selection);
+                for (int i = 0; i < myStrat.length; ++i) {
+                    myStrat[i] = 0;
+                }
+                myStrat[selection] = 1;
+
+                float[] strategy = new float[myStrat.length];
+                for(int i = 0; i < myStrat.length; ++i) {
+                    strategy[i] = myStrat[i];
+                }
+                strategyChanger.setTargetStrategy(strategy);
+                strategyChanger.setCurrentStrategy(strategy);
+            }
+        }
+    }
+
+    public void keyReleased(KeyEvent e) {
     }
 
     public void configChanged(Config config) {

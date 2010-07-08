@@ -152,6 +152,15 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         currentBuffer.updatePixels();
     }
 
+    public void updateStripHeatmap(
+            float currentPercent,
+            float opponentStrat) {
+        currentBuffer = applet.createGraphics(width, height, PEmbed.P2D);
+        currentBuffer.loadPixels();
+
+        
+    }
+
     public float getPayoff(int x, int y) {
         if (x < 0) {
             x = 0;
