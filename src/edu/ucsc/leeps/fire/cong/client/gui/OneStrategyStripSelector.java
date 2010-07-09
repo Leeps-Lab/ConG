@@ -31,7 +31,11 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     private Slider slider;
     private float currentPercent;
     private Config config;
-    private PayoffFunction payoffFucntion, counterpartPayoffFunction;
+    private PayoffFunction payoffFunction, counterpartPayoffFunction;
+    private Marker currentPayoff;
+    private Marker targetPayoff;
+    private Marker BPayoff;
+    private Marker APayoff;
 
     public OneStrategyStripSelector(int x, int y, int width, int height,
             PEmbed applet, StrategyChanger strategyChanger) {
@@ -44,8 +48,24 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
 
         if (width > height) {
             slider = new Slider(applet, this, Slider.Alignment.Horizontal, 0, width, height / 2f, Color.black, "A", 1f);
+            currentPayoff = new Marker(this, 0, height, true, 0);
+            currentPayoff.setLabelMode(Marker.LabelMode.Bottom);
+            targetPayoff = new Marker(this, 0, height, true, 0);
+            targetPayoff.setLabelMode(Marker.LabelMode.Bottom);
+            BPayoff = new Marker(this, 0, 0, true, 0);
+            BPayoff.setLabelMode(Marker.LabelMode.Top);
+            APayoff = new Marker(this, width, 0, true, 0);
+            APayoff.setLabelMode(Marker.LabelMode.Top);
         } else {
             slider = new Slider(applet, this, Slider.Alignment.Vertical, 0, height, width / 2f, Color.black, "A", 1f);
+            currentPayoff = new Marker(this, width, 0, true, 0);
+            currentPayoff.setLabelMode(Marker.LabelMode.Right);
+            targetPayoff = new Marker(this, width, 0, true, 0);
+            targetPayoff.setLabelMode(Marker.LabelMode.Right);
+            BPayoff = new Marker(this, 0, height, true, 0);
+            BPayoff.setLabelMode(Marker.LabelMode.Left);
+            APayoff = new Marker(this, 0, 0, true, 0);
+            APayoff.setLabelMode(Marker.LabelMode.Left);
         }
         slider.showGhost();
 
@@ -147,6 +167,19 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             }
         }
 
+        updateLabels();
+        APayoff.draw(applet);
+        BPayoff.draw(applet);
+        targetPayoff.draw(applet);
+        currentPayoff.draw(applet);
+
+        applet.stroke(0);
+        applet.strokeWeight(1);
+        applet.line(0, 0, width, 0);
+        applet.line(width, 0, width, height);
+        applet.line(width, height, 0, height);
+        applet.line(0, height, 0, 0);
+
         slider.draw(applet);
 
         applet.popMatrix();
@@ -157,10 +190,31 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
 
         if (config.mixedStrategySelection && config.stripStrategySelection &&
                 config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            payoffFunction = config.payoffFunction;
+            counterpartPayoffFunction = config.counterpartPayoffFunction;
             setVisible(true);
         } else {
             setVisible(false);
         }
     }
 
+    private void updateLabels() {
+        float uA = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{opponentStrat});
+        float uB = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{opponentStrat});
+        float uCurrent = payoffFunction.getPayoff(currentPercent, new float[]{myStrat}, new float[]{opponentStrat});
+        float uTarget = payoffFunction.getPayoff(currentPercent, new float[]{slider.getGhostValue()}, new float[]{opponentStrat});
+
+        APayoff.setLabel(uA);
+        BPayoff.setLabel(uB);
+        currentPayoff.setLabel(uCurrent);
+        targetPayoff.setLabel(uTarget);
+
+        if (width > height) {
+            currentPayoff.update(slider.getSliderPos(), height);
+            targetPayoff.update(slider.getGhostPos(), height);
+        } else {
+            currentPayoff.update(width, slider.getSliderPos());
+            targetPayoff.update(width, slider.getGhostPos());
+        }
+    }
 }
