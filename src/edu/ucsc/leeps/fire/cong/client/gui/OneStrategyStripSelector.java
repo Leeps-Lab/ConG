@@ -40,6 +40,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         this.strategyChanger = strategyChanger;
 
         heatmap = new HeatmapHelper(0, 0, width, height, true, applet);
+        heatmap.setVisible(true);
 
         if (width > height) {
             slider = new Slider(applet, this, Slider.Alignment.Horizontal, 0, width, height / 2f, Color.black, "A", 1f);
@@ -51,22 +52,70 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         applet.addMouseListener(this);
         FIRE.client.addConfigListener(this);
     }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        if (!visible) {
+            applet.removeMouseListener(this);
+        } else {
+            applet.addMouseListener(this);
+        }
+    }
+
+    public float[] getMyStrategy() {
+        return new float[]{myStrat, 0};
+    }
+
+    public void setCurrentPercent(float percent) {
+        currentPercent = percent;
+    }
+
+    public void setInitialStrategy(float A) {
+        myStrat = A;
+        slider.setStratValue(A);
+        slider.setGhostValue(A);
+    }
+
+    public void setMyStrategy(float A) {
+        myStrat = A;
+        slider.setStratValue(A);
+    }
+
+    public void setCounterpartStrategy(float a) {
+        opponentStrat = a;
+    }
+
+    public void update() {
+        if (visible) {
+            heatmap.updateStripHeatmap(currentPercent, opponentStrat);
+        }
+    }
     
     public void mouseClicked(MouseEvent e) {
     }
 
     public void mousePressed(MouseEvent e) {
-        float mouseX = e.getX() - origin.x;
-        float mouseY = e.getY() - origin.y;
+        if (enabled) {
+            float mouseX = e.getX() - origin.x;
+            float mouseY = e.getY() - origin.y;
 
-        if (slider.mouseOnGhost(mouseX, mouseY)) {
-            slider.grabGhost();
+            if (slider.mouseOnGhost(mouseX, mouseY)) {
+                slider.grabGhost();
+            }
         }
     }
 
     public void mouseReleased(MouseEvent e) {
-        if (slider.isGhostGrabbed()) {
-            slider.releaseGhost();
+        if (enabled) {
+            if (slider.isGhostGrabbed()) {
+                slider.releaseGhost();
+                strategyChanger.setTargetStrategy(new float[]{slider.getGhostValue(), 1 - slider.getGhostValue()});
+            }
         }
     }
 
@@ -85,10 +134,12 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
 
-        float mouseX = applet.mouseX - origin.x;
-        float mouseY = applet.mouseY - origin.y;
+        heatmap.draw(applet);
         
-        if (slider.isGhostGrabbed()) {
+        if (enabled && slider.isGhostGrabbed()) {
+            float mouseX = applet.mouseX - origin.x;
+            float mouseY = applet.mouseY - origin.y;
+            
             if (slider.getAlignment() == Slider.Alignment.Horizontal) {
                 slider.moveGhost(mouseX);
             } else {

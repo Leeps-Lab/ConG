@@ -120,7 +120,11 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         strategyChanger.setCurrentStrategy(FIRE.client.getConfig().initialStrategy);
         if (FIRE.client.getConfig().mixedStrategySelection) {
             if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                bimatrix.setMyStrategy(FIRE.client.getConfig().initialStrategy[0]);
+                if (FIRE.client.getConfig().stripStrategySelection) {
+                    strip.setInitialStrategy(FIRE.client.getConfig().initialStrategy[0]);
+                } else {
+                    bimatrix.setMyStrategy(FIRE.client.getConfig().initialStrategy[0]);
+                }
             } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 simplex.setAllStrategies(FIRE.client.getConfig().initialStrategy);
             } else {
@@ -140,6 +144,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         simplex.setEnabled(true);
         bimatrix.setEnabled(true);
         pureMatrix.setEnabled(true);
+        strip.setEnabled(true);
         payoffChart.clearAll();
         strategyChart.clearAll();
         rChart.clearAll();
@@ -152,6 +157,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         simplex.reset();
         bimatrix.setEnabled(false);
         pureMatrix.setEnabled(false);
+        strip.setEnabled(false);
     }
 
     public void setIsPaused(boolean isPaused) {
@@ -163,6 +169,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         }
         bimatrix.setEnabled(!isPaused);
         pureMatrix.setEnabled(!isPaused);
+        strip.setEnabled(!isPaused);
     }
 
     public void tick(int secondsLeft) {
@@ -171,6 +178,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         bimatrix.update();
         simplex.update();
         pureMatrix.update();
+        strip.update();
     }
 
     public void quickTick(int millisLeft) {
@@ -184,6 +192,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
             bimatrix.setCurrentPercent(this.percent);
             simplex.currentPercent = this.percent;
             pureMatrix.setCurrentPercent(percent);
+            strip.setCurrentPercent(percent);
             if (FIRE.client.getConfig().subperiods == 0) {
                 payoffChart.updateLines();
                 strategyChart.updateLines();
@@ -197,7 +206,11 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     public synchronized float[] getStrategy() {
         if (FIRE.client.getConfig().mixedStrategySelection) {
             if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                return bimatrix.getMyStrategy();
+                if (FIRE.client.getConfig().stripStrategySelection) {
+                    return strip.getMyStrategy();
+                } else {
+                    return bimatrix.getMyStrategy();
+                }
             } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 return simplex.getPlayerRPS();
             } else {
@@ -213,7 +226,11 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         strategyChanger.setCurrentStrategy(s);
         if (FIRE.client.getConfig().mixedStrategySelection) {
             if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                bimatrix.setMyStrategy(s[0]);
+                if (FIRE.client.getConfig().stripStrategySelection) {
+                    strip.setMyStrategy(s[0]);
+                } else {
+                    bimatrix.setMyStrategy(s[0]);
+                }
             } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 simplex.setCurrentStrategies(s);
             } else {
@@ -232,7 +249,11 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     public synchronized void setCounterpartStrategy(float[] s) {
         if (FIRE.client.getConfig().mixedStrategySelection) {
             if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                bimatrix.setCounterpartStrategy(s[0]);
+                if (FIRE.client.getConfig().stripStrategySelection) {
+                    strip.setCounterpartStrategy(s[0]);
+                } else {
+                    bimatrix.setCounterpartStrategy(s[0]);
+                }
             } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 simplex.setCounterpartRPS(s[0], s[1], s[2]);
             } else {
@@ -252,8 +273,13 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         strategyChanger.setCurrentStrategy(subperiodStrategy);
         if (FIRE.client.getConfig().mixedStrategySelection) {
             if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                bimatrix.setMyStrategy(subperiodStrategy[0]);
-                bimatrix.setCounterpartStrategy(counterpartSubperiodStrategy[0]);
+                if (FIRE.client.getConfig().stripStrategySelection) {
+                    strip.setMyStrategy(subperiodStrategy[0]);
+                    strip.setCounterpartStrategy(subperiodStrategy[0]);
+                } else {
+                    bimatrix.setMyStrategy(subperiodStrategy[0]);
+                    bimatrix.setCounterpartStrategy(counterpartSubperiodStrategy[0]);
+                }
             } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 simplex.setCurrentStrategies(subperiodStrategy);
                 simplex.setCounterpartRPS(

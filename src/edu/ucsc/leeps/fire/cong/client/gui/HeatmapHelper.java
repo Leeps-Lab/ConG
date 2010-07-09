@@ -158,7 +158,45 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         currentBuffer = applet.createGraphics(width, height, PEmbed.P2D);
         currentBuffer.loadPixels();
 
-        
+        PayoffFunction payoffFunction = config.payoffFunction;
+        float u;
+        float max = payoffFunction.getMax();
+
+        if (height > width) {
+            for (int i = 0; i < currentBuffer.pixels.length; i += width) {
+                int y = i / width;
+
+                float myStrat = 1f - ((float)y / (float)height);
+                u = payoffFunction.getPayoff(currentPercent,
+                        new float[]{myStrat},
+                        new float[]{opponentStrat});
+
+                currentBuffer.pixels[i] = getRGB(u / max);
+            }
+
+            for (int y = 0; y < height; ++y) {
+                for (int x = 1; x < width; ++x) {
+                    currentBuffer.pixels[y * width + x] = currentBuffer.pixels[y * width];
+                }
+            }
+        } else {
+            for (int i = 0; i / width == 0; ++i) {
+                float myStrat = (float)i / (float)width;
+                u = payoffFunction.getPayoff(currentPercent,
+                        new float[]{myStrat},
+                        new float[]{opponentStrat});
+
+                currentBuffer.pixels[i] = getRGB(u / max);
+            }
+
+            for (int x = 0; x < width; ++x) {
+                for (int y = 1; y < height; ++y) {
+                    currentBuffer.pixels[y * width + x] = currentBuffer.pixels[x];
+                }
+            }
+        }
+
+        currentBuffer.updatePixels();
     }
 
     public float getPayoff(int x, int y) {
