@@ -11,6 +11,7 @@ import edu.ucsc.leeps.fire.cong.client.gui.Chart;
 import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.HeatmapLegend;
 import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
+import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Dimension;
@@ -42,6 +43,9 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     private ChartLegend legend;
     private HeatmapLegend heatmapLegend;
     private StrategyChanger strategyChanger;
+    private Chatroom chatroom;
+    private boolean chatroomEnabled = false;
+    private JFrame frame = new JFrame();
 
     public Client() {
         removeAll();
@@ -107,11 +111,8 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         heatmapLegend = new HeatmapLegend(
                 bimatrix.width + 10 + leftMargin, strategyChart.height + topMargin + chartMargin, 20, payoffChartHeight);
         embed.running = true;
-        JFrame frame = new JFrame();
         frame.add(this);
-        Dimension size = getPreferredSize();
-        size.height += 20;
-        frame.setSize(size);
+        frame.pack();
         frame.setVisible(true);
     }
 
@@ -150,6 +151,10 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         rChart.clearAll();
         pChart.clearAll();
         sChart.clearAll();
+        if (FIRE.client.getConfig().chatroom && !chatroomEnabled) {
+            chatroomEnabled = true;
+            chatroom = new Chatroom(frame);
+        }
     }
 
     public void endPeriod() {
@@ -298,6 +303,10 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         rChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
         pChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
         sChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
+    }
+
+    public void newMessage(String message, int senderID) {
+        chatroom.newMessage(message, senderID);
     }
 
     public boolean readyForNextPeriod() {

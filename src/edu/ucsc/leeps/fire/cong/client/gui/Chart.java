@@ -161,11 +161,11 @@ public class Chart extends Sprite implements Configurable<Config> {
             applet.fill(100, 100, 100, 50);
             applet.noStroke();
             float x0, y0, x1, y1;
-            x0 = width * FIRE.client.getConfig().shock.start - 1;
+            x0 = width * FIRE.client.getConfig().shock.start;
             y0 = 0;
             x1 = width * FIRE.client.getConfig().shock.end;
             y1 = scaledHeight + scaledMargin * 2;
-            applet.rect(x0, y0, x1 - x0 + 2, y1);
+            applet.rect(x0, y0, x1 - x0, y1);
         }
     }
 
@@ -671,7 +671,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 Math.round(line.width * x),
                 Math.round(line.height * (1 - (y / maxPayoff))),
                 !shocked);
-        if (FIRE.client.getConfig().shock.backfill && Math.abs(currentPercent - config.shock.end) < 0.01) {
+        if (FIRE.client.getConfig().shock.backfill && currentPercent > config.shock.end) {
             line.clearShocks();
         }
     }
@@ -682,7 +682,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 Math.round(line.width * x),
                 Math.round(line.height * (1 - y)),
                 !shocked);
-        if (FIRE.client.getConfig().shock.backfill && Math.abs(currentPercent - config.shock.end) < 0.01) {
+        if (FIRE.client.getConfig().shock.backfill && currentPercent > config.shock.end) {
             line.clearShocks();
         }
     }

@@ -12,4 +12,7 @@ public interface ServerInterface {
             float[] hoverStrategy_A,
             float[] hoverStrategy_a,
             Integer id);
+
+    public void newMessage(String message, int senderID);
+
 }

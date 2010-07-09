@@ -13,4 +13,6 @@ public interface ClientInterface {
     public void setCounterpartStrategy(float[] s);
 
     public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy);
+
+    public void newMessage(String s, int i);
 }

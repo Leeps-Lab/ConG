@@ -41,6 +41,7 @@ public class Config extends BaseConfig {
     public float impulse;
     public float changeCost;
     public boolean showHeatmapLegend;
+    public boolean chatroom;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
@@ -119,5 +120,6 @@ public class Config extends BaseConfig {
         shock.backfill = false;
         impulse = 0f;
         showHeatmapLegend = true;
+        chatroom = true;
     }
 }
