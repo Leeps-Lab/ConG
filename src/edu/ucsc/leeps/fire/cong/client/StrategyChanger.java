@@ -3,6 +3,7 @@ package edu.ucsc.leeps.fire.cong.client;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.config.DecisionDelay;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.util.Random;
@@ -90,13 +91,13 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
             /*
             long estimatedLag = Math.round(changeTimeEMA);
             if (tickTime > 20.0 * estimatedLag) {
-                tickTime = Math.round(5.0 * estimatedLag);
-                sleepTimeMillis = tickTime - Math.round(changeTimeEMA);
-                recalculateTickDelta();
+            tickTime = Math.round(5.0 * estimatedLag);
+            sleepTimeMillis = tickTime - Math.round(changeTimeEMA);
+            recalculateTickDelta();
             } else if (sleepTimeMillis < 0) {
-                tickTime = Math.round(5.0 * estimatedLag);
-                sleepTimeMillis = 0;
-                recalculateTickDelta();
+            tickTime = Math.round(5.0 * estimatedLag);
+            sleepTimeMillis = 0;
+            recalculateTickDelta();
             }
              *
              */
@@ -115,7 +116,19 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 hoverStrategy_A,
                 hoverStrategy_a,
                 FIRE.client.getID());
-        //nextAllowedChangeTime = System.currentTimeMillis() + 1000 * random.nextInt(10);
+        if (config.delay != null) {
+            float delayTimeInSeconds = 0;
+            switch (config.delay.distribution) {
+                case uniform:
+                    delayTimeInSeconds = random.nextFloat() * config.delay.lambda;
+                    break;
+                case poisson:
+                    throw new UnsupportedOperationException();
+                case gaussian:
+                    throw new UnsupportedOperationException();
+            }
+            nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delayTimeInSeconds);
+        }
     }
 
     @Override

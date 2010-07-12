@@ -38,6 +38,7 @@ public class Config extends BaseConfig {
     public int heatmapColorLow, heatmapColorMid, heatmapColorHigh;
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
     public ShockZone shock;
+    public DecisionDelay delay;
     public float impulse;
     public float changeCost;
     public boolean showHeatmapLegend;
@@ -53,6 +54,7 @@ public class Config extends BaseConfig {
     public static final Class line = Line.class;
     public static final Class threshold = ThresholdPayoffFunction.class;
     public static final Class shockZone = ShockZone.class;
+    public static final Class decisionDelay = DecisionDelay.class;
     // per-client
     public float[] initialStrategy;
     public int matchID;
