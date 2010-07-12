@@ -64,52 +64,52 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         int counterpartMatrixSize = 100;
         strategyChanger = new StrategyChanger();
         bimatrix = new TwoStrategySelector(
-                leftMargin, topMargin + counterpartMatrixSize + 30,
+                null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, counterpartMatrixSize,
                 embed, strategyChanger);
         simplex = new ThreeStrategySelector(
-                20, 100, 250, 600,
+                null, 20, 100, 250, 600,
                 embed, strategyChanger);
         pureMatrix = new PureStrategySelector(
-                leftMargin, topMargin + counterpartMatrixSize + 30,
+                null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, embed, strategyChanger);
-        strip = new OneStrategyStripSelector(leftMargin + matrixSize / 2,
+        strip = new OneStrategyStripSelector(null, leftMargin + matrixSize / 2,
                 topMargin + counterpartMatrixSize + 30,
                 matrixSize / 8, matrixSize, embed, strategyChanger);
         countdown = new Countdown(
-                counterpartMatrixSize + 4 * leftMargin, 40 + topMargin, embed);
+                null, counterpartMatrixSize + 4 * leftMargin, 40 + topMargin, embed);
         pointsDisplay = new PointsDisplay(
-                counterpartMatrixSize + 4 * leftMargin, (int) (40 + textHeight) + topMargin, embed);
+                null, counterpartMatrixSize + 4 * leftMargin, (int) (40 + textHeight) + topMargin, embed);
         int chartWidth = (int) (width - bimatrix.width - 2 * leftMargin - 80);
         int chartMargin = 30;
         int strategyChartHeight = 100;
         int threeStrategyChartHeight = 30;
         int payoffChartHeight = (int) (height - strategyChartHeight - 2 * topMargin - chartMargin - 10);
         strategyChart = new Chart(
-                bimatrix.width + 80 + leftMargin, topMargin,
+                null, bimatrix.width + 80 + leftMargin, topMargin,
                 chartWidth, strategyChartHeight,
                 simplex, Chart.Mode.TwoStrategy, strategyChanger);
         payoffChart = new Chart(
-                bimatrix.width + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
+                null, bimatrix.width + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight,
                 simplex, Chart.Mode.Payoff, strategyChanger);
         rChart = new Chart(
-                bimatrix.width + 80 + leftMargin, topMargin,
+                null, bimatrix.width + 80 + leftMargin, topMargin,
                 chartWidth, threeStrategyChartHeight,
                 simplex, Chart.Mode.RStrategy, strategyChanger);
         pChart = new Chart(
-                bimatrix.width + 80 + leftMargin, topMargin + threeStrategyChartHeight + 5,
+                null, bimatrix.width + 80 + leftMargin, topMargin + threeStrategyChartHeight + 5,
                 chartWidth, threeStrategyChartHeight,
                 simplex, Chart.Mode.PStrategy, strategyChanger);
         sChart = new Chart(
-                bimatrix.width + 80 + leftMargin, topMargin + 2 * (threeStrategyChartHeight + 5),
+                null, bimatrix.width + 80 + leftMargin, topMargin + 2 * (threeStrategyChartHeight + 5),
                 chartWidth, threeStrategyChartHeight,
                 simplex, Chart.Mode.SStrategy, strategyChanger);
         legend = new ChartLegend(
-                (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
+                null, (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
         heatmapLegend = new HeatmapLegend(
-                bimatrix.width + 10 + leftMargin, strategyChart.height + topMargin + chartMargin, 20, payoffChartHeight);
+                null, bimatrix.width + 10 + leftMargin, strategyChart.height + topMargin + chartMargin, 20, payoffChartHeight);
         embed.running = true;
         frame.add(this);
         frame.pack();

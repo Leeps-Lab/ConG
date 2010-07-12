@@ -37,13 +37,13 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     private Marker BPayoff;
     private Marker APayoff;
 
-    public OneStrategyStripSelector(int x, int y, int width, int height,
+    public OneStrategyStripSelector(Sprite parent, int x, int y, int width, int height,
             PEmbed applet, StrategyChanger strategyChanger) {
-        super(x, y, width, height);
+        super(parent, x, y, width, height);
         this.applet = applet;
         this.strategyChanger = strategyChanger;
 
-        heatmap = new HeatmapHelper(0, 0, width, height, true, applet);
+        heatmap = new HeatmapHelper(this, 0, 0, width, height, true, applet);
         heatmap.setVisible(true);
 
         if (width > height) {

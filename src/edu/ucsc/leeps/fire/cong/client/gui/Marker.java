@@ -13,7 +13,6 @@ public class Marker extends Sprite {
     protected FPoint labelOrigin;
     protected boolean grabbed;
     protected boolean enlarged;
-    protected Sprite parent;
     protected LabelMode mode;
 
     public enum LabelMode {
@@ -22,8 +21,7 @@ public class Marker extends Sprite {
     };
 
     public Marker(Sprite parent, float x, float y, boolean visible, float radius) {
-        super(x, y, (int)radius, (int)radius);
-        this.parent = parent;
+        super(parent, x, y, (int)radius, (int)radius);
         this.visible = visible;
         this.radius = radius;
         largeRadius = radius * 1.5f;

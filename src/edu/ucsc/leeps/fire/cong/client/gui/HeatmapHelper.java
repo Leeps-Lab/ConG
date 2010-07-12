@@ -24,10 +24,10 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     private PApplet applet;
     private List<Integer> colors;
 
-    public HeatmapHelper(int x, int y, int width, int height,
+    public HeatmapHelper(Sprite parent, int x, int y, int width, int height,
             boolean mine,
             PApplet applet) {
-        super(x, y, width, height);
+        super(parent, x, y, width, height);
         this.width = width;
         this.height = height;
         this.payoff = new float[width][height];

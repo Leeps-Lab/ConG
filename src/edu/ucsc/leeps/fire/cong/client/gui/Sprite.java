@@ -9,10 +9,12 @@ public abstract class Sprite implements Serializable {
     public transient FPoint origin;
     public transient FPoint screenLocation;
     public transient int width, height;
+    public transient Sprite parent;
     public boolean visible;
 
-    public Sprite(float x, float y, int width, int height) {
+    public Sprite(Sprite parent, float x, float y, int width, int height) {
         origin = new FPoint(x, y);
+        this.parent = parent;
         this.width = width;
         this.height = height;
         screenLocation = new FPoint(x, y);
@@ -38,5 +40,14 @@ public abstract class Sprite implements Serializable {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public FPoint getTranslation(FPoint newOrigin) {
+        if (parent == null) {
+            return newOrigin;
+        } else {
+            FPoint translation = new FPoint(origin.x + newOrigin.x, origin.y + newOrigin.y);
+            return parent.getTranslation(translation);
+        }
     }
 }

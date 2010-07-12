@@ -40,18 +40,18 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private StrategyChanger strategyChanger;
 
     public TwoStrategySelector(
-            int x, int y,
+            Sprite parent, int x, int y,
             int matrixSize, int counterpartMatrixSize,
             PEmbed applet,
             StrategyChanger strategyChanger) {
-        super(x, y, matrixSize, matrixSize);
+        super(parent, x, y, matrixSize, matrixSize);
         this.applet = applet;
         heatmap = new HeatmapHelper(
-                0, 0, matrixSize, matrixSize,
+                this, 0, 0, matrixSize, matrixSize,
                 true,
                 applet);
         counterpartHeatmap = new HeatmapHelper(
-                0, -(counterpartMatrixSize + 30), counterpartMatrixSize, counterpartMatrixSize,
+                this, 0, -(counterpartMatrixSize + 30), counterpartMatrixSize, counterpartMatrixSize,
                 false,
                 applet);
         applet.addMouseListener(this);

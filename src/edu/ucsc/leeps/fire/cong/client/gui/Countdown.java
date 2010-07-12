@@ -10,8 +10,8 @@ public class Countdown extends Sprite {
 
     private int secondsLeft;
 
-    public Countdown(int x, int y, PEmbed embed) {
-        super(x, y, (int) embed.textWidth("Seconds Left: 00"), (int) (embed.textAscent() + embed.textDescent()));
+    public Countdown(Sprite parent, int x, int y, PEmbed embed) {
+        super(parent, x, y, (int) embed.textWidth("Seconds Left: 00"), (int) (embed.textAscent() + embed.textDescent()));
         secondsLeft = 0;
     }
 

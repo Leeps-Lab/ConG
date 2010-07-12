@@ -34,9 +34,9 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private StrategyChanger strategyChanger;
 
-    public PureStrategySelector (int x, int y, int size,
+    public PureStrategySelector (Sprite parent, int x, int y, int size,
             PEmbed applet, StrategyChanger strategyChanger) {
-        super(x, y, size, size);
+        super(parent, x, y, size, size);
         visible = false;
         this.applet = applet;
 

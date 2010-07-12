@@ -45,9 +45,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private StrategyChanger strategyChanger;
 
     public ThreeStrategySelector(
-            float x, float y, int width, int height,
+            Sprite parent, float x, float y, int width, int height,
             PEmbed applet, StrategyChanger strategyChanger) {
-        super(x, y, width, height);
+        super(parent, x, y, width, height);
         this.applet = applet;
         this.strategyChanger = strategyChanger;
         mouseInTriangle = false;
@@ -144,7 +144,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
         applet.addMouseListener(this);
         heatmap = new HeatmapHelper(
-                (int) (origin.x + rock.origin.x), (int) (origin.y + scissors.origin.y),
+                this, (int) (origin.x + rock.origin.x), (int) (origin.y + scissors.origin.y),
                 (int) (paper.origin.x - rock.origin.x), (int) (rock.origin.y - scissors.origin.y),
                 true, applet);
         heatmap.setVisible(true);

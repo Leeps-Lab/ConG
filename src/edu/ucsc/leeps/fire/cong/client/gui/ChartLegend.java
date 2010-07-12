@@ -16,8 +16,8 @@ public class ChartLegend extends Sprite implements Configurable<Config> {
     private Config config;
     private Line youLine, otherLine, threshold;
 
-    public ChartLegend(int x, int y, int width, int height) {
-        super(x, y, width, height);
+    public ChartLegend(Sprite parent, int x, int y, int width, int height) {
+        super(parent, x, y, width, height);
         FIRE.client.addConfigListener(this);
     }
 

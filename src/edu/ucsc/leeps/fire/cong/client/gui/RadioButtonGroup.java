@@ -39,8 +39,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
     public RadioButtonGroup(Sprite parent, float x, float y, int length,
             int numButtons, Alignment alignment, int buttonRadius, PEmbed applet) {
-        super(x, y, 0, 0);
-        this.parent = parent;
+        super(parent, x, y, 0, 0);
         this.numButtons = numButtons;
         this.alignment = alignment;
         this.applet = applet;

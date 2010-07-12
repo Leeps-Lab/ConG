@@ -96,58 +96,58 @@ public class Chart extends Sprite implements Configurable<Config> {
     };
     private Mode mode;
 
-    public Chart(int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode, StrategyChanger strategyChanger) {
-        super(x, y, width, height);
+    public Chart(Sprite parent, int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode, StrategyChanger strategyChanger) {
+        super(parent, x, y, width, height);
 
         this.strategyChanger = strategyChanger;
 
         scaledHeight = Math.round(0.9f * height);
         scaledMargin = Math.round((height - scaledHeight) / 2f);
 
-        actualPayoffYou = new Line(0, scaledMargin, width, scaledHeight);
-        actualPayoffCounterpart = new Line(0, scaledMargin, width, scaledHeight);
+        actualPayoffYou = new Line(this, 0, scaledMargin, width, scaledHeight);
+        actualPayoffCounterpart = new Line(this, 0, scaledMargin, width, scaledHeight);
         // Two strategy
-        actualAPayoff = new Line(0, 0, width, height);
-        actualBPayoff = new Line(0, 0, width, height);
-        futureAPayoff = new Line(0, 0, width, height);
-        futureBPayoff = new Line(0, 0, width, height);
-        actualAaPayoff = new Line(0, 0, width, height);
-        actualAbPayoff = new Line(0, 0, width, height);
-        actualBaPayoff = new Line(0, 0, width, height);
-        actualBbPayoff = new Line(0, 0, width, height);
-        futureAaPayoff = new Line(0, 0, width, height);
-        futureAbPayoff = new Line(0, 0, width, height);
-        futureBaPayoff = new Line(0, 0, width, height);
-        futureBbPayoff = new Line(0, 0, width, height);
-        yourStrategyOverTime = new Line(0, scaledMargin, width, scaledHeight);
-        counterpartStrategyOverTime = new Line(0, scaledMargin, width, scaledHeight);
+        actualAPayoff = new Line(this, 0, 0, width, height);
+        actualBPayoff = new Line(this, 0, 0, width, height);
+        futureAPayoff = new Line(this, 0, 0, width, height);
+        futureBPayoff = new Line(this, 0, 0, width, height);
+        actualAaPayoff = new Line(this, 0, 0, width, height);
+        actualAbPayoff = new Line(this, 0, 0, width, height);
+        actualBaPayoff = new Line(this, 0, 0, width, height);
+        actualBbPayoff = new Line(this, 0, 0, width, height);
+        futureAaPayoff = new Line(this, 0, 0, width, height);
+        futureAbPayoff = new Line(this, 0, 0, width, height);
+        futureBaPayoff = new Line(this, 0, 0, width, height);
+        futureBbPayoff = new Line(this, 0, 0, width, height);
+        yourStrategyOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
+        counterpartStrategyOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
         // RPSD
-        actualRPayoff = new Line(0, 0, width, height);
-        actualPPayoff = new Line(0, 0, width, height);
-        actualSPayoff = new Line(0, 0, width, height);
+        actualRPayoff = new Line(this, 0, 0, width, height);
+        actualPPayoff = new Line(this, 0, 0, width, height);
+        actualSPayoff = new Line(this, 0, 0, width, height);
 
-        futureRPayoff = new Line(0, 0, width, height);
-        futurePPayoff = new Line(0, 0, width, height);
-        futureSPayoff = new Line(0, 0, width, height);
-        futureRrPayoff = new Line(0, 0, width, height);
-        futureRpPayoff = new Line(0, 0, width, height);
-        futureRsPayoff = new Line(0, 0, width, height);
-        futurePrPayoff = new Line(0, 0, width, height);
-        futurePpPayoff = new Line(0, 0, width, height);
-        futurePsPayoff = new Line(0, 0, width, height);
-        futureSrPayoff = new Line(0, 0, width, height);
-        futureSpPayoff = new Line(0, 0, width, height);
-        futureSsPayoff = new Line(0, 0, width, height);
+        futureRPayoff = new Line(this, 0, 0, width, height);
+        futurePPayoff = new Line(this, 0, 0, width, height);
+        futureSPayoff = new Line(this, 0, 0, width, height);
+        futureRrPayoff = new Line(this, 0, 0, width, height);
+        futureRpPayoff = new Line(this, 0, 0, width, height);
+        futureRsPayoff = new Line(this, 0, 0, width, height);
+        futurePrPayoff = new Line(this, 0, 0, width, height);
+        futurePpPayoff = new Line(this, 0, 0, width, height);
+        futurePsPayoff = new Line(this, 0, 0, width, height);
+        futureSrPayoff = new Line(this, 0, 0, width, height);
+        futureSpPayoff = new Line(this, 0, 0, width, height);
+        futureSsPayoff = new Line(this, 0, 0, width, height);
 
-        yourROverTime = new Line(0, scaledMargin, width, scaledHeight);
-        counterpartROverTime = new Line(0, scaledMargin, width, scaledHeight);
-        yourPOverTime = new Line(0, scaledMargin, width, scaledHeight);
-        counterpartPOverTime = new Line(0, scaledMargin, width, scaledHeight);
-        yourSOverTime = new Line(0, scaledMargin, width, scaledHeight);
-        counterpartSOverTime = new Line(0, scaledMargin, width, scaledHeight);
+        yourROverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
+        counterpartROverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
+        yourPOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
+        counterpartPOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
+        yourSOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
+        counterpartSOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
 
         // Threshold
-        threshold = new Line(0, 0, width, height);
+        threshold = new Line(this, 0, 0, width, height);
 
         this.simplex = simplex;
 

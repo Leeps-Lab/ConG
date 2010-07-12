@@ -25,15 +25,15 @@ public class Line extends Sprite implements Serializable {
     private transient Marker costMarker;
 
     public Line() {
-        super(0, 0, 0, 0);
+        super(null, 0, 0, 0, 0);
         r = g = b = 0;
         alpha = 255;
         weight = 1.0f;
         mode = Mode.Solid;
     }
 
-    public Line(int x, int y, int width, int height) {
-        super(x, y, width, height);
+    public Line(Sprite parent, int x, int y, int width, int height) {
+        super(parent, x, y, width, height);
         visible = false;
         definedPoints = new HashMap<Integer, FPoint>();
         points = new LinkedList<FPoint>();

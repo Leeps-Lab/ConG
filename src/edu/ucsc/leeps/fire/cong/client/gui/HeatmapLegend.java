@@ -19,8 +19,8 @@ public class HeatmapLegend extends Sprite implements Configurable<Config> {
 
     private HeatmapHelper heatmap;
 
-    public HeatmapLegend(int x, int y, int width, int height) {
-        super(x, Math.round(y + .05f * height), width, Math.round(.9f * height));
+    public HeatmapLegend(Sprite parent, int x, int y, int width, int height) {
+        super(parent, x, Math.round(y + .05f * height), width, Math.round(.9f * height));
         FIRE.client.addConfigListener(this);
     }
 
@@ -32,7 +32,7 @@ public class HeatmapLegend extends Sprite implements Configurable<Config> {
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
         applet.strokeWeight(1f);
-        heatmap = new HeatmapHelper(0, 0, 0, 0, true, applet);
+        heatmap = new HeatmapHelper(this, 0, 0, 0, 0, true, applet);
         for (float y = 0; y < this.height; y++) {
             float percent = .999f - y / this.height;
             applet.stroke(heatmap.getRGB(percent));
