@@ -120,6 +120,6 @@ public class Config extends BaseConfig {
         shock.backfill = false;
         impulse = 0f;
         showHeatmapLegend = true;
-        chatroom = true;
+        chatroom = false;
     }
 }

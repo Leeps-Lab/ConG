@@ -5,6 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import java.util.Random;
 
 /**
  *
@@ -28,9 +29,13 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private long sleepTimeMillis;
     private float changeTimeEMA = 0;
     private float strategyDelta;
+    private Random random;
+    private long nextAllowedChangeTime;
 
     public StrategyChanger() {
         isMoving = false;
+        random = new Random();
+        nextAllowedChangeTime = System.currentTimeMillis();
         start();
         FIRE.client.addConfigListener(this);
     }
@@ -110,6 +115,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 hoverStrategy_A,
                 hoverStrategy_a,
                 FIRE.client.getID());
+        //nextAllowedChangeTime = System.currentTimeMillis() + 1000 * random.nextInt(10);
     }
 
     @Override
@@ -117,7 +123,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         running = true;
         while (running) {
             try {
-                if (isMoving && shouldUpdate) {
+                if (!decisionDelayed() && isMoving && shouldUpdate) {
                     update();
                 }
                 sleep(sleepTimeMillis);
@@ -125,6 +131,10 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 ex.printStackTrace();
             }
         }
+    }
+
+    private boolean decisionDelayed() {
+        return System.currentTimeMillis() < nextAllowedChangeTime;
     }
 
     private void recalculateTickDelta() {
