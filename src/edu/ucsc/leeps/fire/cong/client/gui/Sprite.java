@@ -46,7 +46,7 @@ public abstract class Sprite implements Serializable {
         if (parent == null) {
             return newOrigin;
         } else {
-            FPoint translation = new FPoint(origin.x + newOrigin.x, origin.y + newOrigin.y);
+            FPoint translation = new FPoint(parent.origin.x + newOrigin.x, parent.origin.y + newOrigin.y);
             return parent.getTranslation(translation);
         }
     }
