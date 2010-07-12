@@ -73,7 +73,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         pureMatrix = new PureStrategySelector(
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, embed, strategyChanger);
-        strip = new OneStrategyStripSelector(null, leftMargin + matrixSize / 2,
+        strip = new OneStrategyStripSelector(leftMargin + 7 * matrixSize / 8,
                 topMargin + counterpartMatrixSize + 30,
                 matrixSize / 8, matrixSize, embed, strategyChanger);
         countdown = new Countdown(

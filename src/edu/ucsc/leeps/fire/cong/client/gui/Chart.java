@@ -170,7 +170,7 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     private void drawAxis(PEmbed applet) {
-
+        applet.rectMode(PEmbed.CORNER);
         applet.noFill();
         applet.stroke(0);
         applet.strokeWeight(2);
