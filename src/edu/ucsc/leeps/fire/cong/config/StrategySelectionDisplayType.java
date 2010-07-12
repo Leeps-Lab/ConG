@@ -10,5 +10,5 @@ package edu.ucsc.leeps.fire.cong.config;
  * @author jpettit
  */
 public enum StrategySelectionDisplayType {
-    HeatmapSingle, HeatmapBoth, Matrix
+    HeatmapSingle, HeatmapBoth, Matrix, Slider
 }

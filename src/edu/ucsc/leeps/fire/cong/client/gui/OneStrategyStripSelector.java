@@ -10,6 +10,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;
@@ -34,7 +35,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     private Slider slider;
     private float currentPercent;
     private Config config;
-    private PayoffFunction payoffFunction, counterpartPayoffFunction;
+    private PayoffFunction payoffFunction;
     private Marker currentPayoff;
     private Marker targetPayoff;
     private Marker BPayoff;
@@ -132,6 +133,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     public void mousePressed(MouseEvent e) {
         if (enabled && isHit(e.getX(), e.getY())) {
             slider.grabGhost();
+            hover.setVisible(false);
         }
     }
 
@@ -198,6 +200,18 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             } else {
                 slider.moveGhost(mouseY);
             }
+        } else if (enabled && isHit(applet.mouseX, applet.mouseY) && heatmap.visible) {
+            hover.setVisible(true);
+            hover.update(applet.mouseX - origin.x, applet.mouseY - origin.y);
+            float hoverA;
+            if (width > height) {
+                hoverA = (applet.mouseX - origin.x) / (float)width;
+            } else {
+                hoverA = 1 - (applet.mouseY - origin.y) / (float)height;
+            }
+            hover.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverA}, new float[]{opponentStrat}));
+        } else {
+            hover.setVisible(false);
         }
 
         updateLabels();
@@ -206,14 +220,18 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         targetPayoff.draw(applet);
         currentPayoff.draw(applet);
 
-        applet.stroke(0);
-        applet.strokeWeight(1);
-        applet.line(0, 0, width, 0);
-        applet.line(width, 0, width, height);
-        applet.line(width, height, 0, height);
-        applet.line(0, height, 0, 0);
+        if (heatmap.visible) {
+            applet.stroke(0);
+            applet.strokeWeight(1);
+            applet.line(0, 0, width, 0);
+            applet.line(width, 0, width, height);
+            applet.line(width, height, 0, height);
+            applet.line(0, height, 0, 0);
+        }
 
         slider.draw(applet);
+        
+        hover.draw(applet);
 
         applet.popMatrix();
     }
@@ -224,8 +242,13 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         if (config.mixedStrategySelection && config.stripStrategySelection &&
                 config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             payoffFunction = config.payoffFunction;
-            counterpartPayoffFunction = config.counterpartPayoffFunction;
             setVisible(true);
+
+            if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapSingle) {
+                setHeatmapMode(true);
+            } else if (config.strategySelectionDisplayType == StrategySelectionDisplayType.Slider) {
+                setHeatmapMode(false);
+            }
         } else {
             setVisible(false);
         }
@@ -249,5 +272,13 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             currentPayoff.update(0, slider.getSliderPos());
             targetPayoff.update(0, slider.getGhostPos());
         }
+    }
+
+    private void setHeatmapMode(boolean showHeatmap) {
+        heatmap.setVisible(showHeatmap);
+        currentPayoff.setVisible(showHeatmap);
+        targetPayoff.setVisible(showHeatmap);
+        APayoff.setVisible(showHeatmap);
+        BPayoff.setVisible(showHeatmap);
     }
 }
