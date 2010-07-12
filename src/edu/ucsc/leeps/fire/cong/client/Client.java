@@ -205,6 +205,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
                 pChart.updateLines();
                 sChart.updateLines();
             }
+            pointsDisplay.update();
         }
     }
 

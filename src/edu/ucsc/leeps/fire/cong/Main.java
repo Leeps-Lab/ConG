@@ -12,19 +12,27 @@ import java.io.InputStreamReader;
 public class Main {
 
     public static void main(String[] args) throws Exception {
+        startClient();
+        startClient();
+        startClient();
+        startClient();
+        startServer().waitFor();
+    }
+
+    private static Process startServer() throws IOException {
         Runtime runtime = Runtime.getRuntime();
-        Process server = runtime.exec(new String[]{"java", "-ea", "-jar", "dist/Server.jar"});
-        Process client1 = runtime.exec(new String[]{"java", "-ea", "-jar", "dist/Client.jar"});
-        Process client2 = runtime.exec(new String[]{"java", "-ea", "-jar", "dist/Client.jar"});
-        runtime.addShutdownHook(new ShutdownThread(server));
-        runtime.addShutdownHook(new ShutdownThread(client1));
-        runtime.addShutdownHook(new ShutdownThread(client2));
-        new OutputRedirectThread(server.getErrorStream()).start();
-        new OutputRedirectThread(client1.getErrorStream()).start();
-        new OutputRedirectThread(client2.getErrorStream()).start();
-        server.waitFor();
-        client1.waitFor();
-        client2.waitFor();
+        Process p = runtime.exec(new String[]{"java", "-ea", "-jar", "dist/Server.jar"});
+        runtime.addShutdownHook(new ShutdownThread(p));
+        new OutputRedirectThread(p.getErrorStream()).start();
+        return p;
+    }
+
+    private static Process startClient() throws IOException {
+        Runtime runtime = Runtime.getRuntime();
+        Process p = runtime.exec(new String[]{"java", "-ea", "-jar", "dist/Client.jar"});
+        runtime.addShutdownHook(new ShutdownThread(p));
+        new OutputRedirectThread(p.getErrorStream()).start();
+        return p;
     }
 
     private static class OutputRedirectThread extends Thread {

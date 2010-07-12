@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
 
 /**
@@ -39,16 +40,8 @@ public class PointsDisplay extends Sprite {
         }
     }
 
-    public void setPoints(float periodPoints, float totalPoints) {
-        this.periodPoints = periodPoints;
-        this.totalPoints = totalPoints;
-    }
-
-    public void setDisplaySwitchCosts(boolean displaySwitchCosts) {
-        this.displaySwitchCosts = displaySwitchCosts;
-    }
-
-    public void setSwitchCosts(float switchCosts) {
-        this.switchCosts = switchCosts;
+    public void update() {
+        periodPoints = FIRE.client.getPeriodPoints();
+        totalPoints = FIRE.client.getTotalPoints();
     }
 }

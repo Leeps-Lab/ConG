@@ -21,6 +21,8 @@ public class Line extends Sprite implements Serializable {
     public boolean stepFunction;
     private transient HashMap<Integer, FPoint> definedPoints;
     private transient LinkedList<FPoint> points;
+    private transient int costEnd;
+    private transient Marker costMarker;
 
     public Line() {
         super(0, 0, 0, 0);
@@ -35,6 +37,7 @@ public class Line extends Sprite implements Serializable {
         visible = false;
         definedPoints = new HashMap<Integer, FPoint>();
         points = new LinkedList<FPoint>();
+        costMarker = new Marker(this, 0, 0, false, 0);
     }
 
     public void configure(Line config) {
@@ -50,6 +53,7 @@ public class Line extends Sprite implements Serializable {
         if (stepFunction) {
             SAMPLE_RATE = 1;
         }
+        costMarker.setVisible(false);
     }
 
     public synchronized void setPoint(int x, int y, boolean visible) {
@@ -76,6 +80,11 @@ public class Line extends Sprite implements Serializable {
             FPoint last = null;
             int i = 0;
             for (FPoint p : points) {
+                if (costMarker.visible && p.x < costEnd) {
+                    last = p;
+                    i++;
+                    continue;
+                }
                 if (!p.visible) {
                     last = p;
                     i++;
@@ -147,6 +156,10 @@ public class Line extends Sprite implements Serializable {
             FPoint last = null;
             int i = 0;
             for (FPoint p : points) {
+                if (costMarker.visible && p.x < costEnd) {
+                    i++;
+                    continue;
+                }
                 if (last != null && last.visible && !p.visible) {
                     // begin shock zone
                     applet.vertex(last.x, height);
@@ -190,43 +203,46 @@ public class Line extends Sprite implements Serializable {
             return;
         }
         float pixelCost = cost * width * height;
-        int xEnd = 0;
+        float totalPixels = 0;
+        costEnd = 0;
         for (FPoint p : points) {
-            pixelCost -= p.y;
-            if (pixelCost <= 0) {
-                break;
+            if (pixelCost > 0) {
+                pixelCost -= p.y;
+                costEnd++;
             }
-            xEnd++;
+            totalPixels += p.y;
         }
+        if (costEnd <= 1) {
+            return;
+        }
+        float costPercent = pixelCost / totalPixels;
+        costMarker.setVisible(true);
+        costMarker.setLabel(costPercent);
+        costMarker.update(costEnd / 2f, 0.1f * height);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
-        applet.fill(0xFFB40406);
         applet.stroke(0xFFB40406);
-        applet.strokeWeight(weight);
-        applet.noStroke();
-        applet.beginShape();
+        applet.strokeWeight(2f);
+        FPoint first = null;
         FPoint last = null;
         int i = 0;
         for (FPoint p : points) {
-            if (i % SAMPLE_RATE == 0 || i == points.size() - 1) {
+            if (i % SAMPLE_RATE == 0) {
+                if (i >= costEnd - 1) {
+                    applet.line(last.x, last.y, last.x, height);
+                    applet.line(last.x, height, first.x, height);
+                    break;
+                }
                 if (last == null) {
-                    applet.vertex(p.x, height);
-                    if (Math.abs(p.y - height) > Float.MIN_NORMAL) {
-                        applet.vertex(p.x, p.y);
-                    }
+                    first = p;
+                    applet.line(p.x, height, p.x, p.y);
                 } else {
-                    applet.vertex(p.x, p.y);
+                    applet.line(p.x, p.y, last.x, last.y);
                 }
                 last = p;
             }
             i++;
-            xEnd--;
-            if (xEnd == 0) {
-                break;
-            }
         }
-        applet.vertex(last.x, height);
-        applet.endShape(PApplet.CLOSE);
         applet.popMatrix();
     }
 
@@ -250,6 +266,7 @@ public class Line extends Sprite implements Serializable {
                 drawShadedArea(applet);
                 break;
         }
+        costMarker.draw(applet);
         applet.popMatrix();
     }
 

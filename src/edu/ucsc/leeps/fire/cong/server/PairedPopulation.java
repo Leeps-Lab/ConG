@@ -166,14 +166,8 @@ public class PairedPopulation implements Population {
             float[] newStrategy,
             int changed, int other,
             float percent, float percentInStrategyTime, float inStrategyTime) {
-        PayoffFunction changedPayoff, otherPayoff;
-        if (counterparts.contains(changed)) {
-            changedPayoff = FIRE.server.getConfig().counterpartPayoffFunction;
-            otherPayoff = FIRE.server.getConfig().payoffFunction;
-        } else {
-            changedPayoff = FIRE.server.getConfig().payoffFunction;
-            otherPayoff = FIRE.server.getConfig().counterpartPayoffFunction;
-        }
+        PayoffFunction changedPayoff = FIRE.server.getConfig(changed).payoffFunction;
+        PayoffFunction otherPayoff = FIRE.server.getConfig(other).payoffFunction;
         float[] changedLast = lastStrategies.get(changed);
         float[] otherLast = lastStrategies.get(other);
         float changedPoints = changedPayoff.getPayoff(
@@ -194,9 +188,8 @@ public class PairedPopulation implements Population {
 
     private void updateStrategiesFast(
             float[] newStrategy, int changed, int other) {
-        float[] c1s = newStrategy;
-        members.get(other).setCounterpartStrategy(c1s);
-        lastStrategies.put(changed, c1s);
+        members.get(other).setCounterpartStrategy(newStrategy);
+        lastStrategies.put(changed, newStrategy);
     }
 
     private void updateStrategiesSlow(int client1, int client2) {
