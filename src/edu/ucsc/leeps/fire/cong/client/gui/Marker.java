@@ -39,8 +39,7 @@ public class Marker extends Sprite {
         grabbed = false;
         enlarged = false;
 
-        labelOrigin = new FPoint(x, y);
-        labelOrigin = getTranslation(labelOrigin);
+        labelOrigin = getTranslation(origin);
     }
 
     public void setAlpha(int alpha) {
