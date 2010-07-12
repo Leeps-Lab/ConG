@@ -215,10 +215,10 @@ public class Line extends Sprite implements Serializable {
         if (costEnd <= 1) {
             return;
         }
-        float costPercent = pixelCost / totalPixels;
+        float costPercent = (cost * width * height) / totalPixels;
         costMarker.setVisible(true);
-        costMarker.setLabel(costPercent);
-        costMarker.update(costEnd / 2f, 0.1f * height);
+        costMarker.setLabelPercent(costPercent);
+        costMarker.update(costEnd / 2f, 0.95f * height);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
         applet.stroke(0xFFB40406);
@@ -243,6 +243,7 @@ public class Line extends Sprite implements Serializable {
             }
             i++;
         }
+        costMarker.draw(applet);
         applet.popMatrix();
     }
 
@@ -266,7 +267,6 @@ public class Line extends Sprite implements Serializable {
                 drawShadedArea(applet);
                 break;
         }
-        costMarker.draw(applet);
         applet.popMatrix();
     }
 

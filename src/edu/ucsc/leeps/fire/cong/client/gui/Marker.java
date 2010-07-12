@@ -74,6 +74,10 @@ public class Marker extends Sprite {
         label1 = String.format("%3.2f", newLabel);
     }
 
+    public void setLabelPercent(float newLabel) {
+        label1 = String.format("%3.0f%%", newLabel * 100);
+    }
+
     public void setLabel(float newLabel1, float newLabel2) {
         label1 = String.format("%3.2f", newLabel1);
         label2 = String.format("%3.2f", newLabel2);
@@ -178,12 +182,12 @@ public class Marker extends Sprite {
         if (label1 != null && label2 != null) {
             float label1Width = applet.textWidth(label1);
             applet.textFont(applet.size14Bold);
-            applet.text(label1, parent.origin.x + labelOrigin.x - label1Width / 2, parent.origin.y + labelOrigin.y);
+            applet.text(label1, getTranslation(labelOrigin).x - label1Width / 2, getTranslation(labelOrigin).y);
             applet.textFont(applet.size14);
-            applet.text("," + label2, parent.origin.x + labelOrigin.x + label1Width / 2, parent.origin.y + labelOrigin.y);
+            applet.text("," + label2, getTranslation(labelOrigin).x + label1Width / 2, getTranslation(labelOrigin).y);
         } else if (label1 != null) {
             applet.textFont(applet.size14);
-            applet.text(label1, parent.origin.x + labelOrigin.x, parent.origin.y + labelOrigin.y);
+            applet.text(label1, getTranslation(labelOrigin).x, getTranslation(labelOrigin).y);
         }
     }
 }
