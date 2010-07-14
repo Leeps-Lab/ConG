@@ -25,6 +25,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private float[] deltaStrategy;
     private float[] hoverStrategy_A;
     private float[] hoverStrategy_a;
+    private float[] lastStrategy;
     private long tickTime = 100;
     private float tickDelta;
     private long sleepTimeMillis;
@@ -49,11 +50,13 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 currentStrategy = new float[2];
                 targetStrategy = new float[2];
                 deltaStrategy = new float[2];
+                lastStrategy = new float[2];
             } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 previousStrategy = new float[3];
                 currentStrategy = new float[3];
                 targetStrategy = new float[3];
                 deltaStrategy = new float[3];
+                lastStrategy = new float[3];
             }
             recalculateTickDelta();
         }
@@ -105,11 +108,13 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     }
 
     private void sendUpdate() {
-        float total = 0;
-        for (int i = 0; i < previousStrategy.length; i++) {
-            total += Math.abs(previousStrategy[i] - currentStrategy[i]);
+        if (config.subperiods == 0) {
+            float total = 0;
+            for (int i = 0; i < previousStrategy.length; i++) {
+                total += Math.abs(previousStrategy[i] - currentStrategy[i]);
+            }
+            strategyDelta += total / 2;
         }
-        strategyDelta += total / 2;
         FIRE.client.getServer().strategyChanged(
                 currentStrategy,
                 targetStrategy,
@@ -214,6 +219,18 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
 
     public void setPause(boolean paused) {
         this.shouldUpdate = !paused;
+    }
+
+    public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
+        if (subperiod == 1) {
+            System.arraycopy(config.initialStrategy, 0, lastStrategy, 0, lastStrategy.length);
+        }
+        float total = 0;
+        for (int i = 0; i < subperiodStrategy.length; i++) {
+            total += Math.abs(subperiodStrategy[i] - lastStrategy[i]);
+        }
+        strategyDelta += total / 2;
+        System.arraycopy(subperiodStrategy, 0, lastStrategy, 0, lastStrategy.length);
     }
 
     public void endPeriod() {

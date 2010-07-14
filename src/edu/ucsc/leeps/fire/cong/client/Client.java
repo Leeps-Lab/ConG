@@ -165,6 +165,10 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         strip.setEnabled(false);
     }
 
+    public float getCost() {
+        return strategyChanger.getCost();
+    }
+
     public void setIsPaused(boolean isPaused) {
         strategyChanger.setPause(isPaused);
         if (isPaused) {
@@ -304,6 +308,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         rChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
         pChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
         sChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
+        strategyChanger.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
     }
 
     public void newMessage(String message, int senderID) {

@@ -14,5 +14,7 @@ public interface ClientInterface {
 
     public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy);
 
+    public float getCost();
+
     public void newMessage(String s, int i);
 }

@@ -63,6 +63,12 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             population.endSubperiod(FIRE.server.getConfig().subperiods);
             population.logTick(FIRE.server.getConfig().subperiods, 0);
         }
+
+        for (int id : clients.keySet()) {
+            float points = FIRE.server.getPeriodPoints(id);
+            float cost = clients.get(id).getCost();
+            FIRE.server.setPeriodPoints(id, points - cost);
+        }
     }
 
     public void tick(int secondsLeft) {
