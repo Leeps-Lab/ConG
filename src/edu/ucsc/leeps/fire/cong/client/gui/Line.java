@@ -226,22 +226,46 @@ public class Line extends Sprite implements Serializable {
         FPoint first = null;
         FPoint last = null;
         int i = 0;
-        for (FPoint p : points) {
-            if (i % SAMPLE_RATE == 0) {
-                if (i >= costEnd - 1) {
-                    applet.line(last.x, last.y, last.x, height);
-                    applet.line(last.x, height, first.x, height);
-                    break;
+        if (FIRE.client.getClient().getCost() >= FIRE.client.getPeriodPoints()) {
+            System.err.println(FIRE.client.getClient().getCost() + ", " + FIRE.client.getPeriodPoints() + ", " + cost);
+            applet.fill(255, 40, 40, 150);
+            applet.beginShape();
+            for (FPoint p : points) {
+                if (i % SAMPLE_RATE == 0) {
+                    if (i >= costEnd - 1) {
+                        applet.vertex(last.x, height);
+                        break;
+                    }
+                    if (last == null) {
+                        first = p;
+                        applet.vertex(p.x, height);
+                        applet.vertex(p.x, p.y);
+                    } else {
+                        applet.vertex(p.x, p.y);
+                    }
+                    last = p;
                 }
-                if (last == null) {
-                    first = p;
-                    applet.line(p.x, height, p.x, p.y);
-                } else {
-                    applet.line(p.x, p.y, last.x, last.y);
-                }
-                last = p;
+                i++;
             }
-            i++;
+            applet.endShape();
+        } else {
+            for (FPoint p : points) {
+                if (i % SAMPLE_RATE == 0) {
+                    if (i >= costEnd - 1) {
+                        applet.line(last.x, last.y, last.x, height);
+                        applet.line(last.x, height, first.x, height);
+                        break;
+                    }
+                    if (last == null) {
+                        first = p;
+                        applet.line(p.x, height, p.x, p.y);
+                    } else {
+                        applet.line(p.x, p.y, last.x, last.y);
+                    }
+                    last = p;
+                }
+                i++;
+            }
         }
         costMarker.draw(applet);
         applet.popMatrix();
