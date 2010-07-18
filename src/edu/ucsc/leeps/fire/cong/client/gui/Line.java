@@ -227,7 +227,6 @@ public class Line extends Sprite implements Serializable {
         FPoint last = null;
         int i = 0;
         if (FIRE.client.getClient().getCost() >= FIRE.client.getPeriodPoints()) {
-            System.err.println(FIRE.client.getClient().getCost() + ", " + FIRE.client.getPeriodPoints() + ", " + cost);
             applet.fill(255, 40, 40, 150);
             applet.beginShape();
             for (FPoint p : points) {
