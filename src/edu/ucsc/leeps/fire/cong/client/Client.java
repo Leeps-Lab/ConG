@@ -14,7 +14,6 @@ import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
-import java.awt.Dimension;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.swing.JFrame;
@@ -117,7 +116,6 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     }
 
     public void startPeriod() {
-
         strategyChanger.setCurrentStrategy(FIRE.client.getConfig().initialStrategy);
         if (FIRE.client.getConfig().mixedStrategySelection) {
             if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {

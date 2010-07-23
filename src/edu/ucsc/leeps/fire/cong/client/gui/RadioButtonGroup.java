@@ -303,9 +303,9 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
                 applet.textFont(applet.size14Bold);
                 textWidth += applet.textWidth(label2);
             }
-            if (textWidth > 16 && mode == LabelMode.Left) {
+            if (textWidth > 16 && labelMode == LabelMode.Left) {
                 labelOrigin.x = origin.x - radius - textWidth / 2;
-            } else if (textWidth > 16 && mode == LabelMode.Right) {
+            } else if (textWidth > 16 && labelMode == LabelMode.Right) {
                 labelOrigin.x = origin.x + radius + textWidth / 2;
             }
             float textHeight = applet.textAscent() + applet.textDescent();

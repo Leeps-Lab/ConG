@@ -23,7 +23,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private float sideLength;
     private Marker rock, paper, scissors;
     private float maxDist;
-    private Marker current, ghost, opponent;
+    private Marker current, target, ghost, opponent;
     private float[] axisDistance;
     private float[] ghostStrat;
     private float[] targetStrat;
@@ -92,6 +92,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         current.setColor(50, 255, 50);
         current.setLabel("$$");
         current.setLabelMode(Marker.LabelMode.Bottom);
+        target = new Marker(this, 0, 0, false, BASE_MARKER_R + 2);
+        target.setDrawMode(Marker.DrawMode.Outline);
+        target.setLabel("$$");
+        target.setLabelMode(Marker.LabelMode.Bottom);
         ghost = new Marker(this, 0, 0, false, BASE_MARKER_R);
         ghost.setColor(25, 255, 25, 140);
         opponent = new Marker(this, 0, 0, false, BASE_MARKER_R);
@@ -289,6 +293,11 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
         ghost.draw(applet);
 
+        if (target.visible && targetStrat != null) {
+            target.setLabel(config.payoffFunction.getPayoff(currentPercent, targetStrat, opponentStrat));
+            adjustLabels(targetStrat, target, null, null);
+        }
+
         if (current.visible) {
             updateDropLines(current, playedStrat, rDrop, pDrop, sDrop);
             applet.strokeWeight(1);
@@ -310,6 +319,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         rDrop.draw(applet);
         pDrop.draw(applet);
         sDrop.draw(applet);
+        target.draw(applet);
         current.draw(applet);
         opponent.draw(applet);
         for (int i = R; i <= S; i++) {
@@ -434,6 +444,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         this.enabled = enabled;
         if (enabled) {
             current.setVisible(true);
+            target.setVisible(true);
             opponent.setVisible(true);
             rDrop.setVisible(true);
             pDrop.setVisible(true);
@@ -443,6 +454,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             }
         } else {
             current.setVisible(false);
+            target.setVisible(false);
             opponent.setVisible(false);
             rDrop.setVisible(false);
             pDrop.setVisible(false);
@@ -470,6 +482,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         }
 
         current.setVisible(false);
+        target.setVisible(false);
         ghost.setVisible(false);
         opponent.setVisible(false);
         rDrop.setVisible(false);
@@ -498,17 +511,29 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         if (strats[S] < 0.2f) {
             if (strats[R] > strats[P]) {
                 stratMarker.setLabelMode(Marker.LabelMode.Right);
-                pDropMarker.setLabelMode(Marker.LabelMode.Top);
-                rDropMarker.setLabelMode(Marker.LabelMode.Right);
+                if (pDropMarker != null) {
+                    pDropMarker.setLabelMode(Marker.LabelMode.Top);
+                }
+                if (rDropMarker != null) {
+                    rDropMarker.setLabelMode(Marker.LabelMode.Right);
+                }
             } else {
                 stratMarker.setLabelMode(Marker.LabelMode.Left);
-                pDropMarker.setLabelMode(Marker.LabelMode.Left);
-                rDropMarker.setLabelMode(Marker.LabelMode.Top);
+                if (pDropMarker != null) {
+                    pDropMarker.setLabelMode(Marker.LabelMode.Left);
+                }
+                if (rDropMarker != null) {
+                    rDropMarker.setLabelMode(Marker.LabelMode.Top);
+                }
             }
         } else {
             stratMarker.setLabelMode(Marker.LabelMode.Bottom);
-            pDropMarker.setLabelMode(Marker.LabelMode.Left);
-            rDropMarker.setLabelMode(Marker.LabelMode.Right);
+            if (pDropMarker != null) {
+                pDropMarker.setLabelMode(Marker.LabelMode.Left);
+            }
+            if (rDropMarker != null) {
+                rDropMarker.setLabelMode(Marker.LabelMode.Right);
+            }
         }
     }
 
@@ -587,6 +612,8 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         targetStrat[P] = axisDistance[P] / maxDist;
         targetStrat[R] = 1 - targetStrat[S] - targetStrat[P];
         strategyChanger.setTargetStrategy(targetStrat);
+        float[] coords = calculateStratCoords(targetStrat[R], targetStrat[P], targetStrat[S]);
+        target.update(coords[0], coords[1]);
     }
 
     // calculate x, y coordinates given r, p, s values
@@ -690,6 +717,8 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         for (int i = R; i <= S; ++i) {
             stratSlider[i].setGhostValue(targetStrat[i]);
         }
+        float[] coords = calculateStratCoords(targetStrat[R], targetStrat[P], targetStrat[S]);
+        target.update(coords[0], coords[1]);
         strategyChanger.setTargetStrategy(targetStrat);
     }
 

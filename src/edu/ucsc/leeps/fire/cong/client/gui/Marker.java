@@ -13,12 +13,17 @@ public class Marker extends Sprite {
     protected FPoint labelOrigin;
     protected boolean grabbed;
     protected boolean enlarged;
-    protected LabelMode mode;
+    protected LabelMode labelMode;
+    protected DrawMode drawMode;
 
     public enum LabelMode {
 
         Center, Top, Right, Bottom, Left
     };
+
+    public enum DrawMode {
+        Filled, Outline, FillOutline
+    }
 
     public Marker(Sprite parent, float x, float y, boolean visible, float radius) {
         super(parent, x, y, (int)radius, (int)radius);
@@ -31,7 +36,8 @@ public class Marker extends Sprite {
         B = 0;
         alpha = 255;
 
-        mode = LabelMode.Center;
+        labelMode = LabelMode.Center;
+        drawMode = DrawMode.Filled;
 
         label1 = null;
         label2 = null;
@@ -84,7 +90,7 @@ public class Marker extends Sprite {
     }
 
     public void setLabelMode(LabelMode position) {
-        this.mode = position;
+        this.labelMode = position;
         switch (position) {
             case Center:
                 labelOrigin.x = origin.x;
@@ -107,6 +113,10 @@ public class Marker extends Sprite {
                 labelOrigin.y = origin.y;
                 break;
         }
+    }
+
+    public void setDrawMode(DrawMode mode) {
+        drawMode = mode;
     }
 
     public void grab() {
@@ -140,7 +150,7 @@ public class Marker extends Sprite {
     public void update(float x, float y) {
         origin.x = x;
         origin.y = y;
-        setLabelMode(mode);
+        setLabelMode(labelMode);
     }
 
     public void draw(PEmbed applet) {
@@ -150,8 +160,20 @@ public class Marker extends Sprite {
         if (label1 != null) {
             drawLabels(applet);
         }
-        applet.noStroke();
-        applet.fill(R, G, B, alpha);
+
+        if (drawMode == DrawMode.Filled) {
+            applet.noStroke();
+        } else {
+            applet.stroke(0);
+            applet.strokeWeight(1);
+        }
+
+        if (drawMode == DrawMode.Outline) {
+            applet.noFill();
+        } else {
+            applet.fill(R, G, B, alpha);
+        }
+        
         applet.ellipseMode(PEmbed.CENTER);
         if (!enlarged) {
             applet.ellipse(origin.x, origin.y, radius, radius);
@@ -167,9 +189,9 @@ public class Marker extends Sprite {
             applet.textFont(applet.size14Bold);
             textWidth += applet.textWidth(label2);
         }
-        if (textWidth > 16 && mode == LabelMode.Left) {
+        if (textWidth > 16 && labelMode == LabelMode.Left) {
             labelOrigin.x = origin.x - radius - textWidth / 2;
-        } else if (textWidth > 16 && mode == LabelMode.Right) {
+        } else if (textWidth > 16 && labelMode == LabelMode.Right) {
             labelOrigin.x = origin.x + radius + textWidth / 2;
         }
         float textHeight = applet.textAscent() + applet.textDescent();
