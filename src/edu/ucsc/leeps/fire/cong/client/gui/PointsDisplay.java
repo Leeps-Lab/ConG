@@ -22,9 +22,17 @@ public class PointsDisplay extends Sprite {
 
     @Override
     public void draw(PEmbed applet) {
-        String periodPayoffString = String.format("Period Payoff: %.2f", periodPoints);
-        String periodCostString = String.format("Gross Cost: %.2f", periodCost);
-        String netPayoffString = String.format("Net Payoff: %.2f", periodPoints - periodCost);
+        String periodPayoffString = "";
+        String periodCostString = "";
+        String netPayoffString = "";
+        periodPayoffString = String.format("Period Payoff: %.2f", periodPoints);
+        try {
+            if (FIRE.client.getConfig().changeCost != 0) {
+                periodCostString = String.format("Gross Cost: %.2f", periodCost);
+                netPayoffString = String.format("Net Payoff: %.2f", periodPoints - periodCost);
+            }
+        } catch (Exception e) {
+        }
         float textHeight = applet.textAscent() + applet.textDescent();
         applet.fill(0);
         applet.textAlign(PEmbed.LEFT);
