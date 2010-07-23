@@ -88,6 +88,7 @@ public class Chart extends Sprite implements Configurable<Config> {
     private Line threshold;
     private StrategyChanger strategyChanger;
     // draw lock
+    private HeatmapLegend heatmapLegend;
     private final Object lock = new Object();
 
     public enum Mode {
@@ -146,6 +147,8 @@ public class Chart extends Sprite implements Configurable<Config> {
         yourSOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
         counterpartSOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
 
+        heatmapLegend = new HeatmapLegend(this, -9, 1, 8, height);
+
         // Threshold
         threshold = new Line(this, 0, 0, width, height);
 
@@ -197,6 +200,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 String label = String.format("%d%%", percent);
                 applet.text(label, x0 + origin.x, y0 + origin.y + 1.2f * applet.textAscent() + applet.textDescent());
             }
+            heatmapLegend.draw(applet);
             for (float y = 0.0f; y <= 1.01f; y += 0.1f) {
                 applet.noFill();
                 applet.stroke(100, 100, 100);

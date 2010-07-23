@@ -40,7 +40,6 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
     private ChartLegend legend;
-    private HeatmapLegend heatmapLegend;
     private StrategyChanger strategyChanger;
     private Chatroom chatroom;
     private boolean chatroomEnabled = false;
@@ -107,8 +106,6 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         legend = new ChartLegend(
                 null, (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
-        heatmapLegend = new HeatmapLegend(
-                null, bimatrix.width + 10 + leftMargin, strategyChart.height + topMargin + chartMargin, 20, payoffChartHeight);
         embed.running = true;
         frame.add(this);
         frame.pack();
@@ -367,7 +364,6 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         public void draw() {
             if (running) {
                 background(255);
-                heatmapLegend.draw(embed);
                 bimatrix.draw(embed);
                 simplex.draw(embed);
                 pureMatrix.draw(embed);
