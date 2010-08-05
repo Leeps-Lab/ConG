@@ -9,13 +9,22 @@ import edu.ucsc.leeps.fire.cong.client.gui.PointsDisplay;
 import edu.ucsc.leeps.fire.cong.client.gui.ThreeStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chart;
 import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
-import edu.ucsc.leeps.fire.cong.client.gui.HeatmapLegend;
 import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.JarInputStream;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import processing.core.PApplet;
@@ -46,13 +55,23 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     private JFrame frame = new JFrame();
 
     public Client() {
+        // LAKER
+        loadLibraries();
         removeAll();
         width = 900;
         height = 500;
         embed = new PEmbed(width, height);
+        //embed.init();
+        //setSize(embed.getSize());
+        //add(embed);
+
+        frame.add(this);
+        frame.pack();
+        frame.setVisible(true);
+        frame.add(embed);
+        frame.setSize(width, height);
         embed.init();
-        setSize(embed.getSize());
-        add(embed);
+
         percent = -1;
         int leftMargin = 20;
         int topMargin = 20;
@@ -106,10 +125,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         legend = new ChartLegend(
                 null, (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
-        embed.running = true;
-        frame.add(this);
-        frame.pack();
-        frame.setVisible(true);
+        embed.loop();
     }
 
     public void startPeriod() {
@@ -320,7 +336,9 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
 
     public class PEmbed extends PApplet {
 
-        private final String RENDERER = P2D;
+        // LAKER
+        private final String RENDERER = OPENGL;
+        //private final String RENDERER = P2D;
         private int initWidth, initHeight;
         public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
         public boolean running = false;
@@ -354,15 +372,17 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
 
         @Override
         public void setup() {
+            //noLoop();
             size(initWidth, initHeight, RENDERER);
+            hint(DISABLE_DEPTH_TEST);
             smooth();
             textFont(size14);
-            textMode(SCREEN);
+            //textMode(SCREEN);
         }
 
         @Override
         public void draw() {
-            if (running) {
+            try {
                 background(255);
                 bimatrix.draw(embed);
                 simplex.draw(embed);
@@ -398,7 +418,74 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
                     }
                     text(changeTimeString, 330, 45);
                 }
+            } catch (NullPointerException ex) {
             }
+        }
+    }
+
+    private void loadLibraries() {
+        String tmpDir = System.getProperty("java.io.tmpdir");
+        List<JarEntry> entries = new LinkedList<JarEntry>();
+        for (String pathItem : System.getProperty("java.class.path").split(":")) {
+            if (pathItem.contains("jar")) {
+                try {
+                    JarFile jar = new JarFile(pathItem);
+                    JarInputStream jarInputStream = new JarInputStream(new FileInputStream(pathItem));
+                    JarEntry entry = jarInputStream.getNextJarEntry();
+                    while (entry != null) {
+                        if (entry.getName().endsWith("so")
+                                || entry.getName().endsWith("dll")
+                                || entry.getName().endsWith("jnilib")) {
+                            entries.add(entry);
+                        }
+                        entry = jarInputStream.getNextJarEntry();
+                    }
+                    for (JarEntry toExtract : entries) {
+                        File tmpFile = new File(tmpDir, toExtract.getName());
+                        OutputStream out = new FileOutputStream(tmpFile);
+                        InputStream in = jar.getInputStream(toExtract);
+                        byte[] buffer = new byte[4096];
+                        while (true) {
+                            int nBytes = in.read(buffer);
+                            if (nBytes <= 0) {
+                                break;
+                            }
+                            out.write(buffer, 0, nBytes);
+                        }
+                        out.flush();
+                        out.close();
+                        in.close();
+                    }
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+                break;
+            }
+        }
+
+        addDir(tmpDir);
+    }
+
+    public static void addDir(String s) {
+        try {
+            // This enables the java.library.path to be modified at runtime
+            // From a Sun engineer at http://forums.sun.com/thread.jspa?threadID=707176
+            //
+            Field field = ClassLoader.class.getDeclaredField("usr_paths");
+            field.setAccessible(true);
+            String[] paths = (String[]) field.get(null);
+            for (int i = 0; i < paths.length; i++) {
+                if (s.equals(paths[i])) {
+                    return;
+                }
+            }
+            String[] tmp = new String[paths.length + 1];
+            System.arraycopy(paths, 0, tmp, 0, paths.length);
+            tmp[paths.length] = s;
+            field.set(null, tmp);
+            System.setProperty("java.library.path", System.getProperty("java.library.path") + File.pathSeparator + s);
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
     }
 
