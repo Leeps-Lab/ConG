@@ -304,9 +304,9 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
                 textWidth += applet.textWidth(label2);
             }
             if (textWidth > 16 && labelMode == LabelMode.Left) {
-                labelOrigin.x = origin.x - radius - textWidth / 2;
+                labelOrigin.x = -radius - textWidth / 2;
             } else if (textWidth > 16 && labelMode == LabelMode.Right) {
-                labelOrigin.x = origin.x + radius + textWidth / 2;
+                labelOrigin.x = radius + textWidth / 2;
             }
             float textHeight = applet.textAscent() + applet.textDescent();
             applet.rectMode(PEmbed.CENTER);
@@ -318,12 +318,12 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
             if (label1 != null && label2 != null) {
                 float label1Width = applet.textWidth(label1);
                 applet.textFont(applet.size14Bold);
-                applet.text(label1, parent.origin.x + group.origin.x + labelOrigin.x - label1Width / 2, parent.origin.y + group.origin.y + labelOrigin.y);
+                applet.text(label1, labelOrigin.x - label1Width / 2, labelOrigin.y);
                 applet.textFont(applet.size14);
-                applet.text("," + label2, parent.origin.x + group.origin.x + labelOrigin.x + label1Width / 2, parent.origin.y + group.origin.y + labelOrigin.y);
+                applet.text("," + label2, labelOrigin.x + label1Width / 2, labelOrigin.y);
             } else if (label1 != null) {
                 applet.textFont(applet.size14);
-                applet.text(label1, parent.origin.x + group.origin.x + labelOrigin.x, parent.origin.y + group.origin.y + labelOrigin.y);
+                applet.text(label1, labelOrigin.x, labelOrigin.y);
             }
         }
     }

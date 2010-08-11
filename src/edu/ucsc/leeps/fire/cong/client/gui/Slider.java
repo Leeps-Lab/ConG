@@ -231,14 +231,14 @@ public class Slider {
             applet.fill(0);
             applet.textAlign(PEmbed.LEFT);
             float labelWidth = applet.textWidth(label);
-            applet.text(label, parent.origin.x + sliderStart - labelWidth - 10, parent.origin.y + sliderLine + 2);
-            applet.text(stratLabel, parent.origin.x + sliderEnd + 10, parent.origin.y + sliderLine + 2);
+            applet.text(label, sliderStart - labelWidth - 10, sliderLine + 2);
+            applet.text(stratLabel, sliderEnd + 10, sliderLine + 2);
 
             if (ghosting) {
                 applet.image(ghostTexture, ghostPos, sliderLine);
 
                 applet.fill(120);
-                applet.text(ghostLabel, parent.origin.x + sliderEnd + 10, parent.origin.y + sliderLine + 20);
+                applet.text(ghostLabel, sliderEnd + 10, sliderLine + 20);
             }
         } else {
             applet.stroke(0);
@@ -252,14 +252,14 @@ public class Slider {
             applet.fill(0);
             applet.textAlign(PEmbed.CENTER);
             float labelHeight = applet.textAscent() + applet.textDescent();
-            applet.text(label, parent.origin.x + sliderLine,  parent.origin.y + sliderStart - labelHeight);
-            applet.text(stratLabel, parent.origin.x + sliderLine, parent.origin.y + sliderEnd + labelHeight);
+            applet.text(label, sliderLine,  sliderStart - labelHeight);
+            applet.text(stratLabel, sliderLine, sliderEnd + labelHeight);
 
             if (ghosting) {
                 applet.image(ghostTexture, sliderLine, ghostPos);
 
                 applet.fill(120);
-                applet.text(ghostLabel, parent.origin.x + sliderLine, parent.origin.y + sliderEnd + 2 * labelHeight);
+                applet.text(ghostLabel, sliderLine, sliderEnd + 2 * labelHeight);
             }
         }
     }

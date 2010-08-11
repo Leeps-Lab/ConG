@@ -338,7 +338,6 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
 
         // LAKER
         private final String RENDERER = OPENGL;
-        //private final String RENDERER = P2D;
         private int initWidth, initHeight;
         public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
         public boolean running = false;
@@ -377,7 +376,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
             hint(DISABLE_DEPTH_TEST);
             smooth();
             textFont(size14);
-            //textMode(SCREEN);
+            textMode(MODEL);
         }
 
         @Override

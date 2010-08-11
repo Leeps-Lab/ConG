@@ -46,22 +46,22 @@ public class ChartLegend extends Sprite implements Configurable<Config> {
             applet.stroke(youLine.r, youLine.g, youLine.b);
             applet.line(4, height / 2f, 4 + 10, height / 2f);
             applet.text(youLabel,
-                    origin.x + 4 + 10 + 4 - width,
-                    origin.y + (height / 2f));
+                    width + 4 + 10 + 4 - width,
+                    height / 2f);
 
             applet.stroke(otherLine.r, otherLine.g, otherLine.b);
             applet.line(4 + 10 + 4 + w1 + 4, height / 2f, 4 + 10 + 4 + w1 + 4 + 10, height / 2f);
             applet.text(otherLabel,
-                    origin.x + 4 + 10 + 4 + w1 + 4 + 10 + 4 - width,
-                    origin.y + (height / 2f));
+                    width + 4 + 10 + 4 + w1 + 4 + 10 + 4 - width,
+                    height / 2f);
 
             if (config.payoffFunction instanceof ThresholdPayoffFunction) {
                 applet.stroke(threshold.r, threshold.g, threshold.b);
                 applet.line(4 + 10 + 4 + w1 + 4 + 10 + 4 + w2 + 4, height / 2f,
                         4 + 10 + 4 + w1 + 4 + 10 + 4 + w2 + 4 + 10, height / 2f);
                 applet.text(threshLabel,
-                        origin.x + 4 + 10 + 4 + w1 + 4 + 10 + 4 + w2 + 4 + 10 + 4 - width,
-                        origin.y + (height / 2f));
+                        width + 4 + 10 + 4 + w1 + 4 + 10 + 4 + w2 + 4 + 10 + 4 - width,
+                        height / 2f);
             }
 
             applet.strokeWeight(2);

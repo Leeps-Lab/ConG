@@ -45,14 +45,16 @@ public class SinglePopulationInclude implements Population {
             Integer client,
             float percent, float percentInStrategyTime, float inStrategyTime) {
         float[] last = lastStrategies.get(client);
-        float points = FIRE.server.getConfig().payoffFunction.getPayoff(
-                percent, last, averageStrategy);
-        if (!FIRE.server.getConfig().pointsPerSecond) {
-            points *= percentInStrategyTime;
-        } else {
-            points *= inStrategyTime / 1000f;
+        if (last != null) {
+            float points = FIRE.server.getConfig().payoffFunction.getPayoff(
+                    percent, last, averageStrategy);
+            if (!FIRE.server.getConfig().pointsPerSecond) {
+                points *= percentInStrategyTime;
+            } else {
+                points *= inStrategyTime / 1000f;
+            }
+            FIRE.server.addToPeriodPoints(client, points);
         }
-        FIRE.server.addToPeriodPoints(client, points);
     }
 
     private void updateStrategies() {
@@ -100,14 +102,11 @@ public class SinglePopulationInclude implements Population {
     }
 
     public void endSubperiod(int subperiod) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void endPeriod() {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void logTick(int subperiod, int millisLeft) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

@@ -198,7 +198,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 applet.fill(0);
                 int percent = Math.round(x * 100);
                 String label = String.format("%d%%", percent);
-                applet.text(label, x0 + origin.x, y0 + origin.y + 1.2f * applet.textAscent() + applet.textDescent());
+                applet.text(label, x0, y0 + 1.2f * applet.textAscent() + applet.textDescent());
             }
             heatmapLegend.draw(applet);
             for (float y = 0.0f; y <= 1.01f; y += 0.1f) {
@@ -219,20 +219,20 @@ public class Chart extends Sprite implements Configurable<Config> {
                     payoff = 0f;
                 }
                 String label = String.format("%.1f", payoff);
-                applet.text(label, origin.x - 1.2f * applet.textWidth(label), y0 + origin.y);
+                applet.text(label, -1.2f * applet.textWidth(label), y0);
             }
         } else {
             applet.textAlign(PEmbed.RIGHT);
             applet.fill(0);
             if (mode == Mode.RStrategy) {
-                applet.text(config.rLabel, origin.x - 10,
-                        origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
+                applet.text(config.rLabel, -10,
+                        height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
             } else if (mode == Mode.PStrategy) {
-                applet.text(config.pLabel, origin.x - 10,
-                        origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
+                applet.text(config.pLabel, -10,
+                        height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
             } else if (mode == Mode.SStrategy) {
-                applet.text(config.sLabel, origin.x - 10,
-                        origin.y + height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
+                applet.text(config.sLabel, -10,
+                        height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
             }
         }
     }

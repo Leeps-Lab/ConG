@@ -204,12 +204,12 @@ public class Marker extends Sprite {
         if (label1 != null && label2 != null) {
             float label1Width = applet.textWidth(label1);
             applet.textFont(applet.size14Bold);
-            applet.text(label1, getTranslation(labelOrigin).x - label1Width / 2, getTranslation(labelOrigin).y);
+            applet.text(label1, labelOrigin.x - label1Width / 2, labelOrigin.y);
             applet.textFont(applet.size14);
-            applet.text("," + label2, getTranslation(labelOrigin).x + label1Width / 2, getTranslation(labelOrigin).y);
+            applet.text("," + label2, labelOrigin.x + label1Width / 2, labelOrigin.y);
         } else if (label1 != null) {
             applet.textFont(applet.size14);
-            applet.text(label1, getTranslation(labelOrigin).x, getTranslation(labelOrigin).y);
+            applet.text(label1, labelOrigin.x, labelOrigin.y);
         }
     }
 }
