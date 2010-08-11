@@ -326,7 +326,12 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             stratSlider[i].draw(applet);
         }
 
+        applet.fill(0);
+        applet.ellipse(mouseX, mouseY, 10, 10);
+
         applet.popMatrix();
+
+        applet.ellipse(applet.mouseX, applet.mouseY, 10, 10);
     }
 
     //@Override
