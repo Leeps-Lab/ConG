@@ -32,6 +32,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private float strategyDelta;
     private Random random;
     private long nextAllowedChangeTime;
+    private boolean hasLocked;
 
     public StrategyChanger() {
         isMoving = false;
@@ -121,19 +122,33 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 hoverStrategy_A,
                 hoverStrategy_a,
                 FIRE.client.getID());
-        if (config.delay != null) {
+        if (config.delay != null && (!FIRE.client.getConfig().delay.initialLock || !hasLocked)) {
             float delayTimeInSeconds = 0;
             switch (config.delay.distribution) {
                 case uniform:
                     delayTimeInSeconds = random.nextFloat() * config.delay.lambda;
                     break;
                 case poisson:
-                    throw new UnsupportedOperationException();
+                    delayTimeInSeconds = generatePoisson(config.delay.lambda);
                 case gaussian:
                     throw new UnsupportedOperationException();
             }
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delayTimeInSeconds);
+            hasLocked = true;
         }
+    }
+
+    private int generatePoisson(float lambda) {
+        float L = (float) Math.pow(Math.E, -1 * lambda);
+        int k = 0;
+        float p = 1;
+
+        do {
+            k = k + 1;
+            p = p * (float) Math.random();
+        } while (p > L);
+
+        return k - 1;
     }
 
     @Override
@@ -215,6 +230,8 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     public void startPeriod() {
         shouldUpdate = true;
         strategyDelta = 0;
+        // clear delay stuff
+        hasLocked = false;
     }
 
     public void setPause(boolean paused) {

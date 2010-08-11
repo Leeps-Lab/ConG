@@ -13,9 +13,11 @@ public class DecisionDelay implements Serializable {
     };
     public Distribution distribution;
     public float lambda;
+    public boolean initialLock;
 
     public DecisionDelay() {
         distribution = Distribution.uniform;
         lambda = 5;
+        initialLock = true;
     }
 }
