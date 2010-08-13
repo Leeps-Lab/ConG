@@ -222,7 +222,13 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
                 
                 applet.fill(0, 0, 0);
                 applet.ellipse(origin.x, origin.y, width + 1, height + 1);
-                
+
+                if (!enabled) {
+                    applet.tint(150, 150, 150, 50);
+                } else {
+
+                }
+
                 if (selected) {
                     applet.image(selectedTexture, origin.x, origin.y);
                 } else {

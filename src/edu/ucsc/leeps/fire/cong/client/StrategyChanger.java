@@ -33,6 +33,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private Random random;
     private long nextAllowedChangeTime;
     private boolean hasLocked;
+    public volatile boolean isLocked;
 
     public StrategyChanger() {
         isMoving = false;
@@ -156,7 +157,8 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         running = true;
         while (running) {
             try {
-                if (!decisionDelayed() && isMoving && shouldUpdate) {
+                isLocked = decisionDelayed();
+                if (!isLocked && isMoving && shouldUpdate) {
                     update();
                 }
                 sleep(sleepTimeMillis);

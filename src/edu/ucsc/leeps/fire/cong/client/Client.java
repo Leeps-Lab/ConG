@@ -275,11 +275,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     @Override
     public void setup() {
         size(getWidth(), getHeight(), OPENGL);
+        hint(DISABLE_OPENGL_2X_SMOOTH);
+        hint(DISABLE_OPENGL_ERROR_REPORT);
         hint(DISABLE_DEPTH_TEST);
-        smooth();
         setupFonts();
         textFont(size14);
         textMode(MODEL);
+        //smooth();
 
         percent = -1;
         int leftMargin = 20;
