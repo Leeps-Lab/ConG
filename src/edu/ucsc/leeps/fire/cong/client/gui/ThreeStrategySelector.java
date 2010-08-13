@@ -352,9 +352,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                     if (stratSlider[i].mouseOnGhost(mouseX, mouseY)) {
                         stratSlider[i].grabGhost();
                         ghost.setVisible(true);
-                        ghostStrat[R] = stratSlider[R].getStratValue();
-                        ghostStrat[P] = stratSlider[P].getStratValue();
-                        ghostStrat[S] = stratSlider[S].getStratValue();
+                        ghostStrat[R] = stratSlider[R].getGhostValue();
+                        ghostStrat[P] = stratSlider[P].getGhostValue();
+                        ghostStrat[S] = stratSlider[S].getGhostValue();
                         break;
                     }
                 }
