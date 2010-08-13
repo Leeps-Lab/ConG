@@ -1,7 +1,7 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 
 /**
  *
@@ -13,7 +13,7 @@ public class PointsDisplay extends Sprite {
     private float switchCosts;
     private float periodPoints, periodCost;
 
-    public PointsDisplay(Sprite parent, int x, int y, PEmbed embed) {
+    public PointsDisplay(Sprite parent, int x, int y, Client embed) {
         super(parent, x, y, (int) embed.textWidth("Period Payoff: 000"), (int) (2 * (embed.textAscent() + embed.textDescent())));
         periodPoints = 0;
         periodCost = 0;
@@ -21,7 +21,7 @@ public class PointsDisplay extends Sprite {
     }
 
     @Override
-    public void draw(PEmbed applet) {
+    public void draw(Client applet) {
         String periodPayoffString = "";
         String periodCostString = "";
         String netPayoffString = "";
@@ -35,7 +35,7 @@ public class PointsDisplay extends Sprite {
         }
         float textHeight = applet.textAscent() + applet.textDescent();
         applet.fill(0);
-        applet.textAlign(PEmbed.LEFT);
+        applet.textAlign(Client.LEFT);
         applet.text(periodPayoffString, origin.x, origin.y);
         applet.fill(200, 0, 0);
         applet.text(periodCostString, origin.x, origin.y + textHeight);

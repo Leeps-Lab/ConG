@@ -1,7 +1,7 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -73,7 +73,7 @@ public class Line extends Sprite implements Serializable {
         }
     }
 
-    private void drawSolidLine(PEmbed applet) {
+    private void drawSolidLine(Client applet) {
         if (points.size() >= 2) {
             applet.stroke(r, g, b, alpha);
             applet.strokeWeight(weight);
@@ -107,7 +107,7 @@ public class Line extends Sprite implements Serializable {
         }
     }
 
-    private void drawDashedLine(PEmbed applet) {
+    private void drawDashedLine(Client applet) {
         if (points.size() >= 2) {
             applet.stroke(r, g, b, alpha);
             applet.strokeWeight(weight);
@@ -128,7 +128,7 @@ public class Line extends Sprite implements Serializable {
         }
     }
 
-    private void drawLineEndPoint(PEmbed applet) {
+    private void drawLineEndPoint(Client applet) {
         if (points.size() >= 1) {
             applet.fill(r, g, b, alpha);
             applet.stroke(r, g, b, alpha);
@@ -146,7 +146,7 @@ public class Line extends Sprite implements Serializable {
         }
     }
 
-    private void drawShadedArea(PEmbed applet) {
+    private void drawShadedArea(Client applet) {
         if (points.size() >= 1) {
             applet.fill(r, g, b, alpha);
             applet.stroke(r, g, b, alpha);
@@ -198,7 +198,7 @@ public class Line extends Sprite implements Serializable {
         }
     }
 
-    public synchronized void drawCostArea(PEmbed applet, float cost) {
+    public synchronized void drawCostArea(Client applet, float cost) {
         if (cost == 0) {
             return;
         }
@@ -270,7 +270,7 @@ public class Line extends Sprite implements Serializable {
         applet.popMatrix();
     }
 
-    public synchronized void draw(PEmbed applet) {
+    public synchronized void draw(Client applet) {
         if (!visible) {
             return;
         }

@@ -2,7 +2,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
@@ -11,6 +11,7 @@ import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import processing.core.PApplet;
 
 /**
  *
@@ -18,7 +19,7 @@ import java.awt.event.KeyListener;
  */
 public class PureStrategySelector extends Sprite implements Configurable<Config>, KeyListener {
     private final int BUTTON_RADIUS = 15;
-    private PEmbed applet;
+    private Client applet;
     private float currentPercent;
     private float[] myStrat;
     private float[] opponentStrat;
@@ -35,7 +36,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     private StrategyChanger strategyChanger;
 
     public PureStrategySelector (Sprite parent, int x, int y, int size,
-            PEmbed applet, StrategyChanger strategyChanger) {
+            Client applet, StrategyChanger strategyChanger) {
         super(parent, x, y, size, size);
         visible = false;
         this.applet = applet;
@@ -68,7 +69,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     }
     
     @Override
-    public void draw(PEmbed applet) {
+    public void draw(Client applet) {
         if (visible) {
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
@@ -83,7 +84,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             
             applet.noStroke();
             applet.fill(0, 95, 205, 125);
-            applet.rectMode(PEmbed.CORNER);
+            applet.rectMode(PApplet.CORNER);
 
             int playedStrat = buttons.getSelection();
             applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y + playedStrat * interval, matrixSideLength, interval);

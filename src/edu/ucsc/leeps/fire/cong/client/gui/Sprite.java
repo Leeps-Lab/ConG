@@ -1,6 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import java.io.Serializable;
 import processing.core.PMatrix2D;
 
@@ -20,7 +20,7 @@ public abstract class Sprite implements Serializable {
         screenLocation = new FPoint(x, y);
     }
 
-    public abstract void draw(PEmbed applet);
+    public abstract void draw(Client applet);
 
     public boolean isHit(float x, float y) {
         return x >= screenLocation.x && x <= screenLocation.x + width
@@ -28,10 +28,10 @@ public abstract class Sprite implements Serializable {
     }
 
     public boolean circularIsHit(float x, float y) {
-        return PEmbed.dist(x, y, screenLocation.x, screenLocation.y) <= width;
+        return Client.dist(x, y, screenLocation.x, screenLocation.y) <= width;
     }
 
-    public void setScreenLocation(PEmbed applet) {
+    public void setScreenLocation(Client applet) {
         PMatrix2D matrix = new PMatrix2D();
         applet.getMatrix(matrix);
         screenLocation.x = matrix.m02;

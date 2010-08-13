@@ -2,7 +2,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import processing.core.PApplet;
 
 /**
  *
@@ -19,7 +20,7 @@ import java.awt.event.MouseListener;
  */
 public class TwoStrategySelector extends Sprite implements Configurable<Config>, MouseListener, KeyListener {
 
-    private PEmbed applet;
+    private Client applet;
     private Config config;
     private float percent_A, percent_a;
     private boolean enabled;
@@ -42,7 +43,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     public TwoStrategySelector(
             Sprite parent, int x, int y,
             int matrixSize, int counterpartMatrixSize,
-            PEmbed applet,
+            Client applet,
             StrategyChanger strategyChanger) {
         super(parent, x, y, matrixSize, matrixSize);
         this.applet = applet;
@@ -279,7 +280,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     @Override
-    public void draw(PEmbed applet) {
+    public void draw(Client applet) {
         if (!visible) {
             return;
         }
@@ -368,12 +369,12 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             if (ke.getKeyCode() == KeyEvent.VK_UP) {
                 float targetPercentA = strategyChanger.getTargetStrategy()[0];
                 targetPercentA += 0.01f;
-                targetPercentA = PEmbed.constrain(targetPercentA, 0, 1);
+                targetPercentA = PApplet.constrain(targetPercentA, 0, 1);
                 strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
             } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
                 float targetPercentA = strategyChanger.getTargetStrategy()[0];
                 targetPercentA -= 0.01f;
-                targetPercentA = PEmbed.constrain(targetPercentA, 0, 1);
+                targetPercentA = PApplet.constrain(targetPercentA, 0, 1);
                 strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
             }
         }

@@ -1,12 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
@@ -25,7 +21,7 @@ public class HeatmapLegend extends Sprite implements Configurable<Config> {
     }
 
     @Override
-    public void draw(PEmbed applet) {
+    public void draw(Client applet) {
         if (!visible) {
             return;
         }

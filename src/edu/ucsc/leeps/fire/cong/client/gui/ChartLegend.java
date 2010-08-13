@@ -2,7 +2,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import processing.core.PApplet;
@@ -22,7 +22,7 @@ public class ChartLegend extends Sprite implements Configurable<Config> {
     }
 
     @Override
-    public void draw(PEmbed applet) {
+    public void draw(Client applet) {
 
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);

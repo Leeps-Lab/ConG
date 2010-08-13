@@ -2,7 +2,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
@@ -159,7 +159,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         FIRE.client.addConfigListener(this);
     }
 
-    private void drawShockZone(PEmbed applet) {
+    private void drawShockZone(Client applet) {
         if (config.shock.showZone) {
             applet.fill(100, 100, 100, 50);
             applet.noStroke();
@@ -172,14 +172,14 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
-    private void drawAxis(PEmbed applet) {
-        applet.rectMode(PEmbed.CORNER);
+    private void drawAxis(Client applet) {
+        applet.rectMode(Client.CORNER);
         applet.noFill();
         applet.stroke(0);
         applet.strokeWeight(2);
         applet.rect(0, 0, width, height);
 
-        applet.textAlign(PEmbed.CENTER, PEmbed.CENTER);
+        applet.textAlign(Client.CENTER, Client.CENTER);
         applet.fill(255);
         applet.noStroke();
         applet.rect(-40, 0, 38, height);
@@ -222,7 +222,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 applet.text(label, -1.2f * applet.textWidth(label), y0);
             }
         } else {
-            applet.textAlign(PEmbed.RIGHT);
+            applet.textAlign(Client.RIGHT);
             applet.fill(0);
             if (mode == Mode.RStrategy) {
                 applet.text(config.rLabel, -10,
@@ -237,13 +237,13 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
-    private void drawPercentLine(PEmbed applet) {
+    private void drawPercentLine(Client applet) {
         applet.strokeWeight(2f);
         applet.stroke(150, 150, 150);
         applet.line(currentPercent * width, 0, currentPercent * width, height);
     }
 
-    private void drawTwoStrategyPayoffLines(PEmbed applet) {
+    private void drawTwoStrategyPayoffLines(Client applet) {
         actualAPayoff.draw(applet);
         actualBPayoff.draw(applet);
         futureAPayoff.draw(applet);
@@ -256,12 +256,12 @@ public class Chart extends Sprite implements Configurable<Config> {
         futureBbPayoff.draw(applet);
     }
 
-    private void drawTwoStrategyLines(PEmbed applet) {
+    private void drawTwoStrategyLines(Client applet) {
         counterpartStrategyOverTime.draw(applet);
         yourStrategyOverTime.draw(applet);
     }
 
-    private void drawThreeStrategyPayoffLines(PEmbed applet) {
+    private void drawThreeStrategyPayoffLines(Client applet) {
         actualRPayoff.draw(applet);
         actualPPayoff.draw(applet);
         actualSPayoff.draw(applet);
@@ -279,7 +279,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         futureSsPayoff.draw(applet);
     }
 
-    private void drawThreeStrategyLines(PEmbed applet) {
+    private void drawThreeStrategyLines(Client applet) {
         if (mode == Mode.RStrategy) {
             yourROverTime.draw(applet);
             counterpartROverTime.draw(applet);
@@ -292,14 +292,14 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
-    private void drawSubperiodMarkers(PEmbed applet) {
+    private void drawSubperiodMarkers(Client applet) {
 
     }
 
     @Override
-    public void draw(PEmbed applet) {
+    public void draw(Client applet) {
         synchronized (lock) {
-            applet.rectMode(PEmbed.CORNER);
+            applet.rectMode(Client.CORNER);
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
             if (config != null) {
@@ -313,7 +313,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                         if (config.payoffFunction instanceof ThresholdPayoffFunction) {
                             applet.noStroke();
                             applet.fill(255, 255, 0, 75);
-                            applet.rectMode(PEmbed.CORNER);
+                            applet.rectMode(Client.CORNER);
                             applet.rect(0, 0, width,
                                     height * (1 - ((ThresholdPayoffFunction)config.payoffFunction).threshold));
                         }

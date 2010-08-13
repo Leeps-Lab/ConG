@@ -7,7 +7,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
@@ -26,7 +26,7 @@ import java.awt.event.MouseListener;
 public class OneStrategyStripSelector extends Sprite implements Configurable<Config>, MouseListener,
     KeyListener {
 
-    private PEmbed applet;
+    private Client applet;
     private StrategyChanger strategyChanger;
     private float myStrat;
     private float opponentStrat;
@@ -43,7 +43,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     private Marker hover;
 
     public OneStrategyStripSelector(Sprite parent, int x, int y, int width, int height,
-            PEmbed applet, StrategyChanger strategyChanger) {
+            Client applet, StrategyChanger strategyChanger) {
         super(parent, x, y, width, height);
         this.applet = applet;
         this.strategyChanger = strategyChanger;
@@ -164,13 +164,13 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             if (e.getKeyCode() == KeyEvent.VK_UP) {
                 float targetStrat = strategyChanger.getTargetStrategy()[0];
                 targetStrat += .01f;
-                targetStrat = PEmbed.constrain(targetStrat, 0, 1);
+                targetStrat = Client.constrain(targetStrat, 0, 1);
                 slider.setGhostValue(targetStrat);
                 strategyChanger.setTargetStrategy(new float[]{targetStrat, 1- targetStrat});
             } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                 float targetStrat = strategyChanger.getTargetStrategy()[0];
                 targetStrat -= .01f;
-                targetStrat = PEmbed.constrain(targetStrat, 0, 1);
+                targetStrat = Client.constrain(targetStrat, 0, 1);
                 slider.setGhostValue(targetStrat);
                 strategyChanger.setTargetStrategy(new float[]{targetStrat, 1 - targetStrat});
             }
@@ -181,7 +181,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     }
 
     @Override
-    public void draw(PEmbed applet) {
+    public void draw(Client applet) {
         if (!visible) {
             return;
         }

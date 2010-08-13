@@ -2,7 +2,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         buffers = new ArrayList<PImage>();
         int size = payoff[0].length;
         for (int tick = 0; tick < config.length; tick++) {
-            PImage buffer = applet.createImage(size, size, PEmbed.RGB);
+            PImage buffer = applet.createImage(size, size, Client.RGB);
             buffer.loadPixels();
             for (int x = 0; x < size; x++) {
                 for (int y = 0; y < size; y++) {
@@ -89,7 +89,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     public synchronized void updateTwoStrategyHeatmap(float currentPercent) {
         if (buffers == null) {
             int size = 100;
-            currentBuffer = applet.createGraphics(size, size, PEmbed.P2D);
+            currentBuffer = applet.createGraphics(size, size, Client.P2D);
             currentBuffer.loadPixels();
             for (int x = 0; x < size; x++) {
                 for (int y = 0; y < size; y++) {
@@ -123,7 +123,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
             float currentPercent,
             float r, float p, float s,
             ThreeStrategySelector threeStrategySelector) {
-        currentBuffer = applet.createGraphics(width, height, PEmbed.P2D);
+        currentBuffer = applet.createGraphics(width, height, Client.P2D);
         currentBuffer.loadPixels();
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -155,7 +155,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     public void updateStripHeatmap(
             float currentPercent,
             float opponentStrat) {
-        currentBuffer = applet.createGraphics(width, height, PEmbed.P2D);
+        currentBuffer = applet.createGraphics(width, height, Client.P2D);
         currentBuffer.loadPixels();
 
         PayoffFunction payoffFunction = config.payoffFunction;
@@ -214,16 +214,16 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     }
 
     @Override
-    public synchronized void draw(PEmbed applet) {
+    public synchronized void draw(Client applet) {
         if (!visible) {
             return;
         }
         if (currentBuffer != null) {
-            applet.imageMode(PEmbed.CORNER);
+            applet.imageMode(Client.CORNER);
             applet.image(currentBuffer, origin.x, origin.y);
         }
         //if (visible && buffer != null) {
-        //    applet.imageMode(PEmbed.CORNER);
+        //    applet.imageMode(Client.CORNER);
         //    applet.image(buffer, origin.x, origin.y);
         //}
     }

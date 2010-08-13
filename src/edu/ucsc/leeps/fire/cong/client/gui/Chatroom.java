@@ -12,8 +12,8 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
+import java.awt.Frame;
 import java.awt.event.KeyEvent;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
@@ -23,9 +23,9 @@ import javax.swing.JPanel;
 public class Chatroom extends JPanel{
 
     /** Creates new form Chat-room */
-    public Chatroom(JFrame f) {
+    public Chatroom(Frame f) {
         initComponents();
-        JFrame frame = new JFrame();
+        Frame frame = new Frame();
         frame.add(this);
         frame.setBounds(f.getWidth(), 0, 300, f.getHeight());
         frame.setVisible(true);

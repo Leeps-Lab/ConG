@@ -1,6 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import java.awt.Color;
 import processing.core.PImage;
 
@@ -28,7 +28,7 @@ public class Slider {
     private Sprite parent;
 
     // Constructor ////////////////
-    public Slider(PEmbed applet, Sprite parent, Alignment align, float start, float end, float line, Color C,
+    public Slider(Client applet, Sprite parent, Alignment align, float start, float end, float line, Color C,
             String label, float maxValue) {
         if (end < start) {
             throw new RuntimeException("Invalid Slider coordinates " + "(end < start)");
@@ -218,18 +218,18 @@ public class Slider {
         }
     }
 
-    public void draw(PEmbed applet) {
+    public void draw(Client applet) {
         if (align == Alignment.Horizontal) {
             applet.stroke(0);
             applet.strokeWeight(3);
             applet.line(sliderStart, sliderLine, sliderEnd, sliderLine);
 
             applet.noStroke();
-            applet.imageMode(PEmbed.CENTER);
+            applet.imageMode(Client.CENTER);
             applet.image(texture, sliderPos, sliderLine);
 
             applet.fill(0);
-            applet.textAlign(PEmbed.LEFT);
+            applet.textAlign(Client.LEFT);
             float labelWidth = applet.textWidth(label);
             applet.text(label, sliderStart - labelWidth - 10, sliderLine + 2);
             applet.text(stratLabel, sliderEnd + 10, sliderLine + 2);
@@ -246,11 +246,11 @@ public class Slider {
             applet.line(sliderLine, sliderStart, sliderLine, sliderEnd);
 
             applet.noStroke();
-            applet.imageMode(PEmbed.CENTER);
+            applet.imageMode(Client.CENTER);
             applet.image(texture, sliderLine, sliderPos);
 
             applet.fill(0);
-            applet.textAlign(PEmbed.CENTER);
+            applet.textAlign(Client.CENTER);
             float labelHeight = applet.textAscent() + applet.textDescent();
             applet.text(label, sliderLine,  sliderStart - labelHeight);
             applet.text(stratLabel, sliderLine, sliderEnd + labelHeight);
@@ -264,16 +264,16 @@ public class Slider {
         }
     }
 
-    private void textureSetup(PEmbed applet) {
+    private void textureSetup(Client applet) {
         int width, height;
         if (align == Alignment.Horizontal) {
-            texture = applet.createImage(HANDLE_WIDTH, HANDLE_HEIGHT, PEmbed.ARGB);
-            ghostTexture = applet.createImage(HANDLE_WIDTH, HANDLE_HEIGHT, PEmbed.ARGB);
+            texture = applet.createImage(HANDLE_WIDTH, HANDLE_HEIGHT, Client.ARGB);
+            ghostTexture = applet.createImage(HANDLE_WIDTH, HANDLE_HEIGHT, Client.ARGB);
             width = HANDLE_WIDTH;
             height = HANDLE_HEIGHT;
         } else {
-            texture = applet.createImage(HANDLE_HEIGHT, HANDLE_WIDTH, PEmbed.ARGB);
-            ghostTexture = applet.createImage(HANDLE_HEIGHT, HANDLE_WIDTH, PEmbed.ARGB);
+            texture = applet.createImage(HANDLE_HEIGHT, HANDLE_WIDTH, Client.ARGB);
+            ghostTexture = applet.createImage(HANDLE_HEIGHT, HANDLE_WIDTH, Client.ARGB);
             width = HANDLE_HEIGHT;
             height = HANDLE_WIDTH;
         }
@@ -283,13 +283,13 @@ public class Slider {
         int centerX = width / 2 - 1;
         int centerY = height / 2 - 1;
 
-        float maxDist = PEmbed.sqrt(PEmbed.sq(width / 2) + PEmbed.sq(height / 2));
+        float maxDist = Client.sqrt(Client.sq(width / 2) + Client.sq(height / 2));
 
         for (int i = 0; i < texture.pixels.length; ++i) {
             int x = i % width;
             int y = i / width;
 
-            float distance = PEmbed.dist(x, y, centerX, centerY);
+            float distance = Client.dist(x, y, centerX, centerY);
             float percent = 1 - distance / maxDist;
 
             if (percent > .25f) {

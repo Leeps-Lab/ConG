@@ -35,7 +35,6 @@ public class Config extends BaseConfig {
     public Line payoffAa, payoffAb, payoffBa, payoffBb, yourPayoff, otherPayoff;
     public Line yourStrategyOverTime, counterpartStrategyOverTime;
     public Line thresholdLine;
-    public int heatmapColorLow, heatmapColorMid, heatmapColorHigh;
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
     public ShockZone shock;
     public DecisionDelay delay;
@@ -85,9 +84,6 @@ public class Config extends BaseConfig {
         otherPayoff.b = 0;
         otherPayoff.visible = true;
         otherPayoff.mode = Line.Mode.Shaded;
-        heatmapColorLow = 0xff0000;
-        heatmapColorMid = 0x0000ff;
-        heatmapColorHigh = 0x00ff00;
         yourStrategyOverTime = new Line();
         yourStrategyOverTime.visible = true;
         yourStrategyOverTime.mode = Line.Mode.Solid;

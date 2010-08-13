@@ -1,6 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import java.awt.Color;
 
 public class Marker extends Sprite {
@@ -153,7 +153,7 @@ public class Marker extends Sprite {
         setLabelMode(labelMode);
     }
 
-    public void draw(PEmbed applet) {
+    public void draw(Client applet) {
         if (!visible) {
             return;
         }
@@ -174,7 +174,7 @@ public class Marker extends Sprite {
             applet.fill(R, G, B, alpha);
         }
         
-        applet.ellipseMode(PEmbed.CENTER);
+        applet.ellipseMode(Client.CENTER);
         if (!enlarged) {
             applet.ellipse(origin.x, origin.y, radius, radius);
         } else {
@@ -182,7 +182,7 @@ public class Marker extends Sprite {
         }
     }
 
-    protected void drawLabels(PEmbed applet) {
+    protected void drawLabels(Client applet) {
         applet.textFont(applet.size14);
         float textWidth = applet.textWidth(label1);
         if (label2 != null) {
@@ -195,11 +195,11 @@ public class Marker extends Sprite {
             labelOrigin.x = origin.x + radius + textWidth / 2;
         }
         float textHeight = applet.textAscent() + applet.textDescent();
-        applet.rectMode(PEmbed.CENTER);
+        applet.rectMode(Client.CENTER);
         applet.fill(255);
         applet.noStroke();
         applet.rect(labelOrigin.x, labelOrigin.y, textWidth, textHeight);
-        applet.textAlign(PEmbed.CENTER, PEmbed.CENTER);
+        applet.textAlign(Client.CENTER, Client.CENTER);
         applet.fill(0);
         if (label1 != null && label2 != null) {
             float label1Width = applet.textWidth(label1);

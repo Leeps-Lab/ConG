@@ -1,6 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import processing.core.PImage;
@@ -19,7 +19,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
     private Sprite parent;
     // applet in which button group exists - used to add and remove
     // group as a MouseListener
-    private PEmbed applet;
+    private Client applet;
 
     // number of buttons in group
     private int numButtons;
@@ -38,7 +38,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
     private boolean enabled;
 
     public RadioButtonGroup(Sprite parent, float x, float y, int length,
-            int numButtons, Alignment alignment, int buttonRadius, PEmbed applet) {
+            int numButtons, Alignment alignment, int buttonRadius, Client applet) {
         super(parent, x, y, 0, 0);
         this.numButtons = numButtons;
         this.alignment = alignment;
@@ -74,7 +74,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
     }
 
     @Override
-    public void draw(PEmbed applet) {
+    public void draw(Client applet) {
         if (visible) {
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
@@ -207,14 +207,14 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         }
 
         @Override
-        public void draw(PEmbed applet) {
+        public void draw(Client applet) {
             if (visible) {
                 if (label1 != null) {
                     drawLabels(applet);
                 }
 
-                applet.ellipseMode(PEmbed.CENTER);
-                applet.imageMode(PEmbed.CENTER);
+                applet.ellipseMode(Client.CENTER);
+                applet.imageMode(Client.CENTER);
 
                 applet.noStroke();
                 applet.fill(245, 245, 245);
@@ -233,16 +233,16 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         }
 
         private void textureSetup() {
-            idleTexture = applet.createImage(width, height, PEmbed.ARGB);
+            idleTexture = applet.createImage(width, height, Client.ARGB);
             idleTexture.loadPixels();
-            selectedTexture = applet.createImage(width, height, PEmbed.ARGB);
+            selectedTexture = applet.createImage(width, height, Client.ARGB);
             selectedTexture.loadPixels();
             float centerX = width / 2 - 1;
             float centerY = width / 2 - 1;
             for(int i = 0; i < idleTexture.pixels.length; ++i) {
                 float x = i % width;
                 float y = i / width;
-                float distance = PEmbed.dist(x, y, centerX, centerY);
+                float distance = Client.dist(x, y, centerX, centerY);
                 if (distance < width / 2) {
                     idleTexture.pixels[i] = applet.color(175, 175, 175, 255);
                     selectedTexture.pixels[i] = applet.color(0, 32, 113, 255);
@@ -257,7 +257,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
             for(int i = 0; i < idleTexture.pixels.length; ++i) {
                 float x = i % width;
                 float y = i / width;
-                float distance = PEmbed.dist(x, y, centerX, centerY);
+                float distance = Client.dist(x, y, centerX, centerY);
                 if (distance < width / 2 &&
                     idleTexture.pixels[i] != applet.color(255, 255, 255, 0)) {
                     float adjustment = distance * 10;
@@ -271,7 +271,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
             for(int i = 0; i < idleTexture.pixels.length; ++i) {
                 float x = i % width;
                 float y = i / width;
-                float distance = PEmbed.dist(x, y, centerX, centerY);
+                float distance = Client.dist(x, y, centerX, centerY);
                 if (distance < width / 2 &&
                     idleTexture.pixels[i] != applet.color(255, 255, 255, 0)) {
                     float adjustment = distance * 10;
@@ -285,7 +285,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
             for(int i = 0; i < idleTexture.pixels.length; ++i) {
                 float x = i % width;
                 float y = i / width;
-                if (PEmbed.dist(x, y, centerX, centerY) < width / 4) {
+                if (Client.dist(x, y, centerX, centerY) < width / 4) {
                     idleTexture.pixels[i] = applet.color(175, 175, 175, 255);
                     selectedTexture.pixels[i] = applet.color(0, 0, 0, 255);
                 }
@@ -296,7 +296,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         }
 
         @Override
-        protected void drawLabels(PEmbed applet) {
+        protected void drawLabels(Client applet) {
             applet.textFont(applet.size14);
             float textWidth = applet.textWidth(label1);
             if (label2 != null) {
@@ -309,11 +309,11 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
                 labelOrigin.x = radius + textWidth / 2;
             }
             float textHeight = applet.textAscent() + applet.textDescent();
-            applet.rectMode(PEmbed.CENTER);
+            applet.rectMode(Client.CENTER);
             applet.fill(255);
             applet.noStroke();
             applet.rect(labelOrigin.x, labelOrigin.y, textWidth, textHeight);
-            applet.textAlign(PEmbed.CENTER, PEmbed.CENTER);
+            applet.textAlign(Client.CENTER, Client.CENTER);
             applet.fill(0);
             if (label1 != null && label2 != null) {
                 float label1Width = applet.textWidth(label1);

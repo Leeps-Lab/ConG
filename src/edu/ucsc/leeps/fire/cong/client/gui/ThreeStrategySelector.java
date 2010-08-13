@@ -2,7 +2,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.Client.PEmbed;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
@@ -37,7 +37,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private boolean enabled;
     private Config config;
     private HeatmapHelper heatmap;
-    private PEmbed applet;
+    private Client applet;
     public float currentPercent;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
@@ -46,7 +46,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public ThreeStrategySelector(
             Sprite parent, float x, float y, int width, int height,
-            PEmbed applet, StrategyChanger strategyChanger) {
+            Client applet, StrategyChanger strategyChanger) {
         super(parent, x, y, width, height);
         this.applet = applet;
         this.strategyChanger = strategyChanger;
@@ -71,7 +71,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         sColor = new Color(255, 0, 255);
 
         sideLength = width - 10;
-        maxDist = (PEmbed.sqrt(3) / 2f) * sideLength;
+        maxDist = (Client.sqrt(3) / 2f) * sideLength;
 
         rock = new Marker(this, 5, height / 3, true, CORNER_MARKER_R);
         rock.setColor(rColor);
@@ -167,7 +167,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     }
 
     @Override
-    public synchronized void draw(PEmbed applet) {
+    public synchronized void draw(Client applet) {
         if (!visible) {
             return;
         }
@@ -234,7 +234,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                 for (int i = R; i <= S; i++) {
                     if (stratSlider[i].isGhostGrabbed()) {
                         ghost.setVisible(true);
-                        if (applet.keyPressed && applet.key == PEmbed.CODED && applet.keyCode == PEmbed.CONTROL) {
+                        if (applet.keyPressed && applet.key == Client.CODED && applet.keyCode == Client.CONTROL) {
 
                             float currentPos = stratSlider[i].getGhostPos();
                             if (applet.mouseX > applet.pmouseX) {
@@ -546,23 +546,23 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         float newS = y / maxDist;
 
         // constant factors for determining distances
-        float epsilon1 = y + (1 / PEmbed.sqrt(3)) * x;
-        float epsilon2 = y - (1 / PEmbed.sqrt(3)) * x;
+        float epsilon1 = y + (1 / Client.sqrt(3)) * x;
+        float epsilon2 = y - (1 / Client.sqrt(3)) * x;
 
         // calculate distance from paper 3D axis
-        float deltaX = x - (PEmbed.sqrt(3) / 4) * epsilon1;
+        float deltaX = x - (Client.sqrt(3) / 4) * epsilon1;
         float deltaY = y - .75f * epsilon1;
         float newP;
         if (deltaX < 0 && deltaY > 0) {
             newP = -1;
         } else {
-            float distP = PEmbed.sqrt(PEmbed.sq(deltaX) + PEmbed.sq(deltaY));
+            float distP = Client.sqrt(Client.sq(deltaX) + Client.sq(deltaY));
             newP = distP / maxDist;
         }
 
         // calculate distance from rock 3D axis
-        deltaX = x - .75f * sideLength + (PEmbed.sqrt(3) / 4) * epsilon2;
-        deltaY = y - (PEmbed.sqrt(3) / 4) * sideLength - .75f * epsilon2;
+        deltaX = x - .75f * sideLength + (Client.sqrt(3) / 4) * epsilon2;
+        deltaY = y - (Client.sqrt(3) / 4) * sideLength - .75f * epsilon2;
         float newR;
         if (deltaX > 0 && deltaY > 0) {
             newR = -1;
@@ -582,25 +582,25 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         axisDistance[S] = y;
 
         // constant factors for determining distances
-        float epsilon1 = y + (1 / PEmbed.sqrt(3)) * x;
-        float epsilon2 = y - (1 / PEmbed.sqrt(3)) * x;
+        float epsilon1 = y + (1 / Client.sqrt(3)) * x;
+        float epsilon2 = y - (1 / Client.sqrt(3)) * x;
 
         float deltaX, deltaY;
 
-        deltaX = x - (PEmbed.sqrt(3) / 4) * epsilon1;
+        deltaX = x - (Client.sqrt(3) / 4) * epsilon1;
         deltaY = y - .75f * epsilon1;
         if (deltaX < 0 && deltaY > 0) {
             axisDistance[P] = -1;
         } else {
-            axisDistance[P] = PEmbed.sqrt(PEmbed.sq(deltaX) + PEmbed.sq(deltaY));
+            axisDistance[P] = Client.sqrt(Client.sq(deltaX) + Client.sq(deltaY));
         }
 
-        deltaX = x - .75f * sideLength + (PEmbed.sqrt(3) / 4) * epsilon2;
-        deltaY = y - (PEmbed.sqrt(3) / 4) * sideLength - .75f * epsilon2;
+        deltaX = x - .75f * sideLength + (Client.sqrt(3) / 4) * epsilon2;
+        deltaY = y - (Client.sqrt(3) / 4) * sideLength - .75f * epsilon2;
         if (deltaX > 0 && deltaY > 0) {
             axisDistance[R] = -1;
         } else {
-            axisDistance[R] = PEmbed.sqrt(PEmbed.sq(deltaX) + PEmbed.sq(deltaY));
+            axisDistance[R] = Client.sqrt(Client.sq(deltaX) + Client.sq(deltaY));
         }
     }
 
@@ -625,7 +625,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private float[] calculateStratCoords(float r, float p, float s) {
         float[] coords = new float[2];
 
-        coords[0] = rock.origin.x + (maxDist * p) / PEmbed.sin(PEmbed.PI / 3) + maxDist * s * PEmbed.tan(PEmbed.PI / 6);
+        coords[0] = rock.origin.x + (maxDist * p) / Client.sin(Client.PI / 3) + maxDist * s * Client.tan(Client.PI / 6);
         coords[1] = rock.origin.y - maxDist * s;
 
         return coords;
@@ -706,12 +706,12 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         sDropMarker.update(stratMarker.origin.x, rock.origin.y);
 
         float x, y;
-        x = stratMarker.origin.x - maxDist * strats[P] * PEmbed.cos(PEmbed.PI / 6);
-        y = stratMarker.origin.y - maxDist * strats[P] * PEmbed.sin(PEmbed.PI / 6);
+        x = stratMarker.origin.x - maxDist * strats[P] * Client.cos(Client.PI / 6);
+        y = stratMarker.origin.y - maxDist * strats[P] * Client.sin(Client.PI / 6);
         pDropMarker.update(x, y);
 
-        x = stratMarker.origin.x + maxDist * strats[R] * PEmbed.cos(PEmbed.PI / 6);
-        y = stratMarker.origin.y - maxDist * strats[R] * PEmbed.sin(PEmbed.PI / 6);
+        x = stratMarker.origin.x + maxDist * strats[R] * Client.cos(Client.PI / 6);
+        y = stratMarker.origin.y - maxDist * strats[R] * Client.sin(Client.PI / 6);
         rDropMarker.update(x, y);
     }
 

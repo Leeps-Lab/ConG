@@ -26,7 +26,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import processing.core.PApplet;
 import processing.core.PFont;
 
@@ -34,11 +33,9 @@ import processing.core.PFont;
  *
  * @author jpettit
  */
-public class Client extends JPanel implements ClientInterface, FIREClientInterface {
+public class Client extends PApplet implements ClientInterface, FIREClientInterface {
 
     public static final boolean DEBUG = false;
-    private int width, height;
-    private PEmbed embed;
     private float percent;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
@@ -52,80 +49,21 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     private StrategyChanger strategyChanger;
     private Chatroom chatroom;
     private boolean chatroomEnabled = false;
-    private JFrame frame = new JFrame();
+    public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
 
     public Client() {
-        // LAKER
         loadLibraries();
-        removeAll();
+        noLoop();
         width = 900;
-        height = 500;
-        embed = new PEmbed(width, height);
-        //embed.init();
-        //setSize(embed.getSize());
-        //add(embed);
-
-        frame.add(this);
-        frame.pack();
-        frame.setVisible(true);
-        frame.add(embed);
+        height = 550;
+        frame = new JFrame();
+        ((JFrame) frame).setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.setResizable(false);
+        frame.add(Client.this);
         frame.setSize(width, height);
-        embed.init();
-
-        percent = -1;
-        int leftMargin = 20;
-        int topMargin = 20;
-        float textHeight = embed.textAscent() + embed.textDescent();
-        //int matrixSize = (int) (height - (4 * textHeight) - 120);
-        int matrixSize = 320;
-        int counterpartMatrixSize = 100;
-        strategyChanger = new StrategyChanger();
-        bimatrix = new TwoStrategySelector(
-                null, leftMargin, topMargin + counterpartMatrixSize + 30,
-                matrixSize, counterpartMatrixSize,
-                embed, strategyChanger);
-        simplex = new ThreeStrategySelector(
-                null, 20, 100, 250, 600,
-                embed, strategyChanger);
-        pureMatrix = new PureStrategySelector(
-                null, leftMargin, topMargin + counterpartMatrixSize + 30,
-                matrixSize, embed, strategyChanger);
-        strip = new OneStrategyStripSelector(null, leftMargin + 7 * matrixSize / 8,
-                topMargin + counterpartMatrixSize + 30,
-                matrixSize / 8, matrixSize, embed, strategyChanger);
-        countdown = new Countdown(
-                null, counterpartMatrixSize + 4 * leftMargin, 40 + topMargin, embed);
-        pointsDisplay = new PointsDisplay(
-                null, counterpartMatrixSize + 4 * leftMargin, (int) (40 + textHeight) + topMargin, embed);
-        int chartWidth = (int) (width - bimatrix.width - 2 * leftMargin - 80);
-        int chartMargin = 30;
-        int strategyChartHeight = 100;
-        int threeStrategyChartHeight = 30;
-        int payoffChartHeight = (int) (height - strategyChartHeight - 2 * topMargin - chartMargin - 10);
-        strategyChart = new Chart(
-                null, bimatrix.width + 80 + leftMargin, topMargin,
-                chartWidth, strategyChartHeight,
-                simplex, Chart.Mode.TwoStrategy, strategyChanger);
-        payoffChart = new Chart(
-                null, bimatrix.width + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
-                chartWidth, payoffChartHeight,
-                simplex, Chart.Mode.Payoff, strategyChanger);
-        rChart = new Chart(
-                null, bimatrix.width + 80 + leftMargin, topMargin,
-                chartWidth, threeStrategyChartHeight,
-                simplex, Chart.Mode.RStrategy, strategyChanger);
-        pChart = new Chart(
-                null, bimatrix.width + 80 + leftMargin, topMargin + threeStrategyChartHeight + 5,
-                chartWidth, threeStrategyChartHeight,
-                simplex, Chart.Mode.PStrategy, strategyChanger);
-        sChart = new Chart(
-                null, bimatrix.width + 80 + leftMargin, topMargin + 2 * (threeStrategyChartHeight + 5),
-                chartWidth, threeStrategyChartHeight,
-                simplex, Chart.Mode.SStrategy, strategyChanger);
-        legend = new ChartLegend(
-                null, (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
-                0, 0);
-        embed.loop();
+        init();
+        loop();
+        frame.setVisible(true);
     }
 
     public void startPeriod() {
@@ -193,7 +131,7 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
     }
 
     public void tick(int secondsLeft) {
-        this.percent = embed.width * (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
+        this.percent = width * (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
         countdown.setSecondsLeft(secondsLeft);
         bimatrix.update();
         simplex.update();
@@ -334,91 +272,134 @@ public class Client extends JPanel implements ClientInterface, FIREClientInterfa
         System.exit(0);
     }
 
-    public class PEmbed extends PApplet {
+    @Override
+    public void setup() {
+        size(getWidth(), getHeight(), OPENGL);
+        hint(DISABLE_DEPTH_TEST);
+        smooth();
+        setupFonts();
+        textFont(size14);
+        textMode(MODEL);
 
-        // LAKER
-        private final String RENDERER = OPENGL;
-        private int initWidth, initHeight;
-        public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
-        public boolean running = false;
+        percent = -1;
+        int leftMargin = 20;
+        int topMargin = 20;
+        float textHeight = textAscent() + textDescent();
+        //int matrixSize = (int) (height - (4 * textHeight) - 120);
+        int matrixSize = 320;
+        int counterpartMatrixSize = 100;
+        strategyChanger = new StrategyChanger();
+        bimatrix = new TwoStrategySelector(
+                null, leftMargin, topMargin + counterpartMatrixSize + 30,
+                matrixSize, counterpartMatrixSize,
+                this, strategyChanger);
+        simplex = new ThreeStrategySelector(
+                null, 20, 100, 250, 600,
+                this, strategyChanger);
+        pureMatrix = new PureStrategySelector(
+                null, leftMargin, topMargin + counterpartMatrixSize + 30,
+                matrixSize, this, strategyChanger);
+        strip = new OneStrategyStripSelector(null, leftMargin + 7 * matrixSize / 8,
+                topMargin + counterpartMatrixSize + 30,
+                matrixSize / 8, matrixSize, this, strategyChanger);
+        countdown = new Countdown(
+                null, counterpartMatrixSize + 4 * leftMargin, 40 + topMargin, this);
+        pointsDisplay = new PointsDisplay(
+                null, counterpartMatrixSize + 4 * leftMargin, (int) (40 + textHeight) + topMargin, this);
+        int chartWidth = (int) (width - bimatrix.width - 2 * leftMargin - 80);
+        int chartMargin = 30;
+        int strategyChartHeight = 100;
+        int threeStrategyChartHeight = 30;
+        int payoffChartHeight = (int) (height - strategyChartHeight - 2 * topMargin - chartMargin - 10);
+        strategyChart = new Chart(
+                null, bimatrix.width + 80 + leftMargin, topMargin,
+                chartWidth, strategyChartHeight,
+                simplex, Chart.Mode.TwoStrategy, strategyChanger);
+        payoffChart = new Chart(
+                null, bimatrix.width + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
+                chartWidth, payoffChartHeight,
+                simplex, Chart.Mode.Payoff, strategyChanger);
+        rChart = new Chart(
+                null, bimatrix.width + 80 + leftMargin, topMargin,
+                chartWidth, threeStrategyChartHeight,
+                simplex, Chart.Mode.RStrategy, strategyChanger);
+        pChart = new Chart(
+                null, bimatrix.width + 80 + leftMargin, topMargin + threeStrategyChartHeight + 5,
+                chartWidth, threeStrategyChartHeight,
+                simplex, Chart.Mode.PStrategy, strategyChanger);
+        sChart = new Chart(
+                null, bimatrix.width + 80 + leftMargin, topMargin + 2 * (threeStrategyChartHeight + 5),
+                chartWidth, threeStrategyChartHeight,
+                simplex, Chart.Mode.SStrategy, strategyChanger);
+        legend = new ChartLegend(
+                null, (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
+                0, 0);
+    }
 
-        public PEmbed(int initWidth, int initHeight) {
-            this.initWidth = initWidth;
-            this.initHeight = initHeight;
-            try {
-                InputStream fontInputStream;
-                fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-14.vlw");
-                size14 = new PFont(fontInputStream);
-                fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-Bold-14.vlw");
-                size14Bold = new PFont(fontInputStream);
-                fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-16.vlw");
-                size16 = new PFont(fontInputStream);
-                fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-Bold-16.vlw");
-                size16Bold = new PFont(fontInputStream);
-                fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-18.vlw");
-                size18 = new PFont(fontInputStream);
-                fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-Bold-18.vlw");
-                size18Bold = new PFont(fontInputStream);
-                fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-24.vlw");
-                size24 = new PFont(fontInputStream);
-                fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-Bold-24.vlw");
-                size24Bold = new PFont(fontInputStream);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-                System.exit(1);
-            }
-        }
-
-        @Override
-        public void setup() {
-            //noLoop();
-            size(initWidth, initHeight, RENDERER);
-            hint(DISABLE_DEPTH_TEST);
-            smooth();
-            textFont(size14);
-            textMode(MODEL);
-        }
-
-        @Override
-        public void draw() {
-            try {
-                background(255);
-                bimatrix.draw(embed);
-                simplex.draw(embed);
-                pureMatrix.draw(embed);
-                strip.draw(embed);
-                if (FIRE.client.getConfig() != null) {
-                    if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                        strategyChart.draw(embed);
-                    } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                        rChart.draw(embed);
-                        pChart.draw(embed);
-                        sChart.draw(embed);
-                    }
+    @Override
+    public void draw() {
+        try {
+            background(255);
+            bimatrix.draw(this);
+            simplex.draw(this);
+            pureMatrix.draw(this);
+            strip.draw(this);
+            if (FIRE.client.getConfig() != null) {
+                if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+                    strategyChart.draw(this);
+                } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                    rChart.draw(this);
+                    pChart.draw(this);
+                    sChart.draw(this);
                 }
-                payoffChart.draw(embed);
-                legend.draw(embed);
-                countdown.draw(embed);
-                pointsDisplay.draw(embed);
-                if (DEBUG) {
-                    String frameRateString = String.format("FPS: %.2f", frameRate);
-                    if (frameRate < 8) {
-                        fill(255, 0, 0);
-                    } else {
-                        fill(0);
-                    }
-                    text(frameRateString, 330, 30);
-                    float averageChangeTime = strategyChanger.getAverageChangeTime();
-                    String changeTimeString = String.format("MPC: %.2f", averageChangeTime);
-                    if (averageChangeTime > 10) {
-                        fill(255, 0, 0);
-                    } else {
-                        fill(0);
-                    }
-                    text(changeTimeString, 330, 45);
-                }
-            } catch (NullPointerException ex) {
             }
+            payoffChart.draw(this);
+            legend.draw(this);
+            countdown.draw(this);
+            pointsDisplay.draw(this);
+            if (DEBUG) {
+                String frameRateString = String.format("FPS: %.2f", frameRate);
+                if (frameRate < 8) {
+                    fill(255, 0, 0);
+                } else {
+                    fill(0);
+                }
+                text(frameRateString, 330, 30);
+                float averageChangeTime = strategyChanger.getAverageChangeTime();
+                String changeTimeString = String.format("MPC: %.2f", averageChangeTime);
+                if (averageChangeTime > 10) {
+                    fill(255, 0, 0);
+                } else {
+                    fill(0);
+                }
+                text(changeTimeString, 330, 45);
+            }
+        } catch (NullPointerException ex) {
+        }
+    }
+
+    private void setupFonts() {
+        try {
+            InputStream fontInputStream;
+            fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-14.vlw");
+            size14 = new PFont(fontInputStream);
+            fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-Bold-14.vlw");
+            size14Bold = new PFont(fontInputStream);
+            fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-16.vlw");
+            size16 = new PFont(fontInputStream);
+            fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-Bold-16.vlw");
+            size16Bold = new PFont(fontInputStream);
+            fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-18.vlw");
+            size18 = new PFont(fontInputStream);
+            fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-Bold-18.vlw");
+            size18Bold = new PFont(fontInputStream);
+            fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-24.vlw");
+            size24 = new PFont(fontInputStream);
+            fontInputStream = Client.class.getResourceAsStream("resources/DejaVuSans-Bold-24.vlw");
+            size24Bold = new PFont(fontInputStream);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            System.exit(1);
         }
     }
 
