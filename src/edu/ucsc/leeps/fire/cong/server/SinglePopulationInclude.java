@@ -45,7 +45,7 @@ public class SinglePopulationInclude implements Population {
             Integer client,
             float percent, float percentInStrategyTime, float inStrategyTime) {
         float[] last = lastStrategies.get(client);
-        if (last != null) {
+        if (last != null && averageStrategy != null) {
             float points = FIRE.server.getConfig().payoffFunction.getPayoff(
                     percent, last, averageStrategy);
             if (!FIRE.server.getConfig().pointsPerSecond) {
