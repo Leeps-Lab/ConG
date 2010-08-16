@@ -120,11 +120,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public void setIsPaused(boolean isPaused) {
         strategyChanger.setPause(isPaused);
-        if (isPaused) {
-            simplex.setEnabled(true);
-        } else {
-            simplex.pause();
-        }
+        simplex.setEnabled(!isPaused);
         bimatrix.setEnabled(!isPaused);
         pureMatrix.setEnabled(!isPaused);
         strip.setEnabled(!isPaused);

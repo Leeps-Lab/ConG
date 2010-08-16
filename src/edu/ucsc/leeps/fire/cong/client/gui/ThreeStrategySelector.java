@@ -466,10 +466,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         }
     }
 
-    public void pause() {
-        setEnabled(false);
-    }
-
     public void reset() {
         setEnabled(false);
         for (int i = R; i <= S; i++) {
