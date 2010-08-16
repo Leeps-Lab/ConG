@@ -15,8 +15,6 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
     public static final int NO_BUTTON = -1;
 
-    // parent Sprite - used to adjust mouse position on clicks
-    private Sprite parent;
     // applet in which button group exists - used to add and remove
     // group as a MouseListener
     private Client applet;
@@ -62,11 +60,11 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
         // initialize buttons
         if (alignment == Alignment.Vertical) {
             for (int i = 0; i < numButtons; ++i) {
-                buttons[i] = new RadioButton(parent, 0, buffer + i * spacing, buttonRadius, this);
+                buttons[i] = new RadioButton(this, 0, buffer + i * spacing, buttonRadius, this);
             }
         } else {
             for (int i = 0; i < numButtons; ++i) {
-                buttons[i] = new RadioButton(parent, buffer + i * spacing, 0, buttonRadius, this);
+                buttons[i] = new RadioButton(this, buffer + i * spacing, 0, buttonRadius, this);
             }
         }
 
@@ -98,16 +96,9 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
     public void mousePressed(MouseEvent e) {
         if (enabled) {
-            // adjust mouse position
-            float mouseX = e.getX() - origin.x;
-            float mouseY = e.getY() - origin.y;
-            if (parent != null) {
-                mouseX -= parent.origin.x;
-                mouseY -= parent.origin.y;
-            }
             // check to see if any of the buttons in the group were clicked on
             for (int i = 0; i < numButtons; ++i) {
-                if (buttons[i].circularIsHit(mouseX, mouseY)) {
+                if (buttons[i].circularIsHit(e.getX(), e.getY())) {
                     if (selectedButton != NO_BUTTON) {
                         buttons[selectedButton].setSelected(false);
                     }

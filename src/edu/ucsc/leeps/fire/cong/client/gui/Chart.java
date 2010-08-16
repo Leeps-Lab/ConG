@@ -307,6 +307,8 @@ public class Chart extends Sprite implements Configurable<Config> {
                 if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
                     if (mode == Mode.Payoff) {
                         drawTwoStrategyPayoffLines(applet);
+                        actualPayoffYou.draw(applet);
+                        actualPayoffCounterpart.draw(applet);
                     } else if (mode == Mode.TwoStrategy) {
                         drawTwoStrategyLines(applet);
                         threshold.draw(applet);
@@ -318,13 +320,11 @@ public class Chart extends Sprite implements Configurable<Config> {
                                     height * (1 - ((ThresholdPayoffFunction)config.payoffFunction).threshold));
                         }
                     }
-                    if (mode == Mode.Payoff) {
-                        actualPayoffYou.draw(applet);
-                        actualPayoffCounterpart.draw(applet);
-                    }
                 } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                     if (mode == Mode.Payoff) {
                         drawThreeStrategyPayoffLines(applet);
+                        actualPayoffYou.draw(applet);
+                        actualPayoffCounterpart.draw(applet);
                     } else if (mode == Mode.RStrategy
                             || mode == Mode.PStrategy
                             || mode == Mode.SStrategy) {

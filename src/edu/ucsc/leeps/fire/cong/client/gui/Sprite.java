@@ -2,12 +2,10 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.cong.client.Client;
 import java.io.Serializable;
-import processing.core.PMatrix2D;
 
 public abstract class Sprite implements Serializable {
 
     public transient FPoint origin;
-    public transient FPoint screenLocation;
     public transient int width, height;
     public transient Sprite parent;
     public boolean visible;
@@ -17,25 +15,19 @@ public abstract class Sprite implements Serializable {
         this.parent = parent;
         this.width = width;
         this.height = height;
-        screenLocation = new FPoint(x, y);
     }
 
     public abstract void draw(Client applet);
 
     public boolean isHit(float x, float y) {
+        FPoint screenLocation = getTranslation(origin);
         return x >= screenLocation.x && x <= screenLocation.x + width
                 && y >= screenLocation.y && y <= screenLocation.y + height;
     }
 
     public boolean circularIsHit(float x, float y) {
+        FPoint screenLocation = getTranslation(origin);
         return Client.dist(x, y, screenLocation.x, screenLocation.y) <= width;
-    }
-
-    public void setScreenLocation(Client applet) {
-        PMatrix2D matrix = new PMatrix2D();
-        applet.getMatrix(matrix);
-        screenLocation.x = matrix.m02;
-        screenLocation.y = matrix.m12;
     }
 
     public void setVisible(boolean visible) {

@@ -194,11 +194,11 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             paper.shrink();
             scissors.shrink();
             
-            if (rock.circularIsHit(mouseX, mouseY)) {
+            if (rock.circularIsHit(applet.mouseX, applet.mouseY)) {
                 rock.enlarge();
-            } else if (paper.circularIsHit(mouseX, mouseY)) {
+            } else if (paper.circularIsHit(applet.mouseX, applet.mouseY)) {
                 paper.enlarge();
-            } else if (scissors.circularIsHit(mouseX, mouseY)) {
+            } else if (scissors.circularIsHit(applet.mouseX, applet.mouseY)) {
                 scissors.enlarge();
             }
 
@@ -442,6 +442,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+        applet.cursor();
         if (enabled) {
             current.setVisible(true);
             target.setVisible(true);

@@ -34,6 +34,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     private RadioButtonGroup buttons;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private StrategyChanger strategyChanger;
+    private boolean showMatrix;
 
     public PureStrategySelector (Sprite parent, int x, int y, int size,
             Client applet, StrategyChanger strategyChanger) {
@@ -58,6 +59,8 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
         matrixLabel.setLabel("Matrix");
 
         this.strategyChanger = strategyChanger;
+
+        showMatrix = true;
 
         FIRE.client.addConfigListener(this);
     }
@@ -156,6 +159,10 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
     public boolean isEnabled() {
         return buttons.isEnabled();
+    }
+
+    public void setShowMatrix(boolean show) {
+        showMatrix = show;
     }
 
     public float[] getMyStrategy() {
