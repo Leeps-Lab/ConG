@@ -373,6 +373,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 text(changeTimeString, 330, 45);
             }
         } catch (NullPointerException ex) {
+            ex.printStackTrace();
         }
     }
 

@@ -193,7 +193,10 @@ public class Line extends Sprite implements Serializable {
                 }
                 i++;
             }
-            applet.vertex(last.x, height);
+            // FIXME why is last null here!?
+            if (last != null) {
+                applet.vertex(last.x, height);
+            }
             applet.endShape(PApplet.CLOSE);
         }
     }
