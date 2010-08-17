@@ -35,6 +35,9 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private boolean hasLocked;
     public volatile boolean isLocked;
 
+    // Laker
+    private boolean initialLock;
+
     public StrategyChanger() {
         isMoving = false;
         random = new Random();
@@ -42,6 +45,9 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         start();
         FIRE.client.addConfigListener(this);
         sleepTimeMillis = 100;
+
+        //Laker
+        initialLock = true;
     }
 
     public void configChanged(Config config) {
@@ -109,6 +115,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         }
     }
 
+    // TODO: why does it delay AFTER the player switches strategies?
     private void sendUpdate() {
         if (config.subperiods == 0) {
             float total = 0;
@@ -123,7 +130,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 hoverStrategy_A,
                 hoverStrategy_a,
                 FIRE.client.getID());
-        if (config.delay != null && (!FIRE.client.getConfig().delay.initialLock || !hasLocked)) {
+        if (config.delay != null && FIRE.client.getConfig().delay.initialLock && initialLock) {// || !hasLocked)) {
             float delayTimeInSeconds = 0;
             switch (config.delay.distribution) {
                 case uniform:
@@ -131,11 +138,14 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                     break;
                 case poisson:
                     delayTimeInSeconds = generatePoisson(config.delay.lambda);
+                    break;
                 case gaussian:
                     throw new UnsupportedOperationException();
             }
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delayTimeInSeconds);
             hasLocked = true;
+            initialLock = false;
+            System.err.println("delaying for " + delayTimeInSeconds + " seconds");
         }
     }
 

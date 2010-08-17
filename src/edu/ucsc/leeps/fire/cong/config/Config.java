@@ -37,7 +37,7 @@ public class Config extends BaseConfig {
     public Line thresholdLine;
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
     public ShockZone shock;
-    public DecisionDelay delay;
+    public DecisionDelay initialDelay, delay;
     public float impulse;
     public float changeCost;
     public boolean showHeatmapLegend;
