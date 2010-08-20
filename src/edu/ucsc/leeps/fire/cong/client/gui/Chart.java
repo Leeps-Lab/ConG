@@ -200,6 +200,10 @@ public class Chart extends Sprite implements Configurable<Config> {
                 String label = String.format("%d%%", percent);
                 applet.text(label, x0, y0 + 1.2f * applet.textAscent() + applet.textDescent());
             }
+            String maxPayoffLabel = String.format("%.1f", maxPayoff);
+            float labelX = -10 - 1.1f * applet.textWidth(maxPayoffLabel) / 2f;
+            heatmapLegend.origin.x = -10 - 1.1f * applet.textWidth(maxPayoffLabel) -
+                    heatmapLegend.width;
             heatmapLegend.draw(applet);
             for (float y = 0.0f; y <= 1.01f; y += 0.1f) {
                 applet.noFill();
@@ -219,7 +223,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                     payoff = 0f;
                 }
                 String label = String.format("%.1f", payoff);
-                applet.text(label, -1.2f * applet.textWidth(label), y0);
+                applet.text(label, labelX, y0);
             }
         } else {
             applet.textAlign(Client.RIGHT);
