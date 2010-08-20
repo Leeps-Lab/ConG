@@ -292,7 +292,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 matrixSize, counterpartMatrixSize,
                 this, strategyChanger);
         simplex = new ThreeStrategySelector(
-                null, 20, 100, 250, 600,
+                null, 35, 150, 300, 600,
                 this, strategyChanger);
         pureMatrix = new PureStrategySelector(
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
@@ -301,9 +301,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 topMargin + counterpartMatrixSize + 30,
                 matrixSize / 8, matrixSize, this, strategyChanger);
         countdown = new Countdown(
-                null, counterpartMatrixSize + 4 * leftMargin, 40 + topMargin, this);
+                null, counterpartMatrixSize + 4 * leftMargin, 20 + topMargin, this);
         pointsDisplay = new PointsDisplay(
-                null, counterpartMatrixSize + 4 * leftMargin, (int) (40 + textHeight) + topMargin, this);
+                null, counterpartMatrixSize + 4 * leftMargin, (int) (20 + textHeight) + topMargin, this);
         int chartWidth = (int) (width - bimatrix.width - 2 * leftMargin - 80);
         int chartMargin = 30;
         int strategyChartHeight = 100;

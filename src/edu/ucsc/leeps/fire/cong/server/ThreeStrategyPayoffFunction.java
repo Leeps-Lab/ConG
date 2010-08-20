@@ -12,14 +12,14 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
 
     public ThreeStrategyPayoffFunction() {
         Rr = 0;
-        Rp = 0;
-        Rs = 100;
-        Pr = 100;
-        Pp = 0;
-        Ps = 0;
-        Sr = 0;
+        Rp = 10;
+        Rs = 60;
+        Pr = 80;
+        Pp = 5;
+        Ps = 10;
+        Sr = 20;
         Sp = 100;
-        Ss = 0;
+        Ss = 10;
     }
 
     public float getMin() {
