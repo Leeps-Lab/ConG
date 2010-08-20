@@ -20,6 +20,7 @@ public class Slider {
     private float ghostPos;
     private float ghostValue;
     private float R, G, B;
+    private boolean colorChanged;
     private PImage texture, ghostTexture;
     private String label, stratLabel, ghostLabel;
     private boolean grabbed;
@@ -44,6 +45,7 @@ public class Slider {
         R = C.getRed();
         G = C.getGreen();
         B = C.getBlue();
+        colorChanged = false;
         textureSetup(applet);
         length = end - start;
         if (align == Alignment.Horizontal) {
@@ -102,6 +104,13 @@ public class Slider {
     }
 
     // Manipulation ///////
+    public void setColor(Color c) {
+        R = c.getRed();
+        G = c.getGreen();
+        B = c.getBlue();
+        colorChanged = true;
+    }
+
     public void setStratValue(float newStrat) {
         if (newStrat > maxValue + ERROR_MARGIN || newStrat < -ERROR_MARGIN) {
             throw new RuntimeException("Error: strategy value out of range.");
@@ -219,6 +228,10 @@ public class Slider {
     }
 
     public void draw(Client applet) {
+        if (colorChanged) {
+            textureSetup(applet);
+            colorChanged = false;
+        }
         if (align == Alignment.Horizontal) {
             applet.stroke(0);
             applet.strokeWeight(3);

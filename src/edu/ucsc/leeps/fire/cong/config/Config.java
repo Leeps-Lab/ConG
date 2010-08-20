@@ -16,6 +16,7 @@ import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.UltimatumPayoffFunction;
 import edu.ucsc.leeps.fire.config.BaseConfig;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
+import java.awt.Color;
 
 /**
  *
@@ -36,6 +37,7 @@ public class Config extends BaseConfig {
     public Line yourStrategyOverTime, counterpartStrategyOverTime;
     public Line thresholdLine;
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
+    public Color rColor, pColor, sColor;
     public ShockZone shock;
     public DecisionDelay initialDelay, delay;
     public float impulse;
@@ -113,6 +115,9 @@ public class Config extends BaseConfig {
         shortRLabel = "R";
         shortPLabel = "P";
         shortSLabel = "S";
+        rColor = new Color(255, 25, 25);
+        pColor = new Color(25, 25, 255);
+        sColor = new Color(255, 0, 255);
         shock = new ShockZone();
         shock.start = 0f;
         shock.end = 0f;

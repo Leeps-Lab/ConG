@@ -33,7 +33,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private float[] opponentStrat;
     private Slider[] stratSlider;
     private boolean mouseInTriangle;
-    private Color rColor, pColor, sColor;
     private boolean enabled;
     private Config config;
     private HeatmapHelper heatmap;
@@ -66,24 +65,17 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
         stratSlider = new Slider[3];
 
-        rColor = new Color(255, 25, 25);
-        pColor = new Color(25, 25, 255);
-        sColor = new Color(255, 0, 255);
-
         sideLength = width - 10;
         maxDist = (Client.sqrt(3) / 2f) * sideLength;
 
         rock = new Marker(this, 5, height / 3, true, CORNER_MARKER_R);
-        rock.setColor(rColor);
         rock.setLabel("R");
         rock.setLabelMode(Marker.LabelMode.Bottom);
         paper = new Marker(this, rock.origin.x + sideLength, rock.origin.y, true, CORNER_MARKER_R);
-        paper.setColor(pColor);
         paper.setLabel("P");
         paper.setLabelMode(Marker.LabelMode.Bottom);
         scissors = new Marker(this, rock.origin.x + sideLength / 2,
                 rock.origin.y - (int) maxDist, true, CORNER_MARKER_R);
-        scissors.setColor(sColor);
         scissors.setLabel("S");
         scissors.setLabelMode(Marker.LabelMode.Top);
 
@@ -103,43 +95,37 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
         // set up Sliders
         stratSlider[R] = new Slider(applet, this, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 50,
-                rColor, rLabel, 1f);
+                Color.BLACK, rLabel, 1f);
         stratSlider[P] = new Slider(applet, this, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 100,
-                pColor, pLabel, 1f);
+                Color.BLACK, pLabel, 1f);
         stratSlider[S] = new Slider(applet, this, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 150,
-                sColor, sLabel, 1f);
+                Color.BLACK, sLabel, 1f);
 
 
         // set up dropline Markers
         rDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
-        rDrop.setColor(rColor);
         rDrop.setLabel("R");
         rDrop.setLabelMode(Marker.LabelMode.Right);
 
         ghostRDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
-        ghostRDrop.setColor(rColor);
         ghostRDrop.setAlpha(150);
         ghostRDrop.setLabel("R");
         ghostRDrop.setLabelMode(Marker.LabelMode.Right);
 
         pDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
-        pDrop.setColor(pColor);
         pDrop.setLabel("P");
         pDrop.setLabelMode(Marker.LabelMode.Left);
 
         ghostPDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
-        ghostPDrop.setColor(pColor);
         ghostPDrop.setAlpha(150);
         ghostPDrop.setLabel("P");
         ghostPDrop.setLabelMode(Marker.LabelMode.Left);
 
         sDrop = new Marker(this, 0, rock.origin.y, true, BASE_MARKER_R);
-        sDrop.setColor(sColor);
         sDrop.setLabel("S");
         sDrop.setLabelMode(Marker.LabelMode.Bottom);
 
         ghostSDrop = new Marker(this, 0, rock.origin.y, true, BASE_MARKER_R);
-        ghostSDrop.setColor(sColor);
         ghostSDrop.setAlpha(150);
         ghostSDrop.setLabel("S");
         ghostSDrop.setLabelMode(Marker.LabelMode.Bottom);
@@ -725,13 +711,25 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                 config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             rLabel = config.rLabel;
             stratSlider[R].setLabel(rLabel);
+            stratSlider[R].setColor(config.rColor);
             pLabel = config.pLabel;
             stratSlider[P].setLabel(pLabel);
+            stratSlider[P].setColor(config.pColor);
             sLabel = config.sLabel;
             stratSlider[S].setLabel(sLabel);
+            stratSlider[S].setColor(config.sColor);
             rock.setLabel(config.shortRLabel);
+            rock.setColor(config.rColor);
             paper.setLabel(config.shortPLabel);
+            paper.setColor(config.pColor);
             scissors.setLabel(config.shortSLabel);
+            scissors.setColor(config.sColor);
+            rDrop.setColor(config.rColor);
+            ghostRDrop.setColor(config.rColor);
+            pDrop.setColor(config.pColor);
+            ghostPDrop.setColor(config.pColor);
+            sDrop.setColor(config.sColor);
+            ghostSDrop.setColor(config.sColor);
             setVisible(true);
         } else {
             setVisible(false);
