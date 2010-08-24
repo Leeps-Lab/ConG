@@ -1,5 +1,5 @@
-"period","timeConstrained","paid","length","pointsPerSecond","percentChangePerSecond","payoffFunction","counterpartPayoffFunction","population","yourPayoff","mode","r","g","b","otherPayoff","mode","r","g","b","weight"
-1,"TRUE","TRUE",240,"FALSE",0.1,"rps","rps","singlePopulationInclude","line","shaded",100,255,100,"line","solid",100,150,255,2
-2,"TRUE","TRUE",240,"FALSE",0.1,"rps","rps","singlePopulationInclude","line","shaded",100,255,100,"line","solid",100,150,255,2
-3,"TRUE","TRUE",240,"FALSE",0.1,"rps","rps","singlePopulationInclude","line","shaded",100,255,100,"line","solid",100,150,255,2
-4,"TRUE","TRUE",240,"FALSE",0.1,"rps","rps","singlePopulationInclude","line","shaded",100,255,100,"line","solid",100,150,255,2
+period,timeConstrained,paid,length,pointsPerSecond,percentChangePerSecond,subperiods,payoffFunction,counterpartPayoffFunction,population,yourPayoff,mode,r,g,b,otherPayoff,mode,r,g,b,weight
+1,TRUE,TRUE,60,FALSE,0.1,10,rps,rps,paired,line,shaded,100,255,100,line,solid,100,150,255,2
+2,TRUE,TRUE,60,FALSE,0.1,0,rps,rps,singlePopulationInclude,line,shaded,100,255,100,line,solid,100,150,255,2
+3,TRUE,TRUE,240,FALSE,0.1,0,rps,rps,singlePopulationInclude,line,shaded,100,255,100,line,solid,100,150,255,2
+4,TRUE,TRUE,240,FALSE,0.1,0,rps,rps,singlePopulationInclude,line,shaded,100,255,100,line,solid,100,150,255,2

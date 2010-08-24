@@ -297,7 +297,17 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     private void drawSubperiodMarkers(Client applet) {
-
+        if (config == null || config.subperiods == 0) {
+            return;
+        }
+        applet.strokeWeight(1f);
+        applet.stroke(100, 100, 100);
+        float interval = 1f / (float)config.subperiods;
+        float offset = interval;
+        for (int i = 0; i < config.subperiods; ++i) {
+            applet.line(width * offset, 0, width * offset, height);
+            offset += interval;
+        }
     }
 
     @Override
