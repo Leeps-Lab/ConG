@@ -6,8 +6,9 @@ import java.awt.Color;
 public class Marker extends Sprite {
 
     protected float R, G, B, alpha;
-    protected float radius;
-    protected float largeRadius;
+    protected float outline;
+    protected float diameter;
+    protected float largeDiameter;
     protected String label1;
     protected String label2;
     protected FPoint labelOrigin;
@@ -22,18 +23,19 @@ public class Marker extends Sprite {
     };
 
     public enum DrawMode {
-        Filled, Outline, FillOutline
+        Filled, Outline, FillOutline, Target
     }
 
-    public Marker(Sprite parent, float x, float y, boolean visible, float radius) {
-        super(parent, x, y, (int)radius, (int)radius);
+    public Marker(Sprite parent, float x, float y, boolean visible, float diameter) {
+        super(parent, x, y, (int)diameter, (int)diameter);
         this.visible = visible;
-        this.radius = radius;
-        largeRadius = radius * 1.5f;
+        this.diameter = diameter;
+        largeDiameter = diameter * 1.5f;
 
         R = 0;
         G = 0;
         B = 0;
+        outline = 0;
         alpha = 255;
 
         labelMode = LabelMode.Center;
@@ -56,6 +58,14 @@ public class Marker extends Sprite {
         R = r;
         G = g;
         B = b;
+        if (drawMode == DrawMode.FillOutline) {
+            if (R > 200 || G > 200 || B > 200 ||
+                    R + G + B > 300) {
+                outline = 0;
+            } else {
+                outline = 255;
+            }
+        }
     }
 
     public void setColor(float r, float g, float b, int a) {
@@ -63,6 +73,14 @@ public class Marker extends Sprite {
         G = g;
         B = b;
         alpha = a;
+        if (drawMode == DrawMode.FillOutline) {
+            if (R > 200 || G > 200 || B > 200 ||
+                    R + G + B > 300) {
+                outline = 0;
+            } else {
+                outline = 255;
+            }
+        }
     }
 
     public void setColor(Color C) {
@@ -70,6 +88,14 @@ public class Marker extends Sprite {
         G = C.getGreen();
         B = C.getBlue();
         alpha = C.getAlpha();
+        if (drawMode == DrawMode.FillOutline) {
+            if (R > 200 || G > 200 || B > 200 ||
+                    R + G + B > 300) {
+                outline = 0;
+            } else {
+                outline = 255;
+            }
+        }
     }
 
     public void setLabel(String newLabel) {
@@ -98,18 +124,18 @@ public class Marker extends Sprite {
                 break;
             case Top:
                 labelOrigin.x = origin.x;
-                labelOrigin.y = origin.y - radius - 8;
+                labelOrigin.y = origin.y - diameter - 8;
                 break;
             case Right:
-                labelOrigin.x = origin.x + radius + 8;
+                labelOrigin.x = origin.x + diameter + 8;
                 labelOrigin.y = origin.y;
                 break;
             case Bottom:
                 labelOrigin.x = origin.x;
-                labelOrigin.y = origin.y + radius + 8;
+                labelOrigin.y = origin.y + diameter + 8;
                 break;
             case Left:
-                labelOrigin.x = origin.x - radius - 8;
+                labelOrigin.x = origin.x - diameter - 8;
                 labelOrigin.y = origin.y;
                 break;
         }
@@ -117,6 +143,14 @@ public class Marker extends Sprite {
 
     public void setDrawMode(DrawMode mode) {
         drawMode = mode;
+        if (drawMode == DrawMode.FillOutline) {
+            if (R > 200 || G > 200 || B > 200 ||
+                    R + G + B > 300) {
+                outline = 0;
+            } else {
+                outline = 255;
+            }
+        }
     }
 
     public void grab() {
@@ -132,14 +166,14 @@ public class Marker extends Sprite {
     }
 
     public void enlarge() {
-        width = (int)largeRadius;
-        height = (int)largeRadius;
+        width = (int)largeDiameter;
+        height = (int)largeDiameter;
         enlarged = true;
     }
 
     public void shrink() {
-        width = (int)radius;
-        height = (int)radius;
+        width = (int)diameter;
+        height = (int)diameter;
         enlarged = false;
     }
 
@@ -164,11 +198,12 @@ public class Marker extends Sprite {
         if (drawMode == DrawMode.Filled) {
             applet.noStroke();
         } else {
-            applet.stroke(0);
+            applet.stroke(outline);
             applet.strokeWeight(1);
         }
 
-        if (drawMode == DrawMode.Outline) {
+        if (drawMode == DrawMode.Outline ||
+                drawMode == DrawMode.Target) {
             applet.noFill();
         } else {
             applet.fill(R, G, B, alpha);
@@ -176,9 +211,19 @@ public class Marker extends Sprite {
         
         applet.ellipseMode(Client.CENTER);
         if (!enlarged) {
-            applet.ellipse(origin.x, origin.y, radius, radius);
+            applet.ellipse(origin.x, origin.y, diameter, diameter);
+            if (drawMode == DrawMode.Target) {
+                applet.strokeWeight(2);
+                applet.line(origin.x - diameter, origin.y, origin.x + diameter, origin.y);
+                applet.line(origin.x + .5f, origin.y - diameter, origin.x + .5f, origin.y + diameter);
+            }
         } else {
-            applet.ellipse(origin.x, origin.y, largeRadius, largeRadius);
+            applet.ellipse(origin.x, origin.y, largeDiameter, largeDiameter);
+            if (drawMode == DrawMode.Target) {
+                applet.strokeWeight(2);
+                applet.line(origin.x - diameter, origin.y, origin.x + diameter, origin.y);
+                applet.line(origin.x + .5f, origin.y - diameter, origin.x + .5f, origin.y + diameter);
+            }
         }
     }
 
@@ -190,9 +235,9 @@ public class Marker extends Sprite {
             textWidth += applet.textWidth(label2);
         }
         if (textWidth > 16 && labelMode == LabelMode.Left) {
-            labelOrigin.x = origin.x - radius - textWidth / 2;
+            labelOrigin.x = origin.x - diameter - textWidth / 2;
         } else if (textWidth > 16 && labelMode == LabelMode.Right) {
-            labelOrigin.x = origin.x + radius + textWidth / 2;
+            labelOrigin.x = origin.x + diameter + textWidth / 2;
         }
         float textHeight = applet.textAscent() + applet.textDescent();
         applet.rectMode(Client.CENTER);

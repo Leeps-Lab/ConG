@@ -32,6 +32,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     // average of opponents' strategies
     private float[] opponentStrat;
     private Slider[] stratSlider;
+    private boolean showSliders;
     private boolean mouseInTriangle;
     private boolean enabled;
     private Config config;
@@ -71,27 +72,33 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         rock = new Marker(this, 5, height / 3, true, CORNER_MARKER_R);
         rock.setLabel("R");
         rock.setLabelMode(Marker.LabelMode.Bottom);
+        rock.setDrawMode(Marker.DrawMode.FillOutline);
         paper = new Marker(this, rock.origin.x + sideLength, rock.origin.y, true, CORNER_MARKER_R);
         paper.setLabel("P");
         paper.setLabelMode(Marker.LabelMode.Bottom);
+        paper.setDrawMode(Marker.DrawMode.FillOutline);
         scissors = new Marker(this, rock.origin.x + sideLength / 2,
                 rock.origin.y - (int) maxDist, true, CORNER_MARKER_R);
         scissors.setLabel("S");
         scissors.setLabelMode(Marker.LabelMode.Top);
+        scissors.setDrawMode(Marker.DrawMode.FillOutline);
 
         // set up strategy markers
         current = new Marker(this, 0, 0, false, BASE_MARKER_R + 2);
         current.setColor(50, 255, 50);
         current.setLabel("$$");
         current.setLabelMode(Marker.LabelMode.Bottom);
+        current.setDrawMode(Marker.DrawMode.FillOutline);
         target = new Marker(this, 0, 0, false, BASE_MARKER_R + 2);
-        target.setDrawMode(Marker.DrawMode.Outline);
         target.setLabel("$$");
         target.setLabelMode(Marker.LabelMode.Bottom);
+        target.setDrawMode(Marker.DrawMode.Target);
         ghost = new Marker(this, 0, 0, false, BASE_MARKER_R);
         ghost.setColor(25, 255, 25, 140);
+        ghost.setDrawMode(Marker.DrawMode.FillOutline);
         opponent = new Marker(this, 0, 0, false, BASE_MARKER_R);
         opponent.setColor(200, 40, 40);
+        opponent.setDrawMode(Marker.DrawMode.FillOutline);
 
         // set up Sliders
         stratSlider[R] = new Slider(applet, this, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 50,
@@ -106,29 +113,35 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         rDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
         rDrop.setLabel("R");
         rDrop.setLabelMode(Marker.LabelMode.Right);
+        rDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
         ghostRDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
         ghostRDrop.setAlpha(150);
         ghostRDrop.setLabel("R");
         ghostRDrop.setLabelMode(Marker.LabelMode.Right);
+        ghostRDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
         pDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
         pDrop.setLabel("P");
         pDrop.setLabelMode(Marker.LabelMode.Left);
+        pDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
         ghostPDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
         ghostPDrop.setAlpha(150);
         ghostPDrop.setLabel("P");
         ghostPDrop.setLabelMode(Marker.LabelMode.Left);
+        ghostPDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
         sDrop = new Marker(this, 0, rock.origin.y, true, BASE_MARKER_R);
         sDrop.setLabel("S");
         sDrop.setLabelMode(Marker.LabelMode.Bottom);
+        sDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
         ghostSDrop = new Marker(this, 0, rock.origin.y, true, BASE_MARKER_R);
         ghostSDrop.setAlpha(150);
         ghostSDrop.setLabel("S");
         ghostSDrop.setLabelMode(Marker.LabelMode.Bottom);
+        ghostSDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
         setEnabled(false);
 
@@ -730,6 +743,11 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             ghostPDrop.setColor(config.pColor);
             sDrop.setColor(config.sColor);
             ghostSDrop.setColor(config.sColor);
+
+            for (int i = R; i <= S; ++i) {
+                stratSlider[i].setVisible(config.showRPSSliders);
+            }
+
             setVisible(true);
         } else {
             setVisible(false);

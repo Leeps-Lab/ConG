@@ -11,6 +11,7 @@ public class Slider {
     private final int HANDLE_HEIGHT = 27;
     private final String FORMAT = "%4.2f";
     private final float ERROR_MARGIN = .01f;
+    private boolean visible;
     private Alignment align;
     private float sliderStart, sliderEnd, sliderLine;
     private float length;
@@ -104,6 +105,10 @@ public class Slider {
     }
 
     // Manipulation ///////
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+    
     public void setColor(Color c) {
         R = c.getRed();
         G = c.getGreen();
@@ -228,51 +233,53 @@ public class Slider {
     }
 
     public void draw(Client applet) {
-        if (colorChanged) {
-            textureSetup(applet);
-            colorChanged = false;
-        }
-        if (align == Alignment.Horizontal) {
-            applet.stroke(0);
-            applet.strokeWeight(3);
-            applet.line(sliderStart, sliderLine, sliderEnd, sliderLine);
-
-            applet.noStroke();
-            applet.imageMode(Client.CENTER);
-            applet.image(texture, sliderPos, sliderLine);
-
-            applet.fill(0);
-            applet.textAlign(Client.LEFT);
-            float labelWidth = applet.textWidth(label);
-            applet.text(label, sliderStart - labelWidth - 10, sliderLine + 2);
-            applet.text(stratLabel, sliderEnd + 10, sliderLine + 2);
-
-            if (ghosting) {
-                applet.image(ghostTexture, ghostPos, sliderLine);
-
-                applet.fill(120);
-                applet.text(ghostLabel, sliderEnd + 10, sliderLine + 20);
+        if (visible) {
+            if (colorChanged) {
+                textureSetup(applet);
+                colorChanged = false;
             }
-        } else {
-            applet.stroke(0);
-            applet.strokeWeight(3);
-            applet.line(sliderLine, sliderStart, sliderLine, sliderEnd);
+            if (align == Alignment.Horizontal) {
+                applet.stroke(0);
+                applet.strokeWeight(3);
+                applet.line(sliderStart, sliderLine, sliderEnd, sliderLine);
 
-            applet.noStroke();
-            applet.imageMode(Client.CENTER);
-            applet.image(texture, sliderLine, sliderPos);
+                applet.noStroke();
+                applet.imageMode(Client.CENTER);
+                applet.image(texture, sliderPos, sliderLine);
 
-            applet.fill(0);
-            applet.textAlign(Client.CENTER);
-            float labelHeight = applet.textAscent() + applet.textDescent();
-            applet.text(label, sliderLine,  sliderStart - labelHeight);
-            applet.text(stratLabel, sliderLine, sliderEnd + labelHeight);
+                applet.fill(0);
+                applet.textAlign(Client.LEFT);
+                float labelWidth = applet.textWidth(label);
+                applet.text(label, sliderStart - labelWidth - 10, sliderLine + 2);
+                applet.text(stratLabel, sliderEnd + 10, sliderLine + 2);
 
-            if (ghosting) {
-                applet.image(ghostTexture, sliderLine, ghostPos);
+                if (ghosting) {
+                    applet.image(ghostTexture, ghostPos, sliderLine);
 
-                applet.fill(120);
-                applet.text(ghostLabel, sliderLine, sliderEnd + 2 * labelHeight);
+                    applet.fill(120);
+                    applet.text(ghostLabel, sliderEnd + 10, sliderLine + 20);
+                }
+            } else {
+                applet.stroke(0);
+                applet.strokeWeight(3);
+                applet.line(sliderLine, sliderStart, sliderLine, sliderEnd);
+
+                applet.noStroke();
+                applet.imageMode(Client.CENTER);
+                applet.image(texture, sliderLine, sliderPos);
+
+                applet.fill(0);
+                applet.textAlign(Client.CENTER);
+                float labelHeight = applet.textAscent() + applet.textDescent();
+                applet.text(label, sliderLine,  sliderStart - labelHeight);
+                applet.text(stratLabel, sliderLine, sliderEnd + labelHeight);
+
+                if (ghosting) {
+                    applet.image(ghostTexture, sliderLine, ghostPos);
+
+                    applet.fill(120);
+                    applet.text(ghostLabel, sliderLine, sliderEnd + 2 * labelHeight);
+                }
             }
         }
     }

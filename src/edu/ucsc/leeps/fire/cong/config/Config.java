@@ -38,6 +38,7 @@ public class Config extends BaseConfig {
     public Line thresholdLine;
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
     public Color rColor, pColor, sColor;
+    public boolean showRPSSliders;
     public ShockZone shock;
     public DecisionDelay initialDelay, delay;
     public float impulse;
@@ -115,9 +116,10 @@ public class Config extends BaseConfig {
         shortRLabel = "R";
         shortPLabel = "P";
         shortSLabel = "S";
-        rColor = new Color(255, 25, 25);
-        pColor = new Color(25, 25, 255);
-        sColor = new Color(255, 0, 255);
+        rColor = new Color(255, 255, 255);
+        pColor = new Color(0, 0, 0);
+        sColor = new Color(150, 150, 150);
+        showRPSSliders = false;
         shock = new ShockZone();
         shock.start = 0f;
         shock.end = 0f;
