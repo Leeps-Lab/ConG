@@ -49,6 +49,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private StrategyChanger strategyChanger;
     private Chatroom chatroom;
     private boolean chatroomEnabled = false;
+    private boolean initialStrategyChosen;
     public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
 
     public Client() {
@@ -66,32 +67,18 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         frame.setVisible(true);
     }
 
-    public void startPeriod() {
-        strategyChanger.setCurrentStrategy(FIRE.client.getConfig().initialStrategy);
-        if (FIRE.client.getConfig().mixedStrategySelection) {
-            if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                if (FIRE.client.getConfig().stripStrategySelection) {
-                    strip.setInitialStrategy(FIRE.client.getConfig().initialStrategy[0]);
-                } else {
-                    bimatrix.setMyStrategy(FIRE.client.getConfig().initialStrategy[0]);
-                }
-            } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                simplex.setAllStrategies(FIRE.client.getConfig().initialStrategy);
-            } else {
-                assert false;
-            }
-        } else {
-            pureMatrix.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-        }
-        payoffChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-        strategyChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-        rChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-        pChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-        sChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+    public boolean isInitialStrategyChosen() {
+        return initialStrategyChosen;
+    }
 
+    public void setInitialStrategyChosen(boolean isChosen) {
+        initialStrategyChosen = isChosen;
+    }
+
+    public void startPrePeriod() {
+        initialStrategyChosen = false;
         this.percent = 0;
-        strategyChanger.startPeriod();
-        simplex.setEnabled(true);
+        simplex.startPrePeriod();
         bimatrix.setEnabled(true);
         pureMatrix.setEnabled(true);
         strip.setEnabled(true);
@@ -100,6 +87,46 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         rChart.clearAll();
         pChart.clearAll();
         sChart.clearAll();
+    }
+
+    public void startPeriod() {
+        if (FIRE.client.getConfig().preLength == 0) {
+            initialStrategyChosen = true;
+            strategyChanger.setCurrentStrategy(FIRE.client.getConfig().initialStrategy);
+            if (FIRE.client.getConfig().mixedStrategySelection) {
+                if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+                    if (FIRE.client.getConfig().stripStrategySelection) {
+                        strip.setInitialStrategy(FIRE.client.getConfig().initialStrategy[0]);
+                    } else {
+                        bimatrix.setMyStrategy(FIRE.client.getConfig().initialStrategy[0]);
+                    }
+                } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+                    simplex.setAllStrategies(FIRE.client.getConfig().initialStrategy);
+                } else {
+                    assert false;
+                }
+            } else {
+                pureMatrix.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+            }
+            payoffChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+            strategyChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+            rChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+            pChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+            sChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+            this.percent = 0;
+            bimatrix.setEnabled(true);
+            pureMatrix.setEnabled(true);
+            strip.setEnabled(true);
+            payoffChart.clearAll();
+            strategyChart.clearAll();
+            rChart.clearAll();
+            pChart.clearAll();
+            sChart.clearAll();
+        }
+        simplex.setEnabled(true);
+
+        strategyChanger.startPeriod();
+        
         if (FIRE.client.getConfig().chatroom && !chatroomEnabled) {
             chatroomEnabled = true;
             chatroom = new Chatroom(frame);
@@ -353,6 +380,11 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             }
             payoffChart.draw(this);
             legend.draw(this);
+            if (!initialStrategyChosen) {
+                float textHeight = textDescent() + textAscent() + 8;
+                fill(255, 50, 50);
+                text("Please choose an initial strategy.", countdown.origin.x, countdown.origin.y - textHeight);
+            }
             countdown.draw(this);
             pointsDisplay.draw(this);
             if (DEBUG) {

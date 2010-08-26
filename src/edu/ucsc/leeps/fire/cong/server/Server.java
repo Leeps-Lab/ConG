@@ -50,6 +50,15 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         configureStrategies();
     }
 
+    public boolean initialStrategiesChosen() {
+        for (Integer id : clients.keySet()) {
+            if (!clients.get(id).isInitialStrategyChosen()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void startPeriod(long periodStartTime) {
         population.initialize(periodStartTime);
         configureImpulses();

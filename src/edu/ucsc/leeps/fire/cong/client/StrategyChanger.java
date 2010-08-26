@@ -214,12 +214,16 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     }
 
     public void setTargetStrategy(float[] strategy) {
-        if (FIRE.client.getConfig().percentChangePerSecond >= 1.0f) {
+        if (FIRE.client.getConfig().percentChangePerSecond >= 1.0f ||
+                !FIRE.client.getClient().isInitialStrategyChosen()) {
             for (int i = 0; i < targetStrategy.length; i++) {
                 currentStrategy[i] = strategy[i];
                 targetStrategy[i] = strategy[i];
             }
             FIRE.client.getClient().setMyStrategy(strategy);
+            if (!FIRE.client.getClient().isInitialStrategyChosen()) {
+                FIRE.client.getClient().setInitialStrategyChosen(true);
+            }
             sendUpdate();
             return;
         } else {

@@ -37,18 +37,19 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private boolean enabled;
     private Config config;
     private HeatmapHelper heatmap;
-    private Client applet;
+    private Client client;
     public float currentPercent;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
     private Marker ghostRDrop, ghostPDrop, ghostSDrop;
     private StrategyChanger strategyChanger;
+    private boolean periodStarted;
 
     public ThreeStrategySelector(
             Sprite parent, float x, float y, int width, int height,
             Client applet, StrategyChanger strategyChanger) {
         super(parent, x, y, width, height);
-        this.applet = applet;
+        this.client = applet;
         this.strategyChanger = strategyChanger;
         mouseInTriangle = false;
         axisDistance = new float[3];
@@ -150,9 +151,11 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                 this, (int) (origin.x + rock.origin.x), (int) (origin.y + scissors.origin.y),
                 (int) (paper.origin.x - rock.origin.x), (int) (rock.origin.y - scissors.origin.y),
                 true, applet);
-        heatmap.setVisible(true);
+        heatmap.setVisible(false);
         currentPercent = 0f;
 
+        periodStarted = false;
+        
         FIRE.client.addConfigListener(this);
     }
 
@@ -441,7 +444,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
-        applet.cursor();
+        client.cursor();
         if (enabled) {
             current.setVisible(true);
             target.setVisible(true);
@@ -451,6 +454,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             sDrop.setVisible(true);
             for (int i = R; i <= S; ++i) {
                 stratSlider[i].showGhost();
+            }
+            if (!periodStarted) {
+                periodStarted = true;
+                heatmap.setVisible(true);
             }
         } else {
             current.setVisible(false);
@@ -463,6 +470,17 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                 stratSlider[i].hideGhost();
             }
         }
+    }
+
+    public void startPrePeriod() {
+        enabled = true;
+        client.cursor();
+        target.setVisible(true);
+        current.setVisible(false);
+        opponent.setVisible(false);
+        rDrop.setVisible(false);
+        pDrop.setVisible(false);
+        sDrop.setVisible(false);
     }
 
     public void reset() {
@@ -478,12 +496,15 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         }
 
         current.setVisible(false);
+        target.update(0, 0);
         target.setVisible(false);
         ghost.setVisible(false);
         opponent.setVisible(false);
         rDrop.setVisible(false);
         pDrop.setVisible(false);
         sDrop.setVisible(false);
+        heatmap.setVisible(false);
+        periodStarted = false;
     }
 
     public boolean isEnabled() {
@@ -494,9 +515,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         if (!visible) {
-            applet.removeMouseListener(this);
+            client.removeMouseListener(this);
         } else {
-            applet.addMouseListener(this);
+            client.addMouseListener(this);
         }
     }
 
@@ -504,6 +525,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     // array. also adjust labeling mode of given droplines
     private void adjustLabels(float[] strats, Marker stratMarker,
             Marker pDropMarker, Marker rDropMarker) {
+        if (!periodStarted) {
+            stratMarker.setLabel(null);
+        }
         if (strats[S] < 0.2f) {
             if (strats[R] > strats[P]) {
                 stratMarker.setLabelMode(Marker.LabelMode.Right);
