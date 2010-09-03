@@ -4,6 +4,7 @@ import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
+import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
@@ -17,12 +18,13 @@ import processing.core.PApplet;
  *
  * @author swolpert
  */
-public class PureStrategySelector extends Sprite implements Configurable<Config>, KeyListener {
+public class PureStrategySelector extends Sprite implements Configurable<Config>, KeyListener, Selector {
     private final int BUTTON_RADIUS = 15;
     private Client applet;
     private float currentPercent;
     private float[] myStrat;
     private float[] opponentStrat;
+    private float[] targetStrat;
     private Marker matrixTopLeft;
     private Marker matrixTopRight;
     private Marker matrixBotLeft;
@@ -33,7 +35,6 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     private Marker[] columnLabels;
     private RadioButtonGroup buttons;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
-    private StrategyChanger strategyChanger;
     private boolean showMatrix;
 
     public PureStrategySelector (Sprite parent, int x, int y, int size,
@@ -57,8 +58,6 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 true, 0);
         matrixLabel.setLabelMode(Marker.LabelMode.Top);
         matrixLabel.setLabel("Matrix");
-
-        this.strategyChanger = strategyChanger;
 
         showMatrix = true;
 
@@ -134,8 +133,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 for(int i = 0; i < myStrat.length; ++i) {
                     strategy[i] = myStrat[i];
                 }
-                strategyChanger.setTargetStrategy(strategy);
-                strategyChanger.setCurrentStrategy(strategy);
+                targetStrat = strategy;
             }
             
             applet.popMatrix();
@@ -155,6 +153,22 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
     public void setEnabled(boolean enabled) {
         buttons.setEnabled(enabled);
+    }
+
+    public void setCurrent(float[] strategy) {
+        myStrat = strategy;
+    }
+
+    public void setInitial(float[] strategy) {
+        targetStrat = myStrat;
+    }
+
+    public void setCounterpart(float[] strategy) {
+        opponentStrat = strategy;
+    }
+
+    public float[] getTarget() {
+        return targetStrat;
     }
 
     public boolean isEnabled() {
@@ -226,8 +240,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 for(int i = 0; i < myStrat.length; ++i) {
                     strategy[i] = myStrat[i];
                 }
-                strategyChanger.setTargetStrategy(strategy);
-                strategyChanger.setCurrentStrategy(strategy);
+                targetStrat = strategy;
             } else if ((buttons.getAlignment() == RadioButtonGroup.Alignment.Vertical &&
                             e.getKeyCode() == KeyEvent.VK_UP) ||
                         (buttons.getAlignment() == RadioButtonGroup.Alignment.Horizontal &&
@@ -249,8 +262,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 for(int i = 0; i < myStrat.length; ++i) {
                     strategy[i] = myStrat[i];
                 }
-                strategyChanger.setTargetStrategy(strategy);
-                strategyChanger.setCurrentStrategy(strategy);
+                targetStrat = strategy;
             }
         }
     }
@@ -358,5 +370,8 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 cellMarkers[i][j].setLabel(myPayoff, opponentPayoff);
             }
         }
+    }
+
+    public void startPrePeriod() {
     }
 }

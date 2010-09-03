@@ -4,6 +4,7 @@ import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
+import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
@@ -18,11 +19,11 @@ import processing.core.PApplet;
  *
  * @author jpettit
  */
-public class TwoStrategySelector extends Sprite implements Configurable<Config>, MouseListener, KeyListener {
+public class TwoStrategySelector extends Sprite implements Configurable<Config>, MouseListener, KeyListener, Selector {
 
     private Client applet;
     private Config config;
-    private float percent_A, percent_a;
+    private float percent_A, percent_a, target_percent_A;
     private boolean enabled;
     private HeatmapHelper heatmap, counterpartHeatmap;
     private float currentPercent;
@@ -38,7 +39,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private long hoverTimestamp;
     private long hoverTimeMillis = 0;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
-    private StrategyChanger strategyChanger;
 
     public TwoStrategySelector(
             Sprite parent, int x, int y,
@@ -94,7 +94,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         counterpart = new Marker(this, 0, 0, false, 10);
         counterpart.setLabelMode(Marker.LabelMode.Top);
 
-        this.strategyChanger = strategyChanger;
         FIRE.client.addConfigListener(this);
     }
 
@@ -122,12 +121,20 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         currentPercent = percent;
     }
 
-    public void setMyStrategy(float A) {
-        percent_A = A;
+    public void setCurrent(float[] strategy) {
+        percent_A = strategy[0];
+    }
+    
+    public void setInitial(float[] strategy) {
+        target_percent_A = strategy[0];
     }
 
-    public void setCounterpartStrategy(float a) {
-        percent_a = a;
+    public void setCounterpart(float[] strategy) {
+        percent_a = strategy[0];
+    }
+
+    public float[] getTarget() {
+        return new float[] { target_percent_A };
     }
 
     public void update() {
@@ -206,15 +213,14 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             dragged.update((1 - percent_a) * width, dragged.origin.y);
         }
 
-        if (strategyChanger.strategyIsMoving()) {
-            float targetPercentA = strategyChanger.getTargetStrategy()[0];
+        if (percent_A == target_percent_A) {
             planned.setVisible(true);
             planned.update(
                     (1 - percent_a) * width,
-                    (1 - targetPercentA) * height);
+                    (1 - target_percent_A) * height);
             planned.setLabel(payoffFunction.getPayoff(
                     currentPercent,
-                    new float[]{targetPercentA},
+                    new float[]{target_percent_A},
                     new float[]{percent_a}));
         } else {
             planned.setVisible(false);
@@ -230,9 +236,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
                     && hoverPercent_a >= 0 && hoverPercent_a <= 1.0) {
                 hover.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
                 hover.update((1 - hoverPercent_a) * width, (1 - hoverPercent_A) * height);
-                strategyChanger.setHoverStrategy(
-                        new float[]{hoverPercent_A, 1 - hoverPercent_A},
-                        new float[]{hoverPercent_a, 1 - hoverPercent_a});
                 hover.setVisible(true);
                 hover.draw(applet);
             }
@@ -313,7 +316,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
             float targetPercentA = 1 - ((mouseY - origin.y) / height);
-            strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
+            //strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
+            target_percent_A = targetPercentA;
         }
     }
 
@@ -328,7 +332,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
             float targetPercentA = 1 - ((mouseY - origin.y) / height);
-            strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
+            //strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
+            target_percent_A = targetPercentA;
         }
     }
 
@@ -367,15 +372,17 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         }
         if (ke.isActionKey()) {
             if (ke.getKeyCode() == KeyEvent.VK_UP) {
-                float targetPercentA = strategyChanger.getTargetStrategy()[0];
+                float targetPercentA = target_percent_A;
                 targetPercentA += 0.01f;
                 targetPercentA = PApplet.constrain(targetPercentA, 0, 1);
-                strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
+                //strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
+                target_percent_A = targetPercentA;
             } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
-                float targetPercentA = strategyChanger.getTargetStrategy()[0];
+                float targetPercentA = target_percent_A;
                 targetPercentA -= 0.01f;
                 targetPercentA = PApplet.constrain(targetPercentA, 0, 1);
-                strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
+                //strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
+                target_percent_A = targetPercentA;
             }
         }
     }
@@ -386,5 +393,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     public void setTwoStrategyHeatmapBuffers(float[][][] payoff, float[][][] counterpartPayoff) {
         heatmap.setTwoStrategyHeatmapBuffers(payoff);
         counterpartHeatmap.setTwoStrategyHeatmapBuffers(counterpartPayoff);
+    }
+
+    public void startPrePeriod() {
     }
 }

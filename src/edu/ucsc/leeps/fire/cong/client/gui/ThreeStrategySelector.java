@@ -4,13 +4,14 @@ import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
+import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import java.awt.Color;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 
-public class ThreeStrategySelector extends Sprite implements Configurable<Config>, MouseListener {
+public class ThreeStrategySelector extends Sprite implements Configurable<Config>, MouseListener, Selector {
 
     private String rLabel = "";
     private String pLabel = "";
@@ -42,7 +43,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
     private Marker ghostRDrop, ghostPDrop, ghostSDrop;
-    private StrategyChanger strategyChanger;
     private boolean periodStarted;
 
     public ThreeStrategySelector(
@@ -50,7 +50,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             Client applet, StrategyChanger strategyChanger) {
         super(parent, x, y, width, height);
         this.client = applet;
-        this.strategyChanger = strategyChanger;
         mouseInTriangle = false;
         axisDistance = new float[3];
         ghostStrat = new float[3];
@@ -631,7 +630,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         targetStrat[S] = axisDistance[S] / maxDist;
         targetStrat[P] = axisDistance[P] / maxDist;
         targetStrat[R] = 1 - targetStrat[S] - targetStrat[P];
-        strategyChanger.setTargetStrategy(targetStrat);
         float[] coords = calculateStratCoords(targetStrat[R], targetStrat[P], targetStrat[S]);
         target.update(coords[0], coords[1]);
     }
@@ -739,7 +737,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         }
         float[] coords = calculateStratCoords(targetStrat[R], targetStrat[P], targetStrat[S]);
         target.update(coords[0], coords[1]);
-        strategyChanger.setTargetStrategy(targetStrat);
     }
 
     public void configChanged(Config config) {
@@ -776,5 +773,27 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         } else {
             setVisible(false);
         }
+    }
+
+    public void setCurrent(float[] strategy) {
+        playedStrat = strategy;
+    }
+
+    public void setInitial(float[] strategy) {
+        targetStrat = strategy;
+    }
+
+    public void setCounterpart(float[] strategy) {
+        opponentStrat = strategy;
+        float[] coords = calculateStratCoords(strategy[0], strategy[1], strategy[2]);
+        opponent.update(coords[0], coords[1]);
+    }
+
+    public float[] getTarget() {
+        return targetStrat;
+    }
+
+    public void setCurrentPercent(float percent) {
+        currentPercent = percent;
     }
 }

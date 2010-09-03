@@ -9,6 +9,7 @@ import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
+import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
@@ -24,12 +25,12 @@ import java.awt.event.MouseListener;
  * @author swolpert
  */
 public class OneStrategyStripSelector extends Sprite implements Configurable<Config>, MouseListener,
-    KeyListener {
+    KeyListener, Selector {
 
     private Client applet;
-    private StrategyChanger strategyChanger;
     private float myStrat;
     private float opponentStrat;
+    private float targetStrat;
     private boolean enabled;
     private HeatmapHelper heatmap;
     private Slider slider;
@@ -46,7 +47,6 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             Client applet, StrategyChanger strategyChanger) {
         super(parent, x, y, width, height);
         this.applet = applet;
-        this.strategyChanger = strategyChanger;
 
         heatmap = new HeatmapHelper(this, 0, 0, width, height, true, applet);
         heatmap.setVisible(true);
@@ -141,7 +141,6 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         if (enabled) {
             if (slider.isGhostGrabbed()) {
                 slider.releaseGhost();
-                strategyChanger.setTargetStrategy(new float[]{slider.getGhostValue(), 1 - slider.getGhostValue()});
             }
         }
     }
@@ -162,17 +161,13 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
 
         if (e.isActionKey()) {
             if (e.getKeyCode() == KeyEvent.VK_UP) {
-                float targetStrat = strategyChanger.getTargetStrategy()[0];
                 targetStrat += .01f;
                 targetStrat = Client.constrain(targetStrat, 0, 1);
                 slider.setGhostValue(targetStrat);
-                strategyChanger.setTargetStrategy(new float[]{targetStrat, 1- targetStrat});
             } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                float targetStrat = strategyChanger.getTargetStrategy()[0];
                 targetStrat -= .01f;
                 targetStrat = Client.constrain(targetStrat, 0, 1);
                 slider.setGhostValue(targetStrat);
-                strategyChanger.setTargetStrategy(new float[]{targetStrat, 1 - targetStrat});
             }
         }
     }
@@ -280,5 +275,24 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         targetPayoff.setVisible(showHeatmap);
         APayoff.setVisible(showHeatmap);
         BPayoff.setVisible(showHeatmap);
+    }
+
+    public void setCurrent(float[] strategy) {
+        myStrat = strategy[0];
+    }
+
+    public void setInitial(float[] strategy) {
+        targetStrat = strategy[0];
+    }
+
+    public void setCounterpart(float[] strategy) {
+        opponentStrat = strategy[0];
+    }
+
+    public float[] getTarget() {
+        return new float[] { targetStrat };
+    }
+
+    public void startPrePeriod() {
     }
 }
