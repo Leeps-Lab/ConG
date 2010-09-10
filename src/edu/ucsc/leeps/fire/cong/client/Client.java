@@ -127,6 +127,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         if (FIRE.client.getConfig().preLength == 0) {
             initialStrategyChosen = true;
             strategyChanger.setCurrentStrategy(FIRE.client.getConfig().initialStrategy);
+            strategyChanger.setTargetStrategy(FIRE.client.getConfig().initialStrategy);
+            strategyChanger.selector.setInitial(FIRE.client.getConfig().initialStrategy);
             payoffChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
             strategyChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
             rChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);

@@ -17,7 +17,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private Config config;
     private volatile boolean running;
     private volatile boolean shouldUpdate;
-    private boolean isMoving;
     private float[] previousStrategy;
     private float[] currentStrategy;
     private float[] targetStrategy;
@@ -40,7 +39,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private boolean initialLock;
 
     public StrategyChanger() {
-        isMoving = false;
         random = new Random();
         nextAllowedChangeTime = System.currentTimeMillis();
         start();
@@ -77,8 +75,11 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         }
         synchronized (lock) {
             float[] temp = selector.getTarget();
-            if(Math.abs(temp[0] - targetStrategy[0]) > 0.1) {
-                System.err.println("Target changed");
+            if(temp != null) {
+                if(temp == currentStrategy) {
+                    sleepTimeMillis = 100;
+                    return;
+                }
             }
             targetStrategy = selector.getTarget();
             float totalDelta = 0f;
@@ -95,7 +96,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 for (int i = 0; i < currentStrategy.length; i++) {
                     currentStrategy[i] = targetStrategy[i];
                 }
-                isMoving = false;
                 sleepTimeMillis = 100;
             }
 
@@ -179,7 +179,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 if(selector != null) {
                     selector.setEnabled(!isLocked);
                 }
-                if (!isLocked && isMoving && shouldUpdate) {
+                if (!isLocked && shouldUpdate) {
                     update();
                 }
                 sleep(sleepTimeMillis);
@@ -195,10 +195,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
 
     private void recalculateTickDelta() {
         tickDelta = config.percentChangePerSecond / (1000f / tickTime);
-    }
-
-    public boolean strategyIsMoving() {
-        return isMoving;
     }
 
     public void setCurrentStrategy(float[] strategy) {
@@ -232,7 +228,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 for (int i = 0; i < targetStrategy.length; i++) {
                     targetStrategy[i] = strategy[i];
                 }
-                isMoving = true;
             }
         }
     }
