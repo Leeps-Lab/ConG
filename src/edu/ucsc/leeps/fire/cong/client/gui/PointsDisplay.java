@@ -20,6 +20,18 @@ public class PointsDisplay extends Sprite {
         displaySwitchCosts = false;
     }
 
+    /**
+     * Draws points display. Using black font, displays period payoff, period
+     * cost, and net payoff to an accuracy of two decimal places. Period payoff
+     * is determined by the period points, period cost is determined by period
+     * cost, and net payoff is the difference between period points and period
+     * costs.
+     * Period payoff string is located at the origin. Period cost string is
+     * located below payoff string, and is red if cost is greater than points and
+     * black if less than period points. Payoff is displayed below period cost,
+     * using black text. 
+     * @param applet
+     */
     @Override
     public void draw(Client applet) {
         String periodPayoffString = "";
@@ -55,6 +67,9 @@ public class PointsDisplay extends Sprite {
         }
     }
 
+    /**
+     * Using FIRE's client, updater period points and period costs.
+     */
     public void update() {
         periodPoints = FIRE.client.getPeriodPoints();
         periodCost = FIRE.client.getClient().getCost();

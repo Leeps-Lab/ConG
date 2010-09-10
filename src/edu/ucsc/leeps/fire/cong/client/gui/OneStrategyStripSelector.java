@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 package edu.ucsc.leeps.fire.cong.client.gui;
 
@@ -43,6 +39,21 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     private Marker APayoff;
     private Marker hover;
 
+    /**
+     * Creates a strip strategy selector for use with a one-strategy payoff
+     * function. Creates an applet. Uses HeatmapHelper to create a heatmap
+     * located at the origin with some width and height. Sets heatmap to visible.
+     * Uses Marker to create a new marker.
+     * If width is greater than height, the slider is aligned horizontally.
+     *
+     * @param parent
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param applet
+     * @param strategyChanger
+     */
     public OneStrategyStripSelector(Sprite parent, int x, int y, int width, int height,
             Client applet, StrategyChanger strategyChanger) {
         super(parent, x, y, width, height);
@@ -82,10 +93,21 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         FIRE.client.addConfigListener(this);
     }
 
+    /**
+     * If enabled, set the strategy strip selector to enabled.
+     *
+     * @param enabled boolean enabling the strategy selector
+     */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
+    /**
+     * If not visible, remove mouse and key listeners. Otherwise, add key and
+     * mouse listeners.
+     *
+     * @param visible boolean determining whether mouse and keys are seen
+     */
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
@@ -98,29 +120,57 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         }
     }
 
+    /**
+     * Gives a float that determines the user's strategy.
+     * @return user's strategy.
+     */
     public float[] getMyStrategy() {
         return new float[]{myStrat, 0};
     }
 
+    /**
+     * Sets  the current percent to some percent.
+     * @param percent
+     */
     public void setCurrentPercent(float percent) {
         currentPercent = percent;
     }
 
+    /**
+     * Sets initial user strategy and ghost values to some given condition.
+     *
+     * @param A initial condition for user.
+     */
     public void setInitialStrategy(float A) {
         myStrat = A;
         slider.setStratValue(A);
         slider.setGhostValue(A);
     }
 
+    /**
+     * Sets user's current strategy to some value using the slider.
+     *
+     * @param A float determining the user's current strategy.
+     */
     public void setMyStrategy(float A) {
         myStrat = A;
         slider.setStratValue(A);
     }
 
+    /**
+     * Sets counterpart's strategy.
+     *
+     * @param a float for counterpart's strategy.
+     */
     public void setCounterpartStrategy(float a) {
         opponentStrat = a;
     }
 
+    /**
+     * If visible, update strip heatmap using current percent and the counterpart's
+     * strategy.
+     *
+     */
     public void update() {
         if (visible) {
             heatmap.updateStripHeatmap(currentPercent, opponentStrat);
@@ -175,6 +225,36 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     public void keyReleased(KeyEvent e) {
     }
 
+    /**
+     * If not visible, return.
+     * Translate the applet to the origin.Use heatmap to draw applet. If slider
+     * is enabled and slider is grabbed, mouseX and mouseY are the respective x
+     * and y coordinates in the applet minus the origin coordinates.
+     *
+     * If strip is horizontal, slider moves along the x-axis. If the strip is
+     * vertical, move the slider along the y-axis, based on mouse movement.
+     *
+     * If strip is enabled and heatmap is visible, and strip is hit at mouseX and
+     * mouseY, set a hover of user's strategy. Update mouse positions relative to
+     * the origin of the applet. If width is greater than height, the hover is
+     * the quotient of the difference of the mouse's x-position and the width.
+     * Otherwise, the hover is one minus the quotient of the difference of the
+     * mouses's y-coordinate and the origin and the height. In other words, it
+     * is the percentage of wither the x or y component as decided by the
+     * orientation of the strategy selector.
+     *
+     * Set hover label to payoff function using current percent, user's hover
+     * value and opponent's strategy.  Otherwise, labels are not visible.
+     * Update labels with user's payoff, counterpart's payoff, target and current
+     * payoffs.
+     *
+     * If heatmap is visible, draw a box around it using a black line 1 pixel in
+     * width.
+     *
+     * Draw slider and hover.
+     * 
+     * @param applet  the strategy selector strip
+     */
     @Override
     public void draw(Client applet) {
         if (!visible) {

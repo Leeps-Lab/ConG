@@ -91,12 +91,37 @@ public class Chart extends Sprite implements Configurable<Config> {
     private HeatmapLegend heatmapLegend;
     private final Object lock = new Object();
 
+    /**
+     *A list of modes. Payoff, two-strategy and three-strategy. 
+     */
     public enum Mode {
 
         Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy
     };
     private Mode mode;
 
+    /**
+     * Creates the chart. Scales the height and margin. Shows line depicting
+     * actual payoff for subject and subject's counterpart.
+     *
+     * For 2 strategy payoff, shows actual and future payoffs for your and
+     * counterpart's strategy, Using different combinations: A, B, Aa ,Ab, Ba, Bb.
+     *
+     * For a 3 strategy, shows actual RPS payoffs. Shows future payoffs for
+     * various combinations of R, P, and S. Shows your R, P and S over time, and
+     * shows counterpart's R, P and S over time.
+     *
+     * Shows threshold and draws a simplex. Adds a configListener.
+     * 
+     * @param parent
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @param width width of display
+     * @param height height of display
+     * @param simplex simplex is selected for the strategy changer-- 3 strategies used
+     * @param mode mode used
+     * @param strategyChanger
+     */
     public Chart(Sprite parent, int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode, StrategyChanger strategyChanger) {
         super(parent, x, y, width, height);
 
@@ -310,6 +335,19 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
+    /**
+     * Draw chart. Embed the applet in the corner. Translate the origin of the
+     * applet to x and y.
+     *
+     * If the config is not null, draw shockZone applet. When using the two
+     * strategy payoff function, if the mode is set to payoff, Draw two strategy
+     * payoff lines. Otherwise, if the mode is TwoStrategy, use  drawTwoStrategyLines.
+     * Use threshold. If the config of the payoff function is an instance of
+     * ThresholdPayoffFunction, have no borders and fill with a transparent
+     * yellow. Embed applet in corner, 
+     *
+     * @param applet a sub-program to be run in Cong.
+     */
     @Override
     public void draw(Client applet) {
         synchronized (lock) {
@@ -331,7 +369,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                             applet.fill(255, 255, 0, 75);
                             applet.rectMode(Client.CORNER);
                             applet.rect(0, 0, width,
-                                    height * (1 - ((ThresholdPayoffFunction)config.payoffFunction).threshold));
+                                    height * (1 - ((ThresholdPayoffFunction) config.payoffFunction).threshold));
                         }
                     }
                 } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
@@ -356,6 +394,10 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
+    /**
+     * Clear actual payoff for you, your counterpart,and strategies over time for
+     * combinations of strategies for two or three strategy payoff functions.
+     */
     public void clearAll() {
         actualPayoffYou.clear();
         actualPayoffCounterpart.clear();
@@ -375,6 +417,9 @@ public class Chart extends Sprite implements Configurable<Config> {
         clearFuture();
     }
 
+    /**
+     * Clear future payoffs.
+     */
     public void clearFuture() {
         // clear two strategy
         futureAPayoff.clear();
@@ -502,6 +547,16 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
+    /**
+     * If period is not completed, add payoff points for both your and
+     * counterpart's actual payoff, current percent, and current payoff.
+     * If using a 2 strategy payoff event, add two strategy actual and future
+     * payoff points. If a three strategy payoff function  is being used, add
+     * strategy payoff points, and actual and future payoff points.
+     *
+     * Strategy points are added using strategy over time, current percent, and
+     * percent based on strategy.
+     */
     public void updateLines() {
         if (currentPercent <= 1.0) {
             addPayoffPoint(actualPayoffYou, currentPercent, currentPayoffYou);
@@ -597,6 +652,16 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
+    /**
+     * Sets strategy. If a two strategy payoff function is being used, subject's
+     * strategy is set as initial conditions. If a three strategy payoff function
+     * is being used, Percent R is first element in array, percent P is second
+     * element and percent S is third element.
+     *
+     * Implements the strategyChanged function.
+     *
+     * @param s an array with the strategy.
+     */
     public void setMyStrategy(float[] s) {
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_A = s[0];
@@ -608,6 +673,17 @@ public class Chart extends Sprite implements Configurable<Config> {
         strategyChanged();
     }
 
+    /**
+     * Sets the counterpart's strategy. If a two strategy payoff function is
+     * being used, counterpart's initial percent is set as initial element in
+     * array. If three strategy payoff function is being used, Percent r is first
+     * element in array, percent p is second element, and percent s is third
+     * element.
+     *
+     * Implements strategyChange function.
+     *
+     * @param s an array with the counterpart's strategy.
+     */
     public void setCounterpartStrategy(float[] s) {
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             percent_a = s[0];
@@ -619,6 +695,32 @@ public class Chart extends Sprite implements Configurable<Config> {
         strategyChanged();
     }
 
+    /**
+     * Sets strategy at end of period. In the event that a two strategy payoff
+     * function is being used, sets subject's strategy as subperiodStrategy, and
+     * sets counterpart's strategy as counterpartSubperiodStrategy. If a three
+     * strategy payoff function is used, sets RPS as the first, second and third
+     * elements of subperiodStrategy, respectively. Similarly, the rps elements
+     * are set as the first, second and third elements of the
+     * counterpartSubperiodStrategy.
+     *
+     * Calculates the percent start using the quotient if one less than the
+     * subperiod and the total number of subperiods. Calculates the percent end
+     * using the quotient of the subperiod and the total number of subperiods.
+     * The current percent is called tmpCurrentPercent.
+     *
+     * Your current payoff is based on the payoffFunction using tmpCurrentPercent,
+     * subperiodStrategy, and counterpartSubperiodStrategy. Counterpart's payoff
+     * is determined by counterpartPayoffFunction, using tmpCurrentPercent,
+     * counterpartSubperiodStrategy, and subperiodStrategy.
+     *
+     * Update lines using percent start and percent end. Sets current percent to
+     * tmpCurrentPercent.
+     *
+     * @param subperiod number of subperiod.
+     * @param subperiodStrategy strategy selected by subject for subperiod
+     * @param counterpartSubperiodStrategy counterpart's strategy for subperiod.
+     */
     public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
         synchronized (lock) {
             if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
@@ -673,8 +775,8 @@ public class Chart extends Sprite implements Configurable<Config> {
         if (config.payoffFunction instanceof ThresholdPayoffFunction) {
             threshold.clear();
             for (float percent = 0f; percent < 1.0f; percent += .01f) {
-                threshold.setPoint(Math.round(threshold.width * percent), 
-                        Math.round(threshold.height * (1 - ((ThresholdPayoffFunction)config.payoffFunction).threshold)),
+                threshold.setPoint(Math.round(threshold.width * percent),
+                        Math.round(threshold.height * (1 - ((ThresholdPayoffFunction) config.payoffFunction).threshold)),
                         true);
             }
             threshold.visible = true;
@@ -683,6 +785,22 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
+    /**
+     * If current percent is greater than beginning shock as defined in config,
+     * and is less than the ending shock, and line is set to show shocks, set
+     * shocked to true.
+     *
+     * If not shocked, set width of line to the product of width and x. Set the
+     * height of line proportional to 1 minus the quotient of y and the max payoff.
+     * Height is inversely proportional to the max payoff.
+     *
+     * If shocks are backfilled, and current percent is greater than end shock,
+     * clear shocks.
+     * 
+     * @param line
+     * @param x
+     * @param y
+     */
     public void addPayoffPoint(Line line, float x, float y) {
         boolean shocked = currentPercent > config.shock.start && currentPercent < config.shock.end && line.showShock;
         line.setPoint(
@@ -694,6 +812,19 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
+    /**
+     * If current percent is greater than starting shock and less than ending
+     * shock and line shows shock, set shocked to true.
+     *
+     * If not shocked, multiply line width by x and height by 1 minus y.
+     *
+     * If shock is backfilled, and current percent is greater than ending shock,
+     * clear shocks.
+     * 
+     * @param line
+     * @param x
+     * @param y
+     */
     public void addStrategyPoint(Line line, float x, float y) {
         boolean shocked = currentPercent > config.shock.start && currentPercent < config.shock.end && line.showShock;
         line.setPoint(

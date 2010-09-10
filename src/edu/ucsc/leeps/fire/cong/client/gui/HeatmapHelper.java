@@ -24,6 +24,19 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     private PApplet applet;
     private List<Integer> colors;
 
+    /**
+     * Creates HeatmapHelper. Creates an array list of colors. Colors correspond
+     * to weather maps, with purple being the coldest and red being the warmest.
+     * Adds a configListener.
+     *
+     * @param parent
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param mine belonging to subject as opposed to counterpart?
+     * @param applet
+     */
     public HeatmapHelper(Sprite parent, int x, int y, int width, int height,
             boolean mine,
             PApplet applet) {
@@ -52,6 +65,17 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         this.config = config;
     }
 
+    /**
+     * Creates an embedded image array list.Sets size to initial element of
+     * payoff.
+     *
+     * Begins at tick event 0, and increments until it reaches the length of
+     * config. Creates an applet with
+     *
+     * 
+     *
+     * @param payoff payoff function.
+     */
     public void setTwoStrategyHeatmapBuffers(float[][][] payoff) {
         buffers = new ArrayList<PImage>();
         int size = payoff[0].length;
@@ -166,7 +190,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
             for (int i = 0; i < currentBuffer.pixels.length; i += width) {
                 int y = i / width;
 
-                float myStrat = 1f - ((float)y / (float)height);
+                float myStrat = 1f - ((float) y / (float) height);
                 u = payoffFunction.getPayoff(currentPercent,
                         new float[]{myStrat},
                         new float[]{opponentStrat});
@@ -181,7 +205,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
             }
         } else {
             for (int i = 0; i / width == 0; ++i) {
-                float myStrat = (float)i / (float)width;
+                float myStrat = (float) i / (float) width;
                 u = payoffFunction.getPayoff(currentPercent,
                         new float[]{myStrat},
                         new float[]{opponentStrat});

@@ -5,6 +5,9 @@ import java.awt.Color;
 import processing.core.PImage;
 
 public class Slider {
+    /**
+     * Creates an enum of types of alignment. Can be either horizontal or vertical.
+     */
     public static enum Alignment { Horizontal, Vertical };
 
     private final int HANDLE_WIDTH = 10;
@@ -72,34 +75,71 @@ public class Slider {
 
     // Methods ///////////////////
     // Access ///////
+    /**
+     * Gets strategy value as based on position of slider.
+     *
+     * @return  stratValue
+     */
     public float getStratValue() {
         return stratValue;
     }
 
+    /**
+     * Gets value of ghost.
+     *
+     * @return ghostValue
+     */
     public float getGhostValue() {
         return ghostValue;
     }
 
+    /**
+     * Gets slider position.
+     *
+     * @return sliderPos
+     */
     public float getSliderPos() {
         return sliderPos;
     }
 
+    /**
+     * Gets ghost position
+     * @return ghostPos
+     */
     public float getGhostPos() {
         return ghostPos;
     }
 
+    /**
+     * Gets length of slider.
+     *
+     * @return length
+     */
     public float getLength() {
         return length;
     }
 
+    /**
+     * Determines if slider is grabbed.
+     *
+     * @return grabbed
+     */
     public boolean isGrabbed() {
         return grabbed;
     }
 
+    /**
+     * Determines if ghost is grabbed.
+     * @return ghostGrabbed
+     */
     public boolean isGhostGrabbed() {
         return ghostGrabbed;
     }
 
+    /**
+     * determines whether the alignment is horizontal or vertical.
+     * @return align
+     */
     public Alignment getAlignment() {
         return align;
     }
@@ -131,6 +171,21 @@ public class Slider {
         stratLabel = String.format(FORMAT, stratValue);
     }
 
+    /**
+     * Moves slider.
+     * The slider remains at the start if the position is less than the start
+     * value. Likewise, the slider remains at the end if the slider position is
+     * greater than the end value. Otherwise ,the slider is at some position
+     * between the starting and ending values.
+     *
+     * If the slider is aligned horizontally, then the strategy value is the max
+     * value multiplied by the quotient of the difference of the slider position
+     * and the start value and the length. If the slider is vertically aligned,
+     * the strategy value is the maximum value multiplied by the quotient of
+     * the difference  of the end value of the slider and the slider position and
+     * the length.
+     * @param pos position of the slider
+     */
     public void moveSlider(float pos) {
         if (pos < sliderStart) {
             sliderPos = sliderStart;
@@ -148,14 +203,29 @@ public class Slider {
         stratLabel = String.format(FORMAT, stratValue);
     }
 
+    /**
+     * Sets ghosting to true.
+     */
     public void showGhost() {
         ghosting = true;
     }
 
+    /**
+     * Sets ghosting to false.
+     */
     public void hideGhost() {
         ghosting = false;
     }
 
+    /**
+     * Sets ghost value. If the alignment is horizontal, the ghost position is
+     * the starting value of the slider plus the quotient of the product of the
+     * length and the ghost value and the max value. Likewise, if the slider is
+     * vertically aligned, the ghost position is the ending value of the slider
+     * minus the above quotient.
+     * The ghost is labeled with the ghost value with some text formatting. 
+     * @param ghostVal value of the ghost
+     */
     public void setGhostValue(float ghostVal) {
         ghostValue = ghostVal;
 
@@ -167,6 +237,20 @@ public class Slider {
         ghostLabel = String.format(FORMAT, ghostValue);
     }
 
+    /**
+     * If position is less than slider start, then the ghost remains at slider start.
+     * If the position is greater than the slider end, then the ghost position is
+     * slider end. otherwise, the ghost value is at some position between the
+     * start and end values.
+     * If alignment is horizontal, ghost value is max value multiplied by the
+     * difference of the ghost position and the slider start divided by the length.
+     * If alignment is vertical, the ghost value is the maximum value multiplied
+     * by the difference of slider end and the ghost position  and divided by the
+     * length.
+     * Ghost is labeled with the ghost value using some text format.
+     *
+     * @param pos position of ghost.
+     */
     public void moveGhost(float pos) {
         if (pos < sliderStart) {
             ghostPos = sliderStart;
@@ -184,26 +268,49 @@ public class Slider {
         ghostLabel = String.format(FORMAT, ghostValue);
     }
 
+    /**
+     * Sets grabbed to true
+     */
     public void grab() {
         grabbed = true;
     }
 
+    /**
+     * Sets grabbed to false
+     */
     public void release() {
         grabbed = false;
     }
 
+    /**
+     * Sets ghost grabbed to true.
+     */
     public void grabGhost() {
         ghostGrabbed = true;
     }
 
+    /**
+     * Sets ghost grabbed to false.
+     */
     public void releaseGhost() {
         ghostGrabbed = false;
     }
 
+    /**
+     * Sets label
+     *
+     * @param label slider or ghost label
+     */
     public void setLabel(String label) {
         this.label = label;
     }
 
+    /**
+     * Uses mouse position to determine if mouse is on handle.
+     * @param mouseX mouse's x-coordinate
+     * @param mouseY mouse's y-coordinate
+     * @return
+     */
     public boolean mouseOnHandle(float mouseX, float mouseY) {
         if (align == Alignment.Horizontal) {
             return (mouseX < sliderPos + HANDLE_WIDTH / 2 &&
@@ -218,6 +325,12 @@ public class Slider {
         }
     }
 
+    /**
+     * Uses mouse input to determine if mouse is on ghost.
+     * @param mouseX mouse's x-coordinate
+     * @param mouseY mouse's y-coordinate
+     * @return
+     */
     public boolean mouseOnGhost(float mouseX, float mouseY) {
         if (align == Alignment.Horizontal) {
             return (mouseX < ghostPos + HANDLE_WIDTH / 2 &&

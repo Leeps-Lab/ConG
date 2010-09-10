@@ -15,6 +15,11 @@ public class Countdown extends Sprite {
         secondsLeft = 0;
     }
 
+    /**
+     * Creates a string with the seconds left. Text is black. Aligns text to the
+     * left. Draws text at the origin of applet.
+     * @param applet Countdown applet.
+     */
     @Override
     public void draw(Client applet) {
         String string = String.format("Seconds Left: %d", secondsLeft);
@@ -23,6 +28,10 @@ public class Countdown extends Sprite {
         applet.text(string, origin.x, origin.y);
     }
 
+    /**
+     * Uses secondsLeft to determine the amount of time in the period. 
+     * @param secondsLeft How many seconds remain in the period.
+     */
     public void setSecondsLeft(int secondsLeft) {
         this.secondsLeft = secondsLeft;
     }

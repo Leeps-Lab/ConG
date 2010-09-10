@@ -16,11 +16,33 @@ public class ChartLegend extends Sprite implements Configurable<Config> {
     private Config config;
     private Line youLine, otherLine, threshold;
 
+    /**
+     * Creates the chart legend.
+     * @param parent
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @param width width of legend
+     * @param height height of legend
+     */
     public ChartLegend(Sprite parent, int x, int y, int width, int height) {
         super(parent, x, y, width, height);
         FIRE.client.addConfigListener(this);
     }
 
+    /**
+     * If not null, label lines. Your line is labeled "You" and counterpart is
+     * labeled "Other". THe threshold is labeled "Threshold". Width is 40 plus
+     * width of text "You" and "Other". If a threshold payoff function is being
+     * used,add another 18 and width of text "Threshold".
+     *
+     * Translate the applet to negative width.
+     *
+     * Align the text at the left of the screen in the middle, using a stroke
+     * weight of 10.
+     *
+     * Set colors for youLine. Draw a line from 
+     * @param applet
+     */
     @Override
     public void draw(Client applet) {
 
@@ -36,7 +58,7 @@ public class ChartLegend extends Sprite implements Configurable<Config> {
             float w3 = applet.textWidth(threshLabel);
             width = (int) (4 + 10 + 4 + w1 + 4 + 10 + 4 + w2 + 4);
             if (config.payoffFunction instanceof ThresholdPayoffFunction) {
-                width += (int)(4 + 10 + 4 + w3);
+                width += (int) (4 + 10 + 4 + w3);
             }
             applet.translate(-width, 0);
 

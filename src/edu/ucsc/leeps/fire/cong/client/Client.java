@@ -40,6 +40,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private float percent;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
+    //only one shown
     private TwoStrategySelector bimatrix;
     private ThreeStrategySelector simplex;
     private PureStrategySelector pureMatrix;
@@ -47,6 +48,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private Sprite selector;
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
+    // heatmap legend off/on
     private ChartLegend legend;
     private StrategyChanger strategyChanger;
     private Chatroom chatroom;
@@ -54,6 +56,22 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private boolean initialStrategyChosen;
     public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
 
+    /**
+     * Creates a panel that the user interacts with. Contains payoff chart and
+     * strategy chart. Depending on choice?, there may be one, two, three or
+     * pure strategy selection. Note that only one of these strategy variables
+     * is used at a time. Either strategy chart or r,p,s chart is used.
+     * Currently, the r,p,s strategy is being used.
+     *
+     * Heatmap legend may be toggled on or off, depending on researcher's
+     * preference.
+     * Chatroom may be turned on or off depending on the game. It is
+     *  currently disabled.
+     *
+     * Displays a countdown, player points, and legend.
+     *
+     * Creates and puts itself into a frame.
+     */
     public Client() {
         loadLibraries();
         noLoop();
@@ -147,16 +165,34 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         return strategyChanger.getCost();
     }
 
+    /**
+     * If set is paused, simplex is enabled. Other strategies are not paused?
+     * @param isPaused 
+     */
     public void setIsPaused(boolean isPaused) {
         strategyChanger.setPause(isPaused);
     }
 
+    /**
+     * Creates a tick event. Measures in seconds.Creates a percentage using
+     * secondsLeft and total amount of time.
+     *Creates a countdown and updates bimatrix, simplex, pureMatrix, or strip,
+     * depending on format used.
+     * @param secondsLeft
+     */
     public void tick(int secondsLeft) {
         this.percent = width * (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
         countdown.setSecondsLeft(secondsLeft);
         strategyChanger.selector.update();
     }
 
+    /**
+     *As long as there is time remaining in countdown, calculate percent. Set
+     * strategy charts and selectors to percent calculated in this function.
+     * If subperiod is determined to be zero/ start, update payoff, strategy,
+     * and r, p, and s charts. After updating charts, update point display.
+     * @param millisLeft
+     */
     public void quickTick(int millisLeft) {
         if (millisLeft > 0) {
             this.percent = (1 - (millisLeft / ((float) FIRE.client.getConfig().length * 1000)));
@@ -177,6 +213,19 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         }
     }
 
+    /**
+     * If the mixed strategy selection is used, the two strategy payoff function
+     * is used and the strip strategy selector is being used, return the strategy
+     * selected. Likewise, return the strategy if a bimatrix is used.
+     *
+     * In the event that a three strategy payoff function, and therefore a simplex,
+     * is being used, return player's rps.
+     *      
+     * If pure strategy is being used, get strategy.
+     *
+     * Otherwise, assert false, making the program fail to function.
+     * @return
+     */
     public synchronized float[] getStrategy() {
 //        if (FIRE.client.getConfig().mixedStrategySelection) {
 //            if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
@@ -198,6 +247,16 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         return strategyChanger.getCurrentStrategy();
     }
 
+    /**
+     *Strategy is changed using strategy changer.
+     *
+     * If using a two strategy payoff function, set either strip or bimatrix to
+     * initial conditions.For a simplex or pure matrix set the strategy. If none
+     * of the above, assert false.
+     *
+     * Set strategy for payoff, strategy ,and rps charts.
+     * @param s Strategy selected by player
+     */
     public synchronized void setMyStrategy(float[] s) {
         strategyChanger.setCurrentStrategy(s);
 //        if (FIRE.client.getConfig().mixedStrategySelection) {
@@ -222,6 +281,22 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         sChart.setMyStrategy(s);
     }
 
+    /**
+     * Gets counterpart's strategy.
+     *
+     * If a two strategy payoff function is being used,for a strip strategy
+     * selector, set counterpart strategy to initial conditions. Similarly, for
+     * a bimatrix, set strategy to initial conditions.
+     *
+     * If a three strategy payoff function is being used, set counterpart's
+     * strategy to R, P, or S.
+     * Set counterpart strategy to strategy if using pure strategy selection.
+     * If none of the above, assert false and crash the program.
+     *
+     * Set counterpart strategy for the payoff, strategy, and rps charts.
+     *  
+     * @param s
+     */
     public synchronized void setCounterpartStrategy(float[] s) {
         strategyChanger.selector.setCounterpart(s);
 //        if (FIRE.client.getConfig().mixedStrategySelection) {
@@ -246,6 +321,18 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         sChart.setCounterpartStrategy(s);
     }
 
+    /**
+     * Sets the strategy and counterpart strategy to initial conditions at the
+     * end of a subperiod.
+     *
+     * 
+     *
+     *
+     *
+     * @param subperiod division of the period
+     * @param subperiodStrategy strategy user has selected for the subperiod
+     * @param counterpartSubperiodStrategy strategy counterpart has selected for subperiod
+     */
     public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
         strategyChanger.setCurrentStrategy(subperiodStrategy);
         strategyChanger.selector.setCounterpart(counterpartSubperiodStrategy);
@@ -279,14 +366,26 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
     }
 
+    /**
+     * Send a message in the chatroom, using the sender ID.
+     * @param message
+     * @param senderID ID of participant
+     */
     public void newMessage(String message, int senderID) {
         chatroom.newMessage(message, senderID);
     }
 
+    /**
+     * At the end of period, be ready for next period.
+     * @return
+     */
     public boolean readyForNextPeriod() {
         return true;
     }
 
+    /**
+     * Terminates the virtual machine upon disconnect.
+     */
     public void disconnect() {
         System.exit(0);
     }

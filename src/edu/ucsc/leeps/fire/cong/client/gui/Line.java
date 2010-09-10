@@ -24,6 +24,9 @@ public class Line extends Sprite implements Serializable {
     private transient int costEnd;
     private transient Marker costMarker;
 
+    /**
+     * Creates a black line, 1 pixel in width.
+     */
     public Line() {
         super(null, 0, 0, 0, 0);
         r = g = b = 0;
@@ -32,6 +35,16 @@ public class Line extends Sprite implements Serializable {
         mode = Mode.Solid;
     }
 
+    /** 
+     * Creates a HashMap of defined points in the line. Creates a linked list of
+     * the points. Adds a  cost marker.
+     *
+     * @param parent parent class
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @param width width
+     * @param height height
+     */
     public Line(Sprite parent, int x, int y, int width, int height) {
         super(parent, x, y, width, height);
         visible = false;
@@ -40,6 +53,14 @@ public class Line extends Sprite implements Serializable {
         costMarker = new Marker(this, 0, 0, false, 0);
     }
 
+    /**
+     * Creates a configurator for the line. Has configurators for line color,
+     * transparency, weight, mode and whether or not shocks are shown.
+     * Creates a step function if there are subperiods. Sample at a rate of 1.
+     * Cost markers are not visible.
+     *
+     * @param config configurator
+     */
     public void configure(Line config) {
         this.visible = true;
         this.r = config.r;
@@ -56,6 +77,14 @@ public class Line extends Sprite implements Serializable {
         costMarker.setVisible(false);
     }
 
+    /**
+     * Sets points. If defined points do not contain Key x, then create a
+     * visible FPoint with x and y coordinates. Put the point at the coordinate.
+     *
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @param visible point is visible if set to true
+     */
     public synchronized void setPoint(int x, int y, boolean visible) {
         if (!definedPoints.containsKey(x)) {
             FPoint point = new FPoint(x, y);
@@ -65,6 +94,16 @@ public class Line extends Sprite implements Serializable {
         }
     }
 
+    /**
+     * If starting value is greater than or equal to zero and less than or equal
+     * to ending value, and stop value is less than the size of points array, go
+     * through points, and set points to visible for all values of  points from
+     * start to stop values.
+     *
+     * @param start
+     * @param stop
+     * @param vis point is visible if true
+     */
     public synchronized void setVisible(int start, int stop, boolean vis) {
         if (start <= stop && start >= 0 && stop < points.size() - 1) {
             for (int i = start; i < stop; i++) {
@@ -296,16 +335,25 @@ public class Line extends Sprite implements Serializable {
         applet.popMatrix();
     }
 
+    /**
+     * Clears points and defined points.
+     */
     public synchronized void clear() {
         definedPoints.clear();
         points.clear();
     }
 
+    /**
+     * Removes points from first round, as it is the practice period.
+     */
     public synchronized void removeFirst() {
         FPoint first = points.removeFirst();
         definedPoints.remove(Math.round(first.x));
     }
 
+    /**
+     * Clear shocks. For a point in points, set point to visible.
+     */
     public synchronized void clearShocks() {
         for (FPoint point : points) {
             point.visible = true;

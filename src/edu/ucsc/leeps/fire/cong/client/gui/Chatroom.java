@@ -112,12 +112,22 @@ public class Chatroom extends JPanel{
     private javax.swing.JButton sendButton;
     // End of variables declaration//GEN-END:variables
 
+    /**
+     * Allows text to be inputted. Sets text to string, and sends message with
+     * user ID. 
+     */
     public void sendMessage() {
         String message = inputField.getText();
         inputField.setText("");
         FIRE.client.getServer().newMessage(message, FIRE.client.getID());
     }
 
+    /**
+     * If no ID number, indicate that message is sent from server. If there is
+     * an ID number, send player and subject ID number along with message.
+     * @param message message inputted by subject.
+     * @param senderID ID of sender.
+     */
     public void newMessage(String message, int senderID) {
         if (senderID == -1) {
             outputField.append("SERVER: " + message);

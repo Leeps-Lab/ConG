@@ -37,7 +37,16 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private boolean showMatrix;
 
-    public PureStrategySelector (Sprite parent, int x, int y, int size,
+    /**
+     *
+     * @param parent
+     * @param x
+     * @param y
+     * @param size
+     * @param applet
+     * @param strategyChanger
+     */
+    public PureStrategySelector(Sprite parent, int x, int y, int size,
             Client applet, StrategyChanger strategyChanger) {
         super(parent, x, y, size, size);
         visible = false;

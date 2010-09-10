@@ -17,6 +17,9 @@ public class Marker extends Sprite {
     protected LabelMode labelMode;
     protected DrawMode drawMode;
 
+    /**
+     * Creates a list of possible modes to set label position.
+     */
     public enum LabelMode {
 
         Center, Top, Right, Bottom, Left
@@ -50,10 +53,22 @@ public class Marker extends Sprite {
         labelOrigin = getTranslation(origin);
     }
 
+    /**
+     * Sets transparency.
+     * @param alpha transparency
+     */
     public void setAlpha(int alpha) {
         this.alpha = alpha;
     }
 
+    /**
+     * Sets color using red, green, blue color scheme.Uses floating points to
+     * determine values. Doesn't include transparency.
+     *
+     * @param r red value
+     * @param g green value
+     * @param b blue value
+     */
     public void setColor(float r, float g, float b) {
         R = r;
         G = g;
@@ -68,6 +83,15 @@ public class Marker extends Sprite {
         }
     }
 
+    /**
+     * Uses floating point values to set color and transparency. Uses red, green,
+     * blue color scheme.
+     *
+     * @param r red value
+     * @param g green value
+     * @param b blue value
+     * @param a transparency value
+     */
     public void setColor(float r, float g, float b, int a) {
         R = r;
         G = g;
@@ -83,6 +107,10 @@ public class Marker extends Sprite {
         }
     }
 
+    /**
+     * Uses a single hexadecimal number to determine color and transparency.
+     * @param C hexadecimal value for color and transparency
+     */
     public void setColor(Color C) {
         R = C.getRed();
         G = C.getGreen();
@@ -98,23 +126,54 @@ public class Marker extends Sprite {
         }
     }
 
+    /**
+     * Creates a label for Label 1.
+     * @param newLabel new string
+     */
     public void setLabel(String newLabel) {
         label1 = newLabel;
     }
 
+    /**
+     * Sets the value for label 1.Writes to accuracy of 2 decimal places with a
+     * minimum of 3 characters.
+     *
+     * @param newLabel
+     */
     public void setLabel(float newLabel) {
         label1 = String.format("%3.2f", newLabel);
     }
 
+    /**
+     * Multiplies setLabel by 100 to create percentage. Assumes that setLabel
+     * is between zero and one. Has a minimum of three numbers with an accuracy
+     * of zero decimal places. In other words, truncates to the nearest percent.
+     * Adds a percent sign to the string.
+     *
+     * @param newLabel creates a new label
+     */
     public void setLabelPercent(float newLabel) {
         label1 = String.format("%3.0f%%", newLabel * 100);
     }
 
+    /**
+     * Sets values for labels 1 and 2. Writes to an accuracy of two decimal
+     * places with a minimum of three characters.
+     *
+     * @param newLabel1 label 1
+     * @param newLabel2 label 2
+     */
     public void setLabel(float newLabel1, float newLabel2) {
         label1 = String.format("%3.2f", newLabel1);
         label2 = String.format("%3.2f", newLabel2);
     }
 
+    /**
+     * Creates label positions. Center is at the origin of the label. Top is
+     * above the origin. Right is to the right of the origin. Bottom is below
+     * the origin. Left is to the left. Variances are all by radius + 8.
+     * @param position position of label
+     */
     public void setLabelMode(LabelMode position) {
         this.labelMode = position;
         switch (position) {
@@ -157,30 +216,53 @@ public class Marker extends Sprite {
         grabbed = true;
     }
 
+    /**
+     * Sets grabbed to false.
+     */
     public void release() {
         grabbed = false;
     }
 
+    /**
+     * If marker is grabbed, return grabbed.
+     * @return grabbed
+     */
     public boolean isGrabbed() {
         return grabbed;
     }
 
+    /**
+     * When enlarged, make radius 1.5 times larger, and set enlarged to true.
+     */
     public void enlarge() {
         width = (int)largeDiameter;
         height = (int)largeDiameter;
         enlarged = true;
     }
 
+    /**
+     * When shrunk, set radius to radius, and set enlarged to false.
+     */
     public void shrink() {
         width = (int)diameter;
         height = (int)diameter;
         enlarged = false;
     }
 
+    /**
+     * If the marker is enlarged, return enlarged.
+     * @return enlarged
+     */
     public boolean isEnlarged() {
         return enlarged;
     }
 
+    /**
+     * Update origin based on x and y coordinates, and set labelMode to mode.
+     *
+     * @param x x-coordinate
+     * @param y y-coordinate
+     */
     public void update(float x, float y) {
         origin.x = x;
         origin.y = y;
