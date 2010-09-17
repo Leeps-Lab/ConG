@@ -100,6 +100,9 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     }
 
     public int getRGB(float percent) {
+        if (FIRE.client.getConfig().sigmoidHeatmap) {
+            percent = sigmoid(percent, FIRE.client.getConfig().sigmoidAlpha, FIRE.client.getConfig().sigmoidBeta);
+        }
         int floorIndex = PApplet.floor((colors.size() - 1) * percent);
         int ceilIndex = floorIndex + 1;
         floorIndex = floorIndex < 0 ? 0 : floorIndex;
@@ -110,6 +113,11 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         float amt = (percent - (ppf * floorIndex)) / ppf;
         int c = applet.lerpColor(colorFloor, colorCeil, amt);
         return c;
+    }
+
+    private float sigmoid(float x, float a, float b) {
+        x = PApplet.map(x, 0, 1, -10, 10);
+        return 1f / (1 + (float) Math.exp(-a * (x - b)));
     }
 
     public synchronized void updateTwoStrategyHeatmap(float currentPercent) {
