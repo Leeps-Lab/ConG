@@ -134,7 +134,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public float[] getTarget() {
-        return new float[] { target_percent_A };
+        return new float[] { target_percent_A, 1 - target_percent_A };
     }
 
     public void update() {

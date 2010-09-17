@@ -26,33 +26,22 @@ public class PairedPopulation implements Population {
     private Map<Integer, Long> lastEvalTimes;
     private Map<Integer, float[]> lastStrategies;
     private Map<Integer, float[]> lastTargetStrategies;
-    private Map<Integer, float[]> lastHoverStrategies_A;
-    private Map<Integer, float[]> lastHoverStrategies_a;
     private Map<Integer, float[]> cachedStrategies;
 
     public PairedPopulation() {
         lastEvalTimes = new HashMap<Integer, Long>();
         lastStrategies = new HashMap<Integer, float[]>();
         lastTargetStrategies = new HashMap<Integer, float[]>();
-        lastHoverStrategies_A = new HashMap<Integer, float[]>();
-        lastHoverStrategies_a = new HashMap<Integer, float[]>();
         cachedStrategies = new HashMap<Integer, float[]>();
         pairs = new HashMap<Integer, Integer>();
         counterparts = new HashSet<Integer>();
     }
 
-    public void setMembers(
-            Map<Integer, ClientInterface> members,
-            Map<Integer, Population> membership) {
+    public void configure(Map<Integer, ClientInterface> members) {
         this.members = members;
-        for (Integer id : members.keySet()) {
-            membership.put(id, this);
-        }
         lastEvalTimes.clear();
         lastStrategies.clear();
         lastTargetStrategies.clear();
-        lastHoverStrategies_A.clear();
-        lastHoverStrategies_a.clear();
         pairs.clear();
         counterparts.clear();
         List<Integer> partners = new ArrayList<Integer>();
@@ -74,21 +63,27 @@ public class PairedPopulation implements Population {
             FIRE.server.getConfig(client1).counterpartPayoffFunction = FIRE.server.getConfig().payoffFunction;
             counterparts.add(client2);
         }
+        if (FIRE.server.getConfig().preLength == 0) {
+            for (int client : members.keySet()) {
+                float[] s = new float[2];
+                s[0] = FIRE.server.getRandom().nextFloat();
+                s[1] = 1 - s[0];
+                lastStrategies.put(client, s);
+                FIRE.server.getConfig(client).initialStrategy = s;
+            }
+        }
     }
 
-    public void initialize(long timestamp) {
+    public void setPeriodStartTime(long timestamp) {
         periodStartTime = timestamp;
         for (Integer id : members.keySet()) {
             lastEvalTimes.put(id, timestamp);
         }
-        updateAllStrategies();
     }
 
     public void strategyChanged(
             float[] newStrategy,
             float[] targetStrategy,
-            float[] hoverStrategy_A,
-            float[] hoverStrategy_a,
             Integer changed, long timestamp) {
         if (FIRE.server.getConfig().subperiods == 0) {
             long periodTimeElapsed = timestamp - periodStartTime;
@@ -109,12 +104,8 @@ public class PairedPopulation implements Population {
             event.counterpartId = other;
             event.currentStrategy = newStrategy;
             event.targetStrategy = targetStrategy;
-            event.hoverStrategy_A = hoverStrategy_A;
-            event.hoverStrategy_a = hoverStrategy_a;
             event.counterpartCurrentStrategy = lastStrategies.get(other);
             event.counterpartTargetStrategy = lastTargetStrategies.get(other);
-            event.counterpartHoverStrategy_A = lastHoverStrategies_A.get(other);
-            event.counterpartHoverStrategy_a = lastHoverStrategies_a.get(other);
             if (counterparts.contains(changed)) {
                 event.payoffFunction = FIRE.server.getConfig().counterpartPayoffFunction;
                 event.counterpartPayoffFunction = FIRE.server.getConfig().payoffFunction;
@@ -128,35 +119,8 @@ public class PairedPopulation implements Population {
             if (event.counterpartTargetStrategy == null) {
                 event.counterpartTargetStrategy = event.counterpartCurrentStrategy;
             }
-            if (event.hoverStrategy_A == null) {
-                event.hoverStrategy_A = new float[event.currentStrategy.length];
-                for (int i = 0; i < event.hoverStrategy_A.length; i++) {
-                    event.hoverStrategy_A[i] = Float.NaN;
-                }
-            }
-            if (event.hoverStrategy_a == null) {
-                event.hoverStrategy_a = new float[event.currentStrategy.length];
-                for (int i = 0; i < event.hoverStrategy_a.length; i++) {
-                    event.hoverStrategy_a[i] = Float.NaN;
-                }
-            }
-            if (event.counterpartHoverStrategy_A == null) {
-                event.counterpartHoverStrategy_A = new float[event.currentStrategy.length];
-                for (int i = 0; i < event.counterpartHoverStrategy_A.length; i++) {
-                    event.counterpartHoverStrategy_A[i] = Float.NaN;
-                }
-            }
-            if (event.counterpartHoverStrategy_a == null) {
-                event.counterpartHoverStrategy_a = new float[event.currentStrategy.length];
-                for (int i = 0; i < event.counterpartHoverStrategy_a.length; i++) {
-                    event.counterpartHoverStrategy_a[i] = Float.NaN;
-                }
-            }
             FIRE.server.commit(event);
-            // save the strategies
             lastTargetStrategies.put(changed, targetStrategy);
-            lastHoverStrategies_A.put(changed, hoverStrategy_A);
-            lastHoverStrategies_a.put(changed, hoverStrategy_a);
         } else {
             cachedStrategies.put(changed, newStrategy);
         }
@@ -183,33 +147,13 @@ public class PairedPopulation implements Population {
         }
         FIRE.server.addToPeriodPoints(changed, changedPoints);
         FIRE.server.addToPeriodPoints(other, otherPoints);
-        updateStrategiesFast(newStrategy, changed, other);
+        updateStrategies(newStrategy, changed, other);
     }
 
-    private void updateStrategiesFast(
+    private void updateStrategies(
             float[] newStrategy, int changed, int other) {
         members.get(other).setCounterpartStrategy(newStrategy);
         lastStrategies.put(changed, newStrategy);
-    }
-
-    private void updateStrategiesSlow(int client1, int client2) {
-        float[] c1s = members.get(client1).getStrategy();
-        float[] c2s = members.get(client2).getStrategy();
-        members.get(client1).setCounterpartStrategy(c2s);
-        members.get(client2).setCounterpartStrategy(c1s);
-        lastStrategies.put(client1, c1s);
-        lastStrategies.put(client2, c2s);
-    }
-
-    private void updateAllStrategies() {
-        Set<Integer> notified = new HashSet<Integer>();
-        for (int client : members.keySet()) {
-            if (!notified.contains(client)) {
-                updateStrategiesSlow(client, pairs.get(client));
-                notified.add(client);
-                notified.add(pairs.get(client));
-            }
-        }
     }
 
     public void endSubperiod(int subperiod) {
@@ -264,41 +208,13 @@ public class PairedPopulation implements Population {
             event.counterpartId = p2;
             event.currentStrategy = lastStrategies.get(p1);
             event.targetStrategy = lastTargetStrategies.get(p1);
-            event.hoverStrategy_A = lastHoverStrategies_A.get(p1);
-            event.hoverStrategy_a = lastHoverStrategies_a.get(p1);
             event.counterpartCurrentStrategy = lastStrategies.get(p2);
             event.counterpartTargetStrategy = lastTargetStrategies.get(p2);
-            event.counterpartHoverStrategy_A = lastHoverStrategies_A.get(p2);
-            event.counterpartHoverStrategy_a = lastHoverStrategies_a.get(p2);
             if (event.targetStrategy == null) {
                 event.targetStrategy = event.currentStrategy;
             }
             if (event.counterpartTargetStrategy == null) {
                 event.counterpartTargetStrategy = event.counterpartCurrentStrategy;
-            }
-            if (event.hoverStrategy_A == null) {
-                event.hoverStrategy_A = new float[event.currentStrategy.length];
-                for (int i = 0; i < event.hoverStrategy_A.length; i++) {
-                    event.hoverStrategy_A[i] = Float.NaN;
-                }
-            }
-            if (event.hoverStrategy_a == null) {
-                event.hoverStrategy_a = new float[event.currentStrategy.length];
-                for (int i = 0; i < event.hoverStrategy_a.length; i++) {
-                    event.hoverStrategy_a[i] = Float.NaN;
-                }
-            }
-            if (event.counterpartHoverStrategy_A == null) {
-                event.counterpartHoverStrategy_A = new float[event.currentStrategy.length];
-                for (int i = 0; i < event.counterpartHoverStrategy_A.length; i++) {
-                    event.counterpartHoverStrategy_A[i] = Float.NaN;
-                }
-            }
-            if (event.counterpartHoverStrategy_a == null) {
-                event.counterpartHoverStrategy_a = new float[event.currentStrategy.length];
-                for (int i = 0; i < event.counterpartHoverStrategy_a.length; i++) {
-                    event.counterpartHoverStrategy_a[i] = Float.NaN;
-                }
             }
             FIRE.server.commit(event);
         }

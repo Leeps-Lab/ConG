@@ -6,9 +6,7 @@ package edu.ucsc.leeps.fire.cong.client;
  */
 public interface ClientInterface {
 
-    public boolean isInitialStrategyChosen();
-    
-    public void setInitialStrategyChosen(boolean isChosen);
+    public boolean haveInitialStrategy();
 
     public float[] getStrategy();
 

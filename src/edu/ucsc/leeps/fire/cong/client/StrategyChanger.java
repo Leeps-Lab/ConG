@@ -5,7 +5,6 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
-import java.util.Random;
 
 /**
  *
@@ -21,29 +20,22 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private float[] currentStrategy;
     private float[] targetStrategy;
     private float[] deltaStrategy;
-    private float[] hoverStrategy_A;
-    private float[] hoverStrategy_a;
     private float[] lastStrategy;
     private long tickTime = 100;
     private float tickDelta;
     private long sleepTimeMillis;
     private float changeTimeEMA = 0;
     private float strategyDelta;
-    private Random random;
     private long nextAllowedChangeTime;
-    private boolean hasLocked;
+    private boolean initialLock;
     public volatile boolean isLocked;
     public Selector selector;
 
-    // Laker
-    private boolean initialLock;
-
     public StrategyChanger() {
-        random = new Random();
         nextAllowedChangeTime = System.currentTimeMillis();
         start();
         FIRE.client.addConfigListener(this);
-        sleepTimeMillis = 100;
+        sleepTimeMillis = 50;
 
         //Laker
         initialLock = true;
@@ -134,14 +126,12 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         FIRE.client.getServer().strategyChanged(
                 currentStrategy,
                 targetStrategy,
-                hoverStrategy_A,
-                hoverStrategy_a,
                 FIRE.client.getID());
-        if (config.delay != null && FIRE.client.getConfig().delay.initialLock && initialLock) {// || !hasLocked)) {
+        if (config.delay != null && FIRE.client.getConfig().delay.initialLock && initialLock) {
             float delayTimeInSeconds = 0;
             switch (config.delay.distribution) {
                 case uniform:
-                    delayTimeInSeconds = random.nextFloat() * config.delay.lambda;
+                    delayTimeInSeconds = FIRE.client.getRandom().nextFloat() * config.delay.lambda;
                     break;
                 case poisson:
                     delayTimeInSeconds = generatePoisson(config.delay.lambda);
@@ -151,7 +141,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                     throw new UnsupportedOperationException();
             }
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delayTimeInSeconds);
-            hasLocked = true;
             initialLock = false;
             System.err.println("delaying for " + delayTimeInSeconds + " seconds");
         }
@@ -164,7 +153,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
 
         do {
             k = k + 1;
-            p = p * (float) Math.random();
+            p = p * FIRE.client.getRandom().nextFloat();
         } while (p > L);
 
         return k - 1;
@@ -205,22 +194,14 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         selector.setCurrent(currentStrategy);
     }
 
-    public void setHoverStrategy(float[] strategy_A, float[] strategy_a) {
-        this.hoverStrategy_A = strategy_A;
-        this.hoverStrategy_a = strategy_a;
-    }
-
     public void setTargetStrategy(float[] strategy) {
         if (FIRE.client.getConfig().percentChangePerSecond >= 1.0f ||
-                !FIRE.client.getClient().isInitialStrategyChosen()) {
+                !FIRE.client.getClient().haveInitialStrategy()) {
             for (int i = 0; i < targetStrategy.length; i++) {
                 currentStrategy[i] = strategy[i];
                 targetStrategy[i] = strategy[i];
             }
             FIRE.client.getClient().setMyStrategy(strategy);
-            if (!FIRE.client.getClient().isInitialStrategyChosen()) {
-                FIRE.client.getClient().setInitialStrategyChosen(true);
-            }
             sendUpdate();
             return;
         } else {
@@ -242,8 +223,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     public void startPeriod() {
         shouldUpdate = true;
         strategyDelta = 0;
-        // clear delay stuff
-        hasLocked = false;
     }
 
     public void setPause(boolean paused) {

@@ -102,6 +102,8 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     public int getRGB(float percent) {
         int floorIndex = PApplet.floor((colors.size() - 1) * percent);
         int ceilIndex = floorIndex + 1;
+        floorIndex = floorIndex < 0 ? 0 : floorIndex;
+        ceilIndex = ceilIndex >= colors.size() ? colors.size() - 1 : ceilIndex;
         int colorFloor = colors.get(floorIndex);
         int colorCeil = colors.get(ceilIndex);
         float ppf = 1 / (float) (colors.size() - 1);
@@ -246,9 +248,5 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
             applet.imageMode(Client.CORNER);
             applet.image(currentBuffer, origin.x, origin.y);
         }
-        //if (visible && buffer != null) {
-        //    applet.imageMode(Client.CORNER);
-        //    applet.image(buffer, origin.x, origin.y);
-        //}
     }
 }

@@ -3,12 +3,10 @@ package edu.ucsc.leeps.fire.cong.server;
 import edu.ucsc.leeps.fire.FIREServerInterface;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
-import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.logging.TickEvent;
+import edu.ucsc.leeps.fire.server.ServerController.State;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.TimerTask;
 
 /**
@@ -18,27 +16,22 @@ import java.util.TimerTask;
 public class Server implements ServerInterface, FIREServerInterface<ClientInterface, Config> {
 
     private Map<Integer, ClientInterface> clients;
-    private TickEvent tickLog;
-    private StrategyChangeEvent eventLog;
     private Population population;
-    private Map<Integer, Population> membership;
-    private Random random;
 
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
-        random = new Random();
     }
 
     public synchronized void strategyChanged(
             float[] newStrategy,
             float[] targetStrategy,
-            float[] hoverStrategy_A,
-            float[] hoverStrategy_a,
             Integer id) {
-        long timestamp = System.currentTimeMillis();
-        membership.get(id).strategyChanged(
-                newStrategy, targetStrategy, hoverStrategy_A, hoverStrategy_a,
-                id, timestamp);
+        if (FIRE.server.getState() == State.RUNNING_PERIOD) {
+            long timestamp = System.currentTimeMillis();
+            population.strategyChanged(
+                    newStrategy, targetStrategy,
+                    id, timestamp);
+        }
     }
 
     public boolean readyToStart() {
@@ -47,12 +40,11 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     public void configurePeriod() {
         configurePopulations();
-        configureStrategies();
     }
 
     public boolean initialStrategiesChosen() {
         for (Integer id : clients.keySet()) {
-            if (!clients.get(id).isInitialStrategyChosen()) {
+            if (!clients.get(id).haveInitialStrategy()) {
                 return false;
             }
         }
@@ -60,7 +52,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void startPeriod(long periodStartTime) {
-        population.initialize(periodStartTime);
+        population.setPeriodStartTime(periodStartTime);
         configureImpulses();
         configureSubperiods();
     }
@@ -94,35 +86,11 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     private void configurePopulations() {
-        membership = new HashMap<Integer, Population>();
         Map<Integer, ClientInterface> members = new HashMap<Integer, ClientInterface>();
         members.clear();
         members.putAll(clients);
         population = FIRE.server.getConfig().population;
-        population.setMembers(members, membership);
-    }
-
-    private void configureStrategies() {
-        for (Integer client : clients.keySet()) {
-            if (FIRE.server.getConfig(client).mixedStrategySelection) {
-                if (FIRE.server.getConfig(client).payoffFunction instanceof TwoStrategyPayoffFunction) {
-                    float r = random.nextFloat();
-                    FIRE.server.getConfig(client).initialStrategy = new float[]{r, 1 - r};
-                } else if (FIRE.server.getConfig(client).payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                    FIRE.server.getConfig(client).initialStrategy = new float[]{0.33f, 0.33f, 0.33f};
-                } else {
-                    assert false;
-                }
-            } else {
-                if (FIRE.server.getConfig(client).payoffFunction instanceof TwoStrategyPayoffFunction) {
-                    FIRE.server.getConfig(client).initialStrategy = new float[]{1, 0};
-                } else if (FIRE.server.getConfig(client).payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                    FIRE.server.getConfig(client).initialStrategy = new float[]{1, 0, 0};
-                } else {
-                    assert false;
-                }
-            }
-        }
+        population.configure(members);
     }
 
     private void configureSubperiods() {
@@ -164,10 +132,10 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
             int id = entry.getKey();
             ClientInterface client = entry.getValue();
-            float r = random.nextFloat();
+            float r = FIRE.server.getRandom().nextFloat();
             float[] newStrategy = new float[]{r, 1 - r};
             client.setMyStrategy(newStrategy);
-            strategyChanged(newStrategy, null, null, null, id);
+            strategyChanged(newStrategy, newStrategy, id);
         }
     }
 

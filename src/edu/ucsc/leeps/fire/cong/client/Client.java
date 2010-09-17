@@ -53,25 +53,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private StrategyChanger strategyChanger;
     private Chatroom chatroom;
     private boolean chatroomEnabled = false;
-    private boolean initialStrategyChosen;
+    private boolean haveInitialStrategy;
     public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
 
-    /**
-     * Creates a panel that the user interacts with. Contains payoff chart and
-     * strategy chart. Depending on choice?, there may be one, two, three or
-     * pure strategy selection. Note that only one of these strategy variables
-     * is used at a time. Either strategy chart or r,p,s chart is used.
-     * Currently, the r,p,s strategy is being used.
-     *
-     * Heatmap legend may be toggled on or off, depending on researcher's
-     * preference.
-     * Chatroom may be turned on or off depending on the game. It is
-     *  currently disabled.
-     *
-     * Displays a countdown, player points, and legend.
-     *
-     * Creates and puts itself into a frame.
-     */
     public Client() {
         loadLibraries();
         noLoop();
@@ -87,16 +71,12 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         frame.setVisible(true);
     }
 
-    public boolean isInitialStrategyChosen() {
-        return initialStrategyChosen;
-    }
-
-    public void setInitialStrategyChosen(boolean isChosen) {
-        initialStrategyChosen = isChosen;
+    public boolean haveInitialStrategy() {
+        return haveInitialStrategy;
     }
 
     public void startPrePeriod() {
-        initialStrategyChosen = false;
+        haveInitialStrategy = false;
         this.percent = 0;
         if (simplex.visible) {
             selector = simplex;
@@ -117,15 +97,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         rChart.clearAll();
         pChart.clearAll();
         sChart.clearAll();
-        // TODO: HACK to get startPeriod to be called
-        if(FIRE.client.getConfig().preLength == 0) {
-            initialStrategyChosen = true;
+        if (FIRE.client.getConfig().preLength == 0) {
+            strategyChanger.setTargetStrategy(FIRE.client.getConfig().initialStrategy);
         }
     }
 
     public void startPeriod() {
         if (FIRE.client.getConfig().preLength == 0) {
-            initialStrategyChosen = true;
             strategyChanger.setCurrentStrategy(FIRE.client.getConfig().initialStrategy);
             strategyChanger.setTargetStrategy(FIRE.client.getConfig().initialStrategy);
             strategyChanger.selector.setInitial(FIRE.client.getConfig().initialStrategy);
@@ -147,54 +125,31 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         simplex.setEnabled(true);
 
         strategyChanger.startPeriod();
-        
+
         if (FIRE.client.getConfig().chatroom && !chatroomEnabled) {
             chatroomEnabled = true;
             chatroom = new Chatroom(frame);
         }
     }
 
-    // TODO: add reset to selector
     public void endPeriod() {
         strategyChanger.endPeriod();
-        //simplex.reset();
-        //bimatrix.setEnabled(false);
-        //pureMatrix.setEnabled(false);
-        //strip.setEnabled(false);
     }
 
     public float getCost() {
         return strategyChanger.getCost();
     }
 
-    /**
-     * If set is paused, simplex is enabled. Other strategies are not paused?
-     * @param isPaused 
-     */
     public void setIsPaused(boolean isPaused) {
         strategyChanger.setPause(isPaused);
     }
 
-    /**
-     * Creates a tick event. Measures in seconds.Creates a percentage using
-     * secondsLeft and total amount of time.
-     *Creates a countdown and updates bimatrix, simplex, pureMatrix, or strip,
-     * depending on format used.
-     * @param secondsLeft
-     */
     public void tick(int secondsLeft) {
         this.percent = width * (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
         countdown.setSecondsLeft(secondsLeft);
         strategyChanger.selector.update();
     }
 
-    /**
-     *As long as there is time remaining in countdown, calculate percent. Set
-     * strategy charts and selectors to percent calculated in this function.
-     * If subperiod is determined to be zero/ start, update payoff, strategy,
-     * and r, p, and s charts. After updating charts, update point display.
-     * @param millisLeft
-     */
     public void quickTick(int millisLeft) {
         if (millisLeft > 0) {
             this.percent = (1 - (millisLeft / ((float) FIRE.client.getConfig().length * 1000)));
@@ -215,67 +170,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         }
     }
 
-    /**
-     * If the mixed strategy selection is used, the two strategy payoff function
-     * is used and the strip strategy selector is being used, return the strategy
-     * selected. Likewise, return the strategy if a bimatrix is used.
-     *
-     * In the event that a three strategy payoff function, and therefore a simplex,
-     * is being used, return player's rps.
-     *      
-     * If pure strategy is being used, get strategy.
-     *
-     * Otherwise, assert false, making the program fail to function.
-     * @return
-     */
     public synchronized float[] getStrategy() {
-//        if (FIRE.client.getConfig().mixedStrategySelection) {
-//            if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-//                if (FIRE.client.getConfig().stripStrategySelection) {
-//                    return strip.getMyStrategy();
-//                } else {
-//                    return bimatrix.getMyStrategy();
-//                }
-//            } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
-//                return simplex.getPlayerRPS();
-//            } else {
-//                assert false;
-//                return new float[]{};
-//            }
-//        } else {
-//            return pureMatrix.getMyStrategy();
-//        }
-
         return strategyChanger.getCurrentStrategy();
     }
 
-    /**
-     *Strategy is changed using strategy changer.
-     *
-     * If using a two strategy payoff function, set either strip or bimatrix to
-     * initial conditions.For a simplex or pure matrix set the strategy. If none
-     * of the above, assert false.
-     *
-     * Set strategy for payoff, strategy ,and rps charts.
-     * @param s Strategy selected by player
-     */
     public synchronized void setMyStrategy(float[] s) {
+        haveInitialStrategy = true;
         strategyChanger.setCurrentStrategy(s);
-//        if (FIRE.client.getConfig().mixedStrategySelection) {
-//            if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-//                if (FIRE.client.getConfig().stripStrategySelection) {
-//                    strip.setMyStrategy(s[0]);
-//                } else {
-//                    bimatrix.setCurrent(s);
-//                }
-//            } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
-//                simplex.setCurrentStrategies(s);
-//            } else {
-//                assert false;
-//            }
-//        } else {
-//            pureMatrix.setMyStrategy(s);
-//        }
         payoffChart.setMyStrategy(s);
         strategyChart.setMyStrategy(s);
         rChart.setMyStrategy(s);
@@ -283,39 +184,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         sChart.setMyStrategy(s);
     }
 
-    /**
-     * Gets counterpart's strategy.
-     *
-     * If a two strategy payoff function is being used,for a strip strategy
-     * selector, set counterpart strategy to initial conditions. Similarly, for
-     * a bimatrix, set strategy to initial conditions.
-     *
-     * If a three strategy payoff function is being used, set counterpart's
-     * strategy to R, P, or S.
-     * Set counterpart strategy to strategy if using pure strategy selection.
-     * If none of the above, assert false and crash the program.
-     *
-     * Set counterpart strategy for the payoff, strategy, and rps charts.
-     *  
-     * @param s
-     */
     public synchronized void setCounterpartStrategy(float[] s) {
         strategyChanger.selector.setCounterpart(s);
-//        if (FIRE.client.getConfig().mixedStrategySelection) {
-//            if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-//                if (FIRE.client.getConfig().stripStrategySelection) {
-//                    strip.setCounterpartStrategy(s[0]);
-//                } else {
-//                    bimatrix.setCounterpart(s);
-//                }
-//            } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
-//                simplex.setCounterpartRPS(s[0], s[1], s[2]);
-//            } else {
-//                assert false;
-//            }
-//        } else {
-//            pureMatrix.setCounterpartStrategy(s);
-//        }  
         payoffChart.setCounterpartStrategy(s);
         strategyChart.setCounterpartStrategy(s);
         rChart.setCounterpartStrategy(s);
@@ -323,43 +193,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         sChart.setCounterpartStrategy(s);
     }
 
-    /**
-     * Sets the strategy and counterpart strategy to initial conditions at the
-     * end of a subperiod.
-     *
-     * 
-     *
-     *
-     *
-     * @param subperiod division of the period
-     * @param subperiodStrategy strategy user has selected for the subperiod
-     * @param counterpartSubperiodStrategy strategy counterpart has selected for subperiod
-     */
     public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
         strategyChanger.setCurrentStrategy(subperiodStrategy);
         strategyChanger.selector.setCounterpart(counterpartSubperiodStrategy);
-//        if (FIRE.client.getConfig().mixedStrategySelection) {
-//            if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-//                if (FIRE.client.getConfig().stripStrategySelection) {
-//                    strip.setMyStrategy(subperiodStrategy[0]);
-//                    strip.setCounterpartStrategy(subperiodStrategy[0]);
-//                } else {
-//                    bimatrix.setCurrent(subperiodStrategy);
-//                    bimatrix.setCounterpart(counterpartSubperiodStrategy);
-//                }
-//            } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
-//                simplex.setCurrentStrategies(subperiodStrategy);
-//                simplex.setCounterpartRPS(
-//                        counterpartSubperiodStrategy[0],
-//                        counterpartSubperiodStrategy[1],
-//                        counterpartSubperiodStrategy[2]);
-//            } else {
-//                assert false;
-//            }
-//        } else {
-//            pureMatrix.setMyStrategy(subperiodStrategy);
-//            pureMatrix.setCounterpartStrategy(counterpartSubperiodStrategy);
-//        }
         payoffChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
         strategyChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
         rChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
@@ -368,19 +204,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
     }
 
-    /**
-     * Send a message in the chatroom, using the sender ID.
-     * @param message
-     * @param senderID ID of participant
-     */
     public void newMessage(String message, int senderID) {
         chatroom.newMessage(message, senderID);
     }
 
-    /**
-     * At the end of period, be ready for next period.
-     * @return
-     */
     public boolean readyForNextPeriod() {
         return true;
     }
@@ -462,7 +289,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     public void draw() {
         try {
             background(255);
-            if(selector != null) {
+            if (FIRE.client.getConfig() == null) {
+                fill(0);
+                String s = "Please wait for the experiment to begin";
+                text(s, Math.round(width / 2 - textWidth(s) / 2), Math.round(height / 2));
+                return;
+            }
+            if (selector != null) {
                 selector.draw(this);
             }
             if (FIRE.client.getConfig() != null) {
@@ -476,10 +309,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             }
             payoffChart.draw(this);
             legend.draw(this);
-            if (!initialStrategyChosen) {
+            if (FIRE.client.getConfig().preLength > 0 && !haveInitialStrategy) {
                 float textHeight = textDescent() + textAscent() + 8;
                 fill(255, 50, 50);
-                text("Please choose an initial strategy.", countdown.origin.x, countdown.origin.y - textHeight);
+                text("Please choose an initial strategy.", Math.round(countdown.origin.x), Math.round(countdown.origin.y - textHeight));
             }
             countdown.draw(this);
             pointsDisplay.draw(this);
@@ -531,46 +364,51 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     private void loadLibraries() {
-        String tmpDir = System.getProperty("java.io.tmpdir");
-        List<JarEntry> entries = new LinkedList<JarEntry>();
-        for (String pathItem : System.getProperty("java.class.path").split(":")) {
-            if (pathItem.contains("jar")) {
-                try {
-                    JarFile jar = new JarFile(pathItem);
-                    JarInputStream jarInputStream = new JarInputStream(new FileInputStream(pathItem));
-                    JarEntry entry = jarInputStream.getNextJarEntry();
-                    while (entry != null) {
-                        if (entry.getName().endsWith("so")
-                                || entry.getName().endsWith("dll")
-                                || entry.getName().endsWith("jnilib")) {
-                            entries.add(entry);
-                        }
-                        entry = jarInputStream.getNextJarEntry();
-                    }
-                    for (JarEntry toExtract : entries) {
-                        File tmpFile = new File(tmpDir, toExtract.getName());
-                        OutputStream out = new FileOutputStream(tmpFile);
-                        InputStream in = jar.getInputStream(toExtract);
-                        byte[] buffer = new byte[4096];
-                        while (true) {
-                            int nBytes = in.read(buffer);
-                            if (nBytes <= 0) {
-                                break;
+        if (System.getProperty("os.arch").equals("amd64")) {
+            addDir("./lib/64-bit");
+        } else {
+            addDir("./lib/32-bit");
+            String tmpDir = System.getProperty("java.io.tmpdir");
+            List<JarEntry> entries = new LinkedList<JarEntry>();
+            for (String pathItem : System.getProperty("java.class.path").split(":")) {
+                if (pathItem.contains("jar")) {
+                    try {
+                        JarFile jar = new JarFile(pathItem);
+                        JarInputStream jarInputStream = new JarInputStream(new FileInputStream(pathItem));
+                        JarEntry entry = jarInputStream.getNextJarEntry();
+                        while (entry != null) {
+                            if (entry.getName().endsWith("so")
+                                    || entry.getName().endsWith("dll")
+                                    || entry.getName().endsWith("jnilib")) {
+                                entries.add(entry);
                             }
-                            out.write(buffer, 0, nBytes);
+                            entry = jarInputStream.getNextJarEntry();
                         }
-                        out.flush();
-                        out.close();
-                        in.close();
+                        for (JarEntry toExtract : entries) {
+                            File tmpFile = new File(tmpDir, toExtract.getName());
+                            OutputStream out = new FileOutputStream(tmpFile);
+                            InputStream in = jar.getInputStream(toExtract);
+                            byte[] buffer = new byte[4096];
+                            while (true) {
+                                int nBytes = in.read(buffer);
+                                if (nBytes <= 0) {
+                                    break;
+                                }
+                                out.write(buffer, 0, nBytes);
+                            }
+                            out.flush();
+                            out.close();
+                            in.close();
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
                     }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
+                    break;
                 }
-                break;
             }
-        }
 
-        addDir(tmpDir);
+            addDir(tmpDir);
+        }
     }
 
     public static void addDir(String s) {
@@ -590,7 +428,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             System.arraycopy(paths, 0, tmp, 0, paths.length);
             tmp[paths.length] = s;
             field.set(null, tmp);
-            System.setProperty("java.library.path", System.getProperty("java.library.path") + File.pathSeparator + s);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
