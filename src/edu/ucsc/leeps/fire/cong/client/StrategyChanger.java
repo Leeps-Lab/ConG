@@ -62,30 +62,30 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     }
 
     private void update() {
-        if (FIRE.client.getConfig().percentChangePerSecond >= 1.0f) {
-            return;
-        }
         synchronized (lock) {
-            float[] temp = selector.getTarget();
-            if (temp != null) {
-                boolean same = true;
-                for (int i = 0; i < temp.length; i++) {
-                    if (Math.abs(temp[i] - currentStrategy[i]) > Float.MIN_NORMAL) {
-                        same = false;
-                    }
-                }
-                if (same) {
-                    sleepTimeMillis = 100;
-                    return;
+            targetStrategy = selector.getTarget();
+            if (targetStrategy == null) {
+                return;
+            }
+            boolean same = true;
+            for (int i = 0; i < targetStrategy.length; i++) {
+                if (Math.abs(targetStrategy[i] - currentStrategy[i]) > Float.MIN_NORMAL) {
+                    same = false;
                 }
             }
-            targetStrategy = selector.getTarget();
+            if (same) {
+                for (int i = 0; i < targetStrategy.length; i++) {
+                    targetStrategy[i] = currentStrategy[i];
+                }
+                sleepTimeMillis = 100;
+                return;
+            }
             float totalDelta = 0f;
             for (int i = 0; i < currentStrategy.length; i++) {
                 deltaStrategy[i] = targetStrategy[i] - currentStrategy[i];
                 totalDelta += Math.abs(deltaStrategy[i]);
             }
-            if (totalDelta > tickDelta) {
+            if (config.percentChangePerSecond < 1f && totalDelta > tickDelta) {
                 for (int i = 0; i < deltaStrategy.length; i++) {
                     deltaStrategy[i] = tickDelta * (deltaStrategy[i] / totalDelta);
                     currentStrategy[i] += deltaStrategy[i];
@@ -133,7 +133,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 currentStrategy,
                 targetStrategy,
                 FIRE.client.getID());
-        if (config.delay != null && FIRE.client.getConfig().delay.initialLock && initialLock) {
+        if (config.delay != null && config.delay.initialLock && initialLock) {
             float delayTimeInSeconds = 0;
             switch (config.delay.distribution) {
                 case uniform:
@@ -201,13 +201,14 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     }
 
     public void setTargetStrategy(float[] strategy) {
-        if (FIRE.client.getConfig().percentChangePerSecond >= 1.0f
+        if (config.percentChangePerSecond >= 1.0f
                 || !FIRE.client.getClient().haveInitialStrategy()) {
-            for (int i = 0; i < targetStrategy.length; i++) {
+            for (int i = 0; i < strategy.length; i++) {
                 currentStrategy[i] = strategy[i];
                 targetStrategy[i] = strategy[i];
             }
             FIRE.client.getClient().setMyStrategy(strategy);
+            selector.setCurrent(strategy);
             sendUpdate();
             return;
         } else {
