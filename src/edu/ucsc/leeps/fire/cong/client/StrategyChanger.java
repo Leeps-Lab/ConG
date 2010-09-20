@@ -67,8 +67,14 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         }
         synchronized (lock) {
             float[] temp = selector.getTarget();
-            if(temp != null) {
-                if(temp == currentStrategy) {
+            if (temp != null) {
+                boolean same = true;
+                for (int i = 0; i < temp.length; i++) {
+                    if (Math.abs(temp[i] - currentStrategy[i]) > Float.MIN_NORMAL) {
+                        same = false;
+                    }
+                }
+                if (same) {
                     sleepTimeMillis = 100;
                     return;
                 }
@@ -165,7 +171,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         while (running) {
             try {
                 isLocked = decisionDelayed();
-                if(selector != null) {
+                if (selector != null) {
                     selector.setEnabled(!isLocked);
                 }
                 if (!isLocked && shouldUpdate) {
@@ -195,8 +201,8 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     }
 
     public void setTargetStrategy(float[] strategy) {
-        if (FIRE.client.getConfig().percentChangePerSecond >= 1.0f ||
-                !FIRE.client.getClient().haveInitialStrategy()) {
+        if (FIRE.client.getConfig().percentChangePerSecond >= 1.0f
+                || !FIRE.client.getClient().haveInitialStrategy()) {
             for (int i = 0; i < targetStrategy.length; i++) {
                 currentStrategy[i] = strategy[i];
                 targetStrategy[i] = strategy[i];
@@ -260,13 +266,21 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     }
 
     public static interface Selector {
+
         public void startPrePeriod();
+
         public void setEnabled(boolean enabled);
+
         public void setCurrent(float[] strategy);
+
         public void setInitial(float[] strategy);
+
         public void setCounterpart(float[] strategy);
+
         public float[] getTarget();
+
         public void setCurrentPercent(float percent);
+
         public void update();
     }
 }

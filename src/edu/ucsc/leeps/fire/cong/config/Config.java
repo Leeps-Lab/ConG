@@ -5,7 +5,6 @@
 package edu.ucsc.leeps.fire.cong.config;
 
 import edu.ucsc.leeps.fire.cong.client.gui.Line;
-import edu.ucsc.leeps.fire.cong.server.PairedPopulation;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.Population;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
@@ -25,7 +24,7 @@ public class Config extends BaseConfig {
     public float percentChangePerSecond;
     public PayoffFunction payoffFunction;
     public PayoffFunction counterpartPayoffFunction;
-    public Population population;
+    public Population.Configuration population;
     public boolean mixedStrategySelection;
     public boolean stripStrategySelection;
     public int subperiods;
@@ -46,11 +45,12 @@ public class Config extends BaseConfig {
     public boolean sigmoidHeatmap;
     public float sigmoidAlpha;
     public float sigmoidBeta;
+    public boolean showMatrix;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class ultimatum = UltimatumPayoffFunction.class;
-    public static final Class paired = PairedPopulation.class;
+    public static final Class paired = Population.class;
     public static final Class line = Line.class;
     public static final Class threshold = ThresholdPayoffFunction.class;
     public static final Class shockZone = ShockZone.class;
@@ -68,7 +68,6 @@ public class Config extends BaseConfig {
         percentChangePerSecond = 0.1f;
         changeCost = 0;
         subperiods = 0;
-        population = new PairedPopulation();
         strategySelectionDisplayType = StrategySelectionDisplayType.Matrix;
         mixedStrategySelection = true;
         stripStrategySelection = false;

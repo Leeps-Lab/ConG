@@ -89,7 +89,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         Map<Integer, ClientInterface> members = new HashMap<Integer, ClientInterface>();
         members.clear();
         members.putAll(clients);
-        population = FIRE.server.getConfig().population;
+        population = new Population();
         population.configure(members);
     }
 
