@@ -83,9 +83,16 @@ public class Population implements Serializable {
     }
 
     public void endSubperiod(int subperiod) {
+        for (Tuple tuple : tuples) {
+            tuple.endSubperiod(subperiod);
+        }
     }
 
     public void endPeriod() {
+        long timestamp = System.currentTimeMillis();
+        for (Tuple tuple : tuples) {
+            tuple.endPeriod(timestamp);
+        }
     }
 
     public void logTick(int subperiod, int millisLeft) {
@@ -96,6 +103,7 @@ public class Population implements Serializable {
         public Set<Integer> members;
         public long evalTime;
         public float[] strategy;
+        public Map<Integer, float[]> strategyExclude;
         public Map<Integer, float[]> strategies;
         public Tuple match;
 
@@ -108,41 +116,103 @@ public class Population implements Serializable {
             } else {
                 strategy = new float[3];
             }
+            strategyExclude = new HashMap<Integer, float[]>();
         }
 
         public void update(int changed, float[] strategy, long timestamp) {
-            evaluate(timestamp);
-            match.evaluate(timestamp);
+            if (FIRE.server.getConfig().subperiods == 0) {
+                evaluate(timestamp);
+                match.evaluate(timestamp);
+            }
             strategies.put(changed, strategy);
             mergeStrategies();
+
         }
 
         public void mergeStrategies() {
-            for (int i = 0; i < strategy.length; i++) {
-                strategy[i] = 0;
-            }
-            for (int member : members) {
-                float[] s = strategies.get(member);
+            if (configuration == Configuration.SinglePopExclude) {
+                for (int member : members) {
+                    mergeStrategies(member);
+                }
+            } else {
                 for (int i = 0; i < strategy.length; i++) {
-                    strategy[i] += s[i];
+                    strategy[i] = 0;
+                }
+                for (int member : members) {
+                    float[] s = strategies.get(member);
+                    for (int i = 0; i < strategy.length; i++) {
+                        strategy[i] += s[i];
+                    }
+                }
+                for (int i = 0; i < strategy.length; i++) {
+                    strategy[i] /= members.size();
                 }
             }
-            for (int i = 0; i < strategy.length; i++) {
-                strategy[i] /= members.size();
+        }
+
+        public void mergeStrategies(int exclude) {
+            float[] s = new float[strategy.length];
+            for (int i = 0; i < s.length; i++) {
+                s[i] = 0;
             }
+            for (int member : members) {
+                if (member != exclude) {
+                    float[] s1 = strategies.get(member);
+                    for (int i = 0; i < s.length; i++) {
+                        s[i] += s1[i];
+                    }
+                }
+            }
+            for (int i = 0; i < s.length; i++) {
+                s[i] /= (members.size() - 1);
+            }
+            strategyExclude.put(exclude, s);
         }
 
         public void evaluate(long timestamp) {
             float percent = (timestamp - periodStartTime) / (FIRE.server.getConfig().length * 1000f);
             float percentElapsed = (timestamp - evalTime) / (FIRE.server.getConfig().length * 1000f);
+            evaluate(percent, percentElapsed);
+            evalTime = timestamp;
+        }
+
+        public void evaluate(float percent, float percentElapsed) {
             for (int member : members) {
                 PayoffFunction u = FIRE.server.getConfig(member).payoffFunction;
-                float payoff = u.getPayoff(percent, strategies.get(member), match.strategy);
+                float[] otherStrategy;
+                if (configuration == Configuration.SinglePopExclude) {
+                    otherStrategy = strategyExclude.get(member);
+                } else {
+                    otherStrategy = match.strategy;
+                }
+                float payoff = u.getPayoff(percent, strategies.get(member), otherStrategy);
                 payoff *= percentElapsed;
-                Population.this.members.get(member).setCounterpartStrategy(match.strategy);
+                Population.this.members.get(member).setCounterpartStrategy(otherStrategy);
                 FIRE.server.addToPeriodPoints(member, payoff);
             }
-            evalTime = timestamp;
+        }
+
+        public void endSubperiod(int subperiod) {
+            float percentElapsed = 1f / FIRE.server.getConfig().subperiods;
+            float percent = subperiod * percentElapsed;
+            evaluate(percent, percentElapsed);
+            match.evaluate(percent, percentElapsed);
+            for (int member : members) {
+                float[] otherStrategy;
+                if (configuration == Configuration.SinglePopExclude) {
+                    otherStrategy = strategyExclude.get(member);
+                } else {
+                    otherStrategy = match.strategy;
+                }
+                Population.this.members.get(member).endSubperiod(subperiod, strategies.get(member), otherStrategy);
+            }
+            mergeStrategies();
+
+        }
+
+        public void endPeriod(long timestamp) {
+            evaluate(timestamp);
+            match.evaluate(timestamp);
         }
     }
 

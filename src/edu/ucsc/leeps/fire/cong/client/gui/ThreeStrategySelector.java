@@ -33,7 +33,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     // average of opponents' strategies
     private float[] opponentStrat;
     private Slider[] stratSlider;
-    private boolean showSliders;
     private boolean mouseInTriangle;
     private boolean enabled;
     private Config config;
@@ -154,7 +153,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         currentPercent = 0f;
 
         periodStarted = false;
-        
+
         FIRE.client.addConfigListener(this);
     }
 
@@ -166,6 +165,8 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                     this);
         }
     }
+
+    int T = 0;
 
     @Override
     public synchronized void draw(Client applet) {
@@ -194,7 +195,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             rock.shrink();
             paper.shrink();
             scissors.shrink();
-            
+
             if (rock.circularIsHit(applet.mouseX, applet.mouseY)) {
                 rock.enlarge();
             } else if (paper.circularIsHit(applet.mouseX, applet.mouseY)) {
@@ -212,14 +213,13 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             }
 
             if (mouseInTriangle) {
-                applet.noCursor();
                 if (current.isGrabbed()) {
                     calculateTargetStrats();
                     stratSlider[R].setGhostValue(targetStrat[R]);
                     stratSlider[P].setGhostValue(targetStrat[P]);
                     stratSlider[S].setGhostValue(targetStrat[S]);
                 }
-                
+
                 calculateGhostStrats();
                 ghost.setVisible(true);
                 ghost.update(mouseX, mouseY);
@@ -390,55 +390,12 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     public void mouseExited(MouseEvent e) {
     }
 
-    public void setAllStrategies(float[] newStrats) {
-        playedStrat[R] = newStrats[R];
-        playedStrat[P] = newStrats[P];
-        playedStrat[S] = newStrats[S];
-
-        setTargetRPS(newStrats[R], newStrats[P], newStrats[S]);
-
-        ghostStrat[R] = newStrats[R];
-        ghostStrat[P] = newStrats[P];
-        ghostStrat[S] = newStrats[S];
-
-        for (int i = R; i <= S; i++) {
-            stratSlider[i].setStratValue(playedStrat[i]);
-            stratSlider[i].setGhostValue(ghostStrat[i]);
-        }
-
-        float[] coords = calculateStratCoords(newStrats[R],
-                                              newStrats[P],
-                                              newStrats[S]);
-        current.update(coords[0], coords[1]);
-    }
-
-    public void setCurrentStrategies(float[] currentStrat) {
-        playedStrat[R] = currentStrat[R];
-        playedStrat[P] = currentStrat[P];
-        playedStrat[S] = currentStrat[S];
-        for (int i = R; i <= S; ++i) {
-            stratSlider[i].setStratValue(currentStrat[i]);
-        }
-        float[] coords = calculateStratCoords(currentStrat[R],
-                                              currentStrat[P],
-                                              currentStrat[S]);
-        current.update(coords[0], coords[1]);
-    }
-
-    public void setCounterpartRPS(float r, float p, float s) {
-        opponentStrat[R] = r;
-        opponentStrat[P] = p;
-        opponentStrat[S] = s;
-        float[] coords = calculateStratCoords(r, p, s);
-        opponent.update(coords[0], coords[1]);
-    }
-
     public float[] getPlayerRPS() {
-        return new float[] {playedStrat[R], playedStrat[P], playedStrat[S]};
+        return new float[]{playedStrat[R], playedStrat[P], playedStrat[S]};
     }
 
     public float[] getOpponentRPS() {
-        return new float[] {opponentStrat[R], opponentStrat[P], opponentStrat[S]};
+        return new float[]{opponentStrat[R], opponentStrat[P], opponentStrat[S]};
     }
 
     public void setEnabled(boolean enabled) {
@@ -741,8 +698,8 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.mixedStrategySelection &&
-                config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        if (config.mixedStrategySelection
+                && config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             rLabel = config.rLabel;
             stratSlider[R].setLabel(rLabel);
             stratSlider[R].setColor(config.rColor);
@@ -776,15 +733,24 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     }
 
     public void setCurrent(float[] strategy) {
-        playedStrat = strategy;
+        for (int i = 0; i < strategy.length; i++) {
+            playedStrat[i] = strategy[i];
+        }
+        float[] coords = calculateStratCoords(playedStrat[0], playedStrat[1], playedStrat[2]);
+        current.update(coords[0], coords[1]);
     }
 
     public void setInitial(float[] strategy) {
-        targetStrat = strategy;
+        for (int i = 0; i < strategy.length; i++) {
+            targetStrat[i] = strategy[i];
+        }
+        setTargetRPS(targetStrat[0], targetStrat[1], targetStrat[2]);
     }
 
     public void setCounterpart(float[] strategy) {
-        opponentStrat = strategy;
+        for (int i = 0; i < strategy.length; i++) {
+            opponentStrat[i] = strategy[i];
+        }
         float[] coords = calculateStratCoords(strategy[0], strategy[1], strategy[2]);
         opponent.update(coords[0], coords[1]);
     }
