@@ -24,7 +24,9 @@ public class Config extends BaseConfig {
     public float percentChangePerSecond;
     public PayoffFunction payoffFunction;
     public PayoffFunction counterpartPayoffFunction;
-    public Population.Configuration population;
+    public int numTuples;
+    public int tupleSize;
+    public boolean excludeSelf;
     public boolean mixedStrategySelection;
     public boolean stripStrategySelection;
     public int subperiods;
@@ -126,5 +128,8 @@ public class Config extends BaseConfig {
         negativePayoffs = false;
         sigmoidHeatmap = false;
         sigmoidAlpha = 0.5f;
+        excludeSelf = false;
+        tupleSize = -1;
+        numTuples = -1;
     }
 }

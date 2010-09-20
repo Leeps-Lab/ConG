@@ -4,8 +4,11 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,11 +18,6 @@ import java.util.Set;
  */
 public class Population implements Serializable {
 
-    public enum Configuration {
-
-        Paired, SinglePopInclude, SinglePopExclude
-    }
-    private Configuration configuration;
     private Map<Integer, ClientInterface> members;
     private long periodStartTime;
     private Set<Tuple> tuples;
@@ -31,19 +29,10 @@ public class Population implements Serializable {
     }
 
     public void configure(Map<Integer, ClientInterface> members) {
-        configuration = FIRE.server.getConfig().population;
         this.members = members;
         tuples.clear();
         tupleMap.clear();
-        switch (configuration) {
-            case Paired:
-                setupPairedTuples();
-                break;
-            case SinglePopInclude:
-            case SinglePopExclude:
-                setupSinglePopTuples();
-                break;
-        }
+        setupTuples();
         if (FIRE.server.getConfig().preLength == 0) {
             for (int client : members.keySet()) {
                 float[] s;
@@ -130,7 +119,7 @@ public class Population implements Serializable {
         }
 
         public void mergeStrategies() {
-            if (configuration == Configuration.SinglePopExclude) {
+            if (this == this.match && FIRE.server.getConfig().excludeSelf) {
                 for (int member : members) {
                     mergeStrategies(member);
                 }
@@ -180,7 +169,7 @@ public class Population implements Serializable {
             for (int member : members) {
                 PayoffFunction u = FIRE.server.getConfig(member).payoffFunction;
                 float[] otherStrategy;
-                if (configuration == Configuration.SinglePopExclude) {
+                if (this == this.match && FIRE.server.getConfig().excludeSelf) {
                     otherStrategy = strategyExclude.get(member);
                 } else {
                     otherStrategy = match.strategy;
@@ -199,7 +188,7 @@ public class Population implements Serializable {
             match.evaluate(percent, percentElapsed);
             for (int member : members) {
                 float[] otherStrategy;
-                if (configuration == Configuration.SinglePopExclude) {
+                if (this == this.match && FIRE.server.getConfig().excludeSelf) {
                     otherStrategy = strategyExclude.get(member);
                 } else {
                     otherStrategy = match.strategy;
@@ -216,41 +205,55 @@ public class Population implements Serializable {
         }
     }
 
-    /*
-     * Constructs one tuple per subject
-     * Links up tuples in pair formation
-     */
-    private void setupPairedTuples() {
-        for (int member : members.keySet()) {
-            Tuple tuple = new Tuple();
-            tuple.members.add(member);
-            tupleMap.put(member, tuple);
-        }
-        Tuple[] a = tuples.toArray(new Tuple[0]);
-        for (Tuple tuple : tuples) {
-            if (tuple.match == null) {
-                int r = FIRE.server.getRandom().nextInt(a.length);
-                while (tuple == a[r]) {
-                    r = FIRE.server.getRandom().nextInt(a.length);
+    public void setupTuples() {
+        if (FIRE.server.getConfig().numTuples == 1
+                || (members.size() / FIRE.server.getConfig().tupleSize) == 1) {
+            setupSinglePopTuples();
+        } else {
+            ArrayList<Integer> randomMembers = new ArrayList<Integer>();
+            randomMembers.addAll(members.keySet());
+            Collections.shuffle(randomMembers, FIRE.server.getRandom());
+            if (FIRE.server.getConfig().tupleSize == -1) {
+                FIRE.server.getConfig().tupleSize = members.size() / FIRE.server.getConfig().numTuples;
+            }
+            Tuple current = null;
+            ArrayList<Tuple> randomTuples = new ArrayList<Tuple>();
+            while (randomMembers.size() > 0) {
+                if (current == null || current.members.size() == FIRE.server.getConfig().tupleSize) {
+                    current = new Tuple();
+                    randomTuples.add(current);
                 }
-                tuple.match = a[r];
+                int member = randomMembers.remove(0);
+                current.members.add(member);
+                tupleMap.put(member, current);
+            }
+            Collections.shuffle(randomTuples, FIRE.server.getRandom());
+            while (randomTuples.size() > 0) {
+                Tuple tuple = randomTuples.remove(0);
+                tuple.match = randomTuples.remove(0);
                 tuple.match.match = tuple;
                 Config def = FIRE.server.getConfig();
-                Config config1, config2;
+                Tuple tuple1;
                 if (FIRE.server.getRandom().nextBoolean()) {
-                    config1 = FIRE.server.getConfig(tuple.members.toArray(new Integer[0])[0]);
-                    config2 = FIRE.server.getConfig(tuple.match.members.toArray(new Integer[0])[0]);
+                    tuple1 = tuple;
                 } else {
-                    config1 = FIRE.server.getConfig(tuple.match.members.toArray(new Integer[0])[0]);
-                    config2 = FIRE.server.getConfig(tuple.members.toArray(new Integer[0])[0]);
+                    tuple1 = tuple.match;
                 }
-                config1.isCounterpart = false;
-                config2.isCounterpart = true;
-                config1.payoffFunction = def.payoffFunction;
-                config2.payoffFunction = def.counterpartPayoffFunction;
-                config1.counterpartPayoffFunction = def.counterpartPayoffFunction;
-                config2.counterpartPayoffFunction = def.payoffFunction;
+                for (int member : tuple1.members) {
+                    Config config = FIRE.server.getConfig(member);
+                    config.isCounterpart = false;
+                    config.payoffFunction = def.payoffFunction;
+                    config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                }
+                for (int member : tuple1.match.members) {
+                    Config config = FIRE.server.getConfig(member);
+                    config.isCounterpart = true;
+                    config.payoffFunction = def.counterpartPayoffFunction;
+                    config.counterpartPayoffFunction = def.payoffFunction;
+                }
             }
+            assert (randomMembers.size() == 0);
+            assert (randomTuples.size() == 0);
         }
     }
 
