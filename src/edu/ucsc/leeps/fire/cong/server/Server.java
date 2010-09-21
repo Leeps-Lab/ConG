@@ -39,7 +39,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         configurePopulations();
     }
 
-    public boolean initialStrategiesChosen() {
+    public boolean readyToEndPrePeriod() {
         for (Integer id : clients.keySet()) {
             if (!clients.get(id).haveInitialStrategy()) {
                 return false;
