@@ -36,9 +36,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         start();
         FIRE.client.addConfigListener(this);
         sleepTimeMillis = 50;
-
-        //Laker
-        initialLock = true;
     }
 
     public void configChanged(Config config) {
@@ -117,6 +114,11 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
             }
              *
              */
+            if (config.delay != null) {
+                int delay = config.delay.getDelay();
+                nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
+                System.err.println("delay: " + delay);
+            }
         }
     }
 
@@ -133,36 +135,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 currentStrategy,
                 targetStrategy,
                 FIRE.client.getID());
-        if (config.delay != null && config.delay.initialLock && initialLock) {
-            float delayTimeInSeconds = 0;
-            switch (config.delay.distribution) {
-                case uniform:
-                    delayTimeInSeconds = FIRE.client.getRandom().nextFloat() * config.delay.lambda;
-                    break;
-                case poisson:
-                    delayTimeInSeconds = generatePoisson(config.delay.lambda);
-                    //delayTimeInSeconds *= 10;
-                    break;
-                case gaussian:
-                    throw new UnsupportedOperationException();
-            }
-            nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delayTimeInSeconds);
-            initialLock = false;
-            System.err.println("delaying for " + delayTimeInSeconds + " seconds");
-        }
-    }
-
-    private int generatePoisson(float lambda) {
-        float L = (float) Math.pow(Math.E, -1 * lambda);
-        int k = 0;
-        float p = 1;
-
-        do {
-            k = k + 1;
-            p = p * FIRE.client.getRandom().nextFloat();
-        } while (p > L);
-
-        return k - 1;
     }
 
     @Override
@@ -171,7 +143,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         while (running) {
             try {
                 isLocked = decisionDelayed();
-                if (selector != null) {
+                if (shouldUpdate) {
                     selector.setEnabled(!isLocked);
                 }
                 if (!isLocked && shouldUpdate) {
@@ -230,6 +202,13 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     public void startPeriod() {
         shouldUpdate = true;
         strategyDelta = 0;
+        nextAllowedChangeTime = System.currentTimeMillis();
+        if (config.initialDelay != null && initialLock) {
+            int delay = config.initialDelay.getDelay();
+            nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
+            initialLock = false;
+            System.err.println("initial delay: " + delay);
+        }
     }
 
     public void setPause(boolean paused) {
@@ -251,6 +230,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
 
     public void endPeriod() {
         shouldUpdate = false;
+        initialLock = true;
         selector.setEnabled(false);
     }
 

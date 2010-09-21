@@ -34,9 +34,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         }
     }
 
-    public boolean readyToStart() {
-        return clients.size() >= 1;
-    }
 
     public void configurePeriod() {
         configurePopulations();

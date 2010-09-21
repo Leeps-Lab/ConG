@@ -19,12 +19,13 @@ import processing.core.PApplet;
  * @author swolpert
  */
 public class PureStrategySelector extends Sprite implements Configurable<Config>, KeyListener, Selector {
+
     private final int BUTTON_RADIUS = 15;
     private Client applet;
     private float currentPercent;
-    private float[] myStrat;
-    private float[] opponentStrat;
-    private float[] targetStrat;
+    private float[] current;
+    private float[] counterpart;
+    private float[] target;
     private Marker matrixTopLeft;
     private Marker matrixTopRight;
     private Marker matrixBotLeft;
@@ -34,7 +35,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     private Marker[][] cellMarkers;
     private Marker[] columnLabels;
     private RadioButtonGroup buttons;
-    private PayoffFunction payoffFunction, counterpartPayoffFunction;
+    private PayoffFunction payoffFunction;
 
     /**
      *
@@ -51,8 +52,8 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
         visible = false;
         this.applet = applet;
 
-        myStrat = new float[] {0};
-        opponentStrat = new float[] {0};
+        current = new float[]{0};
+        counterpart = new float[]{0};
 
         matrixTopLeft = new Marker(this, width / 4, width / 8, true, 0);
         matrixTopRight = new Marker(this, width, width / 8, true, 0);
@@ -75,73 +76,71 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             updateLabels();
         }
     }
-    
+
     @Override
     public void draw(Client applet) {
         if (visible) {
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
-            matrixLabel.draw(applet);
-            for (int i = 0; i < columnLabels.length; ++i) {
-                columnLabels[i].draw(applet);
-            }
-
-            int numStrategies = myStrat.length;
-            float interval = matrixSideLength / (float)numStrategies;
-            
-            applet.noStroke();
-            applet.fill(0, 95, 205, 125);
-            applet.rectMode(PApplet.CORNER);
-
-            int playedStrat = buttons.getSelection();
-            applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y + playedStrat * interval, matrixSideLength, interval);
-            if (payoffFunction instanceof ThresholdPayoffFunction) {
-                if (((ThresholdPayoffFunction)payoffFunction).thresholdMet(currentPercent, myStrat, opponentStrat)) {
-                    applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y, interval, matrixSideLength);
-                } else {
-                    applet.rect(matrixTopLeft.origin.x + interval, matrixTopLeft.origin.y, interval, matrixSideLength);
+            if (FIRE.client.getConfig().showMatrix) {
+                matrixLabel.draw(applet);
+                for (int i = 0; i < columnLabels.length; ++i) {
+                    columnLabels[i].draw(applet);
                 }
-            }
 
-            applet.stroke(0);
-            applet.strokeWeight(2);
-            
-            applet.line(matrixTopLeft.origin.x, matrixTopLeft.origin.y, matrixTopRight.origin.x, matrixTopRight.origin.y);
-            applet.line(matrixTopRight.origin.x, matrixTopRight.origin.y, matrixBotRight.origin.x, matrixBotRight.origin.y);
-            applet.line(matrixBotLeft.origin.x, matrixBotLeft.origin.y, matrixBotRight.origin.x, matrixBotRight.origin.y);
-            applet.line(matrixTopLeft.origin.x, matrixTopLeft.origin.y, matrixBotLeft.origin.x, matrixBotLeft.origin.y);
+                int numStrategies = current.length;
+                float interval = matrixSideLength / (float) numStrategies;
 
-            for (int i = 1; i < numStrategies; ++i) {
-                float x = matrixTopLeft.origin.x + i * interval;
-                float y = matrixTopLeft.origin.y + i * interval;
-                applet.line(x, matrixTopLeft.origin.y, x, matrixBotLeft.origin.y);
-                applet.line(matrixTopLeft.origin.x, y, matrixTopRight.origin.x, y);
-            }
+                applet.noStroke();
+                applet.fill(0, 95, 205, 125);
+                applet.rectMode(PApplet.CORNER);
 
-            buttons.draw(applet);
+                int playedStrat = buttons.getSelection();
+                applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y + playedStrat * interval, matrixSideLength, interval);
+                if (payoffFunction instanceof ThresholdPayoffFunction) {
+                    if (((ThresholdPayoffFunction) payoffFunction).thresholdMet(currentPercent, current, counterpart)) {
+                        applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y, interval, matrixSideLength);
+                    } else {
+                        applet.rect(matrixTopLeft.origin.x + interval, matrixTopLeft.origin.y, interval, matrixSideLength);
+                    }
+                }
 
-            for (int i = 0; i < cellMarkers.length; ++i) {
-                for (int j = 0; j < cellMarkers[i].length; ++j) {
-                    cellMarkers[i][j].draw(applet);
+                applet.stroke(0);
+                applet.strokeWeight(2);
+
+                applet.line(matrixTopLeft.origin.x, matrixTopLeft.origin.y, matrixTopRight.origin.x, matrixTopRight.origin.y);
+                applet.line(matrixTopRight.origin.x, matrixTopRight.origin.y, matrixBotRight.origin.x, matrixBotRight.origin.y);
+                applet.line(matrixBotLeft.origin.x, matrixBotLeft.origin.y, matrixBotRight.origin.x, matrixBotRight.origin.y);
+                applet.line(matrixTopLeft.origin.x, matrixTopLeft.origin.y, matrixBotLeft.origin.x, matrixBotLeft.origin.y);
+
+                for (int i = 1; i < numStrategies; ++i) {
+                    float x = matrixTopLeft.origin.x + i * interval;
+                    float y = matrixTopLeft.origin.y + i * interval;
+                    applet.line(x, matrixTopLeft.origin.y, x, matrixBotLeft.origin.y);
+                    applet.line(matrixTopLeft.origin.x, y, matrixTopRight.origin.x, y);
+                }
+
+                for (int i = 0; i < cellMarkers.length; ++i) {
+                    for (int j = 0; j < cellMarkers[i].length; ++j) {
+                        cellMarkers[i][j].draw(applet);
+                    }
                 }
             }
 
             int selection = buttons.getSelection();
-            if (selection != RadioButtonGroup.NO_BUTTON &&
-                    myStrat[selection] != 1) {
-                for (int i = 0; i < myStrat.length; ++i) {
-                    myStrat[i] = 0;
+            if (selection != RadioButtonGroup.NO_BUTTON && current[selection] != 1) {
+                for (int i = 0; i < target.length; i++) {
+                    if (selection == i) {
+                        target[i] = 1;
+                    } else {
+                        target[i] = 0;
+                    }
                 }
-                myStrat[selection] = 1;
-
-                float[] strategy = new float[myStrat.length];
-                for(int i = 0; i < myStrat.length; ++i) {
-                    strategy[i] = myStrat[i];
-                }
-                targetStrat = strategy;
             }
-            
+
+            buttons.draw(applet);
+
             applet.popMatrix();
         }
     }
@@ -162,55 +161,38 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     }
 
     public void setCurrent(float[] strategy) {
-        myStrat = strategy;
+        System.arraycopy(strategy, 0, current, 0, strategy.length);
+        int selection = -1;
+        for (int i = 0; i < current.length; i++) {
+            if (current[i] == 1) {
+                selection = i;
+            }
+        }
+        assert selection >= 0;
+        buttons.setSelection(selection);
     }
 
     public void setInitial(float[] strategy) {
-        targetStrat = myStrat;
+        setCurrent(strategy);
+        System.arraycopy(strategy, 0, target, 0, strategy.length);
     }
 
     public void setCounterpart(float[] strategy) {
-        opponentStrat = strategy;
+        System.arraycopy(strategy, 0, counterpart, 0, strategy.length);
     }
 
     public float[] getTarget() {
-        return targetStrat;
+        float[] tmp = new float[target.length];
+        System.arraycopy(target, 0, tmp, 0, target.length);
+        return tmp;
     }
 
     public boolean isEnabled() {
         return buttons.isEnabled();
     }
 
-    public float[] getMyStrategy() {
-        float[] strategy = new float[myStrat.length];
-        for (int i = 0; i < strategy.length; ++i) {
-            strategy[i] = myStrat[i];
-        }
-        return strategy;
-
-    }
-
     public void setCurrentPercent(float percent) {
         currentPercent = percent;
-    }
-
-    public void setMyStrategy(float[] strategy) {
-        for (int i = 0; i < myStrat.length; ++i) {
-            myStrat[i] = strategy[i];
-        }
-
-        for (int i = 0; i < myStrat.length; ++i) {
-            if (myStrat[i] == 1) {
-                buttons.setSelection(i);
-                break;
-            }
-        }
-    }
-
-    public void setCounterpartStrategy(float[] strategy) {
-        for (int i = 0; i < opponentStrat.length; ++i) {
-            opponentStrat[i] = strategy[i];
-        }
     }
 
     public void keyTyped(KeyEvent e) {
@@ -221,50 +203,35 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             return;
         }
         if (e.isActionKey()) {
-            if ((buttons.getAlignment() == RadioButtonGroup.Alignment.Vertical && 
-                    e.getKeyCode() == KeyEvent.VK_DOWN) ||
-                (buttons.getAlignment() == RadioButtonGroup.Alignment.Horizontal &&
-                    e.getKeyCode() == KeyEvent.VK_RIGHT)) {
-                int selection = buttons.getSelection();
+            int selection = buttons.getSelection();
+            if ((buttons.getAlignment() == RadioButtonGroup.Alignment.Vertical
+                    && e.getKeyCode() == KeyEvent.VK_DOWN)
+                    || (buttons.getAlignment() == RadioButtonGroup.Alignment.Horizontal
+                    && e.getKeyCode() == KeyEvent.VK_RIGHT)) {
                 if (selection < buttons.getNumButtons() - 1) {
                     ++selection;
                 } else {
                     return;
                 }
-
-                buttons.setSelection(selection);
-                for (int i = 0; i < myStrat.length; ++i) {
-                    myStrat[i] = 0;
-                }
-                myStrat[selection] = 1;
-
-                float[] strategy = new float[myStrat.length];
-                for(int i = 0; i < myStrat.length; ++i) {
-                    strategy[i] = myStrat[i];
-                }
-                targetStrat = strategy;
-            } else if ((buttons.getAlignment() == RadioButtonGroup.Alignment.Vertical &&
-                            e.getKeyCode() == KeyEvent.VK_UP) ||
-                        (buttons.getAlignment() == RadioButtonGroup.Alignment.Horizontal &&
-                            e.getKeyCode() == KeyEvent.VK_LEFT)) {
-                int selection = buttons.getSelection();
+            } else if ((buttons.getAlignment() == RadioButtonGroup.Alignment.Vertical
+                    && e.getKeyCode() == KeyEvent.VK_UP)
+                    || (buttons.getAlignment() == RadioButtonGroup.Alignment.Horizontal
+                    && e.getKeyCode() == KeyEvent.VK_LEFT)) {
                 if (selection > 0) {
                     --selection;
                 } else {
                     return;
                 }
-
-                buttons.setSelection(selection);
-                for (int i = 0; i < myStrat.length; ++i) {
-                    myStrat[i] = 0;
+            }
+            buttons.setSelection(selection);
+            if (selection != RadioButtonGroup.NO_BUTTON && current[selection] != 1) {
+                for (int i = 0; i < target.length; i++) {
+                    if (selection == i) {
+                        target[i] = 1;
+                    } else {
+                        target[i] = 0;
+                    }
                 }
-                myStrat[selection] = 1;
-
-                float[] strategy = new float[myStrat.length];
-                for(int i = 0; i < myStrat.length; ++i) {
-                    strategy[i] = myStrat[i];
-                }
-                targetStrat = strategy;
             }
         }
     }
@@ -273,6 +240,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     }
 
     public void configChanged(Config config) {
+
         int numStrategies = 0;
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             numStrategies = 2;
@@ -282,13 +250,13 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
         if (numStrategies != 0) {
             this.payoffFunction = config.payoffFunction;
-            this.counterpartPayoffFunction = config.counterpartPayoffFunction;
 
-            myStrat = new float[numStrategies];
-            opponentStrat = new float[numStrategies];
+            current = new float[numStrategies];
+            target = new float[numStrategies];
+            counterpart = new float[numStrategies];
 
             if (payoffFunction instanceof ThresholdPayoffFunction) {
-                float threshold = ((ThresholdPayoffFunction)payoffFunction).threshold;
+                float threshold = ((ThresholdPayoffFunction) payoffFunction).threshold;
                 matrixLabel.setLabel("Threshold: " + threshold);
                 matrixLabel.setVisible(true);
             } else {
@@ -321,7 +289,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             }
 
             buttons = new RadioButtonGroup(this, BUTTON_RADIUS, matrixTopLeft.origin.y,
-                    (int)matrixSideLength, numStrategies,
+                    (int) matrixSideLength, numStrategies,
                     RadioButtonGroup.Alignment.Vertical, BUTTON_RADIUS, applet);
             buttons.setLabelMode(Marker.LabelMode.Right);
 
@@ -329,22 +297,26 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 columnLabels[0].setLabel("met");
                 columnLabels[1].setLabel("not met");
 
-                buttons.setLabels(new String[] {"A", "B"});
+                buttons.setLabels(new String[]{"A", "B"});
             } else if (payoffFunction instanceof TwoStrategyPayoffFunction) {
                 columnLabels[0].setLabel("a");
                 columnLabels[1].setLabel("b");
 
-                buttons.setLabels(new String[] {"A", "B"});
+                buttons.setLabels(new String[]{"A", "B"});
             } else if (payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 columnLabels[0].setLabel("a");
                 columnLabels[1].setLabel("b");
                 columnLabels[2].setLabel("c");
 
-                buttons.setLabels(new String[] {"A", "B", "C"});
+                buttons.setLabels(new String[]{"A", "B", "C"});
             }
             buttons.setEnabled(false);
         }
-        
+
+        if (!config.showMatrix) {
+            buttons.origin.x += width - 10;
+        }
+
         if (config.mixedStrategySelection) {
             setVisible(false);
         } else {

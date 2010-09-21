@@ -136,7 +136,12 @@ public class Line extends Sprite implements Serializable {
                             applet.line(last.x, p.y, p.x, p.y);
                             applet.line(last.x, last.y, last.x, p.y);
                         } else {
-                            applet.line(last.x, last.y, p.x, p.y);
+                            if (Math.abs(p.y - last.y) > 10) {
+                                applet.line(last.x, last.y, last.x, p.y);
+                                applet.line(last.x, p.y, p.x, p.y);
+                            } else {
+                                applet.line(last.x, last.y, p.x, p.y);
+                            }
                         }
                     }
                     last = p;

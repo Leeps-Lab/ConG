@@ -11,12 +11,12 @@ public class TickEvent implements LogEvent {
 
     public int subperiod;
     public int millisLeft;
-    public int id;
-    public int counterpartId;
-    public float[] currentStrategy;
-    public float[] targetStrategy;
-    public float[] counterpartCurrentStrategy;
-    public float[] counterpartTargetStrategy;
-    public PayoffFunction payoffFunction;
-    public PayoffFunction counterpartPayoffFunction;
+    public int subject;
+    public int population;
+    public int match;
+    public int world;
+    public float[] strategy;
+    public float[] target;
+    public float[] matchStrategy;
+    public PayoffFunction pf;
 }

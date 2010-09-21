@@ -316,7 +316,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
             float targetPercentA = 1 - ((mouseY - origin.y) / height);
-            //strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
             target_percent_A = targetPercentA;
         }
     }
@@ -332,7 +331,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
             float targetPercentA = 1 - ((mouseY - origin.y) / height);
-            //strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
             target_percent_A = targetPercentA;
         }
     }
@@ -375,13 +373,11 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
                 float targetPercentA = target_percent_A;
                 targetPercentA += 0.01f;
                 targetPercentA = PApplet.constrain(targetPercentA, 0, 1);
-                //strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
                 target_percent_A = targetPercentA;
             } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
                 float targetPercentA = target_percent_A;
                 targetPercentA -= 0.01f;
                 targetPercentA = PApplet.constrain(targetPercentA, 0, 1);
-                //strategyChanger.setTargetStrategy(new float[]{targetPercentA, 1 - targetPercentA});
                 target_percent_A = targetPercentA;
             }
         }

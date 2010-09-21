@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,26 +33,7 @@ public class Population implements Serializable {
         tupleMap.clear();
         setupTuples();
         if (FIRE.server.getConfig().preLength == 0) {
-            for (int client : members.keySet()) {
-                float[] s;
-                if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                    s = new float[2];
-                    s[0] = FIRE.server.getRandom().nextFloat();
-                    s[1] = 1 - s[0];
-                } else {
-                    s = new float[3];
-                    s[0] = FIRE.server.getRandom().nextFloat();
-                    s[1] = (1 - s[0]) * FIRE.server.getRandom().nextFloat();
-                    s[2] = 1 - s[0] - s[1];
-                }
-                FIRE.server.getConfig(client).initialStrategy = s;
-            }
-            for (Tuple tuple : tuples) {
-                for (int member : tuple.members) {
-                    tuple.strategies.put(member, FIRE.server.getConfig(member).initialStrategy);
-                }
-                tuple.mergeStrategies();
-            }
+            setInitialStrategies();
         }
     }
 
@@ -61,6 +41,7 @@ public class Population implements Serializable {
         periodStartTime = timestamp;
         for (Tuple tuple : tuples) {
             tuple.evalTime = timestamp;
+            tuple.updateCounterparts();
         }
     }
 
@@ -115,7 +96,21 @@ public class Population implements Serializable {
             }
             strategies.put(changed, strategy);
             mergeStrategies();
+            if (FIRE.server.getConfig().subperiods == 0) {
+                updateCounterparts();
+            }
+        }
 
+        public void updateCounterparts() {
+            if (this == this.match && FIRE.server.getConfig().excludeSelf) {
+                for (int member : match.members) {
+                    Population.this.members.get(member).setCounterpartStrategy(strategyExclude.get(member));
+                }
+            } else {
+                for (int member : match.members) {
+                    Population.this.members.get(member).setCounterpartStrategy(strategy);
+                }
+            }
         }
 
         public void mergeStrategies() {
@@ -176,7 +171,6 @@ public class Population implements Serializable {
                 }
                 float payoff = u.getPayoff(percent, strategies.get(member), otherStrategy);
                 payoff *= percentElapsed;
-                Population.this.members.get(member).setCounterpartStrategy(otherStrategy);
                 FIRE.server.addToPeriodPoints(member, payoff);
             }
         }
@@ -196,6 +190,7 @@ public class Population implements Serializable {
                 Population.this.members.get(member).endSubperiod(subperiod, strategies.get(member), otherStrategy);
             }
             mergeStrategies();
+            updateCounterparts();
 
         }
 
@@ -272,6 +267,40 @@ public class Population implements Serializable {
             config.payoffFunction = def.payoffFunction;
             config.counterpartPayoffFunction = def.payoffFunction;
             tupleMap.put(member, tuple);
+        }
+    }
+
+    private void setInitialStrategies() {
+        for (int client : members.keySet()) {
+            float[] s;
+            if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+                s = new float[2];
+                if (FIRE.server.getConfig().mixedStrategySelection) {
+                    s[0] = FIRE.server.getRandom().nextFloat();
+                } else {
+                    s[0] = FIRE.server.getRandom().nextBoolean() ? 1 : 0;
+                }
+                s[1] = 1 - s[0];
+            } else {
+                s = new float[3];
+                if (FIRE.server.getConfig().mixedStrategySelection) {
+                    s[0] = FIRE.server.getRandom().nextFloat();
+                    s[1] = (1 - s[0]) * FIRE.server.getRandom().nextFloat();
+                    s[2] = 1 - s[0] - s[1];
+                } else {
+                    s[0] = 0;
+                    s[1] = 0;
+                    s[2] = 0;
+                    s[FIRE.server.getRandom().nextInt(3)] = 1;
+                }
+            }
+            FIRE.server.getConfig(client).initialStrategy = s;
+        }
+        for (Tuple tuple : tuples) {
+            for (int member : tuple.members) {
+                tuple.strategies.put(member, FIRE.server.getConfig(member).initialStrategy);
+            }
+            tuple.mergeStrategies();
         }
     }
 }
