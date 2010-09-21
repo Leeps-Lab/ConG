@@ -104,6 +104,14 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                     } else {
                         applet.rect(matrixTopLeft.origin.x + interval, matrixTopLeft.origin.y, interval, matrixSideLength);
                     }
+                } else {
+                    int i;
+                    for (i = 0; i < counterpart.length; ++i) {
+                        if (counterpart[i] > 0) {
+                            break;
+                        }
+                    }
+                    applet.rect(matrixTopLeft.origin.x + i * interval, matrixTopLeft.origin.y, interval, matrixSideLength);
                 }
 
                 applet.stroke(0);
