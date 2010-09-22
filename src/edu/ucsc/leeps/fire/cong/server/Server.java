@@ -73,13 +73,12 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void tick(int secondsLeft) {
-        return;
+        if (FIRE.server.getConfig().subperiods == 0) {
+            population.logTick(0, secondsLeft);
+        }
     }
 
     public void quickTick(int millisLeft) {
-        if (FIRE.server.getConfig().subperiods == 0) {
-            population.logTick(0, millisLeft);
-        }
     }
 
     private void configurePopulations() {

@@ -10,7 +10,7 @@ import edu.ucsc.leeps.fire.logging.LogEvent;
 public class TickEvent implements LogEvent {
 
     public int subperiod;
-    public int millisLeft;
+    public int secondsLeft;
     public int subject;
     public int population;
     public int match;
@@ -18,5 +18,6 @@ public class TickEvent implements LogEvent {
     public float[] strategy;
     public float[] target;
     public float[] matchStrategy;
+    public float payoff;
     public PayoffFunction pf;
 }

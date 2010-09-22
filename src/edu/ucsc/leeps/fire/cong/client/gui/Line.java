@@ -231,6 +231,9 @@ public class Line extends Sprite implements Serializable {
                         if (stepFunction && i >= 2 && Math.abs(last.y - p.y) > Float.MIN_NORMAL) {
                             applet.vertex(last.x, p.y);
                         }
+                        if (Math.abs(p.y - last.y) > 10) {
+                            applet.vertex(last.x, p.y);
+                        }
                         applet.vertex(p.x, p.y);
                     }
                     last = p;
