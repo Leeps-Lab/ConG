@@ -5,6 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  *
@@ -13,6 +14,7 @@ import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 public class StrategyChanger extends Thread implements Configurable<Config> {
 
     private final Object lock = new Object();
+    private long sleepTimeMillis;
     private Config config;
     private volatile boolean running;
     private volatile boolean shouldUpdate;
@@ -21,10 +23,7 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     private float[] targetStrategy;
     private float[] deltaStrategy;
     private float[] lastStrategy;
-    private long tickTime = 100;
     private float tickDelta;
-    private long sleepTimeMillis;
-    private float changeTimeEMA = 0;
     private float strategyDelta;
     private long nextAllowedChangeTime;
     private boolean initialLock;
@@ -32,30 +31,27 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     public Selector selector;
 
     public StrategyChanger() {
-        nextAllowedChangeTime = System.currentTimeMillis();
-        start();
+        sleepTimeMillis = Integer.parseInt(System.getProperty("fire.client.rate", "50"));
         FIRE.client.addConfigListener(this);
-        sleepTimeMillis = 50;
+        start();
     }
 
     public void configChanged(Config config) {
-        synchronized (lock) {
-            this.config = config;
-            if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                previousStrategy = new float[2];
-                currentStrategy = new float[2];
-                targetStrategy = new float[2];
-                deltaStrategy = new float[2];
-                lastStrategy = new float[2];
-            } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                previousStrategy = new float[3];
-                currentStrategy = new float[3];
-                targetStrategy = new float[3];
-                deltaStrategy = new float[3];
-                lastStrategy = new float[3];
-            }
-            recalculateTickDelta();
+        this.config = config;
+        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            previousStrategy = new float[2];
+            currentStrategy = new float[2];
+            targetStrategy = new float[2];
+            deltaStrategy = new float[2];
+            lastStrategy = new float[2];
+        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            previousStrategy = new float[3];
+            currentStrategy = new float[3];
+            targetStrategy = new float[3];
+            deltaStrategy = new float[3];
+            lastStrategy = new float[3];
         }
+        tickDelta = config.percentChangePerSecond / (1000f / sleepTimeMillis) * 2f;
     }
 
     private void update() {
@@ -74,7 +70,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 for (int i = 0; i < targetStrategy.length; i++) {
                     targetStrategy[i] = currentStrategy[i];
                 }
-                sleepTimeMillis = 100;
                 return;
             }
             float totalDelta = 0f;
@@ -91,38 +86,18 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
                 for (int i = 0; i < currentStrategy.length; i++) {
                     currentStrategy[i] = targetStrategy[i];
                 }
-                sleepTimeMillis = 100;
             }
 
-            long timestamp = System.nanoTime();
             sendUpdate();
             FIRE.client.getClient().setMyStrategy(currentStrategy);
             selector.setCurrent(currentStrategy);
-            float elapsed = (System.nanoTime() - timestamp) / 1000000f;
-            changeTimeEMA += 0.1 * (elapsed - changeTimeEMA);
-            sleepTimeMillis = tickTime - Math.round(changeTimeEMA);
-            /*
-            long estimatedLag = Math.round(changeTimeEMA);
-            if (tickTime > 20.0 * estimatedLag) {
-            tickTime = Math.round(5.0 * estimatedLag);
-            sleepTimeMillis = tickTime - Math.round(changeTimeEMA);
-            recalculateTickDelta();
-            } else if (sleepTimeMillis < 0) {
-            tickTime = Math.round(5.0 * estimatedLag);
-            sleepTimeMillis = 0;
-            recalculateTickDelta();
-            }
-             *
-             */
             if (config.delay != null) {
                 int delay = config.delay.getDelay();
                 nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
-                System.err.println("delay: " + delay);
             }
         }
     }
 
-    // TODO: why does it delay AFTER the player switches strategies?
     private void sendUpdate() {
         if (config.subperiods == 0) {
             float total = 0;
@@ -140,28 +115,28 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     @Override
     public void run() {
         running = true;
+        long sleepTime = 1000000 * sleepTimeMillis;
         while (running) {
-            try {
-                isLocked = decisionDelayed();
-                if (shouldUpdate) {
-                    selector.setEnabled(!isLocked);
-                }
-                if (!isLocked && shouldUpdate) {
-                    update();
-                }
-                sleep(sleepTimeMillis);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
+            long stamp = System.nanoTime();
+            isLocked = decisionDelayed();
+            if (shouldUpdate) {
+                selector.setEnabled(!isLocked);
+            }
+            if (!isLocked && shouldUpdate) {
+                update();
+            }
+            long elapsed = System.nanoTime() - stamp;
+            long parkTime = sleepTime - elapsed;
+            if (parkTime > 0) {
+                LockSupport.parkNanos(parkTime);
+            } else if (System.getProperty("fire.client.debug") != null) {
+                System.err.println("deadline failure " + parkTime);
             }
         }
     }
 
     private boolean decisionDelayed() {
         return System.currentTimeMillis() < nextAllowedChangeTime;
-    }
-
-    private void recalculateTickDelta() {
-        tickDelta = config.percentChangePerSecond / (1000f / tickTime);
     }
 
     public void setCurrentStrategy(float[] strategy) {
@@ -207,7 +182,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
             int delay = config.initialDelay.getDelay();
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
             initialLock = false;
-            System.err.println("initial delay: " + delay);
         }
     }
 
@@ -236,10 +210,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
 
     public void signalStop() {
         running = false;
-    }
-
-    public float getAverageChangeTime() {
-        return changeTimeEMA;
     }
 
     public float[] getCurrentStrategy() {

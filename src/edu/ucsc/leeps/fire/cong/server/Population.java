@@ -328,6 +328,7 @@ public class Population implements Serializable {
         for (Tuple tuple : tuples) {
             for (int member : tuple.members) {
                 tuple.strategies.put(member, FIRE.server.getConfig(member).initialStrategy);
+                tuple.targets.put(member, FIRE.server.getConfig(member).initialStrategy);
             }
             tuple.mergeStrategies();
         }

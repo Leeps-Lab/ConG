@@ -1,6 +1,11 @@
-"period","timeConstrained","paid","length","preLength","pointsPerSecond","percentChangePerSecond","subperiods","payoffFunction","Rr","Rp","Rs","Pr","Pp","Ps","Sr","Sp","Ss","numTuples","excludeSelf","yourPayoff","mode","r","g","b","otherPayoff","mode","r","g","b","weight"
-1,"TRUE","TRUE",60,0,"FALSE",0.1,0,"rps",36,24,96,60,36,24,24,96,36,1,"TRUE","line","shaded",100,255,100,"line","solid",100,150,255,2
-2,"TRUE","TRUE",60,0,"FALSE",0.2,0,"rps",60,0,72,72,60,36,0,72,60,1,"TRUE","line","shaded",100,255,100,"line","solid",100,150,255,2
-3,"TRUE","TRUE",60,0,"FALSE",1,2,"rps",36,24,96,60,36,24,24,96,36,1,"TRUE","line","shaded",100,255,100,"line","solid",100,150,255,2
-4,"TRUE","TRUE",60,0,"FALSE",0.2,15,"rps",60,0,72,72,60,36,0,72,60,1,"TRUE","line","shaded",100,255,100,"line","solid",100,150,255,2
-5,"TRUE","TRUE",60,0,"FALSE",0.2,60,"rps",60,0,72,72,60,36,0,72,60,1,"TRUE","line","shaded",100,255,100,"line","solid",100,150,255,2
+"period","timeConstrained","paid","length","percentChangePerSecond","subperiods","numTuples","mixedStrategySelection","strategySelectionDisplayType","showMatrix","payoffFunction","Rr","Rp","Rs","Pr","Pp","Ps","Sr","Sp","Ss","excludeSelf"
+1,"TRUE","TRUE",120,0.1,0,1,"TRUE",,,"rps",36,24,96,60,36,24,24,96,36,"TRUE"
+2,"TRUE","TRUE",120,0.2,0,1,"TRUE",,,"rps",60,0,72,72,60,36,0,72,60,"FALSE"
+3,"TRUE","TRUE",120,0.3,0,1,"TRUE",,,"rps",36,24,96,60,36,24,24,96,36,"FALSE"
+4,"TRUE","TRUE",120,0.4,0,1,"TRUE",,,"rps",60,0,72,72,60,36,0,72,60,"TRUE"
+5,"TRUE","TRUE",120,0.5,0,1,"TRUE",,,"rps",60,0,72,72,60,36,0,72,60,"TRUE"
+6,"TRUE","TRUE",120,1,10,1,"TRUE",,,"rps",36,24,96,60,36,24,24,96,36,"TRUE"
+7,"TRUE","TRUE",120,1,20,1,"FALSE","Matrix","FALSE","rps",60,0,72,72,60,36,0,72,60,"TRUE"
+8,"TRUE","TRUE",120,1,30,1,"FALSE","Matrix","FALSE","rps",36,24,96,60,36,24,24,96,36,"TRUE"
+9,"TRUE","TRUE",120,1,60,1,"TRUE",,,"rps",60,0,72,72,60,36,0,72,60,"TRUE"
+10,"TRUE","TRUE",120,1,0,1,"TRUE",,,"rps",60,0,72,72,60,36,0,72,60,"TRUE"

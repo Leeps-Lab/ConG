@@ -386,11 +386,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     public void keyReleased(KeyEvent ke) {
     }
 
-    public void setTwoStrategyHeatmapBuffers(float[][][] payoff, float[][][] counterpartPayoff) {
-        heatmap.setTwoStrategyHeatmapBuffers(payoff);
-        counterpartHeatmap.setTwoStrategyHeatmapBuffers(counterpartPayoff);
-    }
-
     public void startPrePeriod() {
     }
 }

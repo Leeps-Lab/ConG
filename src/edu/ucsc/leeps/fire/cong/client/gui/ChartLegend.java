@@ -65,13 +65,13 @@ public class ChartLegend extends Sprite implements Configurable<Config> {
             applet.strokeWeight(10);
             applet.textAlign(PApplet.LEFT, PApplet.CENTER);
 
-            applet.stroke(youLine.r, youLine.g, youLine.b);
+            applet.stroke(youLine.r, youLine.g, youLine.b, youLine.alpha);
             applet.line(4, height / 2f, 4 + 10, height / 2f);
             applet.text(youLabel,
                     width + 4 + 10 + 4 - width,
                     height / 2f);
 
-            applet.stroke(otherLine.r, otherLine.g, otherLine.b);
+            applet.stroke(otherLine.r, otherLine.g, otherLine.b, otherLine.alpha);
             applet.line(4 + 10 + 4 + w1 + 4, height / 2f, 4 + 10 + 4 + w1 + 4 + 10, height / 2f);
             applet.text(otherLabel,
                     width + 4 + 10 + 4 + w1 + 4 + 10 + 4 - width,

@@ -165,11 +165,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                     this);
         }
     }
-
     int T = 0;
 
     @Override
-    public synchronized void draw(Client applet) {
+    public void draw(Client applet) {
         if (!visible) {
             return;
         }
@@ -330,11 +329,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         applet.popMatrix();
     }
 
-    //@Override
     public void mouseClicked(MouseEvent e) {
     }
 
-    //@Override
     public void mousePressed(MouseEvent e) {
         if (enabled) {
             float mouseX = e.getX() - origin.x;
@@ -363,7 +360,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         }
     }
 
-    //@Override
     public void mouseReleased(MouseEvent e) {
         if (mouseInTriangle) {
             if (current.isGrabbed()) {
@@ -382,11 +378,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         }
     }
 
-    //@Override
     public void mouseEntered(MouseEvent e) {
     }
 
-    //@Override
     public void mouseExited(MouseEvent e) {
     }
 
@@ -721,7 +715,18 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             ghostPDrop.setColor(config.pColor);
             sDrop.setColor(config.sColor);
             ghostSDrop.setColor(config.sColor);
-
+            current.setColor(
+                    config.yourStrategyOverTime.r,
+                    config.yourStrategyOverTime.g,
+                    config.yourStrategyOverTime.b);
+            opponent.setColor(
+                    config.counterpartStrategyOverTime.r,
+                    config.counterpartStrategyOverTime.g,
+                    config.counterpartStrategyOverTime.b);
+            ghost.setColor(
+                    config.yourStrategyOverTime.r,
+                    config.yourStrategyOverTime.g,
+                    config.yourStrategyOverTime.b);
             for (int i = R; i <= S; ++i) {
                 stratSlider[i].setVisible(config.showRPSSliders);
             }

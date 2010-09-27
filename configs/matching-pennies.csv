@@ -1,5 +1,11 @@
-"period","timeConstrained","paid","length","preLength","subperiods","pointsPerSecond","percentChangePerSecond","payoffFunction","name","Aa","Ab","Ba","Bb","min","max","counterpartPayoffFunction","name","Aa","Ab","Ba","Bb","min","max","isCounterpart","tupleSize","strategySelectionDisplayType","mixedStrategySelection","sigmoidHeatmap","yourPayoff","mode","r","g","b","otherPayoff","mode","r","g","b","weight","yourStrategyOverTime","mode","r","g","b","weight","counterpartStrategyOverTime","mode","r","g","b","weight"
-1,"TRUE","TRUE",120,0,0,"FALSE",0.1,"bimatrix","paramX",6,0,0,6,0,6,"bimatrix","paramXcounterpart",0,6,6,0,0,6,"TRUE",1,"HeatmapBoth","TRUE",,"line","shaded",100,255,100,"line","solid",100,150,255,2,"line","solid",100,255,100,2,"line","solid",100,150,255,2
-2,"TRUE","TRUE",120,0,10,"FALSE",0.1,"bimatrix","paramX",6,0,0,6,0,6,"bimatrix","paramXcounterpart",0,6,6,0,0,6,"TRUE",1,"HeatmapSingle","TRUE","TRUE","line","shaded",100,255,100,"line","solid",100,150,255,2,"line","solid",100,255,100,2,"line","solid",100,150,255,2
-3,"TRUE","TRUE",120,0,6,"FALSE",0.1,"bimatrix","paramX",6,0,0,6,0,6,"bimatrix","paramXcounterpart",0,6,6,0,0,6,"TRUE",1,"Matrix","FALSE",,"line","shaded",100,255,100,"line","solid",100,150,255,2,"line","solid",100,255,100,2,"line","solid",100,150,255,2
-4,"TRUE","TRUE",120,0,4,"FALSE",0.1,"bimatrix","paramX",6,0,0,6,0,6,"bimatrix","paramXcounterpart",0,6,6,0,0,6,"TRUE",1,"Matrix","FALSE",,"line","shaded",100,255,100,"line","solid",100,150,255,2,"line","solid",100,255,100,2,"line","solid",100,150,255,2
+"period","timeConstrained","paid","length","subperiods","percentChangePerSecond","tupleSize","numTuples","payoffFunction","name","Aa","Ab","Ba","Bb","min","max","counterpartPayoffFunction","name","Aa","Ab","Ba","Bb","min","max","isCounterpart","strategySelectionDisplayType","mixedStrategySelection","sigmoidHeatmap"
+1,"TRUE","TRUE",120,0,0.1,1,,"bimatrix","pf",34,15,15,16,5,38,"bimatrix","cpf",6,25,25,24,2,35,"TRUE","HeatmapBoth","TRUE",
+2,"TRUE","TRUE",120,0,0.2,1,,"bimatrix","pf",38,5,5,32,5,38,"bimatrix","cpf",2,35,35,8,2,35,"TRUE","HeatmapSingle","TRUE","TRUE"
+3,"TRUE","TRUE",120,0,0.3,1,,"bimatrix","pf",34,15,15,16,5,38,"bimatrix","cpf",6,25,25,24,2,35,"TRUE","Matrix","FALSE",
+4,"TRUE","TRUE",120,0,0.4,1,,"bimatrix","pf",38,5,5,32,5,38,"bimatrix","cpf",2,35,35,8,2,35,"TRUE","Matrix","FALSE",
+5,"TRUE","TRUE",120,0,0.1,,2,"bimatrix","pf",34,15,15,16,5,38,"bimatrix","cpf",6,25,25,24,2,35,"TRUE","HeatmapBoth","TRUE",
+6,"TRUE","TRUE",120,0,0.1,,4,"bimatrix","pf",38,5,5,32,5,38,"bimatrix","cpf",2,35,35,8,2,35,"TRUE","HeatmapSingle","TRUE","TRUE"
+7,"TRUE","TRUE",120,10,1,1,,"bimatrix","pf",34,15,15,16,5,38,"bimatrix","cpf",6,25,25,24,2,35,"TRUE","Matrix","FALSE",
+8,"TRUE","TRUE",120,15,1,1,,"bimatrix","pf",38,5,5,32,5,38,"bimatrix","cpf",2,35,35,8,2,35,"TRUE","Matrix","FALSE",
+9,"TRUE","TRUE",120,20,1,1,,"bimatrix","pf",34,15,15,16,5,38,"bimatrix","cpf",6,25,25,24,2,35,"TRUE","HeatmapBoth","TRUE",
+10,"TRUE","TRUE",120,60,1,1,,"bimatrix","pf",38,5,5,32,5,38,"bimatrix","cpf",2,35,35,8,2,35,"TRUE","HeatmapSingle","TRUE","TRUE"

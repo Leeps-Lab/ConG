@@ -4,10 +4,13 @@ import edu.ucsc.leeps.fire.FIREServerInterface;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
 import edu.ucsc.leeps.fire.server.ServerController.State;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -17,9 +20,11 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     private Map<Integer, ClientInterface> clients;
     private Population population;
+    private StrategyUpdater strategyUpdater;
 
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
+        strategyUpdater = new StrategyUpdater();
     }
 
     public synchronized void strategyChanged(
@@ -27,13 +32,14 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             float[] targetStrategy,
             Integer id) {
         if (FIRE.server.getState() == State.RUNNING_PERIOD) {
-            long timestamp = System.currentTimeMillis();
-            population.strategyChanged(
-                    newStrategy, targetStrategy,
-                    id, timestamp);
+            StrategyChangeEvent event = new StrategyChangeEvent();
+            event.id = id;
+            event.newStrategy = newStrategy;
+            event.targetStrategy = targetStrategy;
+            event.timestamp = System.currentTimeMillis();
+            strategyUpdater.add(event);
         }
     }
-
 
     public void configurePeriod() {
         configurePopulations();
@@ -55,6 +61,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void endPeriod() {
+        strategyUpdater.endPeriod();
         if (FIRE.server.getConfig().subperiods == 0) {
             population.endPeriod();
         } else {
@@ -154,5 +161,44 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public boolean register(int id, ClientInterface client) {
         clients.put(id, client);
         return true;
+    }
+
+    private class StrategyUpdater extends Thread {
+
+        private BlockingQueue<StrategyChangeEvent> queue;
+
+        public StrategyUpdater() {
+            queue = new LinkedBlockingQueue<StrategyChangeEvent>();
+            start();
+        }
+
+        public void add(StrategyChangeEvent event) {
+            try {
+                queue.put(event);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        public void endPeriod() {
+            System.err.println("still have " + queue.size() + " strategies to process");
+            queue.clear();
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    StrategyChangeEvent event = queue.take();
+                    population.strategyChanged(
+                            event.newStrategy,
+                            event.targetStrategy,
+                            event.id,
+                            event.timestamp);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
     }
 }

@@ -18,8 +18,8 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
 
     private Config config;
     private float[][] payoff;
-    private List<PImage> buffers;
     private PImage currentBuffer;
+    private PImage backBuffer;
     private boolean mine;
     private PApplet applet;
     private List<Integer> colors;
@@ -65,40 +65,6 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         this.config = config;
     }
 
-    /**
-     * Creates an embedded image array list.Sets size to initial element of
-     * payoff.
-     *
-     * Begins at tick event 0, and increments until it reaches the length of
-     * config. Creates an applet with
-     *
-     * 
-     *
-     * @param payoff payoff function.
-     */
-    public void setTwoStrategyHeatmapBuffers(float[][][] payoff) {
-        buffers = new ArrayList<PImage>();
-        int size = payoff[0].length;
-        for (int tick = 0; tick < config.length; tick++) {
-            PImage buffer = applet.createImage(size, size, Client.RGB);
-            buffer.loadPixels();
-            for (int x = 0; x < size; x++) {
-                for (int y = 0; y < size; y++) {
-                    float u;
-                    if (mine) {
-                        u = payoff[tick][x][y];
-                    } else {
-                        u = payoff[tick][y][x];
-                    }
-                    buffer.pixels[y * size + x] = getRGB(u);
-                }
-            }
-            buffer.updatePixels();
-            buffer.resize(width, height);
-            buffers.add(buffer);
-        }
-    }
-
     public int getRGB(float percent) {
         if (FIRE.client.getConfig().sigmoidHeatmap) {
             percent = sigmoid(percent, FIRE.client.getConfig().sigmoidAlpha, FIRE.client.getConfig().sigmoidBeta);
@@ -120,84 +86,82 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         return 1f / (1 + (float) Math.exp(-a * (x - b)));
     }
 
-    public synchronized void updateTwoStrategyHeatmap(float currentPercent) {
-        if (buffers == null) {
-            int size = 100;
-            currentBuffer = applet.createGraphics(size, size, Client.P2D);
-            currentBuffer.loadPixels();
-            for (int x = 0; x < size; x++) {
-                for (int y = 0; y < size; y++) {
-                    PayoffFunction u;
-                    float A = 1 - (y / (float) size);
-                    float a = 1 - (x / (float) size);
-                    if (mine) {
-                        u = config.payoffFunction;
-                    } else {
-                        u = config.counterpartPayoffFunction;
-                    }
-                    float value;
-                    if (mine) {
-                        value = u.getPayoff(currentPercent,
-                                new float[]{A}, new float[]{a}) / u.getMax();
-                    } else {
-                        value = u.getPayoff(currentPercent,
-                                new float[]{a}, new float[]{A}) / u.getMax();
-                    }
-                    currentBuffer.pixels[y * size + x] = getRGB(value);
-                }
-            }
-            currentBuffer.updatePixels();
-            currentBuffer.resize(width, height);
+    public void updateTwoStrategyHeatmap(float currentPercent) {
+        int size = 100;
+        PayoffFunction u;
+        if (mine) {
+            u = config.payoffFunction;
         } else {
-            currentBuffer = buffers.get(Math.round(currentPercent * config.length));
+            u = config.counterpartPayoffFunction;
         }
+        float max = u.getMax();
+        backBuffer = applet.createGraphics(size, size, Client.P2D);
+        backBuffer.loadPixels();
+        for (int x = 0; x < size; x++) {
+            for (int y = 0; y < size; y++) {
+                float A = 1 - (y / (float) size);
+                float a = 1 - (x / (float) size);
+                float value;
+                if (mine) {
+                    value = u.getPayoff(currentPercent,
+                            new float[]{A}, new float[]{a}) / max;
+                } else {
+                    value = u.getPayoff(currentPercent,
+                            new float[]{a}, new float[]{A}) / max;
+                }
+                backBuffer.pixels[y * size + x] = getRGB(value);
+            }
+        }
+        backBuffer.updatePixels();
+        backBuffer.resize(width, height);
+        currentBuffer = backBuffer;
     }
 
-    public synchronized void updateThreeStrategyHeatmap(
+    public void updateThreeStrategyHeatmap(
             float currentPercent,
             float r, float p, float s,
             ThreeStrategySelector threeStrategySelector) {
-        currentBuffer = applet.createGraphics(width, height, Client.P2D);
-        currentBuffer.loadPixels();
+        backBuffer = applet.createGraphics(width, height, Client.P2D);
+        backBuffer.loadPixels();
+        PayoffFunction payoffFunction;
+        if (mine) {
+            payoffFunction = config.payoffFunction;
+        } else {
+            payoffFunction = config.counterpartPayoffFunction;
+        }
+        float max = payoffFunction.getMax();
+        float[] rps = new float[]{r, p, s};
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 float[] RPS = threeStrategySelector.translate(x, height - y);
                 if (RPS[0] >= 0 && RPS[1] >= 0 && RPS[2] >= 0) {
-                    float u, max;
-                    PayoffFunction payoffFunction;
-                    if (mine) {
-                        payoffFunction = config.payoffFunction;
-                    } else {
-                        payoffFunction = config.counterpartPayoffFunction;
-                    }
-                    u = payoffFunction.getPayoff(
+                    float u = payoffFunction.getPayoff(
                             currentPercent,
-                            RPS, new float[]{r, p, s});
-                    max = payoffFunction.getMax();
-
+                            RPS, rps);
                     payoff[x][y] = u;
-                    currentBuffer.pixels[y * width + x] = getRGB(u / max);
+                    backBuffer.pixels[y * width + x] = getRGB(u / max);
                 } else {
                     payoff[x][y] = 0;
-                    currentBuffer.pixels[y * width + x] = applet.color(255, 0, 0, 0);
+                    backBuffer.pixels[y * width + x] = applet.color(255, 0, 0, 0);
                 }
             }
         }
-        currentBuffer.updatePixels();
+        backBuffer.updatePixels();
+        currentBuffer = backBuffer;
     }
 
     public void updateStripHeatmap(
             float currentPercent,
             float opponentStrat) {
-        currentBuffer = applet.createGraphics(width, height, Client.P2D);
-        currentBuffer.loadPixels();
+        backBuffer = applet.createGraphics(width, height, Client.P2D);
+        backBuffer.loadPixels();
 
         PayoffFunction payoffFunction = config.payoffFunction;
         float u;
         float max = payoffFunction.getMax();
 
         if (height > width) {
-            for (int i = 0; i < currentBuffer.pixels.length; i += width) {
+            for (int i = 0; i < backBuffer.pixels.length; i += width) {
                 int y = i / width;
 
                 float myStrat = 1f - ((float) y / (float) height);
@@ -205,12 +169,12 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
                         new float[]{myStrat},
                         new float[]{opponentStrat});
 
-                currentBuffer.pixels[i] = getRGB(u / max);
+                backBuffer.pixels[i] = getRGB(u / max);
             }
 
             for (int y = 0; y < height; ++y) {
                 for (int x = 1; x < width; ++x) {
-                    currentBuffer.pixels[y * width + x] = currentBuffer.pixels[y * width];
+                    backBuffer.pixels[y * width + x] = backBuffer.pixels[y * width];
                 }
             }
         } else {
@@ -220,17 +184,18 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
                         new float[]{myStrat},
                         new float[]{opponentStrat});
 
-                currentBuffer.pixels[i] = getRGB(u / max);
+                backBuffer.pixels[i] = getRGB(u / max);
             }
 
             for (int x = 0; x < width; ++x) {
                 for (int y = 1; y < height; ++y) {
-                    currentBuffer.pixels[y * width + x] = currentBuffer.pixels[x];
+                    backBuffer.pixels[y * width + x] = backBuffer.pixels[x];
                 }
             }
         }
 
-        currentBuffer.updatePixels();
+        backBuffer.updatePixels();
+        currentBuffer = backBuffer;
     }
 
     public float getPayoff(int x, int y) {
@@ -248,7 +213,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     }
 
     @Override
-    public synchronized void draw(Client applet) {
+    public void draw(Client applet) {
         if (!visible) {
             return;
         }

@@ -36,7 +36,7 @@ import processing.core.PFont;
  */
 public class Client extends PApplet implements ClientInterface, FIREClientInterface {
 
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = System.getProperty("fire.client.debug") != null;
     private float percent;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
@@ -68,7 +68,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         frame.add(Client.this);
         frame.setSize(width, height);
         init();
-        loop();
         frame.setVisible(true);
     }
 
@@ -171,11 +170,11 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         }
     }
 
-    public synchronized float[] getStrategy() {
+    public float[] getStrategy() {
         return strategyChanger.getCurrentStrategy();
     }
 
-    public synchronized void setMyStrategy(float[] s) {
+    public void setMyStrategy(float[] s) {
         haveInitialStrategy = true;
         strategyChanger.setCurrentStrategy(s);
         payoffChart.setMyStrategy(s);
@@ -185,7 +184,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         sChart.setMyStrategy(s);
     }
 
-    public synchronized void setCounterpartStrategy(float[] s) {
+    public void setCounterpartStrategy(float[] s) {
         strategyChanger.selector.setCounterpart(s);
         payoffChart.setCounterpartStrategy(s);
         strategyChart.setCounterpartStrategy(s);
@@ -223,13 +222,11 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     @Override
     public void setup() {
         size(getWidth(), getHeight(), OPENGL);
-        hint(DISABLE_OPENGL_2X_SMOOTH);
         hint(DISABLE_OPENGL_ERROR_REPORT);
         hint(DISABLE_DEPTH_TEST);
         setupFonts();
         textFont(size14);
         textMode(MODEL);
-        //smooth();
 
         percent = -1;
         int leftMargin = 20;
@@ -325,14 +322,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                     fill(0);
                 }
                 text(frameRateString, 330, 30);
-                float averageChangeTime = strategyChanger.getAverageChangeTime();
-                String changeTimeString = String.format("MPC: %.2f", averageChangeTime);
-                if (averageChangeTime > 10) {
-                    fill(255, 0, 0);
-                } else {
-                    fill(0);
-                }
-                text(changeTimeString, 330, 45);
             }
         } catch (NullPointerException ex) {
             ex.printStackTrace();
