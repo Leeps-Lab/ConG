@@ -87,7 +87,6 @@ public class Chart extends Sprite implements Configurable<Config> {
     // threshold
     private Line threshold;
     private StrategyChanger strategyChanger;
-    // draw lock
     private HeatmapLegend heatmapLegend;
 
     /**

@@ -5,24 +5,22 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
-import java.util.concurrent.locks.LockSupport;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author jpettit
  */
-public class StrategyChanger extends Thread implements Configurable<Config> {
+public class StrategyChanger implements Configurable<Config>, Runnable {
 
-    private final Object lock = new Object();
-    private long sleepTimeMillis;
     private Config config;
-    private volatile boolean running;
     private volatile boolean shouldUpdate;
     private float[] previousStrategy;
     private float[] currentStrategy;
     private float[] targetStrategy;
     private float[] deltaStrategy;
     private float[] lastStrategy;
+    private int rate;
     private float tickDelta;
     private float strategyDelta;
     private long nextAllowedChangeTime;
@@ -31,9 +29,10 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
     public Selector selector;
 
     public StrategyChanger() {
-        sleepTimeMillis = Integer.parseInt(System.getProperty("fire.client.rate", "50"));
+        rate = Integer.parseInt(System.getProperty("fire.client.rate", "50"));
         FIRE.client.addConfigListener(this);
-        start();
+        FIRE.client.getScheduler().scheduleAtFixedRate(
+                this, 0, rate, TimeUnit.MILLISECONDS);
     }
 
     public void configChanged(Config config) {
@@ -51,50 +50,48 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
             deltaStrategy = new float[3];
             lastStrategy = new float[3];
         }
-        tickDelta = config.percentChangePerSecond / (1000f / sleepTimeMillis) * 2f;
+        tickDelta = config.percentChangePerSecond / (1000f / rate) * 2f;
     }
 
     private void update() {
-        synchronized (lock) {
-            targetStrategy = selector.getTarget();
-            if (targetStrategy == null) {
-                return;
+        targetStrategy = selector.getTarget();
+        if (targetStrategy == null) {
+            return;
+        }
+        boolean same = true;
+        for (int i = 0; i < targetStrategy.length; i++) {
+            if (Math.abs(targetStrategy[i] - currentStrategy[i]) > Float.MIN_NORMAL) {
+                same = false;
             }
-            boolean same = true;
+        }
+        if (same) {
             for (int i = 0; i < targetStrategy.length; i++) {
-                if (Math.abs(targetStrategy[i] - currentStrategy[i]) > Float.MIN_NORMAL) {
-                    same = false;
-                }
+                targetStrategy[i] = currentStrategy[i];
             }
-            if (same) {
-                for (int i = 0; i < targetStrategy.length; i++) {
-                    targetStrategy[i] = currentStrategy[i];
-                }
-                return;
+            return;
+        }
+        float totalDelta = 0f;
+        for (int i = 0; i < currentStrategy.length; i++) {
+            deltaStrategy[i] = targetStrategy[i] - currentStrategy[i];
+            totalDelta += Math.abs(deltaStrategy[i]);
+        }
+        if (config.percentChangePerSecond < 1f && totalDelta > tickDelta) {
+            for (int i = 0; i < deltaStrategy.length; i++) {
+                deltaStrategy[i] = tickDelta * (deltaStrategy[i] / totalDelta);
+                currentStrategy[i] += deltaStrategy[i];
             }
-            float totalDelta = 0f;
+        } else {
             for (int i = 0; i < currentStrategy.length; i++) {
-                deltaStrategy[i] = targetStrategy[i] - currentStrategy[i];
-                totalDelta += Math.abs(deltaStrategy[i]);
+                currentStrategy[i] = targetStrategy[i];
             }
-            if (config.percentChangePerSecond < 1f && totalDelta > tickDelta) {
-                for (int i = 0; i < deltaStrategy.length; i++) {
-                    deltaStrategy[i] = tickDelta * (deltaStrategy[i] / totalDelta);
-                    currentStrategy[i] += deltaStrategy[i];
-                }
-            } else {
-                for (int i = 0; i < currentStrategy.length; i++) {
-                    currentStrategy[i] = targetStrategy[i];
-                }
-            }
+        }
 
-            sendUpdate();
-            FIRE.client.getClient().setMyStrategy(currentStrategy);
-            selector.setCurrent(currentStrategy);
-            if (config.delay != null) {
-                int delay = config.delay.getDelay();
-                nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
-            }
+        sendUpdate();
+        FIRE.client.getClient().setMyStrategy(currentStrategy);
+        selector.setCurrent(currentStrategy);
+        if (config.delay != null) {
+            int delay = config.delay.getDelay();
+            nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
         }
     }
 
@@ -106,32 +103,20 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
             }
             strategyDelta += total / 2;
         }
+        Thread.yield();
         FIRE.client.getServer().strategyChanged(
                 currentStrategy,
                 targetStrategy,
                 FIRE.client.getID());
     }
 
-    @Override
     public void run() {
-        running = true;
-        long sleepTime = 1000000 * sleepTimeMillis;
-        while (running) {
-            long stamp = System.nanoTime();
-            isLocked = decisionDelayed();
-            if (shouldUpdate) {
-                selector.setEnabled(!isLocked);
-            }
-            if (!isLocked && shouldUpdate) {
-                update();
-            }
-            long elapsed = System.nanoTime() - stamp;
-            long parkTime = sleepTime - elapsed;
-            if (parkTime > 0) {
-                LockSupport.parkNanos(parkTime);
-            } else if (System.getProperty("fire.client.debug") != null) {
-                System.err.println("deadline failure " + parkTime);
-            }
+        isLocked = decisionDelayed();
+        if (shouldUpdate) {
+            selector.setEnabled(!isLocked);
+        }
+        if (!isLocked && shouldUpdate) {
+            update();
         }
     }
 
@@ -159,10 +144,8 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
             sendUpdate();
             return;
         } else {
-            synchronized (lock) {
-                for (int i = 0; i < targetStrategy.length; i++) {
-                    targetStrategy[i] = strategy[i];
-                }
+            for (int i = 0; i < targetStrategy.length; i++) {
+                targetStrategy[i] = strategy[i];
             }
         }
     }
@@ -206,10 +189,6 @@ public class StrategyChanger extends Thread implements Configurable<Config> {
         shouldUpdate = false;
         initialLock = true;
         selector.setEnabled(false);
-    }
-
-    public void signalStop() {
-        running = false;
     }
 
     public float[] getCurrentStrategy() {

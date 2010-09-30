@@ -100,11 +100,11 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         opponent.setDrawMode(Marker.DrawMode.FillOutline);
 
         // set up Sliders
-        stratSlider[R] = new Slider(applet, this, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 50,
+        stratSlider[R] = new Slider(applet, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 50,
                 Color.BLACK, rLabel, 1f);
-        stratSlider[P] = new Slider(applet, this, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 100,
+        stratSlider[P] = new Slider(applet, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 100,
                 Color.BLACK, pLabel, 1f);
-        stratSlider[S] = new Slider(applet, this, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 150,
+        stratSlider[S] = new Slider(applet, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 150,
                 Color.BLACK, sLabel, 1f);
 
 

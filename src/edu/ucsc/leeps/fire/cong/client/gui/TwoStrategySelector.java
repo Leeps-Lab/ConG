@@ -55,8 +55,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
                 this, 0, -(counterpartMatrixSize + 30), counterpartMatrixSize, counterpartMatrixSize,
                 false,
                 applet);
-        applet.addMouseListener(this);
-        applet.addKeyListener(this);
 
         myHeatmapAa = new Marker(this, 10, 0, true, 0);
         myHeatmapAa.setLabelMode(Marker.LabelMode.Top);
@@ -124,7 +122,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     public void setCurrent(float[] strategy) {
         percent_A = strategy[0];
     }
-    
+
     public void setInitial(float[] strategy) {
         target_percent_A = strategy[0];
     }
@@ -134,7 +132,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public float[] getTarget() {
-        return new float[] { target_percent_A, 1 - target_percent_A };
+        return new float[]{target_percent_A, 1 - target_percent_A};
     }
 
     public void update() {
@@ -341,26 +339,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     public void mouseExited(MouseEvent me) {
     }
 
-    public void configChanged(Config config) {
-        this.config = config;
-        if (config.mixedStrategySelection && !config.stripStrategySelection
-                && config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            this.payoffFunction = config.payoffFunction;
-            this.counterpartPayoffFunction = config.counterpartPayoffFunction;
-            switch (config.strategySelectionDisplayType) {
-                case HeatmapSingle:
-                    setModeHeatmapSingle();
-                    break;
-                case HeatmapBoth:
-                    setModeHeatmapBoth();
-                    break;
-            }
-            setVisible(true);
-        } else {
-            setVisible(false);
-        }
-    }
-
     public void keyTyped(KeyEvent ke) {
     }
 
@@ -384,6 +362,26 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public void keyReleased(KeyEvent ke) {
+    }
+
+    public void configChanged(Config config) {
+        this.config = config;
+        if (config.mixedStrategySelection && !config.stripStrategySelection
+                && config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            this.payoffFunction = config.payoffFunction;
+            this.counterpartPayoffFunction = config.counterpartPayoffFunction;
+            switch (config.strategySelectionDisplayType) {
+                case HeatmapSingle:
+                    setModeHeatmapSingle();
+                    break;
+                case HeatmapBoth:
+                    setModeHeatmapBoth();
+                    break;
+            }
+            setVisible(true);
+        } else {
+            setVisible(false);
+        }
     }
 
     public void startPrePeriod() {

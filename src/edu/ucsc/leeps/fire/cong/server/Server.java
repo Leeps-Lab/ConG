@@ -181,7 +181,9 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         }
 
         public void endPeriod() {
-            System.err.println("still have " + queue.size() + " strategies to process");
+            if (queue.size() != 0) {
+                System.err.println("still have " + queue.size() + " strategies to process");
+            }
             queue.clear();
         }
 

@@ -30,16 +30,15 @@ public class Slider {
     private boolean grabbed;
     private boolean ghostGrabbed;
     private float maxValue;
-    private Sprite parent;
 
     // Constructor ////////////////
-    public Slider(Client applet, Sprite parent, Alignment align, float start, float end, float line, Color C,
+    public Slider(Client applet, Alignment align, float start, float end, float line, Color C,
             String label, float maxValue) {
         if (end < start) {
-            throw new RuntimeException("Invalid Slider coordinates " + "(end < start)");
+            System.err.println("Invalid Slider coordinates " + "(end < start)");
+            return;
         }
 
-        this.parent = parent;
         this.align = align;
 
         this.sliderStart = start;
@@ -307,7 +306,7 @@ public class Slider {
 
     /**
      * Uses mouse position to determine if mouse is on handle.
-     * @param mouseX mouse's x-coordinate
+     * @param mouseX() mouse's x-coordinate
      * @param mouseY mouse's y-coordinate
      * @return
      */
@@ -327,7 +326,7 @@ public class Slider {
 
     /**
      * Uses mouse input to determine if mouse is on ghost.
-     * @param mouseX mouse's x-coordinate
+     * @param mouseX() mouse's x-coordinate
      * @param mouseY mouse's y-coordinate
      * @return
      */

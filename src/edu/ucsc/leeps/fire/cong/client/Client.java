@@ -59,7 +59,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     public Client() {
         loadLibraries();
         noLoop();
-        width = 900;
+        width = 800;
         height = 550;
         frame = new JFrame();
         frame.setTitle("CONG - " + FIRE.client.getName());
@@ -67,6 +67,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         frame.setResizable(false);
         frame.add(Client.this);
         frame.setSize(width, height);
+        //frame.setUndecorated(true);
+        frame.setResizable(false);
+        //GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow(frame);
         init();
         frame.setVisible(true);
     }
@@ -150,26 +153,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.selector.update();
     }
 
-    public void quickTick(int millisLeft) {
-        if (millisLeft > 0) {
-            this.percent = (1 - (millisLeft / ((float) FIRE.client.getConfig().length * 1000)));
-            payoffChart.currentPercent = this.percent;
-            strategyChart.currentPercent = this.percent;
-            rChart.currentPercent = this.percent;
-            pChart.currentPercent = this.percent;
-            sChart.currentPercent = this.percent;
-            strategyChanger.selector.setCurrentPercent(this.percent);
-            if (FIRE.client.getConfig().subperiods == 0) {
-                payoffChart.updateLines();
-                strategyChart.updateLines();
-                rChart.updateLines();
-                pChart.updateLines();
-                sChart.updateLines();
-            }
-            pointsDisplay.update();
-        }
-    }
-
     public float[] getStrategy() {
         return strategyChanger.getCurrentStrategy();
     }
@@ -222,6 +205,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     @Override
     public void setup() {
         size(getWidth(), getHeight(), OPENGL);
+        hint(DISABLE_OPENGL_2X_SMOOTH);
         hint(DISABLE_OPENGL_ERROR_REPORT);
         hint(DISABLE_DEPTH_TEST);
         setupFonts();
@@ -232,8 +216,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         int leftMargin = 20;
         int topMargin = 20;
         float textHeight = textAscent() + textDescent();
-        //int matrixSize = (int) (height - (4 * textHeight) - 120);
-        int matrixSize = 320;
+        int matrixSize = (int) (height - (4 * textHeight) - 120);
+        //int matrixSize = 320;
         int counterpartMatrixSize = 100;
         strategyChanger = new StrategyChanger();
         bimatrix = new TwoStrategySelector(
@@ -293,6 +277,29 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 text(s, Math.round(width / 2 - textWidth(s) / 2), Math.round(height / 2));
                 return;
             }
+
+            if (frameCount % 5 == 0) {
+                long length = FIRE.client.getConfig().length * 1000l;
+                percent = (float) FIRE.client.getElapsedMillis() / (float) length;
+                payoffChart.currentPercent = percent;
+                strategyChart.currentPercent = percent;
+                rChart.currentPercent = percent;
+                pChart.currentPercent = percent;
+                sChart.currentPercent = percent;
+                if (strategyChanger.selector != null) {
+                    strategyChanger.selector.setCurrentPercent(percent);
+                }
+
+                if (FIRE.client.getConfig().subperiods == 0) {
+                    payoffChart.updateLines();
+                    strategyChart.updateLines();
+                    rChart.updateLines();
+                    pChart.updateLines();
+                    sChart.updateLines();
+                }
+                pointsDisplay.update();
+            }
+
             if (selector != null) {
                 selector.draw(this);
             }
@@ -369,7 +376,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                         while (entry != null) {
                             if (entry.getName().endsWith("so")
                                     || entry.getName().endsWith("dll")
-                                    || entry.getName().endsWith("jnilib")) {
+                                    || entry.getName().endsWith("jnilib")
+                                    || entry.getName().endsWith("dynlib")) {
                                 entries.add(entry);
                             }
                             entry = jarInputStream.getNextJarEntry();

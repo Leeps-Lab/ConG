@@ -6,6 +6,8 @@ package edu.ucsc.leeps.fire.cong.server;
  */
 public class ThreeStrategyPayoffFunction implements PayoffFunction {
 
+    public float min;
+    public float max;
     public float Rr, Rp, Rs,
             Pr, Pp, Ps,
             Sr, Sp, Ss;
@@ -23,11 +25,11 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
     }
 
     public float getMin() {
-        return 0;
+        return min;
     }
 
     public float getMax() {
-        return 100;
+        return max;
     }
 
     public float getPayoff(

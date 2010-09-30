@@ -65,7 +65,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         hover = new Marker(this, 0, 0, false, 7);
 
         if (width > height) {
-            slider = new Slider(applet, this, Slider.Alignment.Horizontal, 0, width, height / 2f, Color.black, "A", 1f);
+            slider = new Slider(applet, Slider.Alignment.Horizontal, 0, width, height / 2f, Color.black, "A", 1f);
             currentPayoff = new Marker(this, 0, 0, true, 0);
             currentPayoff.setLabelMode(Marker.LabelMode.Top);
             targetPayoff = new Marker(this, 0, 0, true, 0);
@@ -76,7 +76,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             APayoff.setLabelMode(Marker.LabelMode.Top);
             hover.setLabelMode(Marker.LabelMode.Top);
         } else {
-            slider = new Slider(applet, this, Slider.Alignment.Vertical, 0, height, width / 2f, Color.black, "A", 1f);
+            slider = new Slider(applet, Slider.Alignment.Vertical, 0, height, width / 2f, Color.black, "A", 1f);
             currentPayoff = new Marker(this, 0, 0, true, 0);
             currentPayoff.setLabelMode(Marker.LabelMode.Left);
             targetPayoff = new Marker(this, 0, 0, true, 0);
@@ -228,13 +228,13 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     /**
      * If not visible, return.
      * Translate the applet to the origin.Use heatmap to draw applet. If slider
-     * is enabled and slider is grabbed, mouseX and mouseY are the respective x
+     * is enabled and slider is grabbed, mouseX() and mouseY are the respective x
      * and y coordinates in the applet minus the origin coordinates.
      *
      * If strip is horizontal, slider moves along the x-axis. If the strip is
      * vertical, move the slider along the y-axis, based on mouse movement.
      *
-     * If strip is enabled and heatmap is visible, and strip is hit at mouseX and
+     * If strip is enabled and heatmap is visible, and strip is hit at mouseX() and
      * mouseY, set a hover of user's strategy. Update mouse positions relative to
      * the origin of the applet. If width is greater than height, the hover is
      * the quotient of the difference of the mouse's x-position and the width.
