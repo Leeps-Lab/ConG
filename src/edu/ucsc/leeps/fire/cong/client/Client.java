@@ -161,6 +161,22 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.startPeriod();
         strategyChanger.selector.update();
 
+        percent = 0f;
+        payoffChart.currentPercent = percent;
+        strategyChart.currentPercent = percent;
+        rChart.currentPercent = percent;
+        pChart.currentPercent = percent;
+        sChart.currentPercent = percent;
+
+        if (FIRE.client.getConfig().subperiods == 0) {
+            payoffChart.updateLines();
+            strategyChart.updateLines();
+            rChart.updateLines();
+            pChart.updateLines();
+            sChart.updateLines();
+        }
+        pointsDisplay.update();
+
         if (FIRE.client.getConfig().chatroom && !chatroomEnabled) {
             chatroomEnabled = true;
             chatroom = new Chatroom(frame);
@@ -288,7 +304,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 matrixSize, counterpartMatrixSize,
                 this, strategyChanger);
         simplex = new ThreeStrategySelector(
-                null, 35, 150, 300, 600,
+                null, 60, 250, 300, 600,
                 this, strategyChanger);
         pureMatrix = new PureStrategySelector(
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,

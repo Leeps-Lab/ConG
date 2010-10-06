@@ -10,10 +10,11 @@ import edu.ucsc.leeps.fire.cong.client.Client;
 public class PointsDisplay extends Sprite {
 
     private boolean displaySwitchCosts;
-    private float periodPoints, periodCost;
+    private float totalPoints, periodPoints, periodCost;
 
     public PointsDisplay(Sprite parent, int x, int y, Client embed) {
-        super(parent, x, y, (int) embed.textWidth("Period Payoff: 000"), (int) (2 * (embed.textAscent() + embed.textDescent())));
+        super(parent, x, y, (int) embed.textWidth("Current Earnings: 000"), (int) (2 * (embed.textAscent() + embed.textDescent())));
+        totalPoints = 0;
         periodPoints = 0;
         periodCost = 0;
         displaySwitchCosts = false;
@@ -33,27 +34,30 @@ public class PointsDisplay extends Sprite {
      */
     @Override
     public void draw(Client applet) {
-        String periodPayoffString = "";
+        String totalEarningsString = "";
+        String periodEarningsString = "";
         String periodCostString = "";
-        String netPayoffString = "";
-        periodPayoffString = String.format("Period Payoff: %.2f", periodPoints);
+        String netEarningsString = "";
+        totalEarningsString = String.format("Total Earnings: %.2f", totalPoints);
+        periodEarningsString = String.format("Current Earnings: %.2f", periodPoints);
         try {
             if (FIRE.client.getConfig().changeCost != 0) {
                 periodCostString = String.format("Gross Cost: %.2f", periodCost);
-                netPayoffString = String.format("Net Payoff: %.2f", periodPoints - periodCost);
+                netEarningsString = String.format("Net Earnings: %.2f", periodPoints - periodCost);
             }
         } catch (Exception e) {
         }
         float textHeight = applet.textAscent() + applet.textDescent();
         applet.fill(0);
         applet.textAlign(Client.LEFT);
-        applet.text(periodPayoffString, origin.x, origin.y);
+        applet.text(totalEarningsString, Math.round(origin.x), Math.round(origin.y));
+        applet.text(periodEarningsString, Math.round(origin.x), Math.round(origin.y + textHeight));
         applet.fill(200, 0, 0);
-        applet.text(periodCostString, origin.x, origin.y + textHeight);
+        applet.text(periodCostString, Math.round(origin.x), Math.round(origin.y + 2 * textHeight));
         if (periodCost <= periodPoints) {
             applet.fill(0);
         }
-        applet.text(netPayoffString, origin.x, origin.y + 2 * textHeight);
+        applet.text(netEarningsString, Math.round(origin.x), Math.round(origin.y + 3 * textHeight));
         applet.fill(0);
         if (displaySwitchCosts) {
             /*
@@ -70,6 +74,7 @@ public class PointsDisplay extends Sprite {
      * Using FIRE's client, updater period points and period costs.
      */
     public void update() {
+        totalPoints = FIRE.client.getTotalPoints();
         periodPoints = FIRE.client.getPeriodPoints();
         periodCost = FIRE.client.getClient().getCost();
     }

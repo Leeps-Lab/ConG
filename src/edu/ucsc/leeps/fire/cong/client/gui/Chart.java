@@ -222,7 +222,9 @@ public class Chart extends Sprite implements Configurable<Config> {
                 if (config.showPayoffTimeAxisLabels) {
                     int percent = Math.round(x * 100);
                     String label = String.format("%d%%", percent);
-                    applet.text(label, x0, y0 + 1.2f * applet.textAscent() + applet.textDescent());
+                    applet.text(label,
+                            Math.round(x0),
+                            Math.round(y0 + 1.2f * applet.textAscent() + applet.textDescent()));
                 }
             }
             String maxPayoffLabel = String.format("%.1f", maxPayoff);
@@ -248,20 +250,20 @@ public class Chart extends Sprite implements Configurable<Config> {
                     payoff = 0f;
                 }
                 String label = String.format("%.1f", payoff);
-                applet.text(label, labelX, y0);
+                applet.text(label, Math.round(labelX), Math.round(y0));
             }
         } else {
             applet.textAlign(Client.RIGHT);
             applet.fill(0);
             if (mode == Mode.RStrategy) {
                 applet.text(config.rLabel, -10,
-                        height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
+                        Math.round(height / 2f + (applet.textAscent() + applet.textDescent()) / 2f));
             } else if (mode == Mode.PStrategy) {
                 applet.text(config.pLabel, -10,
-                        height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
+                        Math.round(height / 2f + (applet.textAscent() + applet.textDescent()) / 2f));
             } else if (mode == Mode.SStrategy) {
                 applet.text(config.sLabel, -10,
-                        height / 2f + (applet.textAscent() + applet.textDescent()) / 2f);
+                        Math.round(height / 2f + (applet.textAscent() + applet.textDescent()) / 2f));
             }
         }
     }
