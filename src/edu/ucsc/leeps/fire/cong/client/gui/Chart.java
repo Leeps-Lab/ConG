@@ -21,7 +21,7 @@ public class Chart extends Sprite implements Configurable<Config> {
     private Config config;
     private PayoffFunction payoffFunction, counterpartPayoffFunction;
     private float currentPayoffYou, currentPayoffCounterpart;
-    private float maxPayoff;
+    private float minPayoff, maxPayoff;
     private int scaledMargin;
     private int scaledHeight;
     // Two strategy
@@ -219,9 +219,11 @@ public class Chart extends Sprite implements Configurable<Config> {
                 y1 = height + 10;
                 applet.line(x0, y0, x1, y1);
                 applet.fill(0);
-                int percent = Math.round(x * 100);
-                String label = String.format("%d%%", percent);
-                applet.text(label, x0, y0 + 1.2f * applet.textAscent() + applet.textDescent());
+                if (config.showPayoffTimeAxisLabels) {
+                    int percent = Math.round(x * 100);
+                    String label = String.format("%d%%", percent);
+                    applet.text(label, x0, y0 + 1.2f * applet.textAscent() + applet.textDescent());
+                }
             }
             String maxPayoffLabel = String.format("%.1f", maxPayoff);
             float labelX = -10 - 1.1f * applet.textWidth(maxPayoffLabel) / 2f;
@@ -241,7 +243,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 applet.stroke(100, 100, 100, 50);
                 applet.line(x0, y0, width, y1);
                 applet.fill(0);
-                float payoff = (1 - y) * maxPayoff;
+                float payoff = (1 - y) * (maxPayoff - minPayoff) + minPayoff;
                 if (payoff < 0) {
                     payoff = 0f;
                 }
@@ -557,15 +559,15 @@ public class Chart extends Sprite implements Configurable<Config> {
      * percent based on strategy.
      */
     public void updateLines() {
-        if (currentPercent <= 1.0) {
+        if (currentPercent <= 1f) {
             addPayoffPoint(actualPayoffYou, currentPercent, currentPayoffYou);
             addPayoffPoint(actualPayoffCounterpart, currentPercent, currentPayoffCounterpart);
             if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                addTwoStrategyActualPayoffPoints();
-                addTwoStrategyFuturePayoffPoints();
+                //addTwoStrategyActualPayoffPoints();
+                //addTwoStrategyFuturePayoffPoints();
             } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                addThreeStrategyActualPayoffPoints();
-                addThreeStrategyFuturePayoffPoints();
+                //addThreeStrategyActualPayoffPoints();
+                //addThreeStrategyFuturePayoffPoints();
                 addThreeStrategyPoints();
             }
             addStrategyPoint(yourStrategyOverTime, currentPercent, percent_A);
@@ -748,6 +750,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         this.config = config;
         payoffFunction = config.payoffFunction;
         counterpartPayoffFunction = config.counterpartPayoffFunction;
+        minPayoff = config.payoffFunction.getMin();
         maxPayoff = config.payoffFunction.getMax();
         actualPayoffYou.configure(config.yourPayoff);
         actualPayoffCounterpart.configure(config.otherPayoff);
@@ -799,10 +802,15 @@ public class Chart extends Sprite implements Configurable<Config> {
      * @param y
      */
     public void addPayoffPoint(Line line, float x, float y) {
-        boolean shocked = currentPercent > config.shock.start && currentPercent < config.shock.end && line.showShock;
+        boolean shocked =
+                config != null
+                && config.shock != null
+                && currentPercent > config.shock.start
+                && currentPercent < config.shock.end
+                && line.showShock;
         line.setPoint(
                 Math.round(line.width * x),
-                Math.round(line.height * (1 - (y / maxPayoff))),
+                Math.round(line.height * (1 - ((y - minPayoff) / (maxPayoff - minPayoff)))),
                 !shocked);
         if (FIRE.client.getConfig().shock.backfill && currentPercent > config.shock.end) {
             line.clearShocks();

@@ -5,13 +5,12 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author jpettit
  */
-public class StrategyChanger implements Configurable<Config>, Runnable {
+public class StrategyChanger extends Thread implements Configurable<Config>, Runnable {
 
     private Config config;
     private volatile boolean shouldUpdate;
@@ -29,10 +28,9 @@ public class StrategyChanger implements Configurable<Config>, Runnable {
     public Selector selector;
 
     public StrategyChanger() {
-        rate = Integer.parseInt(System.getProperty("fire.client.rate", "50"));
+        rate = Integer.parseInt(System.getProperty("fire.client.rate", "200"));
         FIRE.client.addConfigListener(this);
-        FIRE.client.getScheduler().scheduleAtFixedRate(
-                this, 0, rate, TimeUnit.MILLISECONDS);
+        start();
     }
 
     public void configChanged(Config config) {
@@ -110,13 +108,26 @@ public class StrategyChanger implements Configurable<Config>, Runnable {
                 FIRE.client.getID());
     }
 
+    @Override
     public void run() {
-        isLocked = decisionDelayed();
-        if (shouldUpdate) {
-            selector.setEnabled(!isLocked);
-        }
-        if (!isLocked && shouldUpdate) {
-            update();
+        long nanoWait = rate * 1000000;
+        while (true) {
+            long start = System.nanoTime();
+            isLocked = decisionDelayed();
+            if (shouldUpdate) {
+                selector.setEnabled(!isLocked);
+            }
+            if (!isLocked && shouldUpdate) {
+                update();
+            }
+            long elapsed = System.nanoTime() - start;
+            long sleepNanos = nanoWait - elapsed;
+            if (sleepNanos > 0) {
+            try {
+                Thread.sleep(sleepNanos / 1000000);
+            } catch (InterruptedException ex) {
+            }
+            }
         }
     }
 

@@ -268,12 +268,14 @@ public class Population implements Serializable {
                     config.isCounterpart = false;
                     config.payoffFunction = def.payoffFunction;
                     config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                    config.playersInTuple = tuple1.members.size();
                 }
                 for (int member : tuple1.match.members) {
                     Config config = FIRE.server.getConfig(member);
                     config.isCounterpart = true;
                     config.payoffFunction = def.counterpartPayoffFunction;
                     config.counterpartPayoffFunction = def.payoffFunction;
+                    config.playersInTuple = tuple1.match.members.size();
                 }
             }
             assert (randomMembers.size() == 0);
@@ -296,6 +298,7 @@ public class Population implements Serializable {
             config.payoffFunction = def.payoffFunction;
             config.counterpartPayoffFunction = def.payoffFunction;
             tupleMap.put(member, tuple);
+            config.playersInTuple = members.size();
         }
     }
 

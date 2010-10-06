@@ -72,12 +72,6 @@
     nbproject/build-impl.xml file.
 
     -->
-    <target name="-pre-jar">
-        <copy todir="build/classes/OSXWait" >
-            <fileset dir="lib/OSXWait/OSXWait"/>
-        </copy>
-    </target>
-    
     <target name="-post-jar">
 
         <property name="final.jar" value="dist/${final.jar.name}.jar"/>

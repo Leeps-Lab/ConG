@@ -87,7 +87,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     }
 
     public void updateTwoStrategyHeatmap(float currentPercent) {
-        int size = 10;
+        int size = 100;
         PayoffFunction u;
         if (mine) {
             u = config.payoffFunction;

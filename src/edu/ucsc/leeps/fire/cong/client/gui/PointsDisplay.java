@@ -10,7 +10,6 @@ import edu.ucsc.leeps.fire.cong.client.Client;
 public class PointsDisplay extends Sprite {
 
     private boolean displaySwitchCosts;
-    private float switchCosts;
     private float periodPoints, periodCost;
 
     public PointsDisplay(Sprite parent, int x, int y, Client embed) {

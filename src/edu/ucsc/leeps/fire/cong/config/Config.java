@@ -48,6 +48,7 @@ public class Config extends BaseConfig {
     public float sigmoidAlpha;
     public float sigmoidBeta;
     public boolean showMatrix;
+    public boolean showPayoffTimeAxisLabels;
     public static final Class homotopy = TwoStrategyPayoffFunction.class;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
@@ -61,6 +62,7 @@ public class Config extends BaseConfig {
     public float[] initialStrategy;
     public int matchID;
     public boolean isCounterpart;
+    public int playersInTuple;
 
     public Config() {
         timeConstrained = true;
@@ -96,7 +98,7 @@ public class Config extends BaseConfig {
         yourStrategyOverTime.r = yourPayoff.r;
         yourStrategyOverTime.g = yourPayoff.g;
         yourStrategyOverTime.b = yourPayoff.b;
-        yourStrategyOverTime.alpha = 255;
+        yourStrategyOverTime.alpha = 100;
         yourStrategyOverTime.weight = 2f;
         counterpartStrategyOverTime = new Line();
         counterpartStrategyOverTime.visible = true;
@@ -133,6 +135,7 @@ public class Config extends BaseConfig {
         negativePayoffs = false;
         sigmoidHeatmap = false;
         sigmoidAlpha = 0.5f;
+        showPayoffTimeAxisLabels = false;
         excludeSelf = false;
         tupleSize = -1;
         numTuples = -1;

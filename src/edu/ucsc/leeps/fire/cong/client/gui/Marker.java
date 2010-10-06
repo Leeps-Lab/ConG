@@ -2,6 +2,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.cong.client.Client;
 import java.awt.Color;
+import processing.core.PApplet;
 
 public class Marker extends Sprite {
 
@@ -16,6 +17,7 @@ public class Marker extends Sprite {
     protected boolean enlarged;
     protected LabelMode labelMode;
     protected DrawMode drawMode;
+    protected Shape shape;
 
     /**
      * Creates a list of possible modes to set label position.
@@ -26,11 +28,17 @@ public class Marker extends Sprite {
     };
 
     public enum DrawMode {
-        Filled, Outline, FillOutline, Target
+
+        Filled, Outline, FillOutline, Target,
+    }
+
+    public enum Shape {
+
+        Circle, Square,
     }
 
     public Marker(Sprite parent, float x, float y, boolean visible, float diameter) {
-        super(parent, x, y, (int)diameter, (int)diameter);
+        super(parent, x, y, (int) diameter, (int) diameter);
         this.visible = visible;
         this.diameter = diameter;
         largeDiameter = diameter * 1.5f;
@@ -43,6 +51,7 @@ public class Marker extends Sprite {
 
         labelMode = LabelMode.Center;
         drawMode = DrawMode.Filled;
+        shape = Shape.Circle;
 
         label1 = null;
         label2 = null;
@@ -74,8 +83,8 @@ public class Marker extends Sprite {
         G = g;
         B = b;
         if (drawMode == DrawMode.FillOutline) {
-            if (R > 200 || G > 200 || B > 200 ||
-                    R + G + B > 300) {
+            if (R > 200 || G > 200 || B > 200
+                    || R + G + B > 300) {
                 outline = 0;
             } else {
                 outline = 255;
@@ -98,8 +107,8 @@ public class Marker extends Sprite {
         B = b;
         alpha = a;
         if (drawMode == DrawMode.FillOutline) {
-            if (R > 200 || G > 200 || B > 200 ||
-                    R + G + B > 300) {
+            if (R > 200 || G > 200 || B > 200
+                    || R + G + B > 300) {
                 outline = 0;
             } else {
                 outline = 255;
@@ -117,8 +126,8 @@ public class Marker extends Sprite {
         B = C.getBlue();
         alpha = C.getAlpha();
         if (drawMode == DrawMode.FillOutline) {
-            if (R > 200 || G > 200 || B > 200 ||
-                    R + G + B > 300) {
+            if (R > 200 || G > 200 || B > 200
+                    || R + G + B > 300) {
                 outline = 0;
             } else {
                 outline = 255;
@@ -203,13 +212,17 @@ public class Marker extends Sprite {
     public void setDrawMode(DrawMode mode) {
         drawMode = mode;
         if (drawMode == DrawMode.FillOutline) {
-            if (R > 200 || G > 200 || B > 200 ||
-                    R + G + B > 300) {
+            if (R > 200 || G > 200 || B > 200
+                    || R + G + B > 300) {
                 outline = 0;
             } else {
                 outline = 255;
             }
         }
+    }
+
+    public void setShape(Shape shape) {
+        this.shape = shape;
     }
 
     public void grab() {
@@ -235,8 +248,8 @@ public class Marker extends Sprite {
      * When enlarged, make radius 1.5 times larger, and set enlarged to true.
      */
     public void enlarge() {
-        width = (int)largeDiameter;
-        height = (int)largeDiameter;
+        width = (int) largeDiameter;
+        height = (int) largeDiameter;
         enlarged = true;
     }
 
@@ -244,8 +257,8 @@ public class Marker extends Sprite {
      * When shrunk, set radius to radius, and set enlarged to false.
      */
     public void shrink() {
-        width = (int)diameter;
-        height = (int)diameter;
+        width = (int) diameter;
+        height = (int) diameter;
         enlarged = false;
     }
 
@@ -273,6 +286,7 @@ public class Marker extends Sprite {
         if (!visible) {
             return;
         }
+        applet.rectMode(PApplet.CENTER);
         if (label1 != null) {
             drawLabels(applet);
         }
@@ -284,28 +298,32 @@ public class Marker extends Sprite {
             applet.strokeWeight(1);
         }
 
-        if (drawMode == DrawMode.Outline ||
-                drawMode == DrawMode.Target) {
+        if (drawMode == DrawMode.Outline
+                || drawMode == DrawMode.Target) {
             applet.noFill();
         } else {
             applet.fill(R, G, B, alpha);
         }
-        
+
         applet.ellipseMode(Client.CENTER);
         if (!enlarged) {
-            applet.ellipse(origin.x, origin.y, diameter, diameter);
-            if (drawMode == DrawMode.Target) {
-                applet.strokeWeight(2);
-                applet.line(origin.x - diameter, origin.y, origin.x + diameter, origin.y);
-                applet.line(origin.x + .5f, origin.y - diameter, origin.x + .5f, origin.y + diameter);
+            if (shape == Shape.Circle) {
+                applet.ellipse(origin.x, origin.y, diameter, diameter);
+            } else if (shape == Shape.Square) {
+                applet.rect(origin.x, origin.y, diameter, diameter);
             }
         } else {
-            applet.ellipse(origin.x, origin.y, largeDiameter, largeDiameter);
-            if (drawMode == DrawMode.Target) {
-                applet.strokeWeight(2);
-                applet.line(origin.x - diameter, origin.y, origin.x + diameter, origin.y);
-                applet.line(origin.x + .5f, origin.y - diameter, origin.x + .5f, origin.y + diameter);
+            if (shape == Shape.Circle) {
+                applet.ellipse(origin.x, origin.y, largeDiameter, largeDiameter);
+            } else if (shape == Shape.Square) {
+                applet.rect(origin.x, origin.y, largeDiameter, largeDiameter);
             }
+            applet.ellipse(origin.x, origin.y, largeDiameter, largeDiameter);
+        }
+        if (drawMode == DrawMode.Target) {
+            applet.strokeWeight(2);
+            applet.line(origin.x - diameter, origin.y, origin.x + diameter, origin.y);
+            applet.line(origin.x + .5f, origin.y - diameter, origin.x + .5f, origin.y + diameter);
         }
     }
 

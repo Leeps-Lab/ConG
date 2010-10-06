@@ -32,12 +32,17 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             float[] targetStrategy,
             Integer id) {
         if (FIRE.server.getState() == State.RUNNING_PERIOD) {
-            StrategyChangeEvent event = new StrategyChangeEvent();
-            event.id = id;
-            event.newStrategy = newStrategy;
-            event.targetStrategy = targetStrategy;
-            event.timestamp = System.currentTimeMillis();
-            strategyUpdater.add(event);
+            //StrategyChangeEvent event = new StrategyChangeEvent();
+            //event.id = id;
+            //event.newStrategy = newStrategy;
+            //event.targetStrategy = targetStrategy;
+            //event.timestamp = System.currentTimeMillis();
+            //strategyUpdater.add(event);
+            population.strategyChanged(
+                    newStrategy,
+                    targetStrategy,
+                    id,
+                    System.currentTimeMillis());
         }
     }
 

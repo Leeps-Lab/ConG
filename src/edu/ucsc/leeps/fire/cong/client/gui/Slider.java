@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import java.awt.Color;
 import processing.core.PImage;
@@ -35,8 +36,7 @@ public class Slider {
     public Slider(Client applet, Alignment align, float start, float end, float line, Color C,
             String label, float maxValue) {
         if (end < start) {
-            System.err.println("Invalid Slider coordinates " + "(end < start)");
-            return;
+            throw new IllegalArgumentException("Invalid Slider coordinates " + "(end < start)");
         }
 
         this.align = align;

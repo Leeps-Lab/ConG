@@ -83,6 +83,9 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
+            String tupleSizeString = String.format("%d players are in your group", FIRE.client.getConfig().playersInTuple);
+            applet.text(tupleSizeString, 0, 0);
+
             if (FIRE.client.getConfig().showMatrix) {
                 matrixLabel.draw(applet);
                 for (int i = 0; i < columnLabels.length; ++i) {
@@ -111,7 +114,8 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                             break;
                         }
                     }
-                    applet.rect(matrixTopLeft.origin.x + i * interval, matrixTopLeft.origin.y, interval, matrixSideLength);
+                    // FIXME Only do when playing versus a pure strategy
+                    //applet.rect(matrixTopLeft.origin.x + i * interval, matrixTopLeft.origin.y, interval, matrixSideLength);
                 }
 
                 applet.stroke(0);
@@ -319,10 +323,6 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 buttons.setLabels(new String[]{"A", "B", "C"});
             }
             buttons.setEnabled(false);
-        }
-
-        if (!config.showMatrix) {
-            buttons.origin.x += width - 10;
         }
 
         if (config.mixedStrategySelection) {

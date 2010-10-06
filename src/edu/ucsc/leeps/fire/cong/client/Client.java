@@ -14,6 +14,7 @@ import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
+import javax.media.opengl.GLException;
 import javax.swing.JFrame;
 import processing.core.PApplet;
 import processing.core.PFont;
@@ -36,7 +38,7 @@ import processing.core.PFont;
  */
 public class Client extends PApplet implements ClientInterface, FIREClientInterface {
 
-    public static final boolean DEBUG = System.getProperty("fire.client.debug") != null;
+    public static boolean DEBUG = System.getProperty("fire.client.debug") != null;
     private float percent;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
@@ -54,24 +56,53 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private Chatroom chatroom;
     private boolean chatroomEnabled = false;
     private boolean haveInitialStrategy;
+    private int INIT_WIDTH, INIT_HEIGHT;
     public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
 
     public Client() {
         loadLibraries();
         noLoop();
-        width = 800;
-        height = 550;
+        INIT_WIDTH = 900;
+        INIT_HEIGHT = 600;
         frame = new JFrame();
         frame.setTitle("CONG - " + FIRE.client.getName());
         ((JFrame) frame).setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.setResizable(false);
         frame.add(Client.this);
-        frame.setSize(width, height);
+        frame.setSize(INIT_WIDTH, INIT_HEIGHT);
         //frame.setUndecorated(true);
         frame.setResizable(false);
         //GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow(frame);
         init();
+        noLoop();
         frame.setVisible(true);
+        new Thread() {
+
+            @Override
+            public void run() {
+                setPriority(Thread.MAX_PRIORITY);
+                long nanoWait = Math.round((1000f / frameRateTarget) * 1000000);
+                long oversleep = 0;
+                while (true) {
+                    if (Math.abs(oversleep) > 20 * 1000000) {
+                        System.err.println("overslept " + (oversleep / 1000000) + "ms");
+                    }
+                    long start = System.nanoTime();
+                    redraw();
+                    long elapsed = System.nanoTime() - start;
+                    long sleepTime = nanoWait - elapsed;
+                    if (sleepTime > 0) {
+                        try {
+                            start = System.nanoTime();
+                            Thread.sleep(Math.round(sleepTime / 1000000));
+                        } catch (InterruptedException ex) {
+                            ex.printStackTrace();
+                        }
+                        elapsed = System.nanoTime() - start;
+                        oversleep = elapsed - sleepTime;
+                    }
+                }
+            }
+        }.start();
     }
 
     public boolean haveInitialStrategy() {
@@ -128,6 +159,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         simplex.setEnabled(true);
 
         strategyChanger.startPeriod();
+        strategyChanger.selector.update();
 
         if (FIRE.client.getConfig().chatroom && !chatroomEnabled) {
             chatroomEnabled = true;
@@ -137,6 +169,23 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public void endPeriod() {
         strategyChanger.endPeriod();
+
+        percent = 1f;
+        payoffChart.currentPercent = percent;
+        strategyChart.currentPercent = percent;
+        rChart.currentPercent = percent;
+        pChart.currentPercent = percent;
+        sChart.currentPercent = percent;
+
+        if (FIRE.client.getConfig().subperiods == 0) {
+            payoffChart.updateLines();
+            strategyChart.updateLines();
+            rChart.updateLines();
+            pChart.updateLines();
+            sChart.updateLines();
+        }
+        pointsDisplay.update();
+
     }
 
     public float getCost() {
@@ -150,7 +199,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     public void tick(int secondsLeft) {
         this.percent = width * (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
         countdown.setSecondsLeft(secondsLeft);
-        strategyChanger.selector.update();
     }
 
     public float[] getStrategy() {
@@ -204,20 +252,35 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     @Override
     public void setup() {
-        size(getWidth(), getHeight(), OPENGL);
-        hint(DISABLE_OPENGL_2X_SMOOTH);
-        hint(DISABLE_OPENGL_ERROR_REPORT);
-        hint(DISABLE_DEPTH_TEST);
+        boolean opengl = true;
+        if (opengl) {
+            try {
+                size(INIT_WIDTH, INIT_HEIGHT - 40, OPENGL);
+            } catch (GLException ex1) {
+                try {
+                    size(INIT_WIDTH, INIT_HEIGHT - 40, OPENGL);
+                } catch (GLException ex2) {
+                }
+            }
+            hint(DISABLE_OPENGL_2X_SMOOTH);
+            hint(DISABLE_OPENGL_ERROR_REPORT);
+            hint(DISABLE_DEPTH_TEST);
+            textMode(MODEL);
+        } else {
+            size(INIT_WIDTH, INIT_HEIGHT - 40, P2D);
+            frameRate(35);
+        }
         setupFonts();
         textFont(size14);
-        textMode(MODEL);
+        width = INIT_WIDTH;
+        height = INIT_HEIGHT - 40;
 
         percent = -1;
+
         int leftMargin = 20;
         int topMargin = 20;
         float textHeight = textAscent() + textDescent();
         int matrixSize = (int) (height - (4 * textHeight) - 120);
-        //int matrixSize = 320;
         int counterpartMatrixSize = 100;
         strategyChanger = new StrategyChanger();
         bimatrix = new TwoStrategySelector(
@@ -237,29 +300,30 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 null, counterpartMatrixSize + 4 * leftMargin, 20 + topMargin, this);
         pointsDisplay = new PointsDisplay(
                 null, counterpartMatrixSize + 4 * leftMargin, (int) (20 + textHeight) + topMargin, this);
-        int chartWidth = (int) (width - bimatrix.width - 2 * leftMargin - 80);
+        int chartLeftOffset = bimatrix.width;
+        int chartWidth = (int) (width - chartLeftOffset - 2 * leftMargin - 80);
         int chartMargin = 30;
         int strategyChartHeight = 100;
         int threeStrategyChartHeight = 30;
         int payoffChartHeight = (int) (height - strategyChartHeight - 2 * topMargin - chartMargin - 10);
         strategyChart = new Chart(
-                null, bimatrix.width + 80 + leftMargin, topMargin,
+                null, chartLeftOffset + 80 + leftMargin, topMargin,
                 chartWidth, strategyChartHeight,
                 simplex, Chart.Mode.TwoStrategy, strategyChanger);
         payoffChart = new Chart(
-                null, bimatrix.width + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
+                null, chartLeftOffset + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight,
                 simplex, Chart.Mode.Payoff, strategyChanger);
         rChart = new Chart(
-                null, bimatrix.width + 80 + leftMargin, topMargin,
+                null, chartLeftOffset + 80 + leftMargin, topMargin,
                 chartWidth, threeStrategyChartHeight,
                 simplex, Chart.Mode.RStrategy, strategyChanger);
         pChart = new Chart(
-                null, bimatrix.width + 80 + leftMargin, topMargin + threeStrategyChartHeight + 5,
+                null, chartLeftOffset + 80 + leftMargin, topMargin + threeStrategyChartHeight + 5,
                 chartWidth, threeStrategyChartHeight,
                 simplex, Chart.Mode.PStrategy, strategyChanger);
         sChart = new Chart(
-                null, bimatrix.width + 80 + leftMargin, topMargin + 2 * (threeStrategyChartHeight + 5),
+                null, chartLeftOffset + 80 + leftMargin, topMargin + 2 * (threeStrategyChartHeight + 5),
                 chartWidth, threeStrategyChartHeight,
                 simplex, Chart.Mode.SStrategy, strategyChanger);
         legend = new ChartLegend(
@@ -278,7 +342,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 return;
             }
 
-            if (frameCount % 5 == 0) {
+            if (frameCount % 5 == 0 && FIRE.client.isRunningPeriod()) {
                 long length = FIRE.client.getConfig().length * 1000l;
                 percent = (float) FIRE.client.getElapsedMillis() / (float) length;
                 payoffChart.currentPercent = percent;
@@ -298,6 +362,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                     sChart.updateLines();
                 }
                 pointsDisplay.update();
+            }
+            if (frameCount % Math.round(frameRateTarget) == 0) {
+                strategyChanger.selector.update();
             }
 
             if (selector != null) {
@@ -332,6 +399,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             }
         } catch (NullPointerException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent ke) {
+        if (ke.getKeyChar() == 'd') {
+            DEBUG = false;
         }
     }
 

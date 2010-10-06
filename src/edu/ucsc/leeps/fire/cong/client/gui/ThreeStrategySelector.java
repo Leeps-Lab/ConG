@@ -24,9 +24,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private float sideLength;
     private Marker rock, paper, scissors;
     private float maxDist;
-    private Marker current, target, ghost, opponent;
+    private Marker current, target, hover, opponent;
     private float[] axisDistance;
-    private float[] ghostStrat;
+    private float[] hoverStrat;
     private float[] targetStrat;
     // current played strategies stored here (R, P, S)
     private float[] playedStrat;
@@ -41,7 +41,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     public float currentPercent;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
-    private Marker ghostRDrop, ghostPDrop, ghostSDrop;
+    private Marker hoverRDrop, hoverPDrop, hoverSDrop;
     private boolean periodStarted;
 
     public ThreeStrategySelector(
@@ -51,13 +51,13 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         this.client = applet;
         mouseInTriangle = false;
         axisDistance = new float[3];
-        ghostStrat = new float[3];
+        hoverStrat = new float[3];
         targetStrat = new float[3];
         playedStrat = new float[3];
         opponentStrat = new float[3];
         for (int i = R; i <= S; i++) {
             axisDistance[i] = 0f;
-            ghostStrat[i] = 0f;
+            hoverStrat[i] = 0f;
             targetStrat[i] = 0f;
             playedStrat[i] = 0f;
             opponentStrat[i] = 0f;
@@ -92,12 +92,12 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         target.setLabel("$$");
         target.setLabelMode(Marker.LabelMode.Bottom);
         target.setDrawMode(Marker.DrawMode.Target);
-        ghost = new Marker(this, 0, 0, false, BASE_MARKER_R);
-        ghost.setColor(25, 255, 25, 140);
-        ghost.setDrawMode(Marker.DrawMode.FillOutline);
+        hover = new Marker(this, 0, 0, false, BASE_MARKER_R - 2);
+        hover.setColor(0, 0, 0, 0);
         opponent = new Marker(this, 0, 0, false, BASE_MARKER_R);
         opponent.setColor(200, 40, 40);
         opponent.setDrawMode(Marker.DrawMode.FillOutline);
+        opponent.setShape(Marker.Shape.Square);
 
         // set up Sliders
         stratSlider[R] = new Slider(applet, Slider.Alignment.Horizontal, 50, width - 50, height / 3 + 50,
@@ -114,33 +114,33 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         rDrop.setLabelMode(Marker.LabelMode.Right);
         rDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
-        ghostRDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
-        ghostRDrop.setAlpha(150);
-        ghostRDrop.setLabel("R");
-        ghostRDrop.setLabelMode(Marker.LabelMode.Right);
-        ghostRDrop.setDrawMode(Marker.DrawMode.FillOutline);
+        hoverRDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
+        hoverRDrop.setAlpha(150);
+        hoverRDrop.setLabel("R");
+        hoverRDrop.setLabelMode(Marker.LabelMode.Right);
+        hoverRDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
         pDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
         pDrop.setLabel("P");
         pDrop.setLabelMode(Marker.LabelMode.Left);
         pDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
-        ghostPDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
-        ghostPDrop.setAlpha(150);
-        ghostPDrop.setLabel("P");
-        ghostPDrop.setLabelMode(Marker.LabelMode.Left);
-        ghostPDrop.setDrawMode(Marker.DrawMode.FillOutline);
+        hoverPDrop = new Marker(this, 0, 0, true, BASE_MARKER_R);
+        hoverPDrop.setAlpha(150);
+        hoverPDrop.setLabel("P");
+        hoverPDrop.setLabelMode(Marker.LabelMode.Left);
+        hoverPDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
         sDrop = new Marker(this, 0, rock.origin.y, true, BASE_MARKER_R);
         sDrop.setLabel("S");
         sDrop.setLabelMode(Marker.LabelMode.Bottom);
         sDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
-        ghostSDrop = new Marker(this, 0, rock.origin.y, true, BASE_MARKER_R);
-        ghostSDrop.setAlpha(150);
-        ghostSDrop.setLabel("S");
-        ghostSDrop.setLabelMode(Marker.LabelMode.Bottom);
-        ghostSDrop.setDrawMode(Marker.DrawMode.FillOutline);
+        hoverSDrop = new Marker(this, 0, rock.origin.y, true, BASE_MARKER_R);
+        hoverSDrop.setAlpha(150);
+        hoverSDrop.setLabel("S");
+        hoverSDrop.setLabelMode(Marker.LabelMode.Bottom);
+        hoverSDrop.setDrawMode(Marker.DrawMode.FillOutline);
 
         setEnabled(false);
 
@@ -220,20 +220,20 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                 }
 
                 calculateGhostStrats();
-                ghost.setVisible(true);
-                ghost.update(mouseX, mouseY);
+                hover.setVisible(true);
+                hover.update(mouseX, mouseY);
             } else {
                 if (current.isGrabbed()) {
                     current.release();
                 }
-                ghost.setVisible(false);
+                hover.setVisible(false);
                 applet.cursor();
             }
 
             if (!mouseInTriangle && applet.mousePressed) {
                 for (int i = R; i <= S; i++) {
                     if (stratSlider[i].isGhostGrabbed()) {
-                        ghost.setVisible(true);
+                        hover.setVisible(true);
                         if (applet.keyPressed && applet.key == Client.CODED && applet.keyCode == Client.CONTROL) {
 
                             float currentPos = stratSlider[i].getGhostPos();
@@ -246,23 +246,23 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                             stratSlider[i].moveGhost(mouseX);
                         }
 
-                        balanceStrats(ghostStrat, i, stratSlider[i].getGhostValue());
+                        balanceStrats(hoverStrat, i, stratSlider[i].getGhostValue());
                         switch (i) {
                             case R:
-                                stratSlider[P].setGhostValue(ghostStrat[P]);
-                                stratSlider[S].setGhostValue(ghostStrat[S]);
+                                stratSlider[P].setGhostValue(hoverStrat[P]);
+                                stratSlider[S].setGhostValue(hoverStrat[S]);
                                 break;
                             case P:
-                                stratSlider[R].setGhostValue(ghostStrat[R]);
-                                stratSlider[S].setGhostValue(ghostStrat[S]);
+                                stratSlider[R].setGhostValue(hoverStrat[R]);
+                                stratSlider[S].setGhostValue(hoverStrat[S]);
                                 break;
                             case S:
-                                stratSlider[R].setGhostValue(ghostStrat[R]);
-                                stratSlider[P].setGhostValue(ghostStrat[P]);
+                                stratSlider[R].setGhostValue(hoverStrat[R]);
+                                stratSlider[P].setGhostValue(hoverStrat[P]);
                                 break;
                         }
-                        float[] coords = calculateStratCoords(ghostStrat[R], ghostStrat[P], ghostStrat[S]);
-                        ghost.update(coords[0], coords[1]);
+                        float[] coords = calculateStratCoords(hoverStrat[R], hoverStrat[P], hoverStrat[S]);
+                        hover.update(coords[0], coords[1]);
 
                         break;
                     }
@@ -270,28 +270,28 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             }
         }
 
-        if (ghost.visible) {
-            updateDropLines(ghost, ghostStrat, ghostRDrop, ghostPDrop, ghostSDrop);
+        if (hover.visible) {
+            updateDropLines(hover, hoverStrat, hoverRDrop, hoverPDrop, hoverSDrop);
             applet.strokeWeight(1);
             applet.stroke(0, 255, 255, 150);
-            applet.line(ghost.origin.x, ghost.origin.y, ghostRDrop.origin.x, ghostRDrop.origin.y);
-            applet.line(ghost.origin.x, ghost.origin.y, ghostPDrop.origin.x, ghostPDrop.origin.y);
-            applet.line(ghost.origin.x, ghost.origin.y, ghostSDrop.origin.x, ghostSDrop.origin.y);
+            applet.line(hover.origin.x, hover.origin.y, hoverRDrop.origin.x, hoverRDrop.origin.y);
+            applet.line(hover.origin.x, hover.origin.y, hoverPDrop.origin.x, hoverPDrop.origin.y);
+            applet.line(hover.origin.x, hover.origin.y, hoverSDrop.origin.x, hoverSDrop.origin.y);
 
-            ghost.setLabel(config.payoffFunction.getPayoff(currentPercent, ghostStrat, opponentStrat));
+            hover.setLabel(config.payoffFunction.getPayoff(currentPercent, hoverStrat, opponentStrat));
 
-            ghostRDrop.setLabel(ghostStrat[R]);
-            ghostPDrop.setLabel(ghostStrat[P]);
-            ghostSDrop.setLabel(ghostStrat[S]);
+            hoverRDrop.setLabel(hoverStrat[R]);
+            hoverPDrop.setLabel(hoverStrat[P]);
+            hoverSDrop.setLabel(hoverStrat[S]);
 
-            adjustLabels(ghostStrat, ghost, ghostPDrop, ghostRDrop);
+            adjustLabels(hoverStrat, hover, hoverPDrop, hoverRDrop);
 
-            ghostRDrop.draw(applet);
-            ghostPDrop.draw(applet);
-            ghostSDrop.draw(applet);
+            hoverRDrop.draw(applet);
+            hoverPDrop.draw(applet);
+            hoverSDrop.draw(applet);
         }
 
-        ghost.draw(applet);
+        hover.draw(applet);
 
         if (target.visible && targetStrat != null) {
             target.setLabel(config.payoffFunction.getPayoff(currentPercent, targetStrat, opponentStrat));
@@ -349,10 +349,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                 for (int i = 0; i < stratSlider.length; i++) {
                     if (stratSlider[i].mouseOnGhost(mouseX, mouseY)) {
                         stratSlider[i].grabGhost();
-                        ghost.setVisible(true);
-                        ghostStrat[R] = stratSlider[R].getGhostValue();
-                        ghostStrat[P] = stratSlider[P].getGhostValue();
-                        ghostStrat[S] = stratSlider[S].getGhostValue();
+                        hover.setVisible(true);
+                        hoverStrat[R] = stratSlider[R].getGhostValue();
+                        hoverStrat[P] = stratSlider[P].getGhostValue();
+                        hoverStrat[S] = stratSlider[S].getGhostValue();
                         break;
                     }
                 }
@@ -369,9 +369,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             for (int i = 0; i < stratSlider.length; i++) {
                 if (stratSlider[i].isGhostGrabbed()) {
                     stratSlider[i].releaseGhost();
-                    balanceStrats(ghostStrat, i, stratSlider[i].getGhostValue());
-                    setTargetRPS(ghostStrat[R], ghostStrat[P], ghostStrat[S]);
-                    ghost.setVisible(false);
+                    balanceStrats(hoverStrat, i, stratSlider[i].getGhostValue());
+                    setTargetRPS(hoverStrat[R], hoverStrat[P], hoverStrat[S]);
+                    hover.setVisible(false);
                     break;
                 }
             }
@@ -437,7 +437,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         setEnabled(false);
         for (int i = R; i <= S; i++) {
             axisDistance[i] = 0f;
-            ghostStrat[i] = 0f;
+            hoverStrat[i] = 0f;
             playedStrat[i] = 0f;
             targetStrat[i] = 0f;
             opponentStrat[i] = 0f;
@@ -448,7 +448,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         current.setVisible(false);
         target.update(0, 0);
         target.setVisible(false);
-        ghost.setVisible(false);
+        hover.setVisible(false);
         opponent.setVisible(false);
         rDrop.setVisible(false);
         pDrop.setVisible(false);
@@ -571,9 +571,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     // calculate ghostStrat entries
     private void calculateGhostStrats() {
-        ghostStrat[S] = axisDistance[S] / maxDist;
-        ghostStrat[P] = axisDistance[P] / maxDist;
-        ghostStrat[R] = 1 - ghostStrat[S] - ghostStrat[P];
+        hoverStrat[S] = axisDistance[S] / maxDist;
+        hoverStrat[P] = axisDistance[P] / maxDist;
+        hoverStrat[R] = 1 - hoverStrat[S] - hoverStrat[P];
     }
 
     // calculate targetStrat entries
@@ -710,11 +710,11 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             scissors.setLabel(config.shortSLabel);
             scissors.setColor(config.sColor);
             rDrop.setColor(config.rColor);
-            ghostRDrop.setColor(config.rColor);
+            hoverRDrop.setColor(config.rColor);
             pDrop.setColor(config.pColor);
-            ghostPDrop.setColor(config.pColor);
+            hoverPDrop.setColor(config.pColor);
             sDrop.setColor(config.sColor);
-            ghostSDrop.setColor(config.sColor);
+            hoverSDrop.setColor(config.sColor);
             current.setColor(
                     config.yourStrategyOverTime.r,
                     config.yourStrategyOverTime.g,
@@ -723,7 +723,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                     config.counterpartStrategyOverTime.r,
                     config.counterpartStrategyOverTime.g,
                     config.counterpartStrategyOverTime.b);
-            ghost.setColor(
+            hover.setColor(
                     config.yourStrategyOverTime.r,
                     config.yourStrategyOverTime.g,
                     config.yourStrategyOverTime.b);
