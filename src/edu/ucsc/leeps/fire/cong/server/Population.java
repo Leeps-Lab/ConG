@@ -303,8 +303,15 @@ public class Population implements Serializable {
             p.match = m;
             tupleMap.put(member, p);
         }
+        Set<Tuple> assignedMatches = new HashSet<Tuple>();
         Config def = FIRE.server.getConfig();
         for (Tuple tuple : tuples) {
+            if (assignedMatches.contains(tuple)) {
+                continue;
+            }
+            if (tuple.population > tuple.match.population) {
+                tuple = tuple.match;
+            }
             for (int member : tuple.members) {
                 Config config = FIRE.server.getConfig(member);
                 config.isCounterpart = false;
@@ -319,6 +326,8 @@ public class Population implements Serializable {
                 config.counterpartPayoffFunction = def.payoffFunction;
                 config.playersInTuple = tuple.match.members.size();
             }
+            assignedMatches.add(tuple);
+            assignedMatches.add(tuple.match);
         }
     }
 
