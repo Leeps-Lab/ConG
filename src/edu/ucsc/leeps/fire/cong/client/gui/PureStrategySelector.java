@@ -356,4 +356,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
     public void startPrePeriod() {
     }
+
+    public void startPeriod() {
+    }
 }

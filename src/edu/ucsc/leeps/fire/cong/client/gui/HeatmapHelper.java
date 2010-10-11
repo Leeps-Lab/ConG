@@ -8,7 +8,6 @@ import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import java.util.ArrayList;
 import java.util.List;
 import processing.core.PApplet;
-import processing.core.PGraphics;
 import processing.core.PImage;
 
 /**
@@ -127,6 +126,10 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
             float currentPercent,
             float r, float p, float s,
             ThreeStrategySelector threeStrategySelector) {
+        if (r < 0 || p < 0 || s < 0) {
+            currentBuffer = null;
+            return;
+        }
         backBuffer = applet.createGraphics(width, height, Client.P2D);
         backBuffer.loadPixels();
         PayoffFunction payoffFunction;

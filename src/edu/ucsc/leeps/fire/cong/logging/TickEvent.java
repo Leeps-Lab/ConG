@@ -9,6 +9,7 @@ import edu.ucsc.leeps.fire.logging.LogEvent;
  */
 public class TickEvent implements LogEvent {
 
+    public int period;
     public int subperiod;
     public int secondsLeft;
     public int subject;

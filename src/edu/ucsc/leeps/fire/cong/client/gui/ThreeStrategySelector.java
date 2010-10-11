@@ -767,4 +767,11 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     public void setCurrentPercent(float percent) {
         currentPercent = percent;
     }
+
+    public void startPeriod() {
+        opponentStrat[0] = -1;
+        opponentStrat[1] = -1;
+        opponentStrat[2] = -1;
+        update();
+    }
 }

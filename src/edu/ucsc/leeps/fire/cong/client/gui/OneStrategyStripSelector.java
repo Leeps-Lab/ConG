@@ -375,4 +375,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
 
     public void startPrePeriod() {
     }
+
+    public void startPeriod() {
+    }
 }

@@ -159,7 +159,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         simplex.setEnabled(true);
 
         strategyChanger.startPeriod();
-        strategyChanger.selector.update();
+        strategyChanger.selector.startPeriod();
 
         percent = 0f;
         payoffChart.currentPercent = percent;
@@ -358,7 +358,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 return;
             }
 
-            if (frameCount % 5 == 0 && FIRE.client.isRunningPeriod()) {
+            if (frameCount % 5 == 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
                 long length = FIRE.client.getConfig().length * 1000l;
                 percent = (float) FIRE.client.getElapsedMillis() / (float) length;
                 payoffChart.currentPercent = percent;
@@ -377,6 +377,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                     pChart.updateLines();
                     sChart.updateLines();
                 }
+            }
+            if (frameCount % Math.round(frameRateTarget) == 0 && FIRE.client.isRunningPeriod()) {
                 pointsDisplay.update();
             }
             if (frameCount % Math.round(frameRateTarget) == 0) {
@@ -421,7 +423,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     @Override
     public void keyTyped(KeyEvent ke) {
         if (ke.getKeyChar() == 'd') {
-            DEBUG = false;
+            DEBUG = !DEBUG;
         }
     }
 

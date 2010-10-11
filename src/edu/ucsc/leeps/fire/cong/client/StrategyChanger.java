@@ -210,6 +210,8 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
 
         public void startPrePeriod();
 
+        public void startPeriod();
+
         public void setEnabled(boolean enabled);
 
         public void setCurrent(float[] strategy);

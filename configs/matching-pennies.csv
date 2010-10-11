@@ -1,5 +1,5 @@
 "period","timeConstrained","paid","length","subperiods","percentChangePerSecond","tupleSize","numTuples","payoffFunction","name","Aa","Ab","Ba","Bb","min","max","counterpartPayoffFunction","name","Aa","Ab","Ba","Bb","min","max","isCounterpart","strategySelectionDisplayType","mixedStrategySelection","sigmoidHeatmap"
-1,"TRUE","TRUE",120,0,0.1,1,,"bimatrix","pf",34,15,15,16,5,38,"bimatrix","cpf",6,25,25,24,2,35,"TRUE","HeatmapBoth","TRUE",
+1,"TRUE","TRUE",120,0,0.1,1,,"bimatrix","pf",0,10,20,30,0,30,"bimatrix","cpf",30,10,0,10,0,30,"TRUE","HeatmapBoth","TRUE",
 2,"TRUE","TRUE",120,0,0.2,1,,"bimatrix","pf",38,5,5,32,5,38,"bimatrix","cpf",2,35,35,8,2,35,"TRUE","HeatmapSingle","TRUE","TRUE"
 3,"TRUE","TRUE",120,0,0.3,1,,"bimatrix","pf",34,15,15,16,5,38,"bimatrix","cpf",6,25,25,24,2,35,"TRUE","Matrix","FALSE",
 4,"TRUE","TRUE",120,0,0.4,1,,"bimatrix","pf",38,5,5,32,5,38,"bimatrix","cpf",2,35,35,8,2,35,"TRUE","Matrix","FALSE",

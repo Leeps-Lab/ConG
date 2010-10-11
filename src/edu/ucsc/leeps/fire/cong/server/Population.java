@@ -66,11 +66,24 @@ public class Population implements Serializable {
         }
     }
 
+    public void tick() {
+        long timestamp = System.currentTimeMillis();
+        // Update payoffs
+        for (Tuple tuple : tuples) {
+            tuple.evaluate(timestamp);
+            // FIXME this is a hack to ensure initial strategies are send to the counterparts
+            tuple.updateCounterparts();
+        }
+    }
+
     public void logTick(int subperiod, int secondsLeft) {
+        // Log the tick information
+        int period = FIRE.server.getConfig().period;
         float length = FIRE.server.getConfig().length;
         float percent = (float) (length * secondsLeft) / (float) length;
         for (int member : members.keySet()) {
             TickEvent tick = new TickEvent();
+            tick.period = period;
             tick.subject = member;
             tick.subperiod = subperiod;
             tick.secondsLeft = secondsLeft;

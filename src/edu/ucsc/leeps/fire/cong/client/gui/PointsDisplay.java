@@ -38,7 +38,7 @@ public class PointsDisplay extends Sprite {
         String periodEarningsString = "";
         String periodCostString = "";
         String netEarningsString = "";
-        totalEarningsString = String.format("Total Earnings: %.2f", totalPoints);
+        totalEarningsString = String.format("Previous Earnings: %.2f", totalPoints);
         periodEarningsString = String.format("Current Earnings: %.2f", periodPoints);
         try {
             if (FIRE.client.getConfig().changeCost != 0) {
