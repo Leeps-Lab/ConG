@@ -26,6 +26,7 @@ public class Config extends BaseConfig {
     public PayoffFunction counterpartPayoffFunction;
     public int numTuples;
     public int tupleSize;
+    public boolean assignedTuples;
     public boolean excludeSelf;
     public boolean mixedStrategySelection;
     public boolean stripStrategySelection;
@@ -63,6 +64,7 @@ public class Config extends BaseConfig {
     public int matchID;
     public boolean isCounterpart;
     public int playersInTuple;
+    public int population, match;
 
     public Config() {
         timeConstrained = true;
@@ -139,5 +141,7 @@ public class Config extends BaseConfig {
         excludeSelf = false;
         tupleSize = -1;
         numTuples = -1;
+        population = -1;
+        match = -1;
     }
 }

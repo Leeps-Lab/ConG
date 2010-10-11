@@ -117,7 +117,11 @@ public class Population implements Serializable {
         public Tuple match;
 
         public Tuple() {
-            population = tuples.size();
+            this(tuples.size());
+        }
+
+        public Tuple(int population) {
+            this.population = population;
             tuples.add(this);
             members = new HashSet<Integer>();
             strategies = new HashMap<Integer, float[]>();
@@ -247,52 +251,11 @@ public class Population implements Serializable {
                 || (members.size() / FIRE.server.getConfig().tupleSize) == 1) {
             setupSinglePopTuples();
         } else {
-            ArrayList<Integer> randomMembers = new ArrayList<Integer>();
-            randomMembers.addAll(members.keySet());
-            Collections.shuffle(randomMembers, FIRE.server.getRandom());
-            if (FIRE.server.getConfig().tupleSize == -1) {
-                FIRE.server.getConfig().tupleSize = members.size() / FIRE.server.getConfig().numTuples;
+            if (FIRE.server.getConfig().assignedTuples) {
+                setupAssignedTuples();
+            } else {
+                setupRandomTuples();
             }
-            Tuple current = null;
-            ArrayList<Tuple> randomTuples = new ArrayList<Tuple>();
-            while (randomMembers.size() > 0) {
-                if (current == null || current.members.size() == FIRE.server.getConfig().tupleSize) {
-                    current = new Tuple();
-                    randomTuples.add(current);
-                }
-                int member = randomMembers.remove(0);
-                current.members.add(member);
-                tupleMap.put(member, current);
-            }
-            Collections.shuffle(randomTuples, FIRE.server.getRandom());
-            while (randomTuples.size() > 0) {
-                Tuple tuple = randomTuples.remove(0);
-                tuple.match = randomTuples.remove(0);
-                tuple.match.match = tuple;
-                Config def = FIRE.server.getConfig();
-                Tuple tuple1;
-                if (FIRE.server.getRandom().nextBoolean()) {
-                    tuple1 = tuple;
-                } else {
-                    tuple1 = tuple.match;
-                }
-                for (int member : tuple1.members) {
-                    Config config = FIRE.server.getConfig(member);
-                    config.isCounterpart = false;
-                    config.payoffFunction = def.payoffFunction;
-                    config.counterpartPayoffFunction = def.counterpartPayoffFunction;
-                    config.playersInTuple = tuple1.members.size();
-                }
-                for (int member : tuple1.match.members) {
-                    Config config = FIRE.server.getConfig(member);
-                    config.isCounterpart = true;
-                    config.payoffFunction = def.counterpartPayoffFunction;
-                    config.counterpartPayoffFunction = def.payoffFunction;
-                    config.playersInTuple = tuple1.match.members.size();
-                }
-            }
-            assert (randomMembers.size() == 0);
-            assert (randomTuples.size() == 0);
         }
     }
 
@@ -313,6 +276,99 @@ public class Population implements Serializable {
             tupleMap.put(member, tuple);
             config.playersInTuple = members.size();
         }
+    }
+
+    private void setupAssignedTuples() {
+        for (int member : members.keySet()) {
+            Config config = FIRE.server.getConfig(member);
+            int population = config.population;
+            int match = config.match;
+            Tuple p = null;
+            Tuple m = null;
+            for (Tuple tuple : tuples) {
+                if (tuple.population == population) {
+                    p = tuple;
+                }
+                if (tuple.population == match) {
+                    m = tuple;
+                }
+            }
+            if (p == null) {
+                p = new Tuple(population);
+            }
+            if (m == null) {
+                m = new Tuple(match);
+            }
+            p.members.add(member);
+            p.match = m;
+            tupleMap.put(member, p);
+        }
+        Config def = FIRE.server.getConfig();
+        for (Tuple tuple : tuples) {
+            for (int member : tuple.members) {
+                Config config = FIRE.server.getConfig(member);
+                config.isCounterpart = false;
+                config.payoffFunction = def.payoffFunction;
+                config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                config.playersInTuple = tuple.members.size();
+            }
+            for (int member : tuple.match.members) {
+                Config config = FIRE.server.getConfig(member);
+                config.isCounterpart = true;
+                config.payoffFunction = def.counterpartPayoffFunction;
+                config.counterpartPayoffFunction = def.payoffFunction;
+                config.playersInTuple = tuple.match.members.size();
+            }
+        }
+    }
+
+    private void setupRandomTuples() {
+        ArrayList<Integer> randomMembers = new ArrayList<Integer>();
+        randomMembers.addAll(members.keySet());
+        Collections.shuffle(randomMembers, FIRE.server.getRandom());
+        if (FIRE.server.getConfig().tupleSize == -1) {
+            FIRE.server.getConfig().tupleSize = members.size() / FIRE.server.getConfig().numTuples;
+        }
+        Tuple current = null;
+        ArrayList<Tuple> randomTuples = new ArrayList<Tuple>();
+        while (randomMembers.size() > 0) {
+            if (current == null || current.members.size() == FIRE.server.getConfig().tupleSize) {
+                current = new Tuple();
+                randomTuples.add(current);
+            }
+            int member = randomMembers.remove(0);
+            current.members.add(member);
+            tupleMap.put(member, current);
+        }
+        Collections.shuffle(randomTuples, FIRE.server.getRandom());
+        while (randomTuples.size() > 0) {
+            Tuple tuple = randomTuples.remove(0);
+            tuple.match = randomTuples.remove(0);
+            tuple.match.match = tuple;
+            Config def = FIRE.server.getConfig();
+            Tuple tuple1;
+            if (FIRE.server.getRandom().nextBoolean()) {
+                tuple1 = tuple;
+            } else {
+                tuple1 = tuple.match;
+            }
+            for (int member : tuple1.members) {
+                Config config = FIRE.server.getConfig(member);
+                config.isCounterpart = false;
+                config.payoffFunction = def.payoffFunction;
+                config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                config.playersInTuple = tuple1.members.size();
+            }
+            for (int member : tuple1.match.members) {
+                Config config = FIRE.server.getConfig(member);
+                config.isCounterpart = true;
+                config.payoffFunction = def.counterpartPayoffFunction;
+                config.counterpartPayoffFunction = def.payoffFunction;
+                config.playersInTuple = tuple1.match.members.size();
+            }
+        }
+        assert (randomMembers.size() == 0);
+        assert (randomTuples.size() == 0);
     }
 
     private void setInitialStrategies() {

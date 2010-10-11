@@ -136,12 +136,7 @@ public class Line extends Sprite implements Serializable {
                             applet.line(last.x, p.y, p.x, p.y);
                             applet.line(last.x, last.y, last.x, p.y);
                         } else {
-                            if (Math.abs(p.y - last.y) > 10) {
-                                applet.line(last.x, last.y, last.x, p.y);
-                                applet.line(last.x, p.y, p.x, p.y);
-                            } else {
-                                applet.line(last.x, last.y, p.x, p.y);
-                            }
+                            applet.line(last.x, last.y, p.x, p.y);
                         }
                     }
                     last = p;
@@ -229,9 +224,6 @@ public class Line extends Sprite implements Serializable {
                         }
                     } else {
                         if (stepFunction && i >= 2 && Math.abs(last.y - p.y) > Float.MIN_NORMAL) {
-                            applet.vertex(last.x, p.y);
-                        }
-                        if (Math.abs(p.y - last.y) > 10) {
                             applet.vertex(last.x, p.y);
                         }
                         applet.vertex(p.x, p.y);

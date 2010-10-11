@@ -381,7 +381,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             if (frameCount % Math.round(frameRateTarget) == 0 && FIRE.client.isRunningPeriod()) {
                 pointsDisplay.update();
             }
-            if (frameCount % Math.round(frameRateTarget) == 0) {
+            if (strategyChanger != null && strategyChanger.selector != null && frameCount % Math.round(frameRateTarget) == 0) {
                 strategyChanger.selector.update();
             }
 
