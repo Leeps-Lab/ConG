@@ -39,6 +39,7 @@ import processing.core.PFont;
 public class Client extends PApplet implements ClientInterface, FIREClientInterface {
 
     public static boolean DEBUG = System.getProperty("fire.client.debug") != null;
+    private int updatesPerSecond;
     private float percent;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
@@ -61,6 +62,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public Client() {
         loadLibraries();
+        updatesPerSecond = Integer.parseInt(System.getProperty("fire.client.ups", "1"));
         noLoop();
         INIT_WIDTH = 900;
         INIT_HEIGHT = 600;
@@ -383,7 +385,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             if (frameCount % Math.round(frameRateTarget) == 0 && FIRE.client.isRunningPeriod()) {
                 pointsDisplay.update();
             }
-            if (strategyChanger != null && strategyChanger.selector != null && frameCount % Math.round(frameRateTarget) == 0) {
+            if (strategyChanger != null
+                    && strategyChanger.selector != null
+                    && frameCount % Math.round(frameRateTarget * (1f / updatesPerSecond)) == 0) {
                 strategyChanger.selector.update();
             }
 
