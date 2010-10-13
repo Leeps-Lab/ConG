@@ -11,9 +11,11 @@ public class PointsDisplay extends Sprite {
 
     private boolean displaySwitchCosts;
     private float totalPoints, periodPoints, periodCost;
+    private float[] myStrategy, counterStrategy;
+    private long lastChangeTime, periodStartTime;
 
-    public PointsDisplay(Sprite parent, int x, int y, Client embed) {
-        super(parent, x, y, (int) embed.textWidth("Current Earnings: 000"), (int) (2 * (embed.textAscent() + embed.textDescent())));
+    public PointsDisplay(Sprite parent, int x, int y, Client client) {
+        super(parent, x, y, (int) client.textWidth("Current Earnings: 000"), (int) (2 * (client.textAscent() + client.textDescent())));
         totalPoints = 0;
         periodPoints = 0;
         periodCost = 0;
@@ -77,5 +79,35 @@ public class PointsDisplay extends Sprite {
         totalPoints = FIRE.client.getTotalPoints();
         periodPoints = FIRE.client.getPeriodPoints();
         periodCost = FIRE.client.getClient().getCost();
+        if (lastChangeTime > 0) {
+            long elapsed = System.currentTimeMillis() - lastChangeTime;
+            if (elapsed > 1000) {
+                float millisInPeriod = FIRE.client.getConfig().length * 1000f;
+                float percentInStrategy = elapsed / millisInPeriod;
+                float percentOfPeriod = (System.currentTimeMillis() - periodStartTime) / millisInPeriod;
+                float payoff = FIRE.client.getConfig().payoffFunction.getPayoff(percentOfPeriod, myStrategy, counterStrategy);
+                periodPoints += percentInStrategy * payoff;
+            }
+        }
+    }
+
+    public void startPeriod() {
+        periodStartTime = System.currentTimeMillis();
+        update();
+    }
+
+    public void endPeriod() {
+        lastChangeTime = -1;
+        update();
+    }
+
+    public void setMyStrategy(float[] s) {
+        lastChangeTime = System.currentTimeMillis();
+        myStrategy = s;
+    }
+
+    public void setCounterpartStrategy(float[] s) {
+        lastChangeTime = System.currentTimeMillis();
+        counterStrategy = s;
     }
 }

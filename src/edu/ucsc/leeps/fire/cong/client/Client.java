@@ -175,7 +175,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             pChart.updateLines();
             sChart.updateLines();
         }
-        pointsDisplay.update();
+        pointsDisplay.startPeriod();
 
         if (FIRE.client.getConfig().chatroom && !chatroomEnabled) {
             chatroomEnabled = true;
@@ -200,7 +200,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             pChart.updateLines();
             sChart.updateLines();
         }
-        pointsDisplay.update();
+        pointsDisplay.endPeriod();
 
     }
 
@@ -229,6 +229,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         rChart.setMyStrategy(s);
         pChart.setMyStrategy(s);
         sChart.setMyStrategy(s);
+        pointsDisplay.setMyStrategy(s);
     }
 
     public void setCounterpartStrategy(float[] s) {
@@ -238,6 +239,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         rChart.setCounterpartStrategy(s);
         pChart.setCounterpartStrategy(s);
         sChart.setCounterpartStrategy(s);
+        pointsDisplay.setCounterpartStrategy(s);
     }
 
     public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {

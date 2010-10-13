@@ -86,7 +86,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     public void tick(int secondsLeft) {
         if (FIRE.server.getConfig().subperiods == 0) {
-            population.tick();
             population.logTick(0, secondsLeft);
         }
     }
