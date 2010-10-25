@@ -28,7 +28,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     public Selector selector;
 
     public StrategyChanger() {
-        rate = Integer.parseInt(System.getProperty("fire.client.rate", "200"));
+        rate = Integer.parseInt(System.getProperty("fire.client.rate", "50"));
         FIRE.client.addConfigListener(this);
         start();
     }
@@ -36,11 +36,11 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     public void configChanged(Config config) {
         this.config = config;
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            previousStrategy = new float[2];
-            currentStrategy = new float[2];
-            targetStrategy = new float[2];
-            deltaStrategy = new float[2];
-            lastStrategy = new float[2];
+            previousStrategy = new float[1];
+            currentStrategy = new float[1];
+            targetStrategy = new float[1];
+            deltaStrategy = new float[1];
+            lastStrategy = new float[1];
         } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             previousStrategy = new float[3];
             currentStrategy = new float[3];
@@ -85,8 +85,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         }
 
         sendUpdate();
-        FIRE.client.getClient().setMyStrategy(currentStrategy);
-        selector.setCurrent(currentStrategy);
+        Client.state.setMyStrategy(currentStrategy);
         if (config.delay != null) {
             int delay = config.delay.getDelay();
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
@@ -123,10 +122,10 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             long elapsed = System.nanoTime() - start;
             long sleepNanos = nanoWait - elapsed;
             if (sleepNanos > 0) {
-            try {
-                Thread.sleep(sleepNanos / 1000000);
-            } catch (InterruptedException ex) {
-            }
+                try {
+                    Thread.sleep(sleepNanos / 1000000);
+                } catch (InterruptedException ex) {
+                }
             }
         }
     }
@@ -140,7 +139,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             previousStrategy[i] = strategy[i];
             currentStrategy[i] = strategy[i];
         }
-        selector.setCurrent(currentStrategy);
     }
 
     public void setTargetStrategy(float[] strategy) {
@@ -150,8 +148,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
                 currentStrategy[i] = strategy[i];
                 targetStrategy[i] = strategy[i];
             }
-            FIRE.client.getClient().setMyStrategy(strategy);
-            selector.setCurrent(strategy);
+            Client.state.setMyStrategy(currentStrategy);
             sendUpdate();
             return;
         } else {
@@ -214,15 +211,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
 
         public void setEnabled(boolean enabled);
 
-        public void setCurrent(float[] strategy);
-
-        public void setInitial(float[] strategy);
-
-        public void setCounterpart(float[] strategy);
-
         public float[] getTarget();
-
-        public void setCurrentPercent(float percent);
 
         public void update();
     }

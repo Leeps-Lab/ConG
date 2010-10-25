@@ -17,67 +17,15 @@ import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 public class Chart extends Sprite implements Configurable<Config> {
 
     // Variables to modify that manipulate the chart
-    public float currentPercent;
     private Config config;
-    private PayoffFunction payoffFunction, counterpartPayoffFunction;
-    private float currentPayoffYou, currentPayoffCounterpart;
     private float minPayoff, maxPayoff;
     private int scaledMargin;
     private int scaledHeight;
-    // Two strategy
-    private float percent_A;
-    private float percent_a;
-    private float currentAPayoff;
-    private float currentBPayoff;
-    private float currentAaPayoff;
-    private float currentAbPayoff;
-    private float currentBaPayoff;
-    private float currentBbPayoff;
-    // Three strategy
-    private ThreeStrategySelector simplex;
-    private float percent_R;
-    private float percent_r;
-    private float percent_P;
-    private float percent_p;
-    private float percent_S;
-    private float percent_s;
-    private float currentRPayoff;
-    private float currentPPayoff;
-    private float currentSPayoff;
     // Either two or three strategies
     private Line actualPayoffYou;
     private Line actualPayoffCounterpart;
-    // Two strategy
-    private Line actualAPayoff;
-    private Line actualBPayoff;
-    private Line actualAaPayoff;
-    private Line actualAbPayoff;
-    private Line actualBaPayoff;
-    private Line actualBbPayoff;
-    private Line futureAaPayoff;
-    private Line futureAbPayoff;
-    private Line futureBaPayoff;
-    private Line futureBbPayoff;
-    private Line futureAPayoff;
-    private Line futureBPayoff;
     private Line yourStrategyOverTime;
     private Line counterpartStrategyOverTime;
-    // Three strategy
-    private Line actualRPayoff;
-    private Line actualPPayoff;
-    private Line actualSPayoff;
-    private Line futureRPayoff;
-    private Line futurePPayoff;
-    private Line futureSPayoff;
-    private Line futureRrPayoff;
-    private Line futureRpPayoff;
-    private Line futureRsPayoff;
-    private Line futurePrPayoff;
-    private Line futurePpPayoff;
-    private Line futurePsPayoff;
-    private Line futureSrPayoff;
-    private Line futureSpPayoff;
-    private Line futureSsPayoff;
     private Line yourROverTime;
     private Line counterpartROverTime;
     private Line yourPOverTime;
@@ -130,38 +78,8 @@ public class Chart extends Sprite implements Configurable<Config> {
 
         actualPayoffYou = new Line(this, 0, scaledMargin, width, scaledHeight);
         actualPayoffCounterpart = new Line(this, 0, scaledMargin, width, scaledHeight);
-        // Two strategy
-        actualAPayoff = new Line(this, 0, 0, width, height);
-        actualBPayoff = new Line(this, 0, 0, width, height);
-        futureAPayoff = new Line(this, 0, 0, width, height);
-        futureBPayoff = new Line(this, 0, 0, width, height);
-        actualAaPayoff = new Line(this, 0, 0, width, height);
-        actualAbPayoff = new Line(this, 0, 0, width, height);
-        actualBaPayoff = new Line(this, 0, 0, width, height);
-        actualBbPayoff = new Line(this, 0, 0, width, height);
-        futureAaPayoff = new Line(this, 0, 0, width, height);
-        futureAbPayoff = new Line(this, 0, 0, width, height);
-        futureBaPayoff = new Line(this, 0, 0, width, height);
-        futureBbPayoff = new Line(this, 0, 0, width, height);
         yourStrategyOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
         counterpartStrategyOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
-        // RPSD
-        actualRPayoff = new Line(this, 0, 0, width, height);
-        actualPPayoff = new Line(this, 0, 0, width, height);
-        actualSPayoff = new Line(this, 0, 0, width, height);
-
-        futureRPayoff = new Line(this, 0, 0, width, height);
-        futurePPayoff = new Line(this, 0, 0, width, height);
-        futureSPayoff = new Line(this, 0, 0, width, height);
-        futureRrPayoff = new Line(this, 0, 0, width, height);
-        futureRpPayoff = new Line(this, 0, 0, width, height);
-        futureRsPayoff = new Line(this, 0, 0, width, height);
-        futurePrPayoff = new Line(this, 0, 0, width, height);
-        futurePpPayoff = new Line(this, 0, 0, width, height);
-        futurePsPayoff = new Line(this, 0, 0, width, height);
-        futureSrPayoff = new Line(this, 0, 0, width, height);
-        futureSpPayoff = new Line(this, 0, 0, width, height);
-        futureSsPayoff = new Line(this, 0, 0, width, height);
 
         yourROverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
         counterpartROverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
@@ -174,8 +92,6 @@ public class Chart extends Sprite implements Configurable<Config> {
 
         // Threshold
         threshold = new Line(this, 0, 0, width, height);
-
-        this.simplex = simplex;
 
         this.mode = mode;
 
@@ -271,43 +187,12 @@ public class Chart extends Sprite implements Configurable<Config> {
     private void drawPercentLine(Client applet) {
         applet.strokeWeight(2f);
         applet.stroke(150, 150, 150);
-        applet.line(currentPercent * width, 0, currentPercent * width, height);
-    }
-
-    private void drawTwoStrategyPayoffLines(Client applet) {
-        actualAPayoff.draw(applet);
-        actualBPayoff.draw(applet);
-        futureAPayoff.draw(applet);
-        futureBPayoff.draw(applet);
-        actualAaPayoff.draw(applet);
-        actualAbPayoff.draw(applet);
-        actualBaPayoff.draw(applet);
-        actualBbPayoff.draw(applet);
-        futureAaPayoff.draw(applet);
-        futureBbPayoff.draw(applet);
+        applet.line(Client.state.currentPercent * width, 0, Client.state.currentPercent * width, height);
     }
 
     private void drawTwoStrategyLines(Client applet) {
         counterpartStrategyOverTime.draw(applet);
         yourStrategyOverTime.draw(applet);
-    }
-
-    private void drawThreeStrategyPayoffLines(Client applet) {
-        actualRPayoff.draw(applet);
-        actualPPayoff.draw(applet);
-        actualSPayoff.draw(applet);
-        futureRPayoff.draw(applet);
-        futurePPayoff.draw(applet);
-        futureSPayoff.draw(applet);
-        futureRrPayoff.draw(applet);
-        futureRpPayoff.draw(applet);
-        futureRsPayoff.draw(applet);
-        futurePrPayoff.draw(applet);
-        futurePpPayoff.draw(applet);
-        futurePsPayoff.draw(applet);
-        futureSrPayoff.draw(applet);
-        futureSpPayoff.draw(applet);
-        futureSsPayoff.draw(applet);
     }
 
     private void drawThreeStrategyLines(Client applet) {
@@ -362,7 +247,6 @@ public class Chart extends Sprite implements Configurable<Config> {
             drawShockZone(applet);
             if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
-                    drawTwoStrategyPayoffLines(applet);
                     actualPayoffYou.draw(applet);
                     actualPayoffCounterpart.draw(applet);
                 } else if (mode == Mode.TwoStrategy) {
@@ -378,7 +262,6 @@ public class Chart extends Sprite implements Configurable<Config> {
                 }
             } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
-                    drawThreeStrategyPayoffLines(applet);
                     actualPayoffYou.draw(applet);
                     actualPayoffCounterpart.draw(applet);
                 } else if (mode == Mode.RStrategy
@@ -404,10 +287,6 @@ public class Chart extends Sprite implements Configurable<Config> {
     public void clearAll() {
         actualPayoffYou.clear();
         actualPayoffCounterpart.clear();
-        actualAPayoff.clear();
-        actualBPayoff.clear();
-        actualAaPayoff.clear();
-        actualBbPayoff.clear();
         yourStrategyOverTime.clear();
         counterpartStrategyOverTime.clear();
         yourPOverTime.clear();
@@ -416,138 +295,10 @@ public class Chart extends Sprite implements Configurable<Config> {
         counterpartROverTime.clear();
         counterpartPOverTime.clear();
         counterpartSOverTime.clear();
-
-        clearFuture();
     }
 
-    /**
-     * Clear future payoffs.
-     */
-    public void clearFuture() {
-        // clear two strategy
-        futureAPayoff.clear();
-        futureBPayoff.clear();
-        futureAaPayoff.clear();
-        futureAbPayoff.clear();
-        futureBaPayoff.clear();
-        futureBbPayoff.clear();
-
-        // clear three strategy
-        futureRPayoff.clear();
-        futurePPayoff.clear();
-        futureSPayoff.clear();
-        futureRrPayoff.clear();
-        futureRpPayoff.clear();
-        futureRsPayoff.clear();
-        futurePrPayoff.clear();
-        futurePpPayoff.clear();
-        futurePsPayoff.clear();
-        futureSrPayoff.clear();
-        futureSpPayoff.clear();
-        futureSsPayoff.clear();
-    }
-
-    private void addTwoStrategyFuturePayoffPoints() {
-        clearFuture();
-        for (float futurePercent = currentPercent; futurePercent <= 1.0; futurePercent += 0.001f) {
-            float future_A = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{1},
-                    new float[]{percent_a});
-            float future_B = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0},
-                    new float[]{percent_a});
-            float future_Aa = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{1},
-                    new float[]{1});
-            float future_Ab = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{1},
-                    new float[]{0});
-            float future_Ba = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0},
-                    new float[]{1});
-            float future_Bb = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0},
-                    new float[]{0});
-            addPayoffPoint(futureAPayoff, futurePercent, future_A);
-            addPayoffPoint(futureBPayoff, futurePercent, future_B);
-            addPayoffPoint(futureAaPayoff, futurePercent, future_Aa);
-            addPayoffPoint(futureAbPayoff, futurePercent, future_Ab);
-            addPayoffPoint(futureBaPayoff, futurePercent, future_Ba);
-            addPayoffPoint(futureBbPayoff, futurePercent, future_Bb);
-        }
-    }
-
-    private void addThreeStrategyFuturePayoffPoints() {
-        clearFuture();
-        for (float futurePercent = currentPercent; futurePercent <= 1.0; futurePercent += 0.01f) {
-            float futureR = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{1, 0, 0},
-                    simplex.getOpponentRPS());
-            float futureP = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0, 1, 0},
-                    simplex.getOpponentRPS());
-            float futureS = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0, 0, 1},
-                    simplex.getOpponentRPS());
-            float futureRr = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{1, 0, 0},
-                    new float[]{1, 0, 0});
-            float futureRp = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{1, 0, 0},
-                    new float[]{0, 1, 0});
-            float futureRs = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{1, 0, 0},
-                    new float[]{0, 0, 1});
-            float futurePr = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0, 1, 0},
-                    new float[]{1, 0, 0});
-            float futurePp = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0, 1, 0},
-                    new float[]{0, 1, 0});
-            float futurePs = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0, 1, 0},
-                    new float[]{0, 0, 1});
-            float futureSr = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0, 0, 1},
-                    new float[]{1, 0, 0});
-            float futureSp = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0, 0, 1},
-                    new float[]{0, 1, 0});
-            float futureSs = payoffFunction.getPayoff(
-                    futurePercent,
-                    new float[]{0, 0, 1},
-                    new float[]{0, 0, 1});
-
-            addPayoffPoint(futureRPayoff, futurePercent, futureR);
-            addPayoffPoint(futurePPayoff, futurePercent, futureP);
-            addPayoffPoint(futureSPayoff, futurePercent, futureS);
-            addPayoffPoint(futureRrPayoff, futurePercent, futureRr);
-            addPayoffPoint(futureRpPayoff, futurePercent, futureRp);
-            addPayoffPoint(futureRsPayoff, futurePercent, futureRs);
-            addPayoffPoint(futurePrPayoff, futurePercent, futurePr);
-            addPayoffPoint(futurePpPayoff, futurePercent, futurePp);
-            addPayoffPoint(futurePsPayoff, futurePercent, futurePs);
-            addPayoffPoint(futureSrPayoff, futurePercent, futureSr);
-            addPayoffPoint(futureSpPayoff, futurePercent, futureSp);
-            addPayoffPoint(futureSsPayoff, futurePercent, futureSs);
-        }
+    public void updateLines() {
+        updateLines(Client.state.currentPercent);
     }
 
     /**
@@ -560,142 +311,16 @@ public class Chart extends Sprite implements Configurable<Config> {
      * Strategy points are added using strategy over time, current percent, and
      * percent based on strategy.
      */
-    public void updateLines() {
-        if (currentPercent <= 1f) {
-            addPayoffPoint(actualPayoffYou, currentPercent, currentPayoffYou);
-            addPayoffPoint(actualPayoffCounterpart, currentPercent, currentPayoffCounterpart);
+    public void updateLines(float percent) {
+        if (percent <= 1f) {
+            addPayoffPoint(actualPayoffYou, percent, PayoffFunction.Utilities.getPayoff());
+            addPayoffPoint(actualPayoffCounterpart, percent, PayoffFunction.Utilities.getMatchPayoff());
             if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                //addTwoStrategyActualPayoffPoints();
-                //addTwoStrategyFuturePayoffPoints();
+                addStrategyPoint(yourStrategyOverTime, percent, Client.state.strategies.get(Client.state.id)[0]);
+                addStrategyPoint(counterpartStrategyOverTime, percent, PayoffFunction.Utilities.getAverageMatchStrategy()[0]);
             } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                //addThreeStrategyActualPayoffPoints();
-                //addThreeStrategyFuturePayoffPoints();
-                addThreeStrategyPoints();
             }
-            addStrategyPoint(yourStrategyOverTime, currentPercent, percent_A);
-            addStrategyPoint(counterpartStrategyOverTime, currentPercent, percent_a);
         }
-    }
-
-    private void addTwoStrategyActualPayoffPoints() {
-        addPayoffPoint(actualAPayoff, currentPercent, currentAPayoff);
-        addPayoffPoint(actualBPayoff, currentPercent, currentBPayoff);
-
-        addPayoffPoint(actualAaPayoff, currentPercent, currentAaPayoff);
-        addPayoffPoint(actualAbPayoff, currentPercent, currentAbPayoff);
-        addPayoffPoint(actualBaPayoff, currentPercent, currentBaPayoff);
-        addPayoffPoint(actualBbPayoff, currentPercent, currentBbPayoff);
-    }
-
-    private void addThreeStrategyActualPayoffPoints() {
-        addPayoffPoint(actualRPayoff, currentPercent, currentRPayoff);
-        addPayoffPoint(actualPPayoff, currentPercent, currentPPayoff);
-        addPayoffPoint(actualSPayoff, currentPercent, currentSPayoff);
-    }
-
-    private void addThreeStrategyPoints() {
-        addStrategyPoint(yourROverTime, currentPercent, percent_R);
-        addStrategyPoint(counterpartROverTime, currentPercent, percent_r);
-        addStrategyPoint(yourPOverTime, currentPercent, percent_P);
-        addStrategyPoint(counterpartPOverTime, currentPercent, percent_p);
-        addStrategyPoint(yourSOverTime, currentPercent, percent_S);
-        addStrategyPoint(counterpartSOverTime, currentPercent, percent_s);
-    }
-
-    private void twoStrategyChanged() {
-        currentPayoffYou = payoffFunction.getPayoff(
-                currentPercent,
-                new float[]{percent_A},
-                new float[]{percent_a});
-        currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(
-                currentPercent,
-                new float[]{percent_a},
-                new float[]{percent_A});
-        // FIXME - use counterpart info to fix these
-        currentAPayoff = payoffFunction.getPayoff(
-                currentPercent,
-                new float[]{1},
-                new float[]{percent_a});
-        currentBPayoff = payoffFunction.getPayoff(
-                currentPercent,
-                new float[]{0},
-                new float[]{percent_a});
-        currentAaPayoff = payoffFunction.getPayoff(currentPercent,
-                new float[]{1},
-                new float[]{1});
-        currentAbPayoff = payoffFunction.getPayoff(currentPercent,
-                new float[]{1},
-                new float[]{0});
-        currentBaPayoff = payoffFunction.getPayoff(currentPercent,
-                new float[]{0},
-                new float[]{1});
-        currentBbPayoff = payoffFunction.getPayoff(currentPercent,
-                new float[]{0},
-                new float[]{0});
-    }
-
-    private void threeStrategyChanged() {
-        currentPayoffYou = payoffFunction.getPayoff(
-                currentPercent,
-                simplex.getPlayerRPS(),
-                simplex.getOpponentRPS());
-        currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(
-                currentPercent,
-                simplex.getOpponentRPS(),
-                simplex.getPlayerRPS());
-    }
-
-    private void strategyChanged() {
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            twoStrategyChanged();
-        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            threeStrategyChanged();
-        } else {
-            assert false;
-        }
-    }
-
-    /**
-     * Sets strategy. If a two strategy payoff function is being used, subject's
-     * strategy is set as initial conditions. If a three strategy payoff function
-     * is being used, Percent R is first element in array, percent P is second
-     * element and percent S is third element.
-     *
-     * Implements the strategyChanged function.
-     *
-     * @param s an array with the strategy.
-     */
-    public void setMyStrategy(float[] s) {
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            percent_A = s[0];
-        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            percent_R = s[0];
-            percent_P = s[1];
-            percent_S = s[2];
-        }
-        strategyChanged();
-    }
-
-    /**
-     * Sets the counterpart's strategy. If a two strategy payoff function is
-     * being used, counterpart's initial percent is set as initial element in
-     * array. If three strategy payoff function is being used, Percent r is first
-     * element in array, percent p is second element, and percent s is third
-     * element.
-     *
-     * Implements strategyChange function.
-     *
-     * @param s an array with the counterpart's strategy.
-     */
-    public void setCounterpartStrategy(float[] s) {
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            percent_a = s[0];
-        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            percent_r = s[0];
-            percent_p = s[1];
-            percent_s = s[2];
-        }
-        strategyChanged();
     }
 
     /**
@@ -725,33 +350,14 @@ public class Chart extends Sprite implements Configurable<Config> {
      * @param counterpartSubperiodStrategy counterpart's strategy for subperiod.
      */
     public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            percent_A = subperiodStrategy[0];
-            percent_a = counterpartSubperiodStrategy[0];
-        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            percent_R = subperiodStrategy[0];
-            percent_P = subperiodStrategy[1];
-            percent_S = subperiodStrategy[2];
-            percent_r = counterpartSubperiodStrategy[0];
-            percent_p = counterpartSubperiodStrategy[1];
-            percent_s = counterpartSubperiodStrategy[2];
-        }
         float percentStart = (float) (subperiod - 1) / FIRE.client.getConfig().subperiods;
         float percentEnd = (float) subperiod / FIRE.client.getConfig().subperiods;
-        float tmpCurrentPercent = currentPercent;
-        currentPayoffYou = payoffFunction.getPayoff(tmpCurrentPercent, subperiodStrategy, counterpartSubperiodStrategy);
-        currentPayoffCounterpart = counterpartPayoffFunction.getPayoff(tmpCurrentPercent, counterpartSubperiodStrategy, subperiodStrategy);
-        currentPercent = percentStart;
-        updateLines();
-        currentPercent = percentEnd;
-        updateLines();
-        currentPercent = tmpCurrentPercent;
+        updateLines(percentStart);
+        updateLines(percentEnd);
     }
 
     public void configChanged(Config config) {
         this.config = config;
-        payoffFunction = config.payoffFunction;
-        counterpartPayoffFunction = config.counterpartPayoffFunction;
         minPayoff = config.payoffFunction.getMin();
         maxPayoff = config.payoffFunction.getMax();
         actualPayoffYou.configure(config.yourPayoff);
@@ -807,14 +413,14 @@ public class Chart extends Sprite implements Configurable<Config> {
         boolean shocked =
                 config != null
                 && config.shock != null
-                && currentPercent > config.shock.start
-                && currentPercent < config.shock.end
+                && Client.state.currentPercent > config.shock.start
+                && Client.state.currentPercent < config.shock.end
                 && line.showShock;
         line.setPoint(
                 Math.round(line.width * x),
                 Math.round(line.height * (1 - ((y - minPayoff) / (maxPayoff - minPayoff)))),
                 !shocked);
-        if (FIRE.client.getConfig().shock.backfill && currentPercent > config.shock.end) {
+        if (FIRE.client.getConfig().shock.backfill && Client.state.currentPercent > config.shock.end) {
             line.clearShocks();
         }
     }
@@ -833,12 +439,12 @@ public class Chart extends Sprite implements Configurable<Config> {
      * @param y
      */
     public void addStrategyPoint(Line line, float x, float y) {
-        boolean shocked = currentPercent > config.shock.start && currentPercent < config.shock.end && line.showShock;
+        boolean shocked = Client.state.currentPercent > config.shock.start && Client.state.currentPercent < config.shock.end && line.showShock;
         line.setPoint(
                 Math.round(line.width * x),
                 Math.round(line.height * (1 - y)),
                 !shocked);
-        if (FIRE.client.getConfig().shock.backfill && currentPercent > config.shock.end) {
+        if (FIRE.client.getConfig().shock.backfill && Client.state.currentPercent > config.shock.end) {
             line.clearShocks();
         }
     }

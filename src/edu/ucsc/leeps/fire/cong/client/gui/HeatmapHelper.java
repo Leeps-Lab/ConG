@@ -108,9 +108,9 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
                 you[0] = A;
                 other[0] = a;
                 if (mine) {
-                    value = u.getPayoff(currentPercent, you, other) / max;
+                    value = PayoffFunction.Utilities.getPayoff(new float[]{A}, new float[]{a}) / max;
                 } else {
-                    value = u.getPayoff(currentPercent, other, you) / max;
+                    value = PayoffFunction.Utilities.getMatchPayoff(new float[]{A}, new float[]{a}) / max;
                 }
                 backBuffer.pixels[y * size + x] = getRGB(value);
             }
@@ -155,9 +155,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
             for (int y = 0; y < height; y++) {
                 float[] RPS = RPSCache[x][y];
                 if (RPS[0] >= 0 && RPS[1] >= 0 && RPS[2] >= 0) {
-                    float u = payoffFunction.getPayoff(
-                            currentPercent,
-                            RPS, rps);
+                    float u = PayoffFunction.Utilities.getPayoff(RPS, rps);
                     backBuffer.pixels[y * width + x] = getRGB(u / max);
                 } else {
                     backBuffer.pixels[y * width + x] = applet.color(255, 0, 0, 0);
@@ -168,9 +166,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         currentBuffer = backBuffer;
     }
 
-    public void updateStripHeatmap(
-            float currentPercent,
-            float opponentStrat) {
+    public void updateStripHeatmap() {
         backBuffer = applet.createGraphics(width, height, Client.P2D);
         backBuffer.loadPixels();
 
@@ -183,9 +179,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
                 int y = i / width;
 
                 float myStrat = 1f - ((float) y / (float) height);
-                u = payoffFunction.getPayoff(currentPercent,
-                        new float[]{myStrat},
-                        new float[]{opponentStrat});
+                u = PayoffFunction.Utilities.getPayoff(new float[]{myStrat});
 
                 backBuffer.pixels[i] = getRGB(u / max);
             }
@@ -198,9 +192,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         } else {
             for (int i = 0; i / width == 0; ++i) {
                 float myStrat = (float) i / (float) width;
-                u = payoffFunction.getPayoff(currentPercent,
-                        new float[]{myStrat},
-                        new float[]{opponentStrat});
+                u = PayoffFunction.Utilities.getPayoff(new float[]{myStrat});
 
                 backBuffer.pixels[i] = getRGB(u / max);
             }

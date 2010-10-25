@@ -346,8 +346,8 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 myStrategy[i] = 1f;
                 opponentStrategy[j] = 1f;
 
-                float myPayoff = payoffFunction.getPayoff(currentPercent, myStrategy, opponentStrategy);
-                float opponentPayoff = payoffFunction.getPayoff(currentPercent, opponentStrategy, myStrategy);
+                float myPayoff = PayoffFunction.Utilities.getPayoff();
+                float opponentPayoff = PayoffFunction.Utilities.getMatchPayoff();
 
                 cellMarkers[i][j].setLabel(myPayoff, opponentPayoff);
             }

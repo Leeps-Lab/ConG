@@ -2,6 +2,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 
 /**
  *
@@ -84,8 +85,7 @@ public class PointsDisplay extends Sprite {
             if (elapsed > 1000) {
                 float millisInPeriod = FIRE.client.getConfig().length * 1000f;
                 float percentInStrategy = elapsed / millisInPeriod;
-                float percentOfPeriod = (System.currentTimeMillis() - periodStartTime) / millisInPeriod;
-                float payoff = FIRE.client.getConfig().payoffFunction.getPayoff(percentOfPeriod, myStrategy, counterStrategy);
+                float payoff = PayoffFunction.Utilities.getPayoff();
                 periodPoints += percentInStrategy * payoff;
             }
         }

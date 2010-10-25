@@ -1,5 +1,7 @@
 package edu.ucsc.leeps.fire.cong.server;
 
+import java.util.Map;
+
 /**
  *
  * @author jpettit
@@ -28,14 +30,16 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
     }
 
     public float getPayoff(
-            float percent, float[] myStrategy, float[] opponentStrategy) {
+            int id, float percent,
+            Map<Integer, float[]> popStrategies,
+            Map<Integer, float[]> matchPopStrategies) {
         if (!Float.isNaN(AaStart) && !Float.isNaN(AaEnd)) {
             Aa = AaStart + (percent * (AaEnd - AaStart));
         }
         float A, B, a, b;
-        A = myStrategy[0];
+        A = popStrategies.get(id)[0];
         B = 1 - A;
-        a = opponentStrategy[0];
+        a = PayoffFunction.Utilities.getAverageMatchStrategy(id, popStrategies, matchPopStrategies)[0];
         b = 1 - a;
         if (isCounterpart) {
             return A * (a * Aa + b * Ba) + B * (a * Ab + b * Bb);

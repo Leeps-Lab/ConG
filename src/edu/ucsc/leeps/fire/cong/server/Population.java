@@ -3,7 +3,6 @@ package edu.ucsc.leeps.fire.cong.server;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.logging.TickEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +41,7 @@ public class Population implements Serializable {
         periodStartTime = timestamp;
         for (Tuple tuple : tuples) {
             tuple.evalTime = timestamp;
-            tuple.updateCounterparts();
+            tuple.update();
         }
     }
 
@@ -68,30 +67,34 @@ public class Population implements Serializable {
 
     public void logTick(int subperiod, int secondsLeft) {
         // Log the tick information
+        /*
+         * FIXME
         int period = FIRE.server.getConfig().period;
         float length = FIRE.server.getConfig().length;
         float percent = (float) (length * secondsLeft) / (float) length;
         for (int member : members.keySet()) {
-            TickEvent tick = new TickEvent();
-            tick.period = period;
-            tick.subject = member;
-            tick.subperiod = subperiod;
-            tick.secondsLeft = secondsLeft;
-            Tuple tuple = tupleMap.get(member);
-            tick.population = tuple.population;
-            tick.world = tuple.world;
-            tick.strategy = tuple.strategies.get(member);
-            tick.target = tuple.targets.get(member);
-            tick.match = tuple.match.population;
-            if (tuple == tuple.match && FIRE.server.getConfig().excludeSelf) {
-                tick.matchStrategy = tuple.strategyExclude.get(member);
-            } else {
-                tick.matchStrategy = tuple.match.strategy;
-            }
-            tick.pf = FIRE.server.getConfig(member).payoffFunction;
-            tick.payoff = tick.pf.getPayoff(percent, tick.strategy, tick.matchStrategy);
-            FIRE.server.commit(tick);
+        TickEvent tick = new TickEvent();
+        tick.period = period;
+        tick.subject = member;
+        tick.subperiod = subperiod;
+        tick.secondsLeft = secondsLeft;
+        Tuple tuple = tupleMap.get(member);
+        tick.population = tuple.population;
+        tick.world = tuple.world;
+        tick.strategy = tuple.strategies.get(member);
+        tick.target = tuple.targets.get(member);
+        tick.match = tuple.match.population;
+        if (tuple == tuple.match && FIRE.server.getConfig().excludeSelf) {
+        tick.matchStrategy = tuple.strategyExclude.get(member);
+        } else {
+        tick.matchStrategy = tuple.match.strategy;
         }
+        tick.pf = FIRE.server.getConfig(member).payoffFunction;
+        tick.payoff = tick.pf.getPayoff(percent, tick.strategy, tick.matchStrategy);
+        FIRE.server.commit(tick);
+        }
+         * 
+         */
     }
 
     private class Tuple {
@@ -100,8 +103,6 @@ public class Population implements Serializable {
         public int world;
         public Set<Integer> members;
         public long evalTime;
-        public float[] strategy;
-        public Map<Integer, float[]> strategyExclude;
         public Map<Integer, float[]> strategies;
         public Map<Integer, float[]> targets;
         public Tuple match;
@@ -116,12 +117,6 @@ public class Population implements Serializable {
             members = new HashSet<Integer>();
             strategies = new HashMap<Integer, float[]>();
             targets = new HashMap<Integer, float[]>();
-            if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                strategy = new float[2];
-            } else {
-                strategy = new float[3];
-            }
-            strategyExclude = new HashMap<Integer, float[]>();
         }
 
         public void update(int changed, float[] strategy, float[] target, long timestamp) {
@@ -131,62 +126,18 @@ public class Population implements Serializable {
             }
             strategies.put(changed, strategy);
             targets.put(changed, target);
-            mergeStrategies();
             if (FIRE.server.getConfig().subperiods == 0) {
-                updateCounterparts();
+                update();
             }
         }
 
-        public void updateCounterparts() {
-            if (this == this.match && FIRE.server.getConfig().excludeSelf) {
-                for (int member : match.members) {
-                    Population.this.members.get(member).setCounterpartStrategy(strategyExclude.get(member));
-                }
-            } else {
-                for (int member : match.members) {
-                    Population.this.members.get(member).setCounterpartStrategy(strategy);
-                }
-            }
-        }
-
-        public void mergeStrategies() {
-            if (this == this.match && FIRE.server.getConfig().excludeSelf) {
-                for (int member : members) {
-                    mergeStrategies(member);
-                }
-            } else {
-                for (int i = 0; i < strategy.length; i++) {
-                    strategy[i] = 0;
-                }
-                for (int member : members) {
-                    float[] s = strategies.get(member);
-                    for (int i = 0; i < strategy.length; i++) {
-                        strategy[i] += s[i];
-                    }
-                }
-                for (int i = 0; i < strategy.length; i++) {
-                    strategy[i] /= (float) members.size();
-                }
-            }
-        }
-
-        public void mergeStrategies(int exclude) {
-            float[] s = new float[strategy.length];
-            for (int i = 0; i < s.length; i++) {
-                s[i] = 0;
-            }
+        public void update() {
             for (int member : members) {
-                if (member != exclude) {
-                    float[] s1 = strategies.get(member);
-                    for (int i = 0; i < s.length; i++) {
-                        s[i] += s1[i];
-                    }
-                }
+                Population.this.members.get(member).setStrategies(strategies);
             }
-            for (int i = 0; i < s.length; i++) {
-                s[i] /= (members.size() - 1);
+            for (int member : match.members) {
+                Population.this.members.get(member).setMatchStrategies(strategies);
             }
-            strategyExclude.put(exclude, s);
         }
 
         public void evaluate(long timestamp) {
@@ -199,13 +150,7 @@ public class Population implements Serializable {
         public void evaluate(float percent, float percentElapsed) {
             for (int member : members) {
                 PayoffFunction u = FIRE.server.getConfig(member).payoffFunction;
-                float[] otherStrategy;
-                if (this == this.match && FIRE.server.getConfig().excludeSelf) {
-                    otherStrategy = strategyExclude.get(member);
-                } else {
-                    otherStrategy = match.strategy;
-                }
-                float payoff = u.getPayoff(percent, strategies.get(member), otherStrategy);
+                float payoff = u.getPayoff(member, percent, strategies, match.strategies);
                 payoff *= percentElapsed;
                 FIRE.server.addToPeriodPoints(member, payoff);
             }
@@ -217,16 +162,10 @@ public class Population implements Serializable {
             evaluate(percent, percentElapsed);
             match.evaluate(percent, percentElapsed);
             for (int member : members) {
-                float[] otherStrategy;
-                if (this == this.match && FIRE.server.getConfig().excludeSelf) {
-                    otherStrategy = strategyExclude.get(member);
-                } else {
-                    otherStrategy = match.strategy;
-                }
-                Population.this.members.get(member).endSubperiod(subperiod, strategies.get(member), otherStrategy);
+                Population.this.members.get(member).endSubperiod(
+                        subperiod, strategies, match.strategies);
             }
-            mergeStrategies();
-            updateCounterparts();
+            update();
 
         }
 
@@ -374,13 +313,12 @@ public class Population implements Serializable {
         for (int client : members.keySet()) {
             float[] s;
             if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                s = new float[2];
+                s = new float[1];
                 if (FIRE.server.getConfig().mixedStrategySelection) {
                     s[0] = FIRE.server.getRandom().nextFloat();
                 } else {
                     s[0] = FIRE.server.getRandom().nextBoolean() ? 1 : 0;
                 }
-                s[1] = 1 - s[0];
             } else {
                 s = new float[3];
                 if (FIRE.server.getConfig().mixedStrategySelection) {
@@ -401,7 +339,9 @@ public class Population implements Serializable {
                 tuple.strategies.put(member, FIRE.server.getConfig(member).initialStrategy);
                 tuple.targets.put(member, FIRE.server.getConfig(member).initialStrategy);
             }
-            tuple.mergeStrategies();
+        }
+        for (Tuple tuple : tuples) {
+            tuple.update();
         }
     }
 }

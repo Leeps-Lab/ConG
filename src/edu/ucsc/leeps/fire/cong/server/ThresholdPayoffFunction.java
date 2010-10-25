@@ -12,6 +12,7 @@ package edu.ucsc.leeps.fire.cong.server;
 public class ThresholdPayoffFunction extends TwoStrategyPayoffFunction {
     public float threshold = .5f;
 
+    /*
     @Override
     public float getPayoff(
             float percent, float[] myStrategy, float[] opponentStrategy) {
@@ -20,6 +21,8 @@ public class ThresholdPayoffFunction extends TwoStrategyPayoffFunction {
         else
             return ((myStrategy[0] * Ab) + ((1 - myStrategy[0]) * Bb));
     }
+     * 
+     */
 
     public boolean thresholdMet(float percent,float[] myStrategy, float[] opponentStrategy) {
         return opponentStrategy[0] >= threshold;

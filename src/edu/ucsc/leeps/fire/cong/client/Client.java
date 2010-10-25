@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
@@ -39,8 +40,8 @@ import processing.core.PFont;
 public class Client extends PApplet implements ClientInterface, FIREClientInterface {
 
     public static boolean DEBUG = System.getProperty("fire.client.debug") != null;
+    public static State state = new State();
     private int updatesPerSecond;
-    private float percent;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
     //only one shown
@@ -112,8 +113,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void startPrePeriod() {
-        haveInitialStrategy = false;
-        this.percent = 0;
+        state.id = FIRE.client.getID();
+        if (FIRE.client.getConfig().initialStrategy == null) {
+            haveInitialStrategy = false;
+        } else {
+            haveInitialStrategy = true;
+        }
+        state.currentPercent = 0;
         if (simplex.visible) {
             selector = simplex;
             strategyChanger.selector = simplex;
@@ -140,15 +146,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public void startPeriod() {
         if (FIRE.client.getConfig().preLength == 0) {
+            state.currentPercent = 0;
+            state.setMyStrategy(FIRE.client.getConfig().initialStrategy);
             strategyChanger.setCurrentStrategy(FIRE.client.getConfig().initialStrategy);
             strategyChanger.setTargetStrategy(FIRE.client.getConfig().initialStrategy);
-            strategyChanger.selector.setInitial(FIRE.client.getConfig().initialStrategy);
-            payoffChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-            strategyChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-            rChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-            pChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-            sChart.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-            this.percent = 0;
             bimatrix.setEnabled(true);
             pureMatrix.setEnabled(true);
             strip.setEnabled(true);
@@ -163,13 +164,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.startPeriod();
         strategyChanger.selector.startPeriod();
 
-        percent = 0f;
-        payoffChart.currentPercent = percent;
-        strategyChart.currentPercent = percent;
-        rChart.currentPercent = percent;
-        pChart.currentPercent = percent;
-        sChart.currentPercent = percent;
-
+        state.currentPercent = 0f;
         if (FIRE.client.getConfig().subperiods == 0) {
             payoffChart.updateLines();
             strategyChart.updateLines();
@@ -188,12 +183,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     public void endPeriod() {
         strategyChanger.endPeriod();
 
-        percent = 1f;
-        payoffChart.currentPercent = percent;
-        strategyChart.currentPercent = percent;
-        rChart.currentPercent = percent;
-        pChart.currentPercent = percent;
-        sChart.currentPercent = percent;
+        state.currentPercent = 1f;
 
         if (FIRE.client.getConfig().subperiods == 0) {
             payoffChart.updateLines();
@@ -215,7 +205,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void tick(int secondsLeft) {
-        this.percent = width * (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
+        state.currentPercent = width * (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
         countdown.setSecondsLeft(secondsLeft);
     }
 
@@ -223,36 +213,20 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         return strategyChanger.getCurrentStrategy();
     }
 
-    public void setMyStrategy(float[] s) {
-        haveInitialStrategy = true;
-        strategyChanger.setCurrentStrategy(s);
-        payoffChart.setMyStrategy(s);
-        strategyChart.setMyStrategy(s);
-        rChart.setMyStrategy(s);
-        pChart.setMyStrategy(s);
-        sChart.setMyStrategy(s);
-        pointsDisplay.setMyStrategy(s);
+    public void setStrategies(Map<Integer, float[]> strategies) {
+        state.strategies = strategies;
     }
 
-    public void setCounterpartStrategy(float[] s) {
-        strategyChanger.selector.setCounterpart(s);
-        payoffChart.setCounterpartStrategy(s);
-        strategyChart.setCounterpartStrategy(s);
-        rChart.setCounterpartStrategy(s);
-        pChart.setCounterpartStrategy(s);
-        sChart.setCounterpartStrategy(s);
-        pointsDisplay.setCounterpartStrategy(s);
+    public void setMatchStrategies(Map<Integer, float[]> matchStrategies) {
+        state.matchStrategies = matchStrategies;
     }
 
-    public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
-        strategyChanger.setCurrentStrategy(subperiodStrategy);
-        strategyChanger.selector.setCounterpart(counterpartSubperiodStrategy);
-        payoffChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
-        strategyChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
-        rChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
-        pChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
-        sChart.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
-        strategyChanger.endSubperiod(subperiod, subperiodStrategy, counterpartSubperiodStrategy);
+    public void endSubperiod(
+            int subperiod,
+            Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies) {
+        state.subperiod = subperiod;
+        state.strategies = strategies;
+        state.matchStrategies = matchStrategies;
     }
 
     public void newMessage(String message, int senderID) {
@@ -295,7 +269,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         width = INIT_WIDTH;
         height = INIT_HEIGHT - 40;
 
-        percent = -1;
+        state.currentPercent = 0;
 
         int leftMargin = 20;
         int topMargin = 20;
@@ -364,15 +338,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
             if (frameCount % 5 == 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
                 long length = FIRE.client.getConfig().length * 1000l;
-                percent = (float) FIRE.client.getElapsedMillis() / (float) length;
-                payoffChart.currentPercent = percent;
-                strategyChart.currentPercent = percent;
-                rChart.currentPercent = percent;
-                pChart.currentPercent = percent;
-                sChart.currentPercent = percent;
-                if (strategyChanger.selector != null) {
-                    strategyChanger.selector.setCurrentPercent(percent);
-                }
+                state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
 
                 if (FIRE.client.getConfig().subperiods == 0) {
                     payoffChart.updateLines();

@@ -137,14 +137,17 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     private void doImpulse() {
+        /*
         for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
             int id = entry.getKey();
             ClientInterface client = entry.getValue();
             float r = FIRE.server.getRandom().nextFloat();
             float[] newStrategy = new float[]{r, 1 - r};
-            client.setMyStrategy(newStrategy);
+            client.setStrategy(newStrategy);
             strategyChanged(newStrategy, newStrategy, id);
         }
+         * 
+         */
     }
 
     public void newMessage(String message, int senderID) {

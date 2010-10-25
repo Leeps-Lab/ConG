@@ -1,4 +1,3 @@
-
 package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
@@ -21,18 +20,13 @@ import java.awt.event.MouseListener;
  * @author swolpert
  */
 public class OneStrategyStripSelector extends Sprite implements Configurable<Config>, MouseListener,
-    KeyListener, Selector {
+        KeyListener, Selector {
 
     private Client applet;
-    private float myStrat;
-    private float opponentStrat;
     private float targetStrat;
     private boolean enabled;
     private HeatmapHelper heatmap;
     private Slider slider;
-    private float currentPercent;
-    private Config config;
-    private PayoffFunction payoffFunction;
     private Marker currentPayoff;
     private Marker targetPayoff;
     private Marker BPayoff;
@@ -121,62 +115,16 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     }
 
     /**
-     * Gives a float that determines the user's strategy.
-     * @return user's strategy.
-     */
-    public float[] getMyStrategy() {
-        return new float[]{myStrat, 0};
-    }
-
-    /**
-     * Sets  the current percent to some percent.
-     * @param percent
-     */
-    public void setCurrentPercent(float percent) {
-        currentPercent = percent;
-    }
-
-    /**
-     * Sets initial user strategy and ghost values to some given condition.
-     *
-     * @param A initial condition for user.
-     */
-    public void setInitialStrategy(float A) {
-        myStrat = A;
-        slider.setStratValue(A);
-        slider.setGhostValue(A);
-    }
-
-    /**
-     * Sets user's current strategy to some value using the slider.
-     *
-     * @param A float determining the user's current strategy.
-     */
-    public void setMyStrategy(float A) {
-        myStrat = A;
-        slider.setStratValue(A);
-    }
-
-    /**
-     * Sets counterpart's strategy.
-     *
-     * @param a float for counterpart's strategy.
-     */
-    public void setCounterpartStrategy(float a) {
-        opponentStrat = a;
-    }
-
-    /**
      * If visible, update strip heatmap using current percent and the counterpart's
      * strategy.
      *
      */
     public void update() {
         if (visible) {
-            heatmap.updateStripHeatmap(currentPercent, opponentStrat);
+            heatmap.updateStripHeatmap();
         }
     }
-    
+
     public void mouseClicked(MouseEvent e) {
     }
 
@@ -260,16 +208,16 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         if (!visible) {
             return;
         }
-        
+
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
 
         heatmap.draw(applet);
-        
+
         if (enabled && slider.isGhostGrabbed()) {
             float mouseX = applet.mouseX - origin.x;
             float mouseY = applet.mouseY - origin.y;
-            
+
             if (slider.getAlignment() == Slider.Alignment.Horizontal) {
                 slider.moveGhost(mouseX);
             } else {
@@ -280,11 +228,11 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             hover.update(applet.mouseX - origin.x, applet.mouseY - origin.y);
             float hoverA;
             if (width > height) {
-                hoverA = (applet.mouseX - origin.x) / (float)width;
+                hoverA = (applet.mouseX - origin.x) / (float) width;
             } else {
-                hoverA = 1 - (applet.mouseY - origin.y) / (float)height;
+                hoverA = 1 - (applet.mouseY - origin.y) / (float) height;
             }
-            hover.setLabel(payoffFunction.getPayoff(currentPercent, new float[]{hoverA}, new float[]{opponentStrat}));
+            hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverA}));
         } else {
             hover.setVisible(false);
         }
@@ -305,18 +253,15 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         }
 
         slider.draw(applet);
-        
+
         hover.draw(applet);
 
         applet.popMatrix();
     }
 
     public void configChanged(Config config) {
-        this.config = config;
-
-        if (config.mixedStrategySelection && config.stripStrategySelection &&
-                config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            payoffFunction = config.payoffFunction;
+        if (config.mixedStrategySelection && config.stripStrategySelection
+                && config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             setVisible(true);
 
             if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapSingle) {
@@ -330,10 +275,10 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     }
 
     private void updateLabels() {
-        float uA = payoffFunction.getPayoff(currentPercent, new float[]{1}, new float[]{opponentStrat});
-        float uB = payoffFunction.getPayoff(currentPercent, new float[]{0}, new float[]{opponentStrat});
-        float uCurrent = payoffFunction.getPayoff(currentPercent, new float[]{myStrat}, new float[]{opponentStrat});
-        float uTarget = payoffFunction.getPayoff(currentPercent, new float[]{slider.getGhostValue()}, new float[]{opponentStrat});
+        float uA = PayoffFunction.Utilities.getPayoff(new float[]{1});
+        float uB = PayoffFunction.Utilities.getPayoff(new float[]{0});
+        float uCurrent = PayoffFunction.Utilities.getPayoff();
+        float uTarget = PayoffFunction.Utilities.getPayoff(new float[]{slider.getGhostValue()});
 
         APayoff.setLabel(uA);
         BPayoff.setLabel(uB);
@@ -357,20 +302,12 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         BPayoff.setVisible(showHeatmap);
     }
 
-    public void setCurrent(float[] strategy) {
-        myStrat = strategy[0];
-    }
-
     public void setInitial(float[] strategy) {
         targetStrat = strategy[0];
     }
 
-    public void setCounterpart(float[] strategy) {
-        opponentStrat = strategy[0];
-    }
-
     public float[] getTarget() {
-        return new float[] { targetStrat };
+        return new float[]{targetStrat};
     }
 
     public void startPrePeriod() {

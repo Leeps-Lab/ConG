@@ -6,6 +6,7 @@ import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import java.awt.Color;
 import java.awt.event.MouseListener;
@@ -35,7 +36,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private Slider[] stratSlider;
     private boolean mouseInTriangle;
     private boolean enabled;
-    private Config config;
     private HeatmapHelper heatmap;
     private Client client;
     public float currentPercent;
@@ -278,7 +278,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             applet.line(hover.origin.x, hover.origin.y, hoverPDrop.origin.x, hoverPDrop.origin.y);
             applet.line(hover.origin.x, hover.origin.y, hoverSDrop.origin.x, hoverSDrop.origin.y);
 
-            hover.setLabel(config.payoffFunction.getPayoff(currentPercent, hoverStrat, opponentStrat));
+            hover.setLabel(PayoffFunction.Utilities.getPayoff(hoverStrat));
 
             hoverRDrop.setLabel(hoverStrat[R]);
             hoverPDrop.setLabel(hoverStrat[P]);
@@ -294,7 +294,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         hover.draw(applet);
 
         if (target.visible && targetStrat != null) {
-            target.setLabel(config.payoffFunction.getPayoff(currentPercent, targetStrat, opponentStrat));
+            target.setLabel(PayoffFunction.Utilities.getPayoff(targetStrat));
             adjustLabels(targetStrat, target, null, null);
         }
 
@@ -307,7 +307,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             applet.line(current.origin.x, current.origin.y, sDrop.origin.x, sDrop.origin.y);
         }
 
-        current.setLabel(config.payoffFunction.getPayoff(currentPercent, playedStrat, opponentStrat));
+        current.setLabel(PayoffFunction.Utilities.getPayoff(playedStrat));
 
         adjustLabels(playedStrat, current, pDrop, rDrop);
 
@@ -691,7 +691,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     }
 
     public void configChanged(Config config) {
-        this.config = config;
         if (config.mixedStrategySelection
                 && config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             rLabel = config.rLabel;

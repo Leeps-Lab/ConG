@@ -1,5 +1,8 @@
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.cong.FIRE;
+import java.util.Map;
+
 /**
  *
  * @author jpettit
@@ -33,15 +36,19 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
     }
 
     public float getPayoff(
+            int id,
             float percent,
-            float[] myStrategy, float[] opponentStrategy) {
+            Map<Integer, float[]> popStrategies,
+            Map<Integer, float[]> matchPopStrategies) {
         float A, B, C, a, b, c;
-        A = myStrategy[0];
-        B = myStrategy[1];
-        C = myStrategy[2];
-        a = opponentStrategy[0];
-        b = opponentStrategy[1];
-        c = opponentStrategy[2];
+        A = popStrategies.get(id)[0];
+        B = popStrategies.get(id)[1];
+        C = popStrategies.get(id)[2];
+        float[] match = PayoffFunction.Utilities.getAverageMatchStrategy(
+                id, popStrategies, matchPopStrategies);
+        a = match[0];
+        b = match[1];
+        c = match[2];
         return A * (Rr * a + Rp * b + Rs * c)
                 + B * (Pr * a + Pp * b + Ps * c)
                 + C * (Sr * a + Sp * b + Ss * c);
