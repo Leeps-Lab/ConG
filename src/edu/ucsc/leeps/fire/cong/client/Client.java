@@ -62,7 +62,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public Client() {
         loadLibraries();
-        updatesPerSecond = Integer.parseInt(System.getProperty("fire.client.ups", "1"));
+        updatesPerSecond = Integer.parseInt(System.getProperty("fire.client.ups", "5"));
         noLoop();
         INIT_WIDTH = 900;
         INIT_HEIGHT = 600;
