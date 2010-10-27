@@ -142,6 +142,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     public void setTargetStrategy(float[] strategy) {
+        assert strategy.length == currentStrategy.length;
         if (config.percentChangePerSecond >= 1.0f
                 || !FIRE.client.getClient().haveInitialStrategy()) {
             for (int i = 0; i < strategy.length; i++) {

@@ -160,7 +160,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     public void update() {
         if (visible) {
             heatmap.updateThreeStrategyHeatmap(
-                    currentPercent,
                     opponentStrat[0], opponentStrat[1], opponentStrat[2],
                     this);
         }

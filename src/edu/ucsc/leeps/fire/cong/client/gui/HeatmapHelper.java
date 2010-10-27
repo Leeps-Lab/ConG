@@ -85,7 +85,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         return 1f / (1 + (float) Math.exp(-a * (x - b)));
     }
 
-    public void updateTwoStrategyHeatmap(float currentPercent) {
+    public void updateTwoStrategyHeatmap() {
         int size = 100;
         PayoffFunction u;
         if (mine) {
@@ -123,7 +123,6 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     }
 
     public void updateThreeStrategyHeatmap(
-            float currentPercent,
             float r, float p, float s,
             ThreeStrategySelector threeStrategySelector) {
         if (r < 0 || p < 0 || s < 0) {

@@ -7,6 +7,7 @@ import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
@@ -194,8 +195,13 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     }
 
     public float[] getTarget() {
-        float[] tmp = new float[target.length];
-        System.arraycopy(target, 0, tmp, 0, target.length);
+        float[] tmp;
+        if (target.length == 2) {
+            tmp = new float[target.length - 1];
+        } else {
+            tmp = new float[target.length];
+        }
+        System.arraycopy(target, 0, tmp, 0, tmp.length);
         return tmp;
     }
 
@@ -325,7 +331,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             buttons.setEnabled(false);
         }
 
-        if (config.mixedStrategySelection) {
+        if (config.mixedStrategySelection || payoffFunction instanceof QWERTYPayoffFunction) {
             setVisible(false);
         } else {
             setVisible(true);

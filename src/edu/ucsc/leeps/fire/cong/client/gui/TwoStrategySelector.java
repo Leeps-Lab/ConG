@@ -26,7 +26,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private float target_percent_A;
     private boolean enabled;
     private HeatmapHelper heatmap, counterpartHeatmap;
-    private float currentPercent;
     private Marker myHeatmapAa;
     private Marker myHeatmapAb;
     private Marker myHeatmapBa;
@@ -116,8 +115,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     public void update() {
         if (visible) {
-            heatmap.updateTwoStrategyHeatmap(currentPercent);
-            counterpartHeatmap.updateTwoStrategyHeatmap(currentPercent);
+            heatmap.updateTwoStrategyHeatmap();
+            counterpartHeatmap.updateTwoStrategyHeatmap();
             updateLabels();
         }
     }

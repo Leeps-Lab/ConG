@@ -11,27 +11,24 @@ import processing.core.PImage;
  */
 public class RadioButtonGroup extends Sprite implements MouseListener {
 
-    public static enum Alignment {Horizontal, Vertical};
+    public static enum Alignment {
 
+        Horizontal, Vertical
+    };
     public static final int NO_BUTTON = -1;
-
     // applet in which button group exists - used to add and remove
     // group as a MouseListener
     private Client applet;
-
     // number of buttons in group
     private int numButtons;
     // how the buttons are aligned
     private Alignment alignment;
     // array storing buttons themselves
     private RadioButton[] buttons;
-
     // button currently pressed
     private int selectedButton;
-
     // distance between buttons - buttons are evenly spaced
     private float spacing;
-
     // whether or not group is enabled
     private boolean enabled;
 
@@ -52,7 +49,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
         selectedButton = NO_BUTTON;
 
-        spacing = (float)length / (float)numButtons;
+        spacing = (float) length / (float) numButtons;
 
         // buffer space at beginning and end of row of buttons
         float buffer = spacing / 2f;
@@ -77,7 +74,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
-            for(int i = 0; i < numButtons; ++i) {
+            for (int i = 0; i < numButtons; ++i) {
                 buttons[i].draw(applet);
             }
 
@@ -168,14 +165,15 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
             button.setLabelMode(labelMode);
         }
     }
-    
+
     public void setLabels(String[] labels) {
         for (int i = 0; i < numButtons; ++i) {
             buttons[i].setLabel(labels[i]);
         }
     }
-    
+
     private class RadioButton extends Marker {
+
         private RadioButtonGroup group;
         private boolean selected;
         private PImage idleTexture;
@@ -212,7 +210,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
                 applet.noStroke();
                 applet.fill(245, 245, 245);
                 applet.ellipse(origin.x, origin.y, width + 3, height + 3);
-                
+
                 applet.fill(0, 0, 0);
                 applet.ellipse(origin.x, origin.y, width + 1, height + 1);
 
@@ -243,7 +241,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
             disabledSelectedTexture.loadPixels();
             float centerX = width / 2 - 1;
             float centerY = width / 2 - 1;
-            for(int i = 0; i < idleTexture.pixels.length; ++i) {
+            for (int i = 0; i < idleTexture.pixels.length; ++i) {
                 float x = i % width;
                 float y = i / width;
                 float distance = Client.dist(x, y, centerX, centerY);
@@ -262,12 +260,12 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
             centerX = width / 2 - 1;
             centerY = 0;
-            for(int i = 0; i < idleTexture.pixels.length; ++i) {
+            for (int i = 0; i < idleTexture.pixels.length; ++i) {
                 float x = i % width;
                 float y = i / width;
                 float distance = Client.dist(x, y, centerX, centerY);
-                if (distance < width / 2 &&
-                    idleTexture.pixels[i] != applet.color(255, 255, 255, 0)) {
+                if (distance < width / 2
+                        && idleTexture.pixels[i] != applet.color(255, 255, 255, 0)) {
                     float adjustment = distance * 10;
                     idleTexture.pixels[i] = applet.color(237 - adjustment, 237 - adjustment, 237 - adjustment, 255);
                     selectedTexture.pixels[i] = applet.color(50 - adjustment, 140 - adjustment, 250 - adjustment, 255);
@@ -278,12 +276,12 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
             centerX = width / 2 - 1;
             centerY = height - 1;
-            for(int i = 0; i < idleTexture.pixels.length; ++i) {
+            for (int i = 0; i < idleTexture.pixels.length; ++i) {
                 float x = i % width;
                 float y = i / width;
                 float distance = Client.dist(x, y, centerX, centerY);
-                if (distance < width / 2 &&
-                    idleTexture.pixels[i] != applet.color(255, 255, 255, 0)) {
+                if (distance < width / 2
+                        && idleTexture.pixels[i] != applet.color(255, 255, 255, 0)) {
                     float adjustment = distance * 10;
                     idleTexture.pixels[i] = applet.color(237 - adjustment, 237 - adjustment, 237 - adjustment, 255);
                     selectedTexture.pixels[i] = applet.color(50 - adjustment, 140 - adjustment, 250 - adjustment, 255);
@@ -294,7 +292,7 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
 
             centerX = width / 2 - 1;
             centerY = width / 2 - 1;
-            for(int i = 0; i < idleTexture.pixels.length; ++i) {
+            for (int i = 0; i < idleTexture.pixels.length; ++i) {
                 float x = i % width;
                 float y = i / width;
                 if (Client.dist(x, y, centerX, centerY) < width / 4) {
