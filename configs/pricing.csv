@@ -1,0 +1,7 @@
+"period","timeConstrained","paid","length","percentChangePerSecond","numTuples","payoffFunction","name","mixedStrategySelection","stripStrategySelection","strategySelectionDisplayType"
+1,"TRUE","TRUE",120,1,1,"pricing","pf","TRUE","TRUE","Slider"
+2,"TRUE","TRUE",120,1,1,"pricing","pf","TRUE","TRUE","Slider"
+3,"TRUE","TRUE",120,1,1,"pricing","pf","TRUE","TRUE","Slider"
+4,"TRUE","TRUE",120,1,1,"pricing","pf","TRUE","TRUE","Slider"
+5,"TRUE","TRUE",120,1,1,"pricing","pf","TRUE","TRUE","Slider"
+6,"TRUE","TRUE",120,1,1,"pricing","pf","TRUE","TRUE","Slider"

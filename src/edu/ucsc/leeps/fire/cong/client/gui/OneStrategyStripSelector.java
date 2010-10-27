@@ -6,8 +6,6 @@ import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -19,19 +17,11 @@ import java.awt.event.MouseListener;
  *
  * @author swolpert
  */
-public class OneStrategyStripSelector extends Sprite implements Configurable<Config>, MouseListener,
-        KeyListener, Selector {
+public class OneStrategyStripSelector extends Sprite implements Configurable<Config>, Selector, MouseListener, KeyListener {
 
     private Client applet;
-    private float targetStrat;
     private boolean enabled;
-    private HeatmapHelper heatmap;
     private Slider slider;
-    private Marker currentPayoff;
-    private Marker targetPayoff;
-    private Marker BPayoff;
-    private Marker APayoff;
-    private Marker hover;
 
     /**
      * Creates a strip strategy selector for use with a one-strategy payoff
@@ -53,38 +43,16 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         super(parent, x, y, width, height);
         this.applet = applet;
 
-        heatmap = new HeatmapHelper(this, 0, 0, width, height, true, applet);
-        heatmap.setVisible(true);
-
-        hover = new Marker(this, 0, 0, false, 7);
-
         if (width > height) {
             slider = new Slider(applet, Slider.Alignment.Horizontal, 0, width, height / 2f, Color.black, "A", 1f);
-            currentPayoff = new Marker(this, 0, 0, true, 0);
-            currentPayoff.setLabelMode(Marker.LabelMode.Top);
-            targetPayoff = new Marker(this, 0, 0, true, 0);
-            targetPayoff.setLabelMode(Marker.LabelMode.Top);
-            BPayoff = new Marker(this, 0, 0, true, 0);
-            BPayoff.setLabelMode(Marker.LabelMode.Top);
-            APayoff = new Marker(this, width, 0, true, 0);
-            APayoff.setLabelMode(Marker.LabelMode.Top);
-            hover.setLabelMode(Marker.LabelMode.Top);
         } else {
             slider = new Slider(applet, Slider.Alignment.Vertical, 0, height, width / 2f, Color.black, "A", 1f);
-            currentPayoff = new Marker(this, 0, 0, true, 0);
-            currentPayoff.setLabelMode(Marker.LabelMode.Left);
-            targetPayoff = new Marker(this, 0, 0, true, 0);
-            targetPayoff.setLabelMode(Marker.LabelMode.Left);
-            BPayoff = new Marker(this, 0, height, true, 0);
-            BPayoff.setLabelMode(Marker.LabelMode.Left);
-            APayoff = new Marker(this, 0, 0, true, 0);
-            APayoff.setLabelMode(Marker.LabelMode.Left);
-            hover.setLabelMode(Marker.LabelMode.Left);
         }
         slider.showGhost();
 
-        applet.addMouseListener(this);
         FIRE.client.addConfigListener(this);
+        applet.addMouseListener(this);
+        applet.addKeyListener(this);
     }
 
     /**
@@ -96,81 +64,13 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         this.enabled = enabled;
     }
 
-    /**
-     * If not visible, remove mouse and key listeners. Otherwise, add key and
-     * mouse listeners.
-     *
-     * @param visible boolean determining whether mouse and keys are seen
-     */
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
-        if (!visible) {
-            applet.removeMouseListener(this);
-            applet.removeKeyListener(this);
-        } else {
-            applet.addMouseListener(this);
-            applet.addKeyListener(this);
-        }
+        slider.setVisible(visible);
     }
 
-    /**
-     * If visible, update strip heatmap using current percent and the counterpart's
-     * strategy.
-     *
-     */
     public void update() {
-        if (visible) {
-            heatmap.updateStripHeatmap();
-        }
-    }
-
-    public void mouseClicked(MouseEvent e) {
-    }
-
-    public void mousePressed(MouseEvent e) {
-        if (enabled && isHit(e.getX(), e.getY())) {
-            slider.grabGhost();
-            hover.setVisible(false);
-        }
-    }
-
-    public void mouseReleased(MouseEvent e) {
-        if (enabled) {
-            if (slider.isGhostGrabbed()) {
-                slider.releaseGhost();
-            }
-        }
-    }
-
-    public void mouseEntered(MouseEvent e) {
-    }
-
-    public void mouseExited(MouseEvent e) {
-    }
-
-    public void keyTyped(KeyEvent e) {
-    }
-
-    public void keyPressed(KeyEvent e) {
-        if (!enabled) {
-            return;
-        }
-
-        if (e.isActionKey()) {
-            if (e.getKeyCode() == KeyEvent.VK_UP) {
-                targetStrat += .01f;
-                targetStrat = Client.constrain(targetStrat, 0, 1);
-                slider.setGhostValue(targetStrat);
-            } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                targetStrat -= .01f;
-                targetStrat = Client.constrain(targetStrat, 0, 1);
-                slider.setGhostValue(targetStrat);
-            }
-        }
-    }
-
-    public void keyReleased(KeyEvent e) {
     }
 
     /**
@@ -209,10 +109,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             return;
         }
 
-        applet.pushMatrix();
-        applet.translate(origin.x, origin.y);
-
-        heatmap.draw(applet);
+        slider.setStratValue(Client.state.getMyStrategy()[0]);
 
         if (enabled && slider.isGhostGrabbed()) {
             float mouseX = applet.mouseX - origin.x;
@@ -223,38 +120,12 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             } else {
                 slider.moveGhost(mouseY);
             }
-        } else if (enabled && isHit(applet.mouseX, applet.mouseY) && heatmap.visible) {
-            hover.setVisible(true);
-            hover.update(applet.mouseX - origin.x, applet.mouseY - origin.y);
-            float hoverA;
-            if (width > height) {
-                hoverA = (applet.mouseX - origin.x) / (float) width;
-            } else {
-                hoverA = 1 - (applet.mouseY - origin.y) / (float) height;
-            }
-            hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverA}));
-        } else {
-            hover.setVisible(false);
         }
 
-        updateLabels();
-        APayoff.draw(applet);
-        BPayoff.draw(applet);
-        targetPayoff.draw(applet);
-        currentPayoff.draw(applet);
-
-        if (heatmap.visible) {
-            applet.stroke(0);
-            applet.strokeWeight(1);
-            applet.line(0, 0, width, 0);
-            applet.line(width, 0, width, height);
-            applet.line(width, height, 0, height);
-            applet.line(0, height, 0, 0);
-        }
+        applet.pushMatrix();
+        applet.translate(origin.x, origin.y);
 
         slider.draw(applet);
-
-        hover.draw(applet);
 
         applet.popMatrix();
     }
@@ -263,56 +134,65 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         if (config.mixedStrategySelection && config.stripStrategySelection
                 && config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             setVisible(true);
-
-            if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapSingle) {
-                setHeatmapMode(true);
-            } else if (config.strategySelectionDisplayType == StrategySelectionDisplayType.Slider) {
-                setHeatmapMode(false);
-            }
         } else {
             setVisible(false);
         }
     }
 
-    private void updateLabels() {
-        float uA = PayoffFunction.Utilities.getPayoff(new float[]{1});
-        float uB = PayoffFunction.Utilities.getPayoff(new float[]{0});
-        float uCurrent = PayoffFunction.Utilities.getPayoff();
-        float uTarget = PayoffFunction.Utilities.getPayoff(new float[]{slider.getGhostValue()});
-
-        APayoff.setLabel(uA);
-        BPayoff.setLabel(uB);
-        currentPayoff.setLabel(uCurrent);
-        targetPayoff.setLabel(uTarget);
-
-        if (width > height) {
-            currentPayoff.update(slider.getSliderPos(), 0);
-            targetPayoff.update(slider.getGhostPos(), 0);
-        } else {
-            currentPayoff.update(0, slider.getSliderPos());
-            targetPayoff.update(0, slider.getGhostPos());
-        }
-    }
-
-    private void setHeatmapMode(boolean showHeatmap) {
-        heatmap.setVisible(showHeatmap);
-        currentPayoff.setVisible(showHeatmap);
-        targetPayoff.setVisible(showHeatmap);
-        APayoff.setVisible(showHeatmap);
-        BPayoff.setVisible(showHeatmap);
-    }
-
-    public void setInitial(float[] strategy) {
-        targetStrat = strategy[0];
-    }
-
     public float[] getTarget() {
-        return new float[]{targetStrat};
+        return new float[]{slider.getGhostValue()};
     }
 
     public void startPrePeriod() {
     }
 
     public void startPeriod() {
+        slider.setStratValue(Client.state.getMyStrategy()[0]);
+        slider.setGhostValue(slider.getStratValue());
+    }
+
+    public void mouseClicked(MouseEvent e) {
+    }
+
+    public void mousePressed(MouseEvent e) {
+        if (enabled) {
+            slider.grabGhost();
+        }
+    }
+
+    public void mouseReleased(MouseEvent e) {
+        if (enabled) {
+            if (slider.isGhostGrabbed()) {
+                slider.releaseGhost();
+            }
+        }
+    }
+
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    public void mouseExited(MouseEvent e) {
+    }
+
+    public void keyTyped(KeyEvent e) {
+    }
+
+    public void keyPressed(KeyEvent e) {
+        if (!enabled) {
+            return;
+        }
+        if (e.isActionKey()) {
+            float target = slider.getGhostValue();
+            if (e.getKeyCode() == KeyEvent.VK_UP) {
+                target += .01f;
+            } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                target -= .01f;
+            }
+            target = Client.constrain(target, 0, 1);
+            slider.setGhostValue(target);
+        }
+    }
+
+    public void keyReleased(KeyEvent e) {
     }
 }

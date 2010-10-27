@@ -10,6 +10,7 @@ import edu.ucsc.leeps.fire.cong.server.Population;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.config.BaseConfig;
+import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import java.awt.Color;
@@ -53,6 +54,7 @@ public class Config extends BaseConfig {
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
+    public static final Class pricing = PricingPayoffFunction.class;
     public static final Class paired = Population.class;
     public static final Class line = Line.class;
     public static final Class threshold = ThresholdPayoffFunction.class;
