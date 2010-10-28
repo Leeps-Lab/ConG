@@ -1,6 +1,7 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.FIREClientInterface;
+import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.gui.TwoStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Countdown;
@@ -13,7 +14,8 @@ import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
 import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
-import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -38,10 +40,10 @@ import processing.core.PFont;
  *
  * @author jpettit
  */
-public class Client extends PApplet implements ClientInterface, FIREClientInterface {
+public class Client extends PApplet implements ClientInterface, FIREClientInterface, Configurable<Config> {
 
     public static boolean DEBUG = System.getProperty("fire.client.debug") != null;
-    public static State state = new State();
+    public static State state;
     private int updatesPerSecond;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
@@ -108,6 +110,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 }
             }
         }.start();
+        FIRE.client.addConfigListener(this);
     }
 
     public boolean haveInitialStrategy() {
@@ -274,31 +277,30 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         width = INIT_WIDTH;
         height = INIT_HEIGHT - 40;
 
-        state.currentPercent = 0;
-
         int leftMargin = 20;
         int topMargin = 20;
         float textHeight = textAscent() + textDescent();
         int matrixSize = (int) (height - (4 * textHeight) - 120);
         int counterpartMatrixSize = 100;
         strategyChanger = new StrategyChanger();
+        Client.state = new State(strategyChanger);
         bimatrix = new TwoStrategySelector(
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, counterpartMatrixSize,
-                this, strategyChanger);
+                this);
         simplex = new ThreeStrategySelector(
                 null, 60, 250, 300, 600,
-                this, strategyChanger);
+                this);
         pureMatrix = new PureStrategySelector(
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
-                matrixSize, this, strategyChanger);
+                matrixSize, this);
         strip = new OneStrategyStripSelector(null, leftMargin + 7 * matrixSize / 8,
                 topMargin + counterpartMatrixSize + 30,
-                matrixSize / 8, matrixSize, this, strategyChanger);
+                matrixSize / 8, matrixSize, this);
         qwerty = new QWERTYStrategySelector(
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize,
-                this, strategyChanger);
+                this);
         countdown = new Countdown(
                 null, counterpartMatrixSize + 4 * leftMargin, 20 + topMargin, this);
         pointsDisplay = new PointsDisplay(
@@ -312,23 +314,23 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChart = new Chart(
                 null, chartLeftOffset + 80 + leftMargin, topMargin,
                 chartWidth, strategyChartHeight,
-                simplex, Chart.Mode.TwoStrategy, strategyChanger);
+                simplex, Chart.Mode.TwoStrategy);
         payoffChart = new Chart(
                 null, chartLeftOffset + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight,
-                simplex, Chart.Mode.Payoff, strategyChanger);
+                simplex, Chart.Mode.Payoff);
         rChart = new Chart(
                 null, chartLeftOffset + 80 + leftMargin, topMargin,
                 chartWidth, threeStrategyChartHeight,
-                simplex, Chart.Mode.RStrategy, strategyChanger);
+                simplex, Chart.Mode.RStrategy);
         pChart = new Chart(
                 null, chartLeftOffset + 80 + leftMargin, topMargin + threeStrategyChartHeight + 5,
                 chartWidth, threeStrategyChartHeight,
-                simplex, Chart.Mode.PStrategy, strategyChanger);
+                simplex, Chart.Mode.PStrategy);
         sChart = new Chart(
                 null, chartLeftOffset + 80 + leftMargin, topMargin + 2 * (threeStrategyChartHeight + 5),
                 chartWidth, threeStrategyChartHeight,
-                simplex, Chart.Mode.SStrategy, strategyChanger);
+                simplex, Chart.Mode.SStrategy);
         legend = new ChartLegend(
                 null, (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
@@ -370,15 +372,12 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 selector.draw(this);
             }
             if (FIRE.client.getConfig() != null) {
-                if (FIRE.client.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-                    strategyChart.draw(this);
-                } else if (FIRE.client.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                    rChart.draw(this);
-                    pChart.draw(this);
-                    sChart.draw(this);
-                }
+                payoffChart.draw(this);
+                strategyChart.draw(this);
+                rChart.draw(this);
+                pChart.draw(this);
+                sChart.draw(this);
             }
-            payoffChart.draw(this);
             legend.draw(this);
             if (FIRE.client.getConfig().preLength > 0 && !haveInitialStrategy) {
                 float textHeight = textDescent() + textAscent() + 8;
@@ -398,6 +397,24 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             }
         } catch (NullPointerException ex) {
             ex.printStackTrace();
+        }
+    }
+
+    public void configChanged(Config config) {
+        payoffChart.setVisible(true);
+        strategyChart.setVisible(false);
+        rChart.setVisible(false);
+        pChart.setVisible(false);
+        sChart.setVisible(false);
+        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            if (config.payoffFunction instanceof PricingPayoffFunction) {
+            } else {
+                strategyChart.setVisible(true);
+            }
+        } else {
+            rChart.setVisible(true);
+            pChart.setVisible(true);
+            sChart.setVisible(true);
         }
     }
 

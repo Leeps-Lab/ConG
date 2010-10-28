@@ -14,6 +14,12 @@ public class State {
     public float currentPercent;
     public Map<Integer, float[]> strategies, matchStrategies;
     public float[] target;
+    public StrategyChanger strategyChanger;
+
+    public State(StrategyChanger changer) {
+        this.strategyChanger = changer;
+        currentPercent = 0;
+    }
 
     public void setMyStrategy(float[] strategy) {
         strategies.put(id, strategy);

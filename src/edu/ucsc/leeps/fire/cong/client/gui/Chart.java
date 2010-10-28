@@ -3,12 +3,14 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
-import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -22,19 +24,19 @@ public class Chart extends Sprite implements Configurable<Config> {
     private int scaledMargin;
     private int scaledHeight;
     // Either two or three strategies
-    private Line actualPayoffYou;
-    private Line actualPayoffCounterpart;
-    private Line yourStrategyOverTime;
-    private Line counterpartStrategyOverTime;
-    private Line yourROverTime;
-    private Line counterpartROverTime;
-    private Line yourPOverTime;
-    private Line counterpartPOverTime;
-    private Line yourSOverTime;
-    private Line counterpartSOverTime;
+    private Line yourPayoff;
+    private Line matchPayoff;
+    private Line yourStrategy;
+    private Line matchStrategy;
+    private Line yourR;
+    private Line matchR;
+    private Line yourP;
+    private Line matchP;
+    private Line yourS;
+    private Line matchS;
+    private Map<Integer, Line> prices;
     // threshold
     private Line threshold;
-    private StrategyChanger strategyChanger;
     private HeatmapLegend heatmapLegend;
 
     /**
@@ -42,7 +44,7 @@ public class Chart extends Sprite implements Configurable<Config> {
      */
     public enum Mode {
 
-        Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy
+        Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy,
     };
     private Mode mode;
 
@@ -68,25 +70,25 @@ public class Chart extends Sprite implements Configurable<Config> {
      * @param mode mode used
      * @param strategyChanger
      */
-    public Chart(Sprite parent, int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode, StrategyChanger strategyChanger) {
+    public Chart(Sprite parent, int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode) {
         super(parent, x, y, width, height);
-
-        this.strategyChanger = strategyChanger;
 
         scaledHeight = Math.round(0.9f * height);
         scaledMargin = Math.round((height - scaledHeight) / 2f);
 
-        actualPayoffYou = new Line(this, 0, scaledMargin, width, scaledHeight);
-        actualPayoffCounterpart = new Line(this, 0, scaledMargin, width, scaledHeight);
-        yourStrategyOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
-        counterpartStrategyOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
+        yourPayoff = new Line(this, 0, scaledMargin, width, scaledHeight);
+        matchPayoff = new Line(this, 0, scaledMargin, width, scaledHeight);
+        yourStrategy = new Line(this, 0, scaledMargin, width, scaledHeight);
+        matchStrategy = new Line(this, 0, scaledMargin, width, scaledHeight);
 
-        yourROverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
-        counterpartROverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
-        yourPOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
-        counterpartPOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
-        yourSOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
-        counterpartSOverTime = new Line(this, 0, scaledMargin, width, scaledHeight);
+        yourR = new Line(this, 0, scaledMargin, width, scaledHeight);
+        matchR = new Line(this, 0, scaledMargin, width, scaledHeight);
+        yourP = new Line(this, 0, scaledMargin, width, scaledHeight);
+        matchP = new Line(this, 0, scaledMargin, width, scaledHeight);
+        yourS = new Line(this, 0, scaledMargin, width, scaledHeight);
+        matchS = new Line(this, 0, scaledMargin, width, scaledHeight);
+
+        prices = new HashMap<Integer, Line>();
 
         heatmapLegend = new HeatmapLegend(this, -9, 1, 8, height);
 
@@ -191,20 +193,26 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     private void drawTwoStrategyLines(Client applet) {
-        counterpartStrategyOverTime.draw(applet);
-        yourStrategyOverTime.draw(applet);
+        yourStrategy.draw(applet);
+        matchStrategy.draw(applet);
     }
 
     private void drawThreeStrategyLines(Client applet) {
         if (mode == Mode.RStrategy) {
-            yourROverTime.draw(applet);
-            counterpartROverTime.draw(applet);
+            yourR.draw(applet);
+            matchR.draw(applet);
         } else if (mode == Mode.PStrategy) {
-            yourPOverTime.draw(applet);
-            counterpartPOverTime.draw(applet);
+            yourP.draw(applet);
+            matchP.draw(applet);
         } else if (mode == Mode.SStrategy) {
-            yourSOverTime.draw(applet);
-            counterpartSOverTime.draw(applet);
+            yourS.draw(applet);
+            matchS.draw(applet);
+        }
+    }
+
+    private void drawPriceLines(Client applet) {
+        for (Line line : prices.values()) {
+            line.draw(applet);
         }
     }
 
@@ -237,7 +245,7 @@ public class Chart extends Sprite implements Configurable<Config> {
      */
     @Override
     public void draw(Client applet) {
-        if (config == null) {
+        if (config == null || !visible) {
             return;
         }
         applet.rectMode(Client.CORNER);
@@ -247,12 +255,16 @@ public class Chart extends Sprite implements Configurable<Config> {
             drawShockZone(applet);
             if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
-                    actualPayoffYou.draw(applet);
-                    actualPayoffCounterpart.draw(applet);
+                    yourPayoff.draw(applet);
+                    if (config.payoffFunction instanceof PricingPayoffFunction) {
+                        drawPriceLines(applet);
+                    } else {
+                        matchPayoff.draw(applet);
+                    }
                 } else if (mode == Mode.TwoStrategy) {
                     drawTwoStrategyLines(applet);
-                    threshold.draw(applet);
                     if (config.payoffFunction instanceof ThresholdPayoffFunction) {
+                        threshold.draw(applet);
                         applet.noStroke();
                         applet.fill(255, 255, 0, 75);
                         applet.rectMode(Client.CORNER);
@@ -262,8 +274,8 @@ public class Chart extends Sprite implements Configurable<Config> {
                 }
             } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 if (mode == Mode.Payoff) {
-                    actualPayoffYou.draw(applet);
-                    actualPayoffCounterpart.draw(applet);
+                    yourPayoff.draw(applet);
+                    matchPayoff.draw(applet);
                 } else if (mode == Mode.RStrategy
                         || mode == Mode.PStrategy
                         || mode == Mode.SStrategy) {
@@ -272,7 +284,7 @@ public class Chart extends Sprite implements Configurable<Config> {
             }
         }
         if (mode == Mode.Payoff) {
-            actualPayoffYou.drawCostArea(applet, strategyChanger.getCost());
+            yourPayoff.drawCostArea(applet, Client.state.strategyChanger.getCost());
         }
         drawPercentLine(applet);
         drawSubperiodMarkers(applet);
@@ -285,40 +297,65 @@ public class Chart extends Sprite implements Configurable<Config> {
      * combinations of strategies for two or three strategy payoff functions.
      */
     public void clearAll() {
-        actualPayoffYou.clear();
-        actualPayoffCounterpart.clear();
-        yourStrategyOverTime.clear();
-        counterpartStrategyOverTime.clear();
-        yourPOverTime.clear();
-        yourROverTime.clear();
-        yourSOverTime.clear();
-        counterpartROverTime.clear();
-        counterpartPOverTime.clear();
-        counterpartSOverTime.clear();
+        yourPayoff.clear();
+        matchPayoff.clear();
+        yourStrategy.clear();
+        matchStrategy.clear();
+        yourP.clear();
+        yourR.clear();
+        yourS.clear();
+        matchR.clear();
+        matchP.clear();
+        matchS.clear();
+        prices.clear();
     }
 
     public void updateLines() {
         updateLines(Client.state.currentPercent);
     }
 
-    /**
-     * If period is not completed, add payoff points for both your and
-     * counterpart's actual payoff, current percent, and current payoff.
-     * If using a 2 strategy payoff event, add two strategy actual and future
-     * payoff points. If a three strategy payoff function  is being used, add
-     * strategy payoff points, and actual and future payoff points.
-     *
-     * Strategy points are added using strategy over time, current percent, and
-     * percent based on strategy.
-     */
     public void updateLines(float percent) {
+        if (!visible) {
+            return;
+        }
         if (percent <= 1f) {
-            addPayoffPoint(actualPayoffYou, percent, PayoffFunction.Utilities.getPayoff());
-            addPayoffPoint(actualPayoffCounterpart, percent, PayoffFunction.Utilities.getMatchPayoff());
-            if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-                addStrategyPoint(yourStrategyOverTime, percent, Client.state.strategies.get(Client.state.id)[0]);
-                addStrategyPoint(counterpartStrategyOverTime, percent, PayoffFunction.Utilities.getAverageMatchStrategy()[0]);
-            } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            if (mode == Mode.Payoff) {
+                addPayoffPoint(yourPayoff, percent, PayoffFunction.Utilities.getPayoff());
+                if (FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction) {
+                    PricingPayoffFunction pf = (PricingPayoffFunction) FIRE.client.getConfig().payoffFunction;
+                    Map<Integer, float[]> currentPrices = Client.state.strategies;
+                    for (int id : currentPrices.keySet()) {
+                        if (!prices.containsKey(id)) {
+                            Line priceLine = new Line(this, 0, scaledMargin, width, scaledHeight);
+                            if (id == Client.state.id) {
+                                priceLine.configure(FIRE.client.getConfig().yourStrategy);
+                            } else {
+                                priceLine.configure(FIRE.client.getConfig().matchStrategy);
+                            }
+                            prices.put(id, priceLine);
+                        }
+                        Line priceLine = prices.get(id);
+                        addPayoffPoint(priceLine, percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
+                    }
+                } else {
+                    addPayoffPoint(matchPayoff, percent, PayoffFunction.Utilities.getMatchPayoff());
+                }
+            } else {
+                float[] you = Client.state.strategies.get(Client.state.id);
+                float[] match = PayoffFunction.Utilities.getAverageMatchStrategy();
+                if (mode == Mode.TwoStrategy) {
+                    addStrategyPoint(yourStrategy, percent, you[0]);
+                    addStrategyPoint(matchStrategy, percent, match[0]);
+                } else if (mode == Mode.RStrategy) {
+                    addStrategyPoint(yourR, percent, you[0]);
+                    addStrategyPoint(matchR, percent, match[0]);
+                } else if (mode == Mode.PStrategy) {
+                    addStrategyPoint(yourR, percent, you[1]);
+                    addStrategyPoint(matchR, percent, match[1]);
+                } else if (mode == Mode.SStrategy) {
+                    addStrategyPoint(yourR, percent, you[2]);
+                    addStrategyPoint(matchR, percent, match[2]);
+                }
             }
         }
     }
@@ -360,25 +397,25 @@ public class Chart extends Sprite implements Configurable<Config> {
         this.config = config;
         minPayoff = config.payoffFunction.getMin();
         maxPayoff = config.payoffFunction.getMax();
-        actualPayoffYou.configure(config.yourPayoff);
-        actualPayoffCounterpart.configure(config.otherPayoff);
-        yourStrategyOverTime.configure(config.yourStrategyOverTime);
-        counterpartStrategyOverTime.configure(config.counterpartStrategyOverTime);
-        yourROverTime.configure(config.yourPayoff);
-        yourROverTime.mode = Line.Mode.Solid;
-        yourROverTime.weight = 2f;
-        counterpartROverTime.configure(config.otherPayoff);
-        counterpartROverTime.mode = Line.Mode.Solid;
-        yourPOverTime.configure(config.yourPayoff);
-        yourPOverTime.mode = Line.Mode.Solid;
-        yourPOverTime.weight = 2f;
-        counterpartPOverTime.configure(config.otherPayoff);
-        counterpartPOverTime.mode = Line.Mode.Solid;
-        yourSOverTime.configure(config.yourPayoff);
-        yourSOverTime.mode = Line.Mode.Solid;
-        yourSOverTime.weight = 2f;
-        counterpartSOverTime.configure(config.otherPayoff);
-        counterpartSOverTime.mode = Line.Mode.Solid;
+        yourPayoff.configure(config.yourPayoff);
+        matchPayoff.configure(config.matchPayoff);
+        yourStrategy.configure(config.yourStrategy);
+        matchStrategy.configure(config.matchStrategy);
+        yourR.configure(config.yourPayoff);
+        yourR.mode = Line.Mode.Solid;
+        yourR.weight = 2f;
+        matchR.configure(config.matchPayoff);
+        matchR.mode = Line.Mode.Solid;
+        yourP.configure(config.yourPayoff);
+        yourP.mode = Line.Mode.Solid;
+        yourP.weight = 2f;
+        matchP.configure(config.matchPayoff);
+        matchP.mode = Line.Mode.Solid;
+        yourS.configure(config.yourPayoff);
+        yourS.mode = Line.Mode.Solid;
+        yourS.weight = 2f;
+        matchS.configure(config.matchPayoff);
+        matchS.mode = Line.Mode.Solid;
         threshold.configure(config.thresholdLine);
         if (config.payoffFunction instanceof ThresholdPayoffFunction) {
             threshold.clear();

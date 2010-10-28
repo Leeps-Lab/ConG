@@ -103,7 +103,7 @@ public class ChartLegend extends Sprite implements Configurable<Config> {
     public void configChanged(Config config) {
         this.config = config;
         youLine = config.yourPayoff;
-        otherLine = config.otherPayoff;
+        otherLine = config.matchPayoff;
         threshold = config.thresholdLine;
     }
 }

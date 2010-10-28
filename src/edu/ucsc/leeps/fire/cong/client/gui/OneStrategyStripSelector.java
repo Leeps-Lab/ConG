@@ -3,7 +3,6 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
-import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
@@ -39,7 +38,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
      * @param strategyChanger
      */
     public OneStrategyStripSelector(Sprite parent, int x, int y, int width, int height,
-            Client applet, StrategyChanger strategyChanger) {
+            Client applet) {
         super(parent, x, y, width, height);
         this.applet = applet;
 

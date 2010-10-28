@@ -3,7 +3,6 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
-import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
@@ -41,8 +40,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     public TwoStrategySelector(
             Sprite parent, int x, int y,
             int matrixSize, int counterpartMatrixSize,
-            Client applet,
-            StrategyChanger strategyChanger) {
+            Client applet) {
         super(parent, x, y, matrixSize, matrixSize);
         this.applet = applet;
         heatmap = new HeatmapHelper(

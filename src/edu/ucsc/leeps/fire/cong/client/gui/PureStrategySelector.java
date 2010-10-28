@@ -3,7 +3,6 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
-import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
@@ -48,7 +47,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
      * @param strategyChanger
      */
     public PureStrategySelector(Sprite parent, int x, int y, int size,
-            Client applet, StrategyChanger strategyChanger) {
+            Client applet) {
         super(parent, x, y, size, size);
         visible = false;
         this.applet = applet;
@@ -84,7 +83,9 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
-            String tupleSizeString = String.format("%d players are in your group", FIRE.client.getConfig().playersInTuple);
+            String tupleSizeString = String.format(
+                    "%d players are in your group",
+                    FIRE.client.getConfig().playersInTuple);
             applet.text(tupleSizeString, 0, 0);
 
             if (FIRE.client.getConfig().showMatrix) {

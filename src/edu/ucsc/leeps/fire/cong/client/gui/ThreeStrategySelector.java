@@ -3,7 +3,6 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
-import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
@@ -46,7 +45,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public ThreeStrategySelector(
             Sprite parent, float x, float y, int width, int height,
-            Client applet, StrategyChanger strategyChanger) {
+            Client applet) {
         super(parent, x, y, width, height);
         this.client = applet;
         mouseInTriangle = false;
@@ -714,17 +713,17 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             sDrop.setColor(config.sColor);
             hoverSDrop.setColor(config.sColor);
             current.setColor(
-                    config.yourStrategyOverTime.r,
-                    config.yourStrategyOverTime.g,
-                    config.yourStrategyOverTime.b);
+                    config.yourStrategy.r,
+                    config.yourStrategy.g,
+                    config.yourStrategy.b);
             opponent.setColor(
-                    config.counterpartStrategyOverTime.r,
-                    config.counterpartStrategyOverTime.g,
-                    config.counterpartStrategyOverTime.b);
+                    config.matchStrategy.r,
+                    config.matchStrategy.g,
+                    config.matchStrategy.b);
             hover.setColor(
-                    config.yourStrategyOverTime.r,
-                    config.yourStrategyOverTime.g,
-                    config.yourStrategyOverTime.b);
+                    config.yourStrategy.r,
+                    config.yourStrategy.g,
+                    config.yourStrategy.b);
             for (int i = R; i <= S; ++i) {
                 stratSlider[i].setVisible(config.showRPSSliders);
             }
