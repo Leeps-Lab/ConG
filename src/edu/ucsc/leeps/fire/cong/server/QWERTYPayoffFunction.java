@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.cong.config.Config;
 import java.util.Map;
 
 /**
@@ -24,7 +25,10 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
     }
 
     @Override
-    public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
+    public float getPayoff(
+            int id, float percent,
+            Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies,
+            Config config) {
         float[] strategy = popStrategies.get(id);
         return payoffs[getInSame(id, strategy, matchPopStrategies)][getInSame(id, strategy, popStrategies) - 1];
     }

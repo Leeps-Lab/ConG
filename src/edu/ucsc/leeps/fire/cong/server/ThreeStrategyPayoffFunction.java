@@ -1,6 +1,6 @@
 package edu.ucsc.leeps.fire.cong.server;
 
-import edu.ucsc.leeps.fire.cong.FIRE;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import java.util.Map;
 
 /**
@@ -39,7 +39,8 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
             int id,
             float percent,
             Map<Integer, float[]> popStrategies,
-            Map<Integer, float[]> matchPopStrategies) {
+            Map<Integer, float[]> matchPopStrategies,
+            Config config) {
         float A, B, C, a, b, c;
         A = popStrategies.get(id)[0];
         B = popStrategies.get(id)[1];
@@ -52,5 +53,13 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
         return A * (Rr * a + Rp * b + Rs * c)
                 + B * (Pr * a + Pp * b + Ps * c)
                 + C * (Sr * a + Sp * b + Ss * c);
+    }
+
+    public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

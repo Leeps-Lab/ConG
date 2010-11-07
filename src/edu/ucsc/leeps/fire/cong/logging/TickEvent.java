@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.logging;
 
+import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.logging.LogEvent;
 
@@ -18,7 +19,8 @@ public class TickEvent implements LogEvent {
     public int world;
     public float[] strategy;
     public float[] target;
+    public float[] popStrategy;
     public float[] matchStrategy;
     public float payoff;
-    public PayoffFunction pf;
+    public Config config;
 }

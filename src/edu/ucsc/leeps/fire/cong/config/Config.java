@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsc.leeps.fire.cong.config;
 
 import edu.ucsc.leeps.fire.cong.client.gui.Line;
@@ -64,6 +60,7 @@ public class Config extends BaseConfig {
     public boolean isCounterpart;
     public int playersInTuple;
     public int population, match;
+    public int marginalCost;
 
     public Config() {
         timeConstrained = true;
@@ -142,5 +139,6 @@ public class Config extends BaseConfig {
         numTuples = -1;
         population = -1;
         match = -1;
+        marginalCost = 0;
     }
 }

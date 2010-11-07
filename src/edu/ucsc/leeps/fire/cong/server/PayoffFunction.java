@@ -2,8 +2,8 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -17,6 +17,17 @@ public interface PayoffFunction extends Serializable {
     public float getMax();
 
     public float getPayoff(
+            int id, float percent,
+            Map<Integer, float[]> popStrategies,
+            Map<Integer, float[]> matchPopStrategies,
+            Config config);
+
+    public float[] getPopStrategySummary(
+            int id, float percent,
+            Map<Integer, float[]> popStrategies,
+            Map<Integer, float[]> matchPopStrategies);
+
+    public float[] getMatchStrategySummary(
             int id, float percent,
             Map<Integer, float[]> popStrategies,
             Map<Integer, float[]> matchPopStrategies);
@@ -62,7 +73,8 @@ public interface PayoffFunction extends Serializable {
             return FIRE.client.getConfig().payoffFunction.getPayoff(
                     Client.state.id,
                     Client.state.currentPercent,
-                    Client.state.strategies, Client.state.matchStrategies);
+                    Client.state.strategies, Client.state.matchStrategies,
+                    FIRE.client.getConfig());
         }
 
         /**
@@ -74,7 +86,8 @@ public interface PayoffFunction extends Serializable {
             return FIRE.client.getConfig().payoffFunction.getPayoff(
                     Client.state.id,
                     Client.state.currentPercent,
-                    Client.state.getFictitiousStrategies(strategy), Client.state.matchStrategies);
+                    Client.state.getFictitiousStrategies(strategy), Client.state.matchStrategies,
+                    FIRE.client.getConfig());
         }
 
         /**
@@ -89,7 +102,8 @@ public interface PayoffFunction extends Serializable {
                     Client.state.id,
                     Client.state.currentPercent,
                     Client.state.getFictitiousStrategies(strategy),
-                    Client.state.getFictitiousMatchStrategies(matchStrategy));
+                    Client.state.getFictitiousMatchStrategies(matchStrategy),
+                    FIRE.client.getConfig());
         }
 
         /**
@@ -102,7 +116,8 @@ public interface PayoffFunction extends Serializable {
                 payoff += FIRE.client.getConfig().counterpartPayoffFunction.getPayoff(
                         matchID,
                         Client.state.currentPercent,
-                        Client.state.matchStrategies, Client.state.strategies);
+                        Client.state.matchStrategies, Client.state.strategies,
+                        FIRE.client.getConfig());
             }
             return payoff / Client.state.matchStrategies.size();
         }
@@ -118,7 +133,8 @@ public interface PayoffFunction extends Serializable {
                     Client.state.id,
                     Client.state.currentPercent,
                     Client.state.getFictitiousMatchStrategies(matchStrategy),
-                    Client.state.getFictitiousStrategies(strategy));
+                    Client.state.getFictitiousStrategies(strategy),
+                    FIRE.client.getConfig());
         }
     }
 }

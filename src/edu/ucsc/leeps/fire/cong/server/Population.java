@@ -3,6 +3,7 @@ package edu.ucsc.leeps.fire.cong.server;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.logging.TickEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,34 +68,31 @@ public class Population implements Serializable {
 
     public void logTick(int subperiod, int secondsLeft) {
         // Log the tick information
-        /*
-         * FIXME
         int period = FIRE.server.getConfig().period;
         float length = FIRE.server.getConfig().length;
         float percent = (float) (length * secondsLeft) / (float) length;
         for (int member : members.keySet()) {
-        TickEvent tick = new TickEvent();
-        tick.period = period;
-        tick.subject = member;
-        tick.subperiod = subperiod;
-        tick.secondsLeft = secondsLeft;
-        Tuple tuple = tupleMap.get(member);
-        tick.population = tuple.population;
-        tick.world = tuple.world;
-        tick.strategy = tuple.strategies.get(member);
-        tick.target = tuple.targets.get(member);
-        tick.match = tuple.match.population;
-        if (tuple == tuple.match && FIRE.server.getConfig().excludeSelf) {
-        tick.matchStrategy = tuple.strategyExclude.get(member);
-        } else {
-        tick.matchStrategy = tuple.match.strategy;
+            TickEvent tick = new TickEvent();
+            tick.period = period;
+            tick.subject = member;
+            tick.config = FIRE.server.getConfig(member);
+            tick.subperiod = subperiod;
+            tick.secondsLeft = secondsLeft;
+            Tuple tuple = tupleMap.get(member);
+            tick.population = tuple.population;
+            tick.world = tuple.world;
+            tick.strategy = tuple.strategies.get(member);
+            tick.target = tuple.targets.get(member);
+            tick.match = tuple.match.population;
+            tick.payoff = tick.config.payoffFunction.getPayoff(
+                    member, percent,
+                    tuple.strategies, tuple.match.strategies,
+                    tick.config);
+            // get summary statistics from payoff function
+            tick.popStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
+            tick.matchStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
+            FIRE.server.commit(tick);
         }
-        tick.pf = FIRE.server.getConfig(member).payoffFunction;
-        tick.payoff = tick.pf.getPayoff(percent, tick.strategy, tick.matchStrategy);
-        FIRE.server.commit(tick);
-        }
-         * 
-         */
     }
 
     private class Tuple {
@@ -149,8 +147,12 @@ public class Population implements Serializable {
 
         public void evaluate(float percent, float percentElapsed) {
             for (int member : members) {
-                PayoffFunction u = FIRE.server.getConfig(member).payoffFunction;
-                float payoff = u.getPayoff(member, percent, strategies, match.strategies);
+                Config config = FIRE.server.getConfig(member);
+                PayoffFunction u = config.payoffFunction;
+                float payoff = u.getPayoff(
+                        member, percent,
+                        strategies, match.strategies,
+                        config);
                 payoff *= percentElapsed;
                 FIRE.server.addToPeriodPoints(member, payoff);
             }
