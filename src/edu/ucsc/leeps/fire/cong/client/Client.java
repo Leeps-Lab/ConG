@@ -66,6 +66,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
 
     public Client() {
+        FIRE.client.addConfigListener(this);
         loadLibraries();
         updatesPerSecond = Integer.parseInt(System.getProperty("fire.client.ups", "1"));
         noLoop();
@@ -110,7 +111,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 }
             }
         }.start();
-        FIRE.client.addConfigListener(this);
     }
 
     public boolean haveInitialStrategy() {
@@ -235,6 +235,11 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         state.subperiod = subperiod;
         state.strategies = strategies;
         state.matchStrategies = matchStrategies;
+        payoffChart.endSubperiod(subperiod);
+        strategyChart.endSubperiod(subperiod);
+        rChart.endSubperiod(subperiod);
+        pChart.endSubperiod(subperiod);
+        sChart.endSubperiod(subperiod);
     }
 
     public void newMessage(String message, int senderID) {
@@ -294,9 +299,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         pureMatrix = new PureStrategySelector(
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, this);
-        strip = new OneStrategyStripSelector(null, leftMargin + 7 * matrixSize / 8,
-                topMargin + counterpartMatrixSize + 30,
-                matrixSize / 8, matrixSize, this);
+        strip = new OneStrategyStripSelector(null,
+                leftMargin + 7 * matrixSize / 8, topMargin + counterpartMatrixSize + 30,
+                matrixSize / 8, matrixSize,
+                this);
         qwerty = new QWERTYStrategySelector(
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize,
@@ -402,12 +408,19 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public void configChanged(Config config) {
         payoffChart.setVisible(true);
+        legend.setVisible(true);
         strategyChart.setVisible(false);
         rChart.setVisible(false);
         pChart.setVisible(false);
         sChart.setVisible(false);
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             if (config.payoffFunction instanceof PricingPayoffFunction) {
+                payoffChart.width = width - 110;
+                payoffChart.origin.x = 100;
+                payoffChart.clearAll();
+                strip.origin.x = 10;
+                legend.setVisible(false);
+                payoffChart.configChanged(config);
             } else {
                 strategyChart.setVisible(true);
             }

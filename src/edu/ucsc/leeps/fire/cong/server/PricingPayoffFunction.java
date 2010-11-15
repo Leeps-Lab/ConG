@@ -23,6 +23,7 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
     public float getMin() {
         return min;
     }
+    float[] marginalCosts = new float[]{0, 25, 50, 30};
 
     @Override
     public float getPayoff(
@@ -31,13 +32,16 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
             Map<Integer, float[]> matchPopStrategies,
             Config config) {
         float minPrice = Float.POSITIVE_INFINITY;
-        for (float[] price : popStrategies.values()) {
-            if (price[0] < minPrice) {
-                minPrice = price[0];
+        int minID = -1;
+        for (int i : popStrategies.keySet()) {
+            float price = (popStrategies.get(i)[0] * max) - min;
+            if (price < minPrice && price >= marginalCosts[i]) {
+                minPrice = price;
+                minID = i;
             }
         }
-        if (popStrategies.get(id)[0] == minPrice) {
-            return (minPrice * max) - min - config.marginalCost;
+        if (id == minID) {
+            return minPrice - config.marginalCost;
         }
         return 0;
     }

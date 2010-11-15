@@ -5,11 +5,14 @@ import java.awt.Color;
 import processing.core.PImage;
 
 public class Slider {
+
     /**
      * Creates an enum of types of alignment. Can be either horizontal or vertical.
      */
-    public static enum Alignment { Horizontal, Vertical };
+    public static enum Alignment {
 
+        Horizontal, Vertical
+    };
     private final int HANDLE_WIDTH = 10;
     private final int HANDLE_HEIGHT = 27;
     private final String FORMAT = "%4.2f";
@@ -63,8 +66,8 @@ public class Slider {
         ghostValue = 0;
 
         this.label = label;
-        stratLabel = String.format(FORMAT, stratValue);
-        ghostLabel = String.format(FORMAT, ghostValue);
+        stratLabel = String.format(FORMAT, 100 * stratValue);
+        ghostLabel = String.format(FORMAT, 100 * ghostValue);
 
         grabbed = false;
         ghostGrabbed = false;
@@ -146,7 +149,7 @@ public class Slider {
     public void setVisible(boolean visible) {
         this.visible = visible;
     }
-    
+
     public void setColor(Color c) {
         R = c.getRed();
         G = c.getGreen();
@@ -158,7 +161,7 @@ public class Slider {
         if (newStrat > maxValue + ERROR_MARGIN || newStrat < -ERROR_MARGIN) {
             throw new RuntimeException("Error: strategy value out of range.");
         }
-        
+
         stratValue = newStrat;
 
         if (align == Alignment.Horizontal) {
@@ -166,7 +169,7 @@ public class Slider {
         } else {
             sliderPos = sliderEnd - length * stratValue / maxValue;
         }
-        stratLabel = String.format(FORMAT, stratValue);
+        stratLabel = String.format(FORMAT, 100 * stratValue);
     }
 
     /**
@@ -198,7 +201,7 @@ public class Slider {
         } else {
             stratValue = maxValue * (sliderEnd - sliderPos) / length;
         }
-        stratLabel = String.format(FORMAT, stratValue);
+        stratLabel = String.format(FORMAT, 100 * stratValue);
     }
 
     /**
@@ -311,15 +314,15 @@ public class Slider {
      */
     public boolean mouseOnHandle(float mouseX, float mouseY) {
         if (align == Alignment.Horizontal) {
-            return (mouseX < sliderPos + HANDLE_WIDTH / 2 &&
-                    mouseX > sliderPos - HANDLE_WIDTH / 2 &&
-                    mouseY < sliderLine + HANDLE_HEIGHT / 2 &&
-                    mouseY > sliderLine - HANDLE_HEIGHT / 2);
+            return (mouseX < sliderPos + HANDLE_WIDTH / 2
+                    && mouseX > sliderPos - HANDLE_WIDTH / 2
+                    && mouseY < sliderLine + HANDLE_HEIGHT / 2
+                    && mouseY > sliderLine - HANDLE_HEIGHT / 2);
         } else {
-            return (mouseY < sliderPos + HANDLE_WIDTH / 2 &&
-                    mouseY > sliderPos - HANDLE_WIDTH / 2 &&
-                    mouseX < sliderLine + HANDLE_HEIGHT / 2 &&
-                    mouseX > sliderLine - HANDLE_HEIGHT / 2);
+            return (mouseY < sliderPos + HANDLE_WIDTH / 2
+                    && mouseY > sliderPos - HANDLE_WIDTH / 2
+                    && mouseX < sliderLine + HANDLE_HEIGHT / 2
+                    && mouseX > sliderLine - HANDLE_HEIGHT / 2);
         }
     }
 
@@ -331,15 +334,15 @@ public class Slider {
      */
     public boolean mouseOnGhost(float mouseX, float mouseY) {
         if (align == Alignment.Horizontal) {
-            return (mouseX < ghostPos + HANDLE_WIDTH / 2 &&
-                    mouseX > ghostPos - HANDLE_WIDTH / 2 &&
-                    mouseY < sliderLine + HANDLE_HEIGHT / 2 &&
-                    mouseY > sliderLine - HANDLE_HEIGHT / 2);
+            return (mouseX < ghostPos + HANDLE_WIDTH / 2
+                    && mouseX > ghostPos - HANDLE_WIDTH / 2
+                    && mouseY < sliderLine + HANDLE_HEIGHT / 2
+                    && mouseY > sliderLine - HANDLE_HEIGHT / 2);
         } else {
-            return (mouseY < ghostPos + HANDLE_WIDTH / 2 &&
-                    mouseY > ghostPos - HANDLE_WIDTH / 2 &&
-                    mouseX < sliderLine + HANDLE_HEIGHT / 2 &&
-                    mouseX > sliderLine - HANDLE_HEIGHT / 2);
+            return (mouseY < ghostPos + HANDLE_WIDTH / 2
+                    && mouseY > ghostPos - HANDLE_WIDTH / 2
+                    && mouseX < sliderLine + HANDLE_HEIGHT / 2
+                    && mouseX > sliderLine - HANDLE_HEIGHT / 2);
         }
     }
 
@@ -368,7 +371,7 @@ public class Slider {
                     applet.image(ghostTexture, ghostPos, sliderLine);
 
                     applet.fill(120);
-                    applet.text(ghostLabel, sliderEnd + 10, sliderLine + 20);
+                    //applet.text(ghostLabel, sliderEnd + 10, sliderLine + 20);
                 }
             } else {
                 applet.stroke(0);
@@ -382,14 +385,14 @@ public class Slider {
                 applet.fill(0);
                 applet.textAlign(Client.CENTER);
                 float labelHeight = applet.textAscent() + applet.textDescent();
-                applet.text(label, sliderLine,  sliderStart - labelHeight);
+                applet.text(label, sliderLine, sliderStart - labelHeight);
                 applet.text(stratLabel, sliderLine, sliderEnd + labelHeight);
 
                 if (ghosting) {
                     applet.image(ghostTexture, sliderLine, ghostPos);
 
                     applet.fill(120);
-                    applet.text(ghostLabel, sliderLine, sliderEnd + 2 * labelHeight);
+                    //applet.text(ghostLabel, sliderLine, sliderEnd + 2 * labelHeight);
                 }
             }
         }

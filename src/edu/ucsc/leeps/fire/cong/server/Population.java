@@ -283,7 +283,11 @@ public class Population implements Serializable {
         Collections.shuffle(randomTuples, FIRE.server.getRandom());
         while (randomTuples.size() > 0) {
             Tuple tuple = randomTuples.remove(0);
-            tuple.match = randomTuples.remove(0);
+            if (tuples.size() == 1) {
+                tuple.match = tuple;
+            } else {
+                tuple.match = randomTuples.remove(0);
+            }
             tuple.match.match = tuple;
             Config def = FIRE.server.getConfig();
             Tuple tuple1;
@@ -321,7 +325,7 @@ public class Population implements Serializable {
                 } else {
                     s[0] = FIRE.server.getRandom().nextBoolean() ? 1 : 0;
                 }
-            } else {
+            } else if (FIRE.server.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 s = new float[3];
                 if (FIRE.server.getConfig().mixedStrategySelection) {
                     s[0] = FIRE.server.getRandom().nextFloat();
@@ -333,6 +337,8 @@ public class Population implements Serializable {
                     s[2] = 0;
                     s[FIRE.server.getRandom().nextInt(3)] = 1;
                 }
+            } else {
+                throw new IllegalStateException("Cannot set initial strategies for given payoff function");
             }
             FIRE.server.getConfig(client).initialStrategy = s;
         }

@@ -4,13 +4,10 @@ import edu.ucsc.leeps.fire.FIREServerInterface;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
 import edu.ucsc.leeps.fire.server.ServerController.State;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -20,11 +17,9 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     private Map<Integer, ClientInterface> clients;
     private Population population;
-    private StrategyUpdater strategyUpdater;
 
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
-        strategyUpdater = new StrategyUpdater();
     }
 
     public synchronized void strategyChanged(
@@ -32,12 +27,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             float[] targetStrategy,
             Integer id) {
         if (FIRE.server.getState() == State.RUNNING_PERIOD) {
-            //StrategyChangeEvent event = new StrategyChangeEvent();
-            //event.id = id;
-            //event.newStrategy = newStrategy;
-            //event.targetStrategy = targetStrategy;
-            //event.timestamp = System.currentTimeMillis();
-            //strategyUpdater.add(event);
             population.strategyChanged(
                     newStrategy,
                     targetStrategy,
@@ -47,7 +36,11 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void configurePeriod() {
-        configurePopulations();
+        Map<Integer, ClientInterface> members = new HashMap<Integer, ClientInterface>();
+        members.clear();
+        members.putAll(clients);
+        population = new Population();
+        population.configure(members);
     }
 
     public boolean readyToEndPrePeriod() {
@@ -66,7 +59,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void endPeriod() {
-        strategyUpdater.endPeriod();
         if (FIRE.server.getConfig().subperiods == 0) {
             population.endPeriod();
         } else {
@@ -91,14 +83,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void quickTick(int millisLeft) {
-    }
-
-    private void configurePopulations() {
-        Map<Integer, ClientInterface> members = new HashMap<Integer, ClientInterface>();
-        members.clear();
-        members.putAll(clients);
-        population = new Population();
-        population.configure(members);
     }
 
     private void configureSubperiods() {
@@ -139,12 +123,12 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     private void doImpulse() {
         /*
         for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
-            int id = entry.getKey();
-            ClientInterface client = entry.getValue();
-            float r = FIRE.server.getRandom().nextFloat();
-            float[] newStrategy = new float[]{r, 1 - r};
-            client.setStrategy(newStrategy);
-            strategyChanged(newStrategy, newStrategy, id);
+        int id = entry.getKey();
+        ClientInterface client = entry.getValue();
+        float r = FIRE.server.getRandom().nextFloat();
+        float[] newStrategy = new float[]{r, 1 - r};
+        client.setStrategy(newStrategy);
+        strategyChanged(newStrategy, newStrategy, id);
         }
          * 
          */
@@ -169,46 +153,5 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public boolean register(int id, ClientInterface client) {
         clients.put(id, client);
         return true;
-    }
-
-    private class StrategyUpdater extends Thread {
-
-        private BlockingQueue<StrategyChangeEvent> queue;
-
-        public StrategyUpdater() {
-            queue = new LinkedBlockingQueue<StrategyChangeEvent>();
-            start();
-        }
-
-        public void add(StrategyChangeEvent event) {
-            try {
-                queue.put(event);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-        public void endPeriod() {
-            if (queue.size() != 0) {
-                System.err.println("still have " + queue.size() + " strategies to process");
-            }
-            queue.clear();
-        }
-
-        @Override
-        public void run() {
-            while (true) {
-                try {
-                    StrategyChangeEvent event = queue.take();
-                    population.strategyChanged(
-                            event.newStrategy,
-                            event.targetStrategy,
-                            event.id,
-                            event.timestamp);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
     }
 }

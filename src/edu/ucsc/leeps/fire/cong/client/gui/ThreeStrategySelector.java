@@ -28,16 +28,11 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private float[] axisDistance;
     private float[] hoverStrat;
     private float[] targetStrat;
-    // current played strategies stored here (R, P, S)
-    private float[] playedStrat;
-    // average of opponents' strategies
-    private float[] opponentStrat;
     private Slider[] stratSlider;
     private boolean mouseInTriangle;
     private boolean enabled;
     private HeatmapHelper heatmap;
     private Client client;
-    public float currentPercent;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
     private Marker hoverRDrop, hoverPDrop, hoverSDrop;
@@ -52,14 +47,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         axisDistance = new float[3];
         hoverStrat = new float[3];
         targetStrat = new float[3];
-        playedStrat = new float[3];
-        opponentStrat = new float[3];
         for (int i = R; i <= S; i++) {
             axisDistance[i] = 0f;
             hoverStrat[i] = 0f;
             targetStrat[i] = 0f;
-            playedStrat[i] = 0f;
-            opponentStrat[i] = 0f;
         }
 
         stratSlider = new Slider[3];
@@ -149,7 +140,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                 (int) (paper.origin.x - rock.origin.x), (int) (rock.origin.y - scissors.origin.y),
                 true, applet);
         heatmap.setVisible(false);
-        currentPercent = 0f;
 
         periodStarted = false;
 
@@ -158,8 +148,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public void update() {
         if (visible) {
+            float[] average = PayoffFunction.Utilities.getAverageMatchStrategy();
             heatmap.updateThreeStrategyHeatmap(
-                    opponentStrat[0], opponentStrat[1], opponentStrat[2],
+                    average[0], average[1], average[2],
                     this);
         }
     }
@@ -296,8 +287,13 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             adjustLabels(targetStrat, target, null, null);
         }
 
+        float[] myStrategy = Client.state.getMyStrategy();
+
+        float[] coords = calculateStratCoords(myStrategy[R], myStrategy[P], myStrategy[S]);
+        current.update(coords[0], coords[1]);
+
         if (current.visible) {
-            updateDropLines(current, playedStrat, rDrop, pDrop, sDrop);
+            updateDropLines(current, myStrategy, rDrop, pDrop, sDrop);
             applet.strokeWeight(1);
             applet.stroke(0, 255, 255);
             applet.line(current.origin.x, current.origin.y, rDrop.origin.x, rDrop.origin.y);
@@ -305,14 +301,17 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             applet.line(current.origin.x, current.origin.y, sDrop.origin.x, sDrop.origin.y);
         }
 
-        current.setLabel(PayoffFunction.Utilities.getPayoff(playedStrat));
+        current.setLabel(PayoffFunction.Utilities.getPayoff());
 
-        adjustLabels(playedStrat, current, pDrop, rDrop);
+        adjustLabels(Client.state.getMyStrategy(), current, pDrop, rDrop);
 
-        rDrop.setLabel(playedStrat[R]);
-        pDrop.setLabel(playedStrat[P]);
-        sDrop.setLabel(playedStrat[S]);
+        rDrop.setLabel(myStrategy[R]);
+        pDrop.setLabel(myStrategy[P]);
+        sDrop.setLabel(myStrategy[S]);
 
+        float[] average = PayoffFunction.Utilities.getAverageMatchStrategy();
+        coords = calculateStratCoords(average[R], average[P], average[S]);
+        opponent.update(coords[0], coords[1]);
 
         rDrop.draw(applet);
         pDrop.draw(applet);
@@ -335,7 +334,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             float mouseX = e.getX() - origin.x;
             float mouseY = e.getY() - origin.y;
             if (mouseInTriangle) {
-                adjustLabels(playedStrat, current, pDrop, rDrop);
+                adjustLabels(Client.state.getMyStrategy(), current, pDrop, rDrop);
                 current.grab();
             } else if (rock.isEnlarged()) {
                 setTargetRPS(1, 0, 0);
@@ -380,14 +379,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     }
 
     public void mouseExited(MouseEvent e) {
-    }
-
-    public float[] getPlayerRPS() {
-        return new float[]{playedStrat[R], playedStrat[P], playedStrat[S]};
-    }
-
-    public float[] getOpponentRPS() {
-        return new float[]{opponentStrat[R], opponentStrat[P], opponentStrat[S]};
     }
 
     public void setEnabled(boolean enabled) {
@@ -436,9 +427,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         for (int i = R; i <= S; i++) {
             axisDistance[i] = 0f;
             hoverStrat[i] = 0f;
-            playedStrat[i] = 0f;
             targetStrat[i] = 0f;
-            opponentStrat[i] = 0f;
             stratSlider[i].setStratValue(0f);
             stratSlider[i].hideGhost();
         }
@@ -692,13 +681,13 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         if (config.mixedStrategySelection
                 && config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             rLabel = config.rLabel;
-            stratSlider[R].setLabel(rLabel);
+            //stratSlider[R].setLabel(rLabel);
             stratSlider[R].setColor(config.rColor);
             pLabel = config.pLabel;
-            stratSlider[P].setLabel(pLabel);
+            //stratSlider[P].setLabel(pLabel);
             stratSlider[P].setColor(config.pColor);
             sLabel = config.sLabel;
-            stratSlider[S].setLabel(sLabel);
+            //stratSlider[S].setLabel(sLabel);
             stratSlider[S].setColor(config.sColor);
             rock.setLabel(config.shortRLabel);
             rock.setColor(config.rColor);
@@ -734,41 +723,16 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         }
     }
 
-    public void setCurrent(float[] strategy) {
-        for (int i = 0; i < strategy.length; i++) {
-            playedStrat[i] = strategy[i];
-        }
-        float[] coords = calculateStratCoords(playedStrat[0], playedStrat[1], playedStrat[2]);
-        current.update(coords[0], coords[1]);
-    }
-
-    public void setInitial(float[] strategy) {
-        for (int i = 0; i < strategy.length; i++) {
-            targetStrat[i] = strategy[i];
-        }
-        setTargetRPS(targetStrat[0], targetStrat[1], targetStrat[2]);
-    }
-
-    public void setCounterpart(float[] strategy) {
-        for (int i = 0; i < strategy.length; i++) {
-            opponentStrat[i] = strategy[i];
-        }
-        float[] coords = calculateStratCoords(strategy[0], strategy[1], strategy[2]);
-        opponent.update(coords[0], coords[1]);
-    }
-
     public float[] getTarget() {
         return targetStrat;
     }
 
-    public void setCurrentPercent(float percent) {
-        currentPercent = percent;
-    }
-
     public void startPeriod() {
-        opponentStrat[0] = -1;
-        opponentStrat[1] = -1;
-        opponentStrat[2] = -1;
+        targetStrat[0] = Client.state.getMyStrategy()[0];
+        targetStrat[1] = Client.state.getMyStrategy()[1];
+        targetStrat[2] = Client.state.getMyStrategy()[2];
+        float[] coords = calculateStratCoords(targetStrat[0], targetStrat[1], targetStrat[2]);
+        target.update(coords[0], coords[1]);
         update();
     }
 }

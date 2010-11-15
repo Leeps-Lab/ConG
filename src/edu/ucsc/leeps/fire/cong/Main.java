@@ -9,6 +9,6 @@ import edu.ucsc.leeps.fire.testing.Startup;
 public class Main {
 
     public static void main(String[] args) {
-        Startup.main(args, 4);
+        Startup.main(args, 3);
     }
 }

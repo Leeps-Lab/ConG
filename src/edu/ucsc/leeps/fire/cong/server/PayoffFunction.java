@@ -38,7 +38,12 @@ public interface PayoffFunction extends Serializable {
                 int id,
                 Map<Integer, float[]> popStrategies,
                 Map<Integer, float[]> matchPopStrategies) {
-            boolean excludeSelf = false;
+            boolean excludeSelf;
+            if (FIRE.client != null) {
+                excludeSelf = FIRE.client.getConfig().excludeSelf;
+            } else {
+                excludeSelf = FIRE.server.getConfig().excludeSelf;
+            }
             float[] average = null;
             for (int match : matchPopStrategies.keySet()) {
                 if (average == null) {

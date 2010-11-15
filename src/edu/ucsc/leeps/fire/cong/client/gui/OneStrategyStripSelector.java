@@ -5,6 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -40,7 +41,6 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     public OneStrategyStripSelector(Sprite parent, int x, int y, int width, int height,
             Client applet) {
         super(parent, x, y, width, height);
-        this.applet = applet;
 
         if (width > height) {
             slider = new Slider(applet, Slider.Alignment.Horizontal, 0, width, height / 2f, Color.black, "A", 1f);
@@ -48,7 +48,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             slider = new Slider(applet, Slider.Alignment.Vertical, 0, height, width / 2f, Color.black, "A", 1f);
         }
         slider.showGhost();
-
+        this.applet = applet;
         FIRE.client.addConfigListener(this);
         applet.addMouseListener(this);
         applet.addKeyListener(this);
@@ -133,6 +133,13 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         if (config.mixedStrategySelection && config.stripStrategySelection
                 && config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             setVisible(true);
+            if (config.payoffFunction instanceof PricingPayoffFunction) {
+                slider = new Slider(
+                        applet,
+                        Slider.Alignment.Vertical, height * 0.05f, height * 0.94f, width / 2f, Color.black, "", 1f);
+                slider.showGhost();
+                slider.setVisible(true);
+            }
         } else {
             setVisible(false);
         }

@@ -46,6 +46,10 @@ public class ChartLegend extends Sprite implements Configurable<Config> {
     @Override
     public void draw(Client applet) {
 
+        if (!visible) {
+            return;
+        }
+
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
 

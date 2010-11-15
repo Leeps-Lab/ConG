@@ -56,10 +56,12 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
     }
 
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 }

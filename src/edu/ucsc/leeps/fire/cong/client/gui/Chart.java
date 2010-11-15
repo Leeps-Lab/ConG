@@ -9,6 +9,7 @@ import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +35,15 @@ public class Chart extends Sprite implements Configurable<Config> {
     private Line matchP;
     private Line yourS;
     private Line matchS;
+    // prices
     private Map<Integer, Line> prices;
+    private Map<Integer, Line> marginalCosts;
+    private Color[] colors = new Color[]{
+        new Color(7, 226, 0),
+        new Color(52, 95, 255),
+        new Color(247, 64, 24),
+        new Color(255, 121, 0),
+        new Color(0, 206, 118),};
     // threshold
     private Line threshold;
     private HeatmapLegend heatmapLegend;
@@ -89,6 +98,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         matchS = new Line(this, 0, scaledMargin, width, scaledHeight);
 
         prices = new HashMap<Integer, Line>();
+        marginalCosts = new HashMap<Integer, Line>();
 
         heatmapLegend = new HeatmapLegend(this, -9, 1, 8, height);
 
@@ -214,6 +224,9 @@ public class Chart extends Sprite implements Configurable<Config> {
         for (Line line : prices.values()) {
             line.draw(applet);
         }
+        for (Line line : marginalCosts.values()) {
+            line.draw(applet);
+        }
     }
 
     private void drawSubperiodMarkers(Client applet) {
@@ -286,7 +299,9 @@ public class Chart extends Sprite implements Configurable<Config> {
         if (mode == Mode.Payoff) {
             yourPayoff.drawCostArea(applet, Client.state.strategyChanger.getCost());
         }
-        drawPercentLine(applet);
+        if (config.payoffFunction instanceof PricingPayoffFunction) {
+            drawPercentLine(applet);
+        }
         drawSubperiodMarkers(applet);
         drawAxis(applet);
         applet.popMatrix();
@@ -308,6 +323,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         matchP.clear();
         matchS.clear();
         prices.clear();
+        marginalCosts.clear();
     }
 
     public void updateLines() {
@@ -327,21 +343,42 @@ public class Chart extends Sprite implements Configurable<Config> {
                     for (int id : currentPrices.keySet()) {
                         if (!prices.containsKey(id)) {
                             Line priceLine = new Line(this, 0, scaledMargin, width, scaledHeight);
+                            Line marginalCostLine = new Line(this, 0, scaledMargin, width, scaledHeight);
                             if (id == Client.state.id) {
                                 priceLine.configure(FIRE.client.getConfig().yourStrategy);
+                                marginalCostLine.configure(FIRE.client.getConfig().yourStrategy);
                             } else {
                                 priceLine.configure(FIRE.client.getConfig().matchStrategy);
+                                marginalCostLine.configure(FIRE.client.getConfig().matchStrategy);
                             }
+                            marginalCostLine.mode = Line.Mode.Dashed;
                             prices.put(id, priceLine);
+                            marginalCosts.put(id, marginalCostLine);
+                            Color color;
+                            if (id == FIRE.client.getID()) {
+                                color = Color.BLACK;
+                            } else {
+                                if (prices.size() < colors.length) {
+                                    color = colors[prices.size()];
+                                } else {
+                                    color = new Color(200, 100, 0);
+                                }
+                            }
+                            priceLine.r = color.getRed();
+                            priceLine.g = color.getGreen();
+                            priceLine.b = color.getBlue();
+                            priceLine.alpha = 255;
                         }
                         Line priceLine = prices.get(id);
                         addPayoffPoint(priceLine, percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
+                        Line marginalCostLine = marginalCosts.get(id);
+                        addPayoffPoint(marginalCostLine, percent, config.marginalCost);
                     }
                 } else {
                     addPayoffPoint(matchPayoff, percent, PayoffFunction.Utilities.getMatchPayoff());
                 }
             } else {
-                float[] you = Client.state.strategies.get(Client.state.id);
+                float[] you = Client.state.getMyStrategy();
                 float[] match = PayoffFunction.Utilities.getAverageMatchStrategy();
                 if (mode == Mode.TwoStrategy) {
                     addStrategyPoint(yourStrategy, percent, you[0]);
@@ -350,11 +387,11 @@ public class Chart extends Sprite implements Configurable<Config> {
                     addStrategyPoint(yourR, percent, you[0]);
                     addStrategyPoint(matchR, percent, match[0]);
                 } else if (mode == Mode.PStrategy) {
-                    addStrategyPoint(yourR, percent, you[1]);
-                    addStrategyPoint(matchR, percent, match[1]);
+                    addStrategyPoint(yourP, percent, you[1]);
+                    addStrategyPoint(matchP, percent, match[1]);
                 } else if (mode == Mode.SStrategy) {
-                    addStrategyPoint(yourR, percent, you[2]);
-                    addStrategyPoint(matchR, percent, match[2]);
+                    addStrategyPoint(yourS, percent, you[2]);
+                    addStrategyPoint(matchS, percent, match[2]);
                 }
             }
         }
@@ -386,10 +423,13 @@ public class Chart extends Sprite implements Configurable<Config> {
      * @param subperiodStrategy strategy selected by subject for subperiod
      * @param counterpartSubperiodStrategy counterpart's strategy for subperiod.
      */
-    public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
+    public void endSubperiod(int subperiod) {
         float percentStart = (float) (subperiod - 1) / FIRE.client.getConfig().subperiods;
         float percentEnd = (float) subperiod / FIRE.client.getConfig().subperiods;
-        updateLines(percentStart);
+        while (percentStart <= percentEnd) {
+            updateLines(percentStart);
+            percentStart += 0.01;
+        }
         updateLines(percentEnd);
     }
 
@@ -427,6 +467,35 @@ public class Chart extends Sprite implements Configurable<Config> {
             threshold.visible = true;
         } else {
             threshold.visible = false;
+        }
+        yourPayoff.width = width;
+        matchPayoff.width = width;
+        yourStrategy.width = width;
+        matchStrategy.width = width;
+        yourR.width = width;
+        matchR.width = width;
+        yourP.width = width;
+        matchP.width = width;
+        yourS.width = width;
+        matchS.width = width;
+        threshold.width = width;
+        if (config.payoffFunction instanceof PricingPayoffFunction) {
+            float ratio =
+                    (config.marginalCost - config.payoffFunction.getMin())
+                    / (config.payoffFunction.getMax() - config.payoffFunction.getMin());
+            yourPayoff.origin.x = 0;
+            yourPayoff.origin.y = scaledMargin - Math.round(ratio * scaledHeight);
+            yourPayoff.width = width;
+            yourPayoff.height = scaledHeight;
+            yourPayoff.r = colors[0].getRed();
+            yourPayoff.g = colors[0].getGreen();
+            yourPayoff.b = colors[0].getBlue();
+        } else {
+            yourPayoff.origin.x = 0;
+            yourPayoff.origin.y = scaledMargin;
+            yourPayoff.width = width;
+            yourPayoff.height = scaledHeight;
+            yourPayoff.configure(config.yourPayoff);
         }
     }
 
