@@ -119,6 +119,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             } else {
                 slider.moveGhost(mouseY);
             }
+            Client.state.target[0] = slider.getGhostValue();
         }
 
         applet.pushMatrix();
@@ -143,10 +144,6 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         } else {
             setVisible(false);
         }
-    }
-
-    public float[] getTarget() {
-        return new float[]{slider.getGhostValue()};
     }
 
     public void startPrePeriod() {

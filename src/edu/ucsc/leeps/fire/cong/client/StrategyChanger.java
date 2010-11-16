@@ -15,8 +15,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     private Config config;
     private volatile boolean shouldUpdate;
     private float[] previousStrategy;
-    private float[] currentStrategy;
-    private float[] targetStrategy;
     private float[] deltaStrategy;
     private float[] lastStrategy;
     private int rate;
@@ -35,57 +33,52 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
 
     public void configChanged(Config config) {
         this.config = config;
+        int size = 0;
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            previousStrategy = new float[1];
-            currentStrategy = new float[1];
-            targetStrategy = new float[1];
-            deltaStrategy = new float[1];
-            lastStrategy = new float[1];
+            size = 1;
         } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            previousStrategy = new float[3];
-            currentStrategy = new float[3];
-            targetStrategy = new float[3];
-            deltaStrategy = new float[3];
-            lastStrategy = new float[3];
+            size = 3;
         }
+        previousStrategy = new float[size];
+        deltaStrategy = new float[size];
+        lastStrategy = new float[size];
         tickDelta = config.percentChangePerSecond / (1000f / rate) * 2f;
     }
 
     private void update() {
-        targetStrategy = selector.getTarget();
-        if (targetStrategy == null) {
+        if (Client.state.target == null) {
             return;
         }
+        float[] current = Client.state.getMyStrategy();
         boolean same = true;
-        for (int i = 0; i < targetStrategy.length; i++) {
-            if (Math.abs(targetStrategy[i] - currentStrategy[i]) > Float.MIN_NORMAL) {
+        for (int i = 0; i < Client.state.target.length; i++) {
+            if (Math.abs(Client.state.target[i] - current[i]) > Float.MIN_NORMAL) {
                 same = false;
             }
         }
         if (same) {
-            for (int i = 0; i < targetStrategy.length; i++) {
-                targetStrategy[i] = currentStrategy[i];
+            for (int i = 0; i < Client.state.target.length; i++) {
+                Client.state.target[i] = current[i];
             }
             return;
         }
         float totalDelta = 0f;
-        for (int i = 0; i < currentStrategy.length; i++) {
-            deltaStrategy[i] = targetStrategy[i] - currentStrategy[i];
+        for (int i = 0; i < current.length; i++) {
+            deltaStrategy[i] = Client.state.target[i] - current[i];
             totalDelta += Math.abs(deltaStrategy[i]);
         }
         if (config.percentChangePerSecond < 1f && totalDelta > tickDelta) {
             for (int i = 0; i < deltaStrategy.length; i++) {
                 deltaStrategy[i] = tickDelta * (deltaStrategy[i] / totalDelta);
-                currentStrategy[i] += deltaStrategy[i];
+                current[i] += deltaStrategy[i];
             }
         } else {
-            for (int i = 0; i < currentStrategy.length; i++) {
-                currentStrategy[i] = targetStrategy[i];
+            for (int i = 0; i < current.length; i++) {
+                current[i] = Client.state.target[i];
             }
         }
 
         sendUpdate();
-        Client.state.setMyStrategy(currentStrategy);
         if (config.delay != null) {
             int delay = config.delay.getDelay();
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
@@ -93,17 +86,28 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     private void sendUpdate() {
+        float[] current = Client.state.getMyStrategy();
         if (config.subperiods == 0) {
             float total = 0;
             for (int i = 0; i < previousStrategy.length; i++) {
-                total += Math.abs(previousStrategy[i] - currentStrategy[i]);
+                total += Math.abs(previousStrategy[i] - current[i]);
             }
             strategyDelta += total / 2;
         }
         Thread.yield();
+        float sum = 0;
+        for (int i = 0; i < current.length; i++) {
+            sum += current[i];
+        }
+        assert Math.abs(1 - sum) < 0.05;
+        sum = 0;
+        for (int i = 0; i < Client.state.target.length; i++) {
+            sum += Client.state.target[i];
+        }
+        assert Math.abs(1 - sum) < 0.05;
         FIRE.client.getServer().strategyChanged(
-                currentStrategy,
-                targetStrategy,
+                current,
+                Client.state.target,
                 FIRE.client.getID());
     }
 
@@ -132,31 +136,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
 
     private boolean decisionDelayed() {
         return System.currentTimeMillis() < nextAllowedChangeTime;
-    }
-
-    public void setCurrentStrategy(float[] strategy) {
-        for (int i = 0; i < currentStrategy.length; i++) {
-            previousStrategy[i] = strategy[i];
-            currentStrategy[i] = strategy[i];
-        }
-    }
-
-    public void setTargetStrategy(float[] strategy) {
-        assert strategy.length == currentStrategy.length;
-        if (config.percentChangePerSecond >= 1.0f
-                || !FIRE.client.getClient().haveInitialStrategy()) {
-            for (int i = 0; i < strategy.length; i++) {
-                currentStrategy[i] = strategy[i];
-                targetStrategy[i] = strategy[i];
-            }
-            Client.state.setMyStrategy(currentStrategy);
-            sendUpdate();
-            return;
-        } else {
-            for (int i = 0; i < targetStrategy.length; i++) {
-                targetStrategy[i] = strategy[i];
-            }
-        }
     }
 
     public float getCost() {
@@ -200,10 +179,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         selector.setEnabled(false);
     }
 
-    public float[] getCurrentStrategy() {
-        return currentStrategy;
-    }
-
     public static interface Selector {
 
         public void startPrePeriod();
@@ -211,8 +186,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         public void startPeriod();
 
         public void setEnabled(boolean enabled);
-
-        public float[] getTarget();
 
         public void update();
     }

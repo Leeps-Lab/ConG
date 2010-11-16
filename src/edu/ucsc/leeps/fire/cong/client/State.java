@@ -22,7 +22,11 @@ public class State {
     }
 
     public void setMyStrategy(float[] strategy) {
-        strategies.put(id, strategy);
+        float[] s = new float[strategy.length];
+        System.arraycopy(strategy, 0, s, 0, s.length);
+        strategies.put(id, s);
+        target = new float[strategy.length];
+        System.arraycopy(strategy, 0, target, 0, target.length);
     }
 
     public float[] getMyStrategy() {

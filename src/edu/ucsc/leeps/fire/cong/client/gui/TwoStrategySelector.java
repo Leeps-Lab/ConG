@@ -12,7 +12,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import processing.core.PApplet;
 
 /**
  *
@@ -22,7 +21,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     private Client applet;
     private Config config;
-    private float target_percent_A;
     private boolean enabled;
     private HeatmapHelper heatmap, counterpartHeatmap;
     private Marker myHeatmapAa;
@@ -107,10 +105,6 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         }
     }
 
-    public float[] getTarget() {
-        return new float[]{target_percent_A};
-    }
-
     public void update() {
         if (visible) {
             heatmap.updateTwoStrategyHeatmap();
@@ -189,12 +183,12 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             dragged.update((1 - percent_a) * width, dragged.origin.y);
         }
 
-        if (percent_A == target_percent_A) {
+        if (percent_A == Client.state.target[0]) {
             planned.setVisible(true);
             planned.update(
                     (1 - percent_a) * width,
-                    (1 - target_percent_A) * height);
-            planned.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{target_percent_A}));
+                    (1 - Client.state.target[0]) * height);
+            planned.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{Client.state.target[0]}));
         } else {
             planned.setVisible(false);
         }
@@ -287,8 +281,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         int mouseX = me.getX();
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
-            float targetPercentA = 1 - ((mouseY - origin.y) / height);
-            target_percent_A = targetPercentA;
+            float target = 1 - ((mouseY - origin.y) / height);
+            Client.state.target[0] = target;
         }
     }
 
@@ -302,8 +296,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         int mouseX = me.getX();
         int mouseY = me.getY();
         if (inRect(mouseX, mouseY)) {
-            float targetPercentA = 1 - ((mouseY - origin.y) / height);
-            target_percent_A = targetPercentA;
+            float target = 1 - ((mouseY - origin.y) / height);
+            Client.state.target[0] = target;
         }
     }
 
@@ -322,15 +316,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         }
         if (ke.isActionKey()) {
             if (ke.getKeyCode() == KeyEvent.VK_UP) {
-                float targetPercentA = target_percent_A;
-                targetPercentA += 0.01f;
-                targetPercentA = PApplet.constrain(targetPercentA, 0, 1);
-                target_percent_A = targetPercentA;
             } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
-                float targetPercentA = target_percent_A;
-                targetPercentA -= 0.01f;
-                targetPercentA = PApplet.constrain(targetPercentA, 0, 1);
-                target_percent_A = targetPercentA;
             }
         }
     }

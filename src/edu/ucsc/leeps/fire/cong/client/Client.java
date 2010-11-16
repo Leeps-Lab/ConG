@@ -147,17 +147,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         rChart.clearAll();
         pChart.clearAll();
         sChart.clearAll();
-        if (FIRE.client.getConfig().preLength == 0) {
-            strategyChanger.setTargetStrategy(FIRE.client.getConfig().initialStrategy);
-        }
     }
 
     public void startPeriod() {
+        System.err.println("starting period");
+        state.setMyStrategy(FIRE.client.getConfig().initialStrategy);
         if (FIRE.client.getConfig().preLength == 0) {
             state.currentPercent = 0;
-            state.setMyStrategy(FIRE.client.getConfig().initialStrategy);
-            strategyChanger.setCurrentStrategy(FIRE.client.getConfig().initialStrategy);
-            strategyChanger.setTargetStrategy(FIRE.client.getConfig().initialStrategy);
             bimatrix.setEnabled(true);
             pureMatrix.setEnabled(true);
             strip.setEnabled(true);
@@ -215,10 +211,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     public void tick(int secondsLeft) {
         state.currentPercent = width * (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
         countdown.setSecondsLeft(secondsLeft);
-    }
-
-    public float[] getStrategy() {
-        return strategyChanger.getCurrentStrategy();
     }
 
     public void setStrategies(Map<Integer, float[]> strategies) {

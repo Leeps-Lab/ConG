@@ -14,9 +14,6 @@ import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 public class QWERTYStrategySelector extends Sprite implements Configurable<Config>, Selector {
 
     private RadioButtonGroup firmButtons;
-    private float[] firm1 = new float[]{1};
-    private float[] firm2 = new float[]{0};
-    private Config config;
     private QWERTYPayoffFunction pf;
 
     public QWERTYStrategySelector(
@@ -43,13 +40,6 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         firmButtons.setVisible(visible);
     }
 
-    public float[] getTarget() {
-        if (firmButtons.getSelection() == 0) {
-            return firm1;
-        }
-        return firm2;
-    }
-
     @Override
     public void draw(Client applet) {
         if (!visible) {
@@ -60,6 +50,12 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         drawTable(applet);
         firmButtons.draw(applet);
         applet.popMatrix();
+
+        if (firmButtons.getSelection() == 0) {
+            Client.state.target[0] = 1;
+        } else {
+            Client.state.target[0] = 0;
+        }
     }
 
     private void drawTable(Client applet) {
@@ -108,7 +104,6 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
     }
 
     public void configChanged(Config config) {
-        this.config = config;
         if (!config.mixedStrategySelection && !config.stripStrategySelection
                 && config.payoffFunction instanceof QWERTYPayoffFunction) {
             this.pf = (QWERTYPayoffFunction) config.payoffFunction;

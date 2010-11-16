@@ -50,17 +50,20 @@ public interface PayoffFunction extends Serializable {
                     average = new float[matchPopStrategies.get(match).length];
                 }
                 if (!(excludeSelf && id == match)) {
+                    float[] s = matchPopStrategies.get(match);
                     for (int i = 0; i < average.length; i++) {
-                        average[i] += matchPopStrategies.get(match)[i];
+                        average[i] += s[i];
                     }
                 }
             }
+            float sum = 0;
             for (int i = 0; i < average.length; i++) {
                 if (excludeSelf) {
                     average[i] /= (matchPopStrategies.size() - 1);
                 } else {
                     average[i] /= matchPopStrategies.size();
                 }
+                sum += average[i];
             }
             return average;
         }
