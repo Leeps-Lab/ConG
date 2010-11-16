@@ -48,7 +48,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         sideLength = width - 10;
         maxDist = (Client.sqrt(3) / 2f) * sideLength;
 
-        rock = new Marker(this, 5, height / 3, true, CORNER_MARKER_R);
+        rock = new Marker(this, 5, height / 4, true, CORNER_MARKER_R);
         rock.setLabel("R");
         rock.setLabelMode(Marker.LabelMode.Bottom);
         rock.setDrawMode(Marker.DrawMode.FillOutline);
@@ -160,6 +160,8 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         paper.draw(applet);
         scissors.draw(applet);
 
+        drawMatrix(applet);
+
         if (enabled) {
             rock.shrink();
             paper.shrink();
@@ -200,8 +202,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                 hover.setVisible(false);
                 applet.cursor();
             }
-            float[] coords = calculateStratCoords(Client.state.target[R], Client.state.target[P], Client.state.target[S]);
-            target.update(coords[0], coords[1]);
+            if (Client.state.target != null) {
+                float[] coords = calculateStratCoords(Client.state.target[R], Client.state.target[P], Client.state.target[S]);
+                target.update(coords[0], coords[1]);
+            }
         }
 
         if (hover.visible) {
@@ -265,6 +269,54 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         current.draw(applet);
         opponent.draw(applet);
 
+        applet.popMatrix();
+    }
+
+    private void drawMatrix(Client applet) {
+        ThreeStrategyPayoffFunction pf = ((ThreeStrategyPayoffFunction) FIRE.client.getConfig().payoffFunction);
+        float[][] table = new float[][]{
+            {pf.Rr, pf.Rp, pf.Rs},
+            {pf.Pr, pf.Pp, pf.Ps},
+            {pf.Sr, pf.Sp, pf.Ss}
+        };
+        String[] rowLabels = new String[]{"A", "B", "C"};
+        String[] colLabels = new String[]{"a", "b", "c"};
+        float tableX = (rock.origin.x + paper.origin.x) / 2;
+        float tableY = rock.origin.y + 25;
+        float textWidth = applet.textWidth("00");
+        float cellWidth = 11 + textWidth + 11;
+        float cellHeight = 5 + textWidth + 5;
+        applet.stroke(0);
+        applet.strokeWeight(2);
+        int cols = table.length + 1;
+        int rows = table.length + 1;
+        float tableWidth = cols * cellWidth;
+        applet.pushMatrix();
+        applet.translate(tableX - tableWidth / 2, tableY);
+        for (int col = 1; col <= cols; col++) {
+            applet.line(col * cellWidth, 0, col * cellWidth, cellHeight * rows);
+        }
+        for (int row = 1; row <= rows; row++) {
+            applet.line(0, row * cellHeight, cellWidth * cols, row * cellHeight);
+        }
+        applet.textAlign(Client.CENTER, Client.CENTER);
+        for (int col = 0; col < cols; col++) {
+            for (int row = 0; row < rows; row++) {
+                if (col == 0 && row == 0) {
+                    continue;
+                }
+                applet.fill(0);
+                if (col == 0) {
+                    applet.text(rowLabels[row - 1], Math.round(cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
+                } else if (row == 0) {
+                    applet.text(colLabels[col - 1], Math.round(col * cellWidth + cellWidth / 2f), Math.round(cellHeight / 2f));
+                } else {
+                    float payoff = table[row - 1][col - 1];
+                    String s = String.format("%.0f", payoff);
+                    applet.text(s, Math.round(col * cellWidth + cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
+                }
+            }
+        }
         applet.popMatrix();
     }
 

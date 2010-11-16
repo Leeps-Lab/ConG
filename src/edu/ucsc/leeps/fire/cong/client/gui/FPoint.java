@@ -16,4 +16,9 @@ public class FPoint {
         y = Y;
         visible = true;
     }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
 }
