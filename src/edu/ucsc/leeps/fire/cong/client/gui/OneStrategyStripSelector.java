@@ -69,9 +69,6 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         slider.setVisible(visible);
     }
 
-    public void update() {
-    }
-
     /**
      * If not visible, return.
      * Translate the applet to the origin.Use heatmap to draw applet. If slider
@@ -197,5 +194,8 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     }
 
     public void keyReleased(KeyEvent e) {
+    }
+
+    public void endSubperiod(int subperiod) {
     }
 }

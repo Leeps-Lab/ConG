@@ -48,7 +48,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         sideLength = width - 10;
         maxDist = (Client.sqrt(3) / 2f) * sideLength;
 
-        rock = new Marker(this, 5, height / 4, true, CORNER_MARKER_R);
+        rock = new Marker(this, 5, height / 3, true, CORNER_MARKER_R);
         rock.setLabel("R");
         rock.setLabelMode(Marker.LabelMode.Bottom);
         rock.setDrawMode(Marker.DrawMode.FillOutline);
@@ -127,7 +127,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         FIRE.client.addConfigListener(this);
     }
 
-    public void update() {
+    public void updateHeatmap() {
         if (visible) {
             float[] average = PayoffFunction.Utilities.getAverageMatchStrategy();
             heatmap.updateThreeStrategyHeatmap(
@@ -135,12 +135,15 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                     this);
         }
     }
-    int T = 0;
 
     @Override
     public void draw(Client applet) {
         if (!visible) {
             return;
+        }
+
+        if (applet.frameCount % applet.framesPerUpdate == 0 && FIRE.client.getConfig().subperiods == 0) {
+            updateHeatmap();
         }
 
         heatmap.draw(applet);
@@ -160,7 +163,9 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         paper.draw(applet);
         scissors.draw(applet);
 
-        drawMatrix(applet);
+        if (FIRE.client.getConfig().showMatrix) {
+            drawMatrix(applet);
+        }
 
         if (enabled) {
             rock.shrink();
@@ -281,8 +286,8 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         };
         String[] rowLabels = new String[]{"A", "B", "C"};
         String[] colLabels = new String[]{"a", "b", "c"};
-        float tableX = (rock.origin.x + paper.origin.x) / 2;
-        float tableY = rock.origin.y + 25;
+        float tableX = 45;
+        float tableY = -origin.y + 25;
         float textWidth = applet.textWidth("00");
         float cellWidth = 11 + textWidth + 11;
         float cellHeight = 5 + textWidth + 5;
@@ -291,6 +296,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         int cols = table.length + 1;
         int rows = table.length + 1;
         float tableWidth = cols * cellWidth;
+        float tableHeight = rows * cellHeight;
         applet.pushMatrix();
         applet.translate(tableX - tableWidth / 2, tableY);
         for (int col = 1; col <= cols; col++) {
@@ -317,6 +323,12 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                 }
             }
         }
+        applet.text("Other Choices", Math.round(tableWidth - (cellWidth * (cols - 1)) / 2f), -10);
+        applet.pushMatrix();
+        applet.translate(-10, tableHeight - (cellHeight * (rows - 1)) / 2f);
+        applet.rotate(3 * Client.PI / 2);
+        applet.text("Your Choices", 0, 0);
+        applet.popMatrix();
         applet.popMatrix();
     }
 
@@ -566,5 +578,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     }
 
     public void startPeriod() {
+        heatmap.reset();
+    }
+
+    public void endSubperiod(int subperiod) {
+        updateHeatmap();
     }
 }

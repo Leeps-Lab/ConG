@@ -90,7 +90,7 @@ public class Population implements Serializable {
                     tick.config);
             // get summary statistics from payoff function
             tick.popStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
-            tick.matchStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
+            tick.matchStrategy = tick.config.payoffFunction.getMatchStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
             FIRE.server.commit(tick);
         }
     }

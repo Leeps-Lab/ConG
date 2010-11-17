@@ -124,6 +124,6 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         }
     }
 
-    public void update() {
+    public void endSubperiod(int subperiod) {
     }
 }

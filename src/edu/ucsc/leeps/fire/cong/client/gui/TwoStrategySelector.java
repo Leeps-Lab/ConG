@@ -105,7 +105,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         }
     }
 
-    public void update() {
+    public void updateHeatmaps() {
         if (visible) {
             heatmap.updateTwoStrategyHeatmap();
             counterpartHeatmap.updateTwoStrategyHeatmap();
@@ -253,21 +253,21 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         if (!visible) {
             return;
         }
-        try {
-            if (!inRect(applet.mouseX, applet.mouseY) || applet.pmouseX != applet.mouseX || applet.pmouseY != applet.mouseY) {
-                hoverTimestamp = System.currentTimeMillis();
-                hover.setVisible(false);
-            }
-            applet.pushMatrix();
-            applet.translate(origin.x, origin.y);
 
-            drawHeatmap();
-            drawStrategyInfo();
-
-            applet.popMatrix();
-        } catch (NullPointerException ex) {
-            ex.printStackTrace();
+        if (applet.frameCount % applet.framesPerUpdate == 0 && FIRE.client.getConfig().subperiods == 0) {
+            updateHeatmaps();
         }
+        if (!inRect(applet.mouseX, applet.mouseY) || applet.pmouseX != applet.mouseX || applet.pmouseY != applet.mouseY) {
+            hoverTimestamp = System.currentTimeMillis();
+            hover.setVisible(false);
+        }
+        applet.pushMatrix();
+        applet.translate(origin.x, origin.y);
+
+        drawHeatmap();
+        drawStrategyInfo();
+
+        applet.popMatrix();
     }
 
     private boolean inRect(int x, int y) {
@@ -347,5 +347,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     public void startPeriod() {
         // FIXME do stuff related to clearing the screen to set up for subperiods here
+    }
+
+    public void endSubperiod(int subperiod) {
+        updateHeatmaps();
     }
 }

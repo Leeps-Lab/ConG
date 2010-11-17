@@ -46,6 +46,8 @@ public class Config extends BaseConfig {
     public float sigmoidBeta;
     public boolean showMatrix;
     public boolean showPayoffTimeAxisLabels;
+    public int updatesPerSecond;
+    public int strategyUpdateMillis;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -134,11 +136,14 @@ public class Config extends BaseConfig {
         sigmoidHeatmap = false;
         sigmoidAlpha = 0.5f;
         showPayoffTimeAxisLabels = false;
+        showMatrix = true;
         excludeSelf = false;
         tupleSize = -1;
         numTuples = -1;
         population = -1;
         match = -1;
         marginalCost = 0;
+        updatesPerSecond = 5;
+        strategyUpdateMillis = 100;
     }
 }

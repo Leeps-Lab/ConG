@@ -299,7 +299,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         if (mode == Mode.Payoff) {
             yourPayoff.drawCostArea(applet, Client.state.strategyChanger.getCost());
         }
-        if (config.payoffFunction instanceof PricingPayoffFunction) {
+        if (!(config.payoffFunction instanceof PricingPayoffFunction && config.subperiods == 0)) {
             drawPercentLine(applet);
         }
         drawSubperiodMarkers(applet);

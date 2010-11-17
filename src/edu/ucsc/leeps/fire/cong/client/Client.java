@@ -44,7 +44,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public static boolean DEBUG = System.getProperty("fire.client.debug") != null;
     public static State state;
-    private int updatesPerSecond;
+    public int framesPerUpdate;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
     //only one shown
@@ -68,7 +68,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     public Client() {
         FIRE.client.addConfigListener(this);
         loadLibraries();
-        updatesPerSecond = Integer.parseInt(System.getProperty("fire.client.ups", "1"));
         noLoop();
         INIT_WIDTH = 900;
         INIT_HEIGHT = 600;
@@ -232,6 +231,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         rChart.endSubperiod(subperiod);
         pChart.endSubperiod(subperiod);
         sChart.endSubperiod(subperiod);
+        strategyChanger.endSubperiod(subperiod);
     }
 
     public void newMessage(String message, int senderID) {
@@ -300,9 +300,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 matrixSize,
                 this);
         countdown = new Countdown(
-                null, counterpartMatrixSize + 4 * leftMargin, 20 + topMargin, this);
+                null, bimatrix.width - 150, 20 + topMargin, this);
         pointsDisplay = new PointsDisplay(
-                null, counterpartMatrixSize + 4 * leftMargin, (int) (20 + textHeight) + topMargin, this);
+                null, bimatrix.width - 150, (int) (20 + textHeight) + topMargin, this);
         int chartLeftOffset = bimatrix.width;
         int chartWidth = (int) (width - chartLeftOffset - 2 * leftMargin - 80);
         int chartMargin = 30;
@@ -360,11 +360,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             if (frameCount % Math.round(frameRateTarget) == 0 && FIRE.client.isRunningPeriod()) {
                 pointsDisplay.update();
             }
-            if (strategyChanger != null
-                    && strategyChanger.selector != null
-                    && frameCount % Math.round(frameRateTarget * (1f / updatesPerSecond)) == 0) {
-                strategyChanger.selector.update();
-            }
 
             if (selector != null) {
                 selector.draw(this);
@@ -391,7 +386,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 } else {
                     fill(0);
                 }
-                text(frameRateString, 330, 30);
+                text(frameRateString, 10, height - 10);
             }
         } catch (NullPointerException ex) {
             ex.printStackTrace();
@@ -399,6 +394,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void configChanged(Config config) {
+        framesPerUpdate = Math.round(frameRateTarget * (1f / FIRE.client.getConfig().updatesPerSecond));
         payoffChart.setVisible(true);
         legend.setVisible(true);
         strategyChart.setVisible(false);

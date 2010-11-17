@@ -64,15 +64,11 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
         FIRE.client.addConfigListener(this);
     }
 
-    public void update() {
-        if (visible) {
-            updateLabels();
-        }
-    }
-
     @Override
     public void draw(Client applet) {
         if (visible) {
+
+            updateLabels();
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
@@ -333,5 +329,8 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     }
 
     public void startPeriod() {
+    }
+
+    public void endSubperiod(int subperiod) {
     }
 }

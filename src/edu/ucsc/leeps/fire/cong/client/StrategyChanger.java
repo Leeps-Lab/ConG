@@ -17,8 +17,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     private float[] previousStrategy;
     private float[] deltaStrategy;
     private float[] lastStrategy;
-    private int rate;
-    private float tickDelta;
     private float strategyDelta;
     private long nextAllowedChangeTime;
     private boolean initialLock;
@@ -26,7 +24,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     public Selector selector;
 
     public StrategyChanger() {
-        rate = Integer.parseInt(System.getProperty("fire.client.rate", "50"));
         FIRE.client.addConfigListener(this);
         start();
     }
@@ -42,13 +39,13 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         previousStrategy = new float[size];
         deltaStrategy = new float[size];
         lastStrategy = new float[size];
-        tickDelta = config.percentChangePerSecond / (1000f / rate) * 2f;
     }
 
     private void update() {
         if (Client.state.target == null) {
             return;
         }
+        float tickDelta = config.percentChangePerSecond / (1000f / config.strategyUpdateMillis) * 2f;
         float[] current = Client.state.getMyStrategy();
         boolean same = true;
         for (int i = 0; i < Client.state.target.length; i++) {
@@ -113,8 +110,15 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
 
     @Override
     public void run() {
-        long nanoWait = rate * 1000000;
         while (true) {
+            if (config == null) {
+                try {
+                    Thread.sleep(50);
+                    continue;
+                } catch (InterruptedException ex) {
+                }
+            }
+            long nanoWait = config.strategyUpdateMillis * 1000000;
             long start = System.nanoTime();
             isLocked = decisionDelayed();
             if (shouldUpdate) {
@@ -161,16 +165,18 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         selector.setEnabled(!paused);
     }
 
-    public void endSubperiod(int subperiod, float[] subperiodStrategy, float[] counterpartSubperiodStrategy) {
+    public void endSubperiod(int subperiod) {
         if (subperiod == 1) {
             System.arraycopy(config.initialStrategy, 0, lastStrategy, 0, lastStrategy.length);
         }
+        float[] subperiodStrategy = Client.state.getMyStrategy();
         float total = 0;
         for (int i = 0; i < subperiodStrategy.length; i++) {
             total += Math.abs(subperiodStrategy[i] - lastStrategy[i]);
         }
         strategyDelta += total / 2;
         System.arraycopy(subperiodStrategy, 0, lastStrategy, 0, lastStrategy.length);
+        selector.endSubperiod(subperiod);
     }
 
     public void endPeriod() {
@@ -185,8 +191,8 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
 
         public void startPeriod();
 
-        public void setEnabled(boolean enabled);
+        public void endSubperiod(int subperiod);
 
-        public void update();
+        public void setEnabled(boolean enabled);
     }
 }

@@ -207,6 +207,10 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         currentBuffer = backBuffer;
     }
 
+    public void reset() {
+        currentBuffer = null;
+    }
+
     @Override
     public void draw(Client applet) {
         if (!visible) {
