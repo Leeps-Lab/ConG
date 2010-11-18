@@ -92,16 +92,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             strategyDelta += total / 2;
         }
         Thread.yield();
-        float sum = 0;
-        for (int i = 0; i < current.length; i++) {
-            sum += current[i];
-        }
-        assert Math.abs(1 - sum) < 0.05;
-        sum = 0;
-        for (int i = 0; i < Client.state.target.length; i++) {
-            sum += Client.state.target[i];
-        }
-        assert Math.abs(1 - sum) < 0.05;
         FIRE.client.getServer().strategyChanged(
                 current,
                 Client.state.target,

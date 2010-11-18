@@ -136,7 +136,9 @@ public class RadioButtonGroup extends Sprite implements MouseListener {
             buttons[selectedButton].setSelected(false);
         }
         selectedButton = selection;
-        buttons[selectedButton].setSelected(true);
+        if (selection != NO_BUTTON) {
+            buttons[selection].setSelected(true);
+        }
     }
 
     public int getSelection() {

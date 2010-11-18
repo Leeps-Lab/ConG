@@ -8,7 +8,6 @@ import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -31,7 +30,6 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     private Marker[][] cellMarkers;
     private Marker[] columnLabels;
     private RadioButtonGroup buttons;
-    private PayoffFunction payoffFunction;
 
     /**
      *
@@ -69,6 +67,15 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
         if (visible) {
 
             updateLabels();
+
+            int selection = buttons.getSelection();
+
+            if (selection == 0 && Client.state.target != null) {
+                Client.state.target[0] = 1;
+            } else {
+                Client.state.target[0] = 0;
+            }
+
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
@@ -77,17 +84,16 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                     FIRE.client.getConfig().playersInTuple);
             applet.text(tupleSizeString, 0, 0);
 
-            float[] myStrategy = Client.state.getMyStrategy();
-            float[] averageMatch = PayoffFunction.Utilities.getAverageMatchStrategy();
-            float[] target = Client.state.target;
-
             if (FIRE.client.getConfig().showMatrix) {
+
+                int numStrategies = 2;
+
                 matrixLabel.draw(applet);
                 for (int i = 0; i < columnLabels.length; ++i) {
                     columnLabels[i].draw(applet);
                 }
 
-                float interval = matrixSideLength / (float) myStrategy.length;
+                float interval = matrixSideLength / (float) numStrategies;
 
                 applet.noStroke();
                 applet.fill(0, 95, 205, 125);
@@ -95,25 +101,26 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
                 int playedStrat = buttons.getSelection();
                 applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y + playedStrat * interval, matrixSideLength, interval);
+                int cpStrat = PayoffFunction.Utilities.getAverageMatchStrategy()[0] == 1 ? 0 : 1;
+                applet.rect(matrixTopLeft.origin.x + cpStrat * interval, matrixTopLeft.origin.y, interval, matrixSideLength);
+                /*
                 if (payoffFunction instanceof ThresholdPayoffFunction) {
-                    if (((ThresholdPayoffFunction) payoffFunction).thresholdMet(Client.state.currentPercent, myStrategy, averageMatch)) {
-                        applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y, interval, matrixSideLength);
-                    } else {
-                        applet.rect(matrixTopLeft.origin.x + interval, matrixTopLeft.origin.y, interval, matrixSideLength);
-                    }
+                if (((ThresholdPayoffFunction) payoffFunction).thresholdMet(Client.state.currentPercent, myStrategy, averageMatch)) {
+                applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y, interval, matrixSideLength);
                 } else {
-                    /*
-                    int i;
-                    for (i = 0; i < numStrategies.length; ++i) {
-                    if (counterpart[i] > 0) {
-                    break;
-                    }
-                    }
-                     * 
-                     */
-                    // FIXME Only do when playing versus a pure strategy
-                    //applet.rect(matrixTopLeft.origin.x + i * interval, matrixTopLeft.origin.y, interval, matrixSideLength);
+                applet.rect(matrixTopLeft.origin.x + interval, matrixTopLeft.origin.y, interval, matrixSideLength);
                 }
+                } else {
+                int i;
+                for (i = 0; i < numStrategies.length; ++i) {
+                if (counterpart[i] > 0) {
+                break;
+                }
+                }
+                // FIXME Only do when playing versus a pure strategy
+                //applet.rect(matrixTopLeft.origin.x + i * interval, matrixTopLeft.origin.y, interval, matrixSideLength);
+                }
+                 */
 
                 applet.stroke(0);
                 applet.strokeWeight(2);
@@ -123,7 +130,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 applet.line(matrixBotLeft.origin.x, matrixBotLeft.origin.y, matrixBotRight.origin.x, matrixBotRight.origin.y);
                 applet.line(matrixTopLeft.origin.x, matrixTopLeft.origin.y, matrixBotLeft.origin.x, matrixBotLeft.origin.y);
 
-                for (int i = 1; i < myStrategy.length; ++i) {
+                for (int i = 1; i < numStrategies; ++i) {
                     float x = matrixTopLeft.origin.x + i * interval;
                     float y = matrixTopLeft.origin.y + i * interval;
                     applet.line(x, matrixTopLeft.origin.y, x, matrixBotLeft.origin.y);
@@ -136,25 +143,6 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                     }
                 }
             }
-
-            int selection = buttons.getSelection();
-            if (selection != RadioButtonGroup.NO_BUTTON && myStrategy[selection] != 1) {
-                for (int i = 0; i < target.length; i++) {
-                    if (selection == i) {
-                        target[i] = 1;
-                    } else {
-                        target[i] = 0;
-                    }
-                }
-            }
-
-            selection = -1;
-            for (int i = 0; i < myStrategy.length; i++) {
-                if (myStrategy[i] == 1) {
-                    selection = i;
-                }
-            }
-            buttons.setSelection(selection);
 
             buttons.draw(applet);
 
@@ -195,7 +183,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                     || (buttons.getAlignment() == RadioButtonGroup.Alignment.Horizontal
                     && e.getKeyCode() == KeyEvent.VK_RIGHT)) {
                 if (selection < buttons.getNumButtons() - 1) {
-                    ++selection;
+                    selection++;
                 } else {
                     return;
                 }
@@ -204,20 +192,17 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                     || (buttons.getAlignment() == RadioButtonGroup.Alignment.Horizontal
                     && e.getKeyCode() == KeyEvent.VK_LEFT)) {
                 if (selection > 0) {
-                    --selection;
+                    selection--;
                 } else {
                     return;
                 }
             }
             buttons.setSelection(selection);
-            float[] myStrategy = Client.state.getMyStrategy();
-            if (selection != RadioButtonGroup.NO_BUTTON && myStrategy[selection] != 1) {
-                for (int i = 0; i < Client.state.target.length; i++) {
-                    if (selection == i) {
-                        Client.state.target[i] = 1;
-                    } else {
-                        Client.state.target[i] = 0;
-                    }
+            if (selection != RadioButtonGroup.NO_BUTTON) {
+                if (selection == 0) {
+                    Client.state.target[0] = 1;
+                } else {
+                    Client.state.target[0] = 0;
                 }
             }
         }
@@ -236,15 +221,14 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
         }
 
         if (numStrategies != 0) {
-            this.payoffFunction = config.payoffFunction;
 
-            if (payoffFunction instanceof ThresholdPayoffFunction) {
-                float threshold = ((ThresholdPayoffFunction) payoffFunction).threshold;
-                matrixLabel.setLabel("Threshold: " + threshold);
-                matrixLabel.setVisible(true);
-            } else {
-                matrixLabel.setVisible(false);
-            }
+            //if (payoffFunction instanceof ThresholdPayoffFunction) {
+            //    float threshold = ((ThresholdPayoffFunction) payoffFunction).threshold;
+            //    matrixLabel.setLabel("Threshold: " + threshold);
+            //    matrixLabel.setVisible(true);
+            //} else {
+            matrixLabel.setVisible(false);
+            //}
 
             cellMarkers = new Marker[numStrategies][numStrategies];
             float interval = matrixSideLength / (numStrategies * 2f);
@@ -276,27 +260,27 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                     RadioButtonGroup.Alignment.Vertical, BUTTON_RADIUS, applet);
             buttons.setLabelMode(Marker.LabelMode.Right);
 
-            if (payoffFunction instanceof ThresholdPayoffFunction) {
-                columnLabels[0].setLabel("met");
-                columnLabels[1].setLabel("not met");
+            //if (payoffFunction instanceof ThresholdPayoffFunction) {
+            //columnLabels[0].setLabel("met");
+            //columnLabels[1].setLabel("not met");
 
-                buttons.setLabels(new String[]{"A", "B"});
-            } else if (payoffFunction instanceof TwoStrategyPayoffFunction) {
-                columnLabels[0].setLabel("a");
-                columnLabels[1].setLabel("b");
+            //buttons.setLabels(new String[]{"A", "B"});
+            //} else if (payoffFunction instanceof TwoStrategyPayoffFunction) {
+            columnLabels[0].setLabel("a");
+            columnLabels[1].setLabel("b");
 
-                buttons.setLabels(new String[]{"A", "B"});
-            } else if (payoffFunction instanceof ThreeStrategyPayoffFunction) {
-                columnLabels[0].setLabel("a");
-                columnLabels[1].setLabel("b");
-                columnLabels[2].setLabel("c");
+            buttons.setLabels(new String[]{"A", "B"});
+            //} else if (payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            //    columnLabels[0].setLabel("a");
+            //    columnLabels[1].setLabel("b");
+            //    columnLabels[2].setLabel("c");
 
-                buttons.setLabels(new String[]{"A", "B", "C"});
-            }
+            //    buttons.setLabels(new String[]{"A", "B", "C"});
+            //}
             buttons.setEnabled(false);
         }
 
-        if (config.mixedStrategySelection || payoffFunction instanceof QWERTYPayoffFunction) {
+        if (config.mixedStrategySelection || config.payoffFunction instanceof QWERTYPayoffFunction) {
             setVisible(false);
         } else {
             setVisible(true);
@@ -317,8 +301,8 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 myStrategy[i] = 1f;
                 opponentStrategy[j] = 1f;
 
-                float myPayoff = PayoffFunction.Utilities.getPayoff();
-                float opponentPayoff = PayoffFunction.Utilities.getMatchPayoff();
+                float myPayoff = PayoffFunction.Utilities.getPayoff(myStrategy, opponentStrategy);
+                float opponentPayoff = PayoffFunction.Utilities.getMatchPayoff(myStrategy, opponentStrategy);
 
                 cellMarkers[i][j].setLabel(myPayoff, opponentPayoff);
             }
@@ -329,6 +313,11 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     }
 
     public void startPeriod() {
+        if (Client.state.getMyStrategy()[0] == 1) {
+            buttons.setSelection(0);
+        } else {
+            buttons.setSelection(1);
+        }
     }
 
     public void endSubperiod(int subperiod) {

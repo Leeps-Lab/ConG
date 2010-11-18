@@ -56,10 +56,10 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
     }
 
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return popStrategies.get(id);
     }
 
     public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return PayoffFunction.Utilities.getAverageMatchStrategy(id, popStrategies, matchPopStrategies);
     }
 }

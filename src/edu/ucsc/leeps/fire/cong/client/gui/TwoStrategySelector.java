@@ -116,13 +116,13 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private void updateLabels() {
         float myAa, counterAa, myAb, counterAb, myBa, counterBa, myBb, counterBb;
         myAa = PayoffFunction.Utilities.getPayoff(new float[]{1}, new float[]{1});
-        counterAa = PayoffFunction.Utilities.getPayoff(new float[]{1}, new float[]{1});
+        counterAa = PayoffFunction.Utilities.getMatchPayoff(new float[]{1}, new float[]{1});
         myAb = PayoffFunction.Utilities.getPayoff(new float[]{1}, new float[]{0});
-        counterAb = PayoffFunction.Utilities.getPayoff(new float[]{1}, new float[]{0});
+        counterAb = PayoffFunction.Utilities.getMatchPayoff(new float[]{1}, new float[]{0});
         myBa = PayoffFunction.Utilities.getPayoff(new float[]{0}, new float[]{1});
-        counterBa = PayoffFunction.Utilities.getPayoff(new float[]{0}, new float[]{1});
+        counterBa = PayoffFunction.Utilities.getMatchPayoff(new float[]{0}, new float[]{1});
         myBb = PayoffFunction.Utilities.getPayoff(new float[]{0}, new float[]{0});
-        counterBb = PayoffFunction.Utilities.getPayoff(new float[]{0}, new float[]{0});
+        counterBb = PayoffFunction.Utilities.getMatchPayoff(new float[]{0}, new float[]{0});
 
         myHeatmapAa.setLabel(myAa);
         myHeatmapAb.setLabel(myAb);
@@ -183,7 +183,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             dragged.update((1 - percent_a) * width, dragged.origin.y);
         }
 
-        if (percent_A == Client.state.target[0]) {
+        if (Client.state.target != null && percent_A == Client.state.target[0]) {
             planned.setVisible(true);
             planned.update(
                     (1 - percent_a) * width,
@@ -254,6 +254,10 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             return;
         }
 
+        if (applet.mousePressed) {
+            updateTarget(applet.mouseX, applet.mouseY);
+        }
+
         if (applet.frameCount % applet.framesPerUpdate == 0 && FIRE.client.getConfig().subperiods == 0) {
             updateHeatmaps();
         }
@@ -274,54 +278,51 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         return (x > origin.x && x < origin.x + width && y > origin.y && y < origin.y + height);
     }
 
-    public void mouseClicked(MouseEvent me) {
-        if (!enabled) {
-            return;
-        }
-        int mouseX = me.getX();
-        int mouseY = me.getY();
+    private void updateTarget(int mouseX, int mouseY) {
         if (inRect(mouseX, mouseY)) {
             float target = 1 - ((mouseY - origin.y) / height);
             Client.state.target[0] = target;
         }
     }
 
-    public void mousePressed(MouseEvent me) {
-    }
-
-    public void mouseReleased(MouseEvent me) {
+    public void mouseClicked(MouseEvent e) {
         if (!enabled) {
             return;
         }
-        int mouseX = me.getX();
-        int mouseY = me.getY();
-        if (inRect(mouseX, mouseY)) {
-            float target = 1 - ((mouseY - origin.y) / height);
-            Client.state.target[0] = target;
-        }
+        updateTarget(e.getX(), e.getY());
     }
 
-    public void mouseEntered(MouseEvent me) {
+    public void mousePressed(MouseEvent e) {
     }
 
-    public void mouseExited(MouseEvent me) {
-    }
-
-    public void keyTyped(KeyEvent ke) {
-    }
-
-    public void keyPressed(KeyEvent ke) {
+    public void mouseReleased(MouseEvent e) {
         if (!enabled) {
             return;
         }
-        if (ke.isActionKey()) {
-            if (ke.getKeyCode() == KeyEvent.VK_UP) {
-            } else if (ke.getKeyCode() == KeyEvent.VK_DOWN) {
+        updateTarget(e.getX(), e.getY());
+    }
+
+    public void mouseEntered(MouseEvent e) {
+    }
+
+    public void mouseExited(MouseEvent e) {
+    }
+
+    public void keyTyped(KeyEvent e) {
+    }
+
+    public void keyPressed(KeyEvent e) {
+        if (!enabled) {
+            return;
+        }
+        if (e.isActionKey()) {
+            if (e.getKeyCode() == KeyEvent.VK_UP) {
+            } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
             }
         }
     }
 
-    public void keyReleased(KeyEvent ke) {
+    public void keyReleased(KeyEvent e) {
     }
 
     public void configChanged(Config config) {
