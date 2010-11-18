@@ -173,9 +173,17 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         current.update((1 - percent_a) * width, (1 - percent_A) * height);
         current.setLabel(PayoffFunction.Utilities.getPayoff());
 
-        if (applet.mousePressed && inRect((int) origin.x + width / 2, applet.mouseY)) {
+        if (applet.mousePressed) {
             dragged.setVisible(true);
-            dragged.update((1 - percent_a) * width, applet.mouseY - origin.y);
+            float target;
+            if (aboveRect(applet.mouseY)) {
+                target = 1;
+            } else if (belowRect(applet.mouseY)) {
+                target = 0;
+            } else {
+                target = 1 - ((applet.mouseY - origin.y) / height);
+            }
+            dragged.update((1 - percent_a) * width, (1 - target) * height);
             float hoverPercent_A = 1 - ((applet.mouseY - origin.y) / height);
             dragged.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}));
         } else {
@@ -255,7 +263,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         }
 
         if (applet.mousePressed) {
-            updateTarget(applet.mouseX, applet.mouseY);
+            updateTarget(applet.mouseY);
         }
 
         if (applet.frameCount % applet.framesPerUpdate == 0 && FIRE.client.getConfig().subperiods == 0) {
@@ -275,21 +283,34 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     private boolean inRect(int x, int y) {
-        return (x > origin.x && x < origin.x + width && y > origin.y && y < origin.y + height);
+        return x >= origin.x && x <= origin.x + width && y >= origin.y && y <= origin.y + height;
     }
 
-    private void updateTarget(int mouseX, int mouseY) {
-        if (inRect(mouseX, mouseY)) {
-            float target = 1 - ((mouseY - origin.y) / height);
-            Client.state.target[0] = target;
+    private boolean aboveRect(int y) {
+        return y < origin.y;
+    }
+
+    private boolean belowRect(int y) {
+        return y > origin.y + height;
+    }
+
+    private void updateTarget(int mouseY) {
+        float target;
+        if (aboveRect(mouseY)) {
+            target = 1;
+        } else if (belowRect(mouseY)) {
+            target = 0;
+        } else {
+            target = 1 - ((mouseY - origin.y) / height);
         }
+        Client.state.target[0] = target;
     }
 
     public void mouseClicked(MouseEvent e) {
         if (!enabled) {
             return;
         }
-        updateTarget(e.getX(), e.getY());
+        updateTarget(e.getY());
     }
 
     public void mousePressed(MouseEvent e) {
@@ -299,7 +320,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         if (!enabled) {
             return;
         }
-        updateTarget(e.getX(), e.getY());
+        updateTarget(e.getY());
     }
 
     public void mouseEntered(MouseEvent e) {
@@ -316,8 +337,14 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             return;
         }
         if (e.isActionKey()) {
+            float newTarget = Client.state.target[0];
             if (e.getKeyCode() == KeyEvent.VK_UP) {
+                newTarget += 0.1;
             } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                newTarget -= 0.1;
+            }
+            if (newTarget >= 0 && newTarget <= 1) {
+                Client.state.target[0] = newTarget;
             }
         }
     }
