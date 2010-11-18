@@ -158,14 +158,20 @@ public class Population implements Serializable {
             }
         }
 
-        public void endSubperiod(int subperiod) {
+        public void endSubperiod(final int subperiod) {
             float percentElapsed = 1f / FIRE.server.getConfig().subperiods;
             float percent = subperiod * percentElapsed;
             evaluate(percent, percentElapsed);
             match.evaluate(percent, percentElapsed);
-            for (int member : members) {
-                Population.this.members.get(member).endSubperiod(
-                        subperiod, strategies, match.strategies);
+            for (final int member : members) {
+                new Thread() {
+
+                    @Override
+                    public void run() {
+                        Population.this.members.get(member).endSubperiod(
+                                subperiod, strategies, match.strategies);
+                    }
+                }.start();
             }
             update();
 

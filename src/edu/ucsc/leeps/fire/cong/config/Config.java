@@ -46,7 +46,7 @@ public class Config extends BaseConfig {
     public float sigmoidBeta;
     public boolean showMatrix;
     public boolean showPayoffTimeAxisLabels;
-    public int updatesPerSecond;
+    public float updatesPerSecond;
     public int strategyUpdateMillis;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
@@ -143,7 +143,7 @@ public class Config extends BaseConfig {
         population = -1;
         match = -1;
         marginalCost = 0;
-        updatesPerSecond = 5;
-        strategyUpdateMillis = 100;
+        updatesPerSecond = 1;
+        strategyUpdateMillis = 200;
     }
 }

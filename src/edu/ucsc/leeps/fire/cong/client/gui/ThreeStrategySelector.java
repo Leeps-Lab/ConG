@@ -323,7 +323,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
                 }
             }
         }
-        applet.text("Other Choices", Math.round(tableWidth - (cellWidth * (cols - 1)) / 2f), -10);
+        applet.text("Others Choices", Math.round(tableWidth - (cellWidth * (cols - 1)) / 2f), -10);
         applet.pushMatrix();
         applet.translate(-10, tableHeight - (cellHeight * (rows - 1)) / 2f);
         applet.rotate(3 * Client.PI / 2);

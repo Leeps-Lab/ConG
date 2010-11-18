@@ -221,17 +221,24 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void endSubperiod(
-            int subperiod,
-            Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies) {
-        state.subperiod = subperiod;
-        state.strategies = strategies;
-        state.matchStrategies = matchStrategies;
-        payoffChart.endSubperiod(subperiod);
-        strategyChart.endSubperiod(subperiod);
-        rChart.endSubperiod(subperiod);
-        pChart.endSubperiod(subperiod);
-        sChart.endSubperiod(subperiod);
-        strategyChanger.endSubperiod(subperiod);
+            final int subperiod,
+            final Map<Integer, float[]> strategies,
+            final Map<Integer,float[]> matchStrategies) {
+        new Thread() {
+
+            @Override
+            public void run() {
+                state.subperiod = subperiod;
+                state.strategies = strategies;
+                state.matchStrategies = matchStrategies;
+                payoffChart.endSubperiod(subperiod);
+                strategyChart.endSubperiod(subperiod);
+                rChart.endSubperiod(subperiod);
+                pChart.endSubperiod(subperiod);
+                sChart.endSubperiod(subperiod);
+                strategyChanger.endSubperiod(subperiod);
+            }
+        }.start();
     }
 
     public void newMessage(String message, int senderID) {
