@@ -47,6 +47,9 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         }
         float tickDelta = config.percentChangePerSecond / (1000f / config.strategyUpdateMillis) * 2f;
         float[] current = Client.state.getMyStrategy();
+        if (current.length == 1) {
+            tickDelta /= 2f;
+        }
         boolean same = true;
         for (int i = 0; i < Client.state.target.length; i++) {
             if (Math.abs(Client.state.target[i] - current[i]) > Float.MIN_NORMAL) {
@@ -91,7 +94,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             }
             strategyDelta += total / 2;
         }
-        Thread.yield();
         FIRE.client.getServer().strategyChanged(
                 current,
                 Client.state.target,

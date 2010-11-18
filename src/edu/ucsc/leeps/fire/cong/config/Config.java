@@ -144,6 +144,6 @@ public class Config extends BaseConfig {
         match = -1;
         marginalCost = 0;
         updatesPerSecond = 1;
-        strategyUpdateMillis = 200;
+        strategyUpdateMillis = 100;
     }
 }

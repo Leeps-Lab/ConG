@@ -347,7 +347,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     public void startPeriod() {
-        // FIXME do stuff related to clearing the screen to set up for subperiods here
+        heatmap.reset();
     }
 
     public void endSubperiod(int subperiod) {
