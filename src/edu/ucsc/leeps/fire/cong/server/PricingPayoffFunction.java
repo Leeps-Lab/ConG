@@ -35,7 +35,7 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
         int minID = -1;
         for (int i : popStrategies.keySet()) {
             float price = (popStrategies.get(i)[0] * max) - min;
-            if (price < minPrice && price >= marginalCosts[i]) {
+            if (price < minPrice) {
                 minPrice = price;
                 minID = i;
             }

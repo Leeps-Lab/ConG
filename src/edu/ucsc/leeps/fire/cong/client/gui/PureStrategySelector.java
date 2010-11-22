@@ -70,10 +70,12 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
             int selection = buttons.getSelection();
 
-            if (selection == 0 && Client.state.target != null) {
-                Client.state.target[0] = 1;
-            } else {
-                Client.state.target[0] = 0;
+            if (Client.state.target != null) {
+                if (selection == 0) {
+                    Client.state.target[0] = 1;
+                } else {
+                    Client.state.target[0] = 0;
+                }
             }
 
             applet.pushMatrix();

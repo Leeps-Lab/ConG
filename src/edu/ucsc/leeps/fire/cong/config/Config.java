@@ -48,6 +48,7 @@ public class Config extends BaseConfig {
     public boolean showPayoffTimeAxisLabels;
     public float updatesPerSecond;
     public int strategyUpdateMillis;
+    public boolean subperiodRematch;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;

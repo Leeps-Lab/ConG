@@ -116,7 +116,16 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             } else {
                 slider.moveGhost(mouseY);
             }
-            Client.state.target[0] = slider.getGhostValue();
+            float newTarget = slider.getGhostValue();
+            float newPrice =
+                    (newTarget * FIRE.client.getConfig().payoffFunction.getMax()) - FIRE.client.getConfig().payoffFunction.getMin();
+            if (newPrice < FIRE.client.getConfig().marginalCost) {
+                float marginalCostTarget = FIRE.client.getConfig().marginalCost / (FIRE.client.getConfig().payoffFunction.getMax() - FIRE.client.getConfig().payoffFunction.getMin());
+                slider.setGhostValue(marginalCostTarget);
+                Client.state.target[0] = marginalCostTarget;
+            } else {
+                Client.state.target[0] = newTarget;
+            }
         }
 
         applet.pushMatrix();

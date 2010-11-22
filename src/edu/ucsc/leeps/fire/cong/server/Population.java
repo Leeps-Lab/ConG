@@ -30,8 +30,6 @@ public class Population implements Serializable {
 
     public void configure(Map<Integer, ClientInterface> members) {
         this.members = members;
-        tuples.clear();
-        tupleMap.clear();
         setupTuples();
         if (FIRE.server.getConfig().preLength == 0) {
             setInitialStrategies();
@@ -54,6 +52,9 @@ public class Population implements Serializable {
     }
 
     public void endSubperiod(int subperiod) {
+        if (FIRE.server.getConfig().subperiodRematch) {
+            shuffleTuples();
+        }
         for (Tuple tuple : tuples) {
             tuple.endSubperiod(subperiod);
         }
@@ -174,7 +175,6 @@ public class Population implements Serializable {
                 }.start();
             }
             update();
-
         }
 
         public void endPeriod(long timestamp) {
@@ -184,6 +184,8 @@ public class Population implements Serializable {
     }
 
     public void setupTuples() {
+        tuples.clear();
+        tupleMap.clear();
         if (FIRE.server.getConfig().numTuples == 1
                 || (members.size() / FIRE.server.getConfig().tupleSize) == 1) {
             setupSinglePopTuples();
@@ -269,6 +271,7 @@ public class Population implements Serializable {
     }
 
     private void setupRandomTuples() {
+        System.err.println("setting up random tuples");
         ArrayList<Integer> randomMembers = new ArrayList<Integer>();
         randomMembers.addAll(members.keySet());
         Collections.shuffle(randomMembers, FIRE.server.getRandom());
@@ -317,6 +320,7 @@ public class Population implements Serializable {
                 config.playersInTuple = tuple1.match.members.size();
             }
         }
+        System.err.println(tuples.size());
         assert (randomMembers.size() == 0);
         assert (randomTuples.size() == 0);
     }
@@ -327,7 +331,9 @@ public class Population implements Serializable {
             if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                 s = new float[1];
                 if (FIRE.server.getConfig().mixedStrategySelection) {
-                    s[0] = FIRE.server.getRandom().nextFloat();
+                    float costRange = FIRE.server.getConfig().payoffFunction.getMax() - FIRE.server.getConfig(client).marginalCost;
+                    float totalRange = FIRE.server.getConfig().payoffFunction.getMax() - FIRE.server.getConfig().payoffFunction.getMin();
+                    s[0] = (FIRE.server.getRandom().nextFloat() * costRange + FIRE.server.getConfig(client).marginalCost) / totalRange;
                 } else {
                     s[0] = FIRE.server.getRandom().nextBoolean() ? 1 : 0;
                 }
@@ -356,6 +362,44 @@ public class Population implements Serializable {
         }
         for (Tuple tuple : tuples) {
             tuple.update();
+        }
+    }
+
+    private void shuffleTuples() {
+        ArrayList<Tuple> randomTuples = new ArrayList<Tuple>();
+        for (Tuple tuple : tuples) {
+            randomTuples.add(tuple);
+            tuple.match = null;
+        }
+        Collections.shuffle(randomTuples, FIRE.server.getRandom());
+        for (Tuple tuple : tuples) {
+            if (tuple.match != null) {
+                continue;
+            }
+            int index = 0;
+            boolean legal = false;
+            Tuple match = null;
+            while (!legal) {
+                match = randomTuples.get(index++);
+                boolean cp1 = false;
+                for (int client : members.keySet()) {
+                    if (tuple.members.contains(client)) {
+                        cp1 = FIRE.server.getConfig(client).isCounterpart;
+                    }
+                }
+                boolean cp2 = false;
+                for (int client : members.keySet()) {
+                    if (match.members.contains(client)) {
+                        cp2 = FIRE.server.getConfig(client).isCounterpart;
+                    }
+                }
+                legal = (tuple != match) && !(cp1 == cp2);
+            }
+            assert match != null;
+            randomTuples.remove(tuple);
+            randomTuples.remove(match);
+            tuple.match = match;
+            match.match = tuple;
         }
     }
 }

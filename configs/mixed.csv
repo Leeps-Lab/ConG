@@ -1,9 +1,5 @@
 "period","timeConstrained","paid","length","subperiods","percentChangePerSecond","tupleSize","assignedTuples","payoffFunction","name","Aa","Ab","Ba","Bb","min","max","counterpartPayoffFunction","name","Aa","Ab","Ba","Bb","min","max","isCounterpart","strategySelectionDisplayType","mixedStrategySelection","sigmoidHeatmap"
-1,"TRUE","TRUE",120,0,0.1,1,"TRUE","bimatrix","pfA",34,15,15,16,6,34,"bimatrix","cpfA",6,25,25,24,6,34,"TRUE","HeatmapBoth","TRUE","TRUE"
-2,"TRUE","TRUE",120,0,1,1,"TRUE","bimatrix","pfA",34,15,15,16,6,34,"bimatrix","cpfA",6,25,25,24,6,34,"TRUE","Matrix","FALSE","FALSE"
-"SUBJECTS",,,,,,,,,,,,,,,,,,,,,,,,,,,
-"period","subject","population","match",,,,,,,,,,,,,,,,,,,,,,,,
-1,1,1,2,,,,,,,,,,,,,,,,,,,,,,,,
-1,2,2,1,,,,,,,,,,,,,,,,,,,,,,,,
-2,1,1,2,,,,,,,,,,,,,,,,,,,,,,,,
-2,2,2,1,,,,,,,,,,,,,,,,,,,,,,,,
+1,"TRUE","TRUE",120,0,0.1,1,"FALSE","bimatrix","pfA",34,15,15,16,6,34,"bimatrix","cpfA",6,25,25,24,6,34,"TRUE","HeatmapBoth","TRUE","TRUE"
+2,"TRUE","TRUE",120,0,1,1,"FALSE","bimatrix","pfA",34,15,15,16,6,34,"bimatrix","cpfA",6,25,25,24,6,34,"TRUE","Matrix","FALSE","FALSE"
+3,"TRUE","TRUE",120,0,0.1,1,"FALSE","bimatrix","pfA",34,15,15,16,6,34,"bimatrix","cpfA",6,25,25,24,6,34,"TRUE","HeatmapBoth","TRUE","TRUE"
+4,"TRUE","TRUE",120,20,1,1,"FALSE","bimatrix","pfA",34,15,15,16,6,34,"bimatrix","cpfA",6,25,25,24,6,34,"TRUE","Matrix","FALSE","FALSE"

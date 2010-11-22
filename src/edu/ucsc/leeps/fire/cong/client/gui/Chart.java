@@ -198,7 +198,7 @@ public class Chart extends Sprite implements Configurable<Config> {
 
     private void drawPercentLine(Client applet) {
         applet.strokeWeight(2f);
-        applet.stroke(150, 150, 150);
+        applet.stroke(116, 202, 200);
         applet.line(Client.state.currentPercent * width, 0, Client.state.currentPercent * width, height);
     }
 
