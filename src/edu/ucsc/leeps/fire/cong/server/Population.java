@@ -30,6 +30,11 @@ public class Population implements Serializable {
 
     public void configure(Map<Integer, ClientInterface> members) {
         this.members = members;
+        // fixme: better way of doing this. config can auto-configure some parts?
+        if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction
+                && FIRE.server.getConfig().counterpartPayoffFunction != null) {
+            ((TwoStrategyPayoffFunction) FIRE.server.getConfig().counterpartPayoffFunction).isCounterpart = true;
+        }
         setupTuples();
         if (FIRE.server.getConfig().preLength == 0) {
             setInitialStrategies();
@@ -163,7 +168,6 @@ public class Population implements Serializable {
             float percentElapsed = 1f / FIRE.server.getConfig().subperiods;
             float percent = subperiod * percentElapsed;
             evaluate(percent, percentElapsed);
-            match.evaluate(percent, percentElapsed);
             for (final int member : members) {
                 new Thread() {
 
@@ -179,7 +183,6 @@ public class Population implements Serializable {
 
         public void endPeriod(long timestamp) {
             evaluate(timestamp);
-            match.evaluate(timestamp);
         }
     }
 
@@ -253,16 +256,25 @@ public class Population implements Serializable {
             }
             for (int member : tuple.members) {
                 Config config = FIRE.server.getConfig(member);
-                config.isCounterpart = false;
-                config.payoffFunction = def.payoffFunction;
-                config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                if (config.isCounterpart) {
+                    config.payoffFunction = def.counterpartPayoffFunction;
+                    config.counterpartPayoffFunction = def.payoffFunction;
+
+                } else {
+                    config.payoffFunction = def.payoffFunction;
+                    config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                }
                 config.playersInTuple = tuple.members.size();
             }
             for (int member : tuple.match.members) {
                 Config config = FIRE.server.getConfig(member);
-                config.isCounterpart = true;
-                config.payoffFunction = def.counterpartPayoffFunction;
-                config.counterpartPayoffFunction = def.payoffFunction;
+                if (config.isCounterpart) {
+                    config.payoffFunction = def.counterpartPayoffFunction;
+                    config.counterpartPayoffFunction = def.payoffFunction;
+                } else {
+                    config.payoffFunction = def.payoffFunction;
+                    config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                }
                 config.playersInTuple = tuple.match.members.size();
             }
             assignedMatches.add(tuple);
@@ -305,18 +317,20 @@ public class Population implements Serializable {
             } else {
                 tuple1 = tuple.match;
             }
+            PayoffFunction payoffFunction = def.payoffFunction;
+            PayoffFunction counterpartPayoffFunction = def.counterpartPayoffFunction == null ? def.payoffFunction : def.counterpartPayoffFunction;
             for (int member : tuple1.members) {
                 Config config = FIRE.server.getConfig(member);
                 config.isCounterpart = false;
-                config.payoffFunction = def.payoffFunction;
-                config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                config.payoffFunction = payoffFunction;
+                config.counterpartPayoffFunction = counterpartPayoffFunction;
                 config.playersInTuple = tuple1.members.size();
             }
             for (int member : tuple1.match.members) {
                 Config config = FIRE.server.getConfig(member);
                 config.isCounterpart = true;
-                config.payoffFunction = def.counterpartPayoffFunction;
-                config.counterpartPayoffFunction = def.payoffFunction;
+                config.payoffFunction = counterpartPayoffFunction;
+                config.counterpartPayoffFunction = payoffFunction;
                 config.playersInTuple = tuple1.match.members.size();
             }
         }

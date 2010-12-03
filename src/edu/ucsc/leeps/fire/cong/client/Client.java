@@ -223,7 +223,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     public void endSubperiod(
             final int subperiod,
             final Map<Integer, float[]> strategies,
-            final Map<Integer,float[]> matchStrategies) {
+            final Map<Integer, float[]> matchStrategies) {
         new Thread() {
 
             @Override
@@ -459,6 +459,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     private void loadLibraries() {
+        System.err.println("os.arch: " + System.getProperty("os.arch"));
         if (System.getProperty("os.arch").equals("amd64")) {
             addDir("./lib/64-bit");
         } else {
@@ -502,12 +503,12 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                     break;
                 }
             }
-
             addDir(tmpDir);
         }
     }
 
     public static void addDir(String s) {
+        System.err.println("adding " + s + " to class path");
         try {
             // This enables the java.library.path to be modified at runtime
             // From a Sun engineer at http://forums.sun.com/thread.jspa?threadID=707176

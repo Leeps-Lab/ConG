@@ -435,6 +435,7 @@ public class Chart extends Sprite implements Configurable<Config> {
 
     public void configChanged(Config config) {
         this.config = config;
+        assert config != null;
         minPayoff = config.payoffFunction.getMin();
         maxPayoff = config.payoffFunction.getMax();
         yourPayoff.configure(config.yourPayoff);

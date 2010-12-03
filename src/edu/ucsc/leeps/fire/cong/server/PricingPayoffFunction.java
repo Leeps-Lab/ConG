@@ -1,7 +1,9 @@
 package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.config.Config;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -32,18 +34,29 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
             Map<Integer, float[]> matchPopStrategies,
             Config config) {
         float minPrice = Float.POSITIVE_INFINITY;
-        int minID = -1;
+        Set<Integer> minIDs = new HashSet<Integer>();
         for (int i : popStrategies.keySet()) {
             float price = (popStrategies.get(i)[0] * max) - min;
-            if (price < minPrice) {
+            if (equalPrices(price, minPrice)) {
+                minIDs.add(i);
+            } else if (price < minPrice) {
+                minIDs.clear();
                 minPrice = price;
-                minID = i;
+                minIDs.add(i);
             }
         }
-        if (id == minID) {
-            return minPrice - config.marginalCost;
+        float profit = 0;
+        if (minIDs.contains(id)) {
+            profit = (minPrice - config.marginalCost) / minIDs.size();
+            if (profit < 0) {
+                profit = 0;
+            }
         }
-        return 0;
+        return profit;
+    }
+
+    private boolean equalPrices(float p1, float p2) {
+        return Math.abs(p1 - p2) < 0.5;
     }
 
     @Override

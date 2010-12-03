@@ -50,11 +50,6 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
         }
     }
 
-    @Override
-    public String toString() {
-        return String.format("%.2f, %.2f, %.2f, %.2f, %b", Aa, Ab, Ba, Bb, isCounterpart);
-    }
-
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
         return popStrategies.get(id);
     }
