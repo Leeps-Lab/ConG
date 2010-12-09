@@ -431,7 +431,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     @Override
     public void keyPressed(KeyEvent ke) {
-        System.err.println(ke.isControlDown() + ", " + ke.getKeyCode() + ", " + KeyEvent.VK_A);
         if (ke.getKeyChar() == 'd') {
             DEBUG = !DEBUG;
         } else if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
