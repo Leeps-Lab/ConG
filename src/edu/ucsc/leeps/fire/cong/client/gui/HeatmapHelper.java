@@ -5,6 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.util.ArrayList;
 import java.util.List;
 import processing.core.PApplet;
@@ -87,11 +88,11 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
 
     public void updateTwoStrategyHeatmap() {
         int size = 100;
-        PayoffFunction u;
+        TwoStrategyPayoffFunction u;
         if (mine) {
-            u = config.payoffFunction;
+            u = (TwoStrategyPayoffFunction) config.payoffFunction;
         } else {
-            u = config.counterpartPayoffFunction;
+            u = (TwoStrategyPayoffFunction) config.counterpartPayoffFunction;
         }
         float max = u.getMax();
         if (backBuffer == null || backBuffer.width != size) {
@@ -103,7 +104,12 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         for (int x = 0; x < size; x++) {
             for (int y = 0; y < size; y++) {
                 float A = 1 - (y / (float) size);
-                float a = 1 - (x / (float) size);
+                float a;
+                if (u.reverseXAxis()) {
+                    a = (x / (float) size);
+                } else {
+                    a = 1 - (x / (float) size);
+                }
                 float value;
                 you[0] = A;
                 other[0] = a;

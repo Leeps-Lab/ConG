@@ -124,15 +124,27 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         myBb = PayoffFunction.Utilities.getPayoff(new float[]{0}, new float[]{0});
         counterBb = PayoffFunction.Utilities.getMatchPayoff(new float[]{0}, new float[]{0});
 
-        myHeatmapAa.setLabel(myAa);
-        myHeatmapAb.setLabel(myAb);
-        myHeatmapBa.setLabel(myBa);
-        myHeatmapBb.setLabel(myBb);
+        if (((TwoStrategyPayoffFunction) config.payoffFunction).reverseXAxis()) {
+            myHeatmapAa.setLabel(myAb);
+            myHeatmapAb.setLabel(myAa);
+            myHeatmapBa.setLabel(myBb);
+            myHeatmapBb.setLabel(myBa);
 
-        counterpartHeatmapAa.setLabel(counterAa);
-        cuonterpartHeatmapAb.setLabel(counterAb);
-        counterpartHeatmapBa.setLabel(counterBa);
-        counterpartHeatmapBb.setLabel(counterBb);
+            counterpartHeatmapAa.setLabel(counterAb);
+            cuonterpartHeatmapAb.setLabel(counterAa);
+            counterpartHeatmapBa.setLabel(counterBb);
+            counterpartHeatmapBb.setLabel(counterBa);
+        } else {
+            myHeatmapAa.setLabel(myAa);
+            myHeatmapAb.setLabel(myAb);
+            myHeatmapBa.setLabel(myBa);
+            myHeatmapBb.setLabel(myBb);
+
+            counterpartHeatmapAa.setLabel(counterAa);
+            cuonterpartHeatmapAb.setLabel(counterAb);
+            counterpartHeatmapBa.setLabel(counterBa);
+            counterpartHeatmapBb.setLabel(counterBb);
+        }
     }
 
     private void setModeHeatmapSingle() {
@@ -164,6 +176,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private void drawStrategyInfo() {
         float percent_A = Client.state.getMyStrategy()[0];
         float percent_a = PayoffFunction.Utilities.getAverageMatchStrategy()[0];
+        if (((TwoStrategyPayoffFunction) config.payoffFunction).reverseXAxis()) {
+            percent_a = 1 - percent_a;
+        }
         applet.stroke(0);
         applet.noFill();
         applet.line(0, (1 - percent_A) * height, width, (1 - percent_A) * height);
@@ -209,7 +224,11 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             float hoverPercent_a = 1 - ((applet.mouseX - origin.x) / height);
             if (hoverPercent_A >= 0 && hoverPercent_A <= 1.0
                     && hoverPercent_a >= 0 && hoverPercent_a <= 1.0) {
-                hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
+                if (((TwoStrategyPayoffFunction) config.payoffFunction).reverseXAxis()) {
+                    hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}, new float[]{1 - hoverPercent_a}));
+                } else {
+                    hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
+                }
                 hover.update((1 - hoverPercent_a) * width, (1 - hoverPercent_A) * height);
                 hover.setVisible(true);
                 hover.draw(applet);
@@ -339,9 +358,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         if (e.isActionKey()) {
             float newTarget = Client.state.target[0];
             if (e.getKeyCode() == KeyEvent.VK_UP) {
-                newTarget += 0.1;
+                newTarget += 0.01f;
             } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                newTarget -= 0.1;
+                newTarget -= 0.01f;
             }
             if (newTarget >= 0 && newTarget <= 1) {
                 Client.state.target[0] = newTarget;

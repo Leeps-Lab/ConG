@@ -5,7 +5,9 @@ import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.config.BaseConfig;
+import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PublicGoodsPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import java.awt.Color;
@@ -53,6 +55,8 @@ public class Config extends BaseConfig {
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
     public static final Class pricing = PricingPayoffFunction.class;
+    public static final Class cournot = CournotPayoffFunction.class;
+    public static final Class publicGoods = PublicGoodsPayoffFunction.class;
     public static final Class line = Line.class;
     public static final Class threshold = ThresholdPayoffFunction.class;
     public static final Class shockZone = ShockZone.class;

@@ -188,7 +188,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     }
 
     public void keyPressed(KeyEvent e) {
-        if (!enabled) {
+        if (!visible || !enabled) {
             return;
         }
         if (e.isActionKey()) {

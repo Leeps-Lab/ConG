@@ -46,7 +46,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         }
 
         sideLength = width - 10;
-        maxDist = (Client.sqrt(3) / 2f) * sideLength;
+        maxDist = (float) (Math.sqrt(3.0) * (sideLength / 2.0));
 
         rock = new Marker(this, 5, height / 3, true, CORNER_MARKER_R);
         rock.setLabel("R");
@@ -515,7 +515,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private float[] calculateStratCoords(float r, float p, float s) {
         float[] coords = new float[2];
 
-        coords[0] = rock.origin.x + (maxDist * p) / Client.sin(Client.PI / 3) + maxDist * s * Client.tan(Client.PI / 6);
+        coords[0] = (float) (rock.origin.x + (maxDist * p) / Math.sin(Math.PI / 3.0) + maxDist * s * Math.tan(Math.PI / 6.0));
         coords[1] = rock.origin.y - maxDist * s;
 
         return coords;

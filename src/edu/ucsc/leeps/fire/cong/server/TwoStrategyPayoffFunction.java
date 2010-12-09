@@ -30,6 +30,10 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
         return min;
     }
 
+    public boolean reverseXAxis() {
+        return false;
+    }
+
     public float getPayoff(
             int id, float percent,
             Map<Integer, float[]> popStrategies,

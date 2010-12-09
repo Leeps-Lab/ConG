@@ -64,6 +64,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private boolean haveInitialStrategy;
     private int INIT_WIDTH, INIT_HEIGHT;
     public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
+    private Agent agent;
 
     public Client() {
         FIRE.client.addConfigListener(this);
@@ -110,6 +111,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 }
             }
         }.start();
+        agent = new Agent();
+        agent.start();
     }
 
     public boolean haveInitialStrategy() {
@@ -427,9 +430,12 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     @Override
-    public void keyTyped(KeyEvent ke) {
+    public void keyPressed(KeyEvent ke) {
+        System.err.println(ke.isControlDown() + ", " + ke.getKeyCode() + ", " + KeyEvent.VK_A);
         if (ke.getKeyChar() == 'd') {
             DEBUG = !DEBUG;
+        } else if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
+            agent.paused = !agent.paused;
         }
     }
 

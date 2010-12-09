@@ -175,7 +175,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     }
 
     public void keyPressed(KeyEvent e) {
-        if (!buttons.isEnabled()) {
+        if (!visible || !buttons.isEnabled()) {
             return;
         }
         if (e.isActionKey()) {
@@ -224,13 +224,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
         if (numStrategies != 0) {
 
-            //if (payoffFunction instanceof ThresholdPayoffFunction) {
-            //    float threshold = ((ThresholdPayoffFunction) payoffFunction).threshold;
-            //    matrixLabel.setLabel("Threshold: " + threshold);
-            //    matrixLabel.setVisible(true);
-            //} else {
             matrixLabel.setVisible(false);
-            //}
 
             cellMarkers = new Marker[numStrategies][numStrategies];
             float interval = matrixSideLength / (numStrategies * 2f);
@@ -262,23 +256,17 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                     RadioButtonGroup.Alignment.Vertical, BUTTON_RADIUS, applet);
             buttons.setLabelMode(Marker.LabelMode.Right);
 
-            //if (payoffFunction instanceof ThresholdPayoffFunction) {
-            //columnLabels[0].setLabel("met");
-            //columnLabels[1].setLabel("not met");
+            if (numStrategies == 2) {
+                buttons.setLabels(new String[]{"A", "B"});
+                columnLabels[0].setLabel("a");
+                columnLabels[1].setLabel("b");
+            } else if (numStrategies == 3) {
+                buttons.setLabels(new String[]{"A", "B", "C"});
+                columnLabels[0].setLabel("a");
+                columnLabels[1].setLabel("b");
+                columnLabels[2].setLabel("c");
 
-            //buttons.setLabels(new String[]{"A", "B"});
-            //} else if (payoffFunction instanceof TwoStrategyPayoffFunction) {
-            columnLabels[0].setLabel("a");
-            columnLabels[1].setLabel("b");
-
-            buttons.setLabels(new String[]{"A", "B"});
-            //} else if (payoffFunction instanceof ThreeStrategyPayoffFunction) {
-            //    columnLabels[0].setLabel("a");
-            //    columnLabels[1].setLabel("b");
-            //    columnLabels[2].setLabel("c");
-
-            //    buttons.setLabels(new String[]{"A", "B", "C"});
-            //}
+            }
             buttons.setEnabled(false);
         }
 
