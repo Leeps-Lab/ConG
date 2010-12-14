@@ -17,7 +17,10 @@ import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -65,6 +68,15 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private int INIT_WIDTH, INIT_HEIGHT;
     public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
     private Agent agent;
+    private boolean fullscreen = false;
+    private boolean resize = false;
+    private WindowAdapter windowListener = new WindowAdapter() {
+
+        @Override
+        public void windowIconified(WindowEvent e) {
+            resize = true;
+        }
+    };
 
     public Client() {
         FIRE.client.addConfigListener(this);
@@ -75,11 +87,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         frame = new JFrame();
         frame.setTitle("CONG - " + FIRE.client.getName());
         ((JFrame) frame).setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.add(Client.this);
+        frame.add(this);
         frame.setSize(INIT_WIDTH, INIT_HEIGHT);
-        //frame.setUndecorated(true);
         frame.setResizable(false);
-        //GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow(frame);
+        frame.addWindowListener(windowListener);
         init();
         noLoop();
         frame.setVisible(true);
@@ -262,6 +273,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     @Override
     public void setup() {
         boolean opengl = true;
+        textMode(MODEL);
         if (opengl) {
             try {
                 size(INIT_WIDTH, INIT_HEIGHT - 40, OPENGL);
@@ -274,7 +286,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             hint(DISABLE_OPENGL_2X_SMOOTH);
             hint(DISABLE_OPENGL_ERROR_REPORT);
             hint(DISABLE_DEPTH_TEST);
-            textMode(MODEL);
         } else {
             size(INIT_WIDTH, INIT_HEIGHT - 40, P2D);
             frameRate(35);
@@ -347,6 +358,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     @Override
     public void draw() {
         try {
+
+            if (resize) {
+                setupFonts();
+                textFont(size14);
+                resize = false;
+            }
+
             background(255);
             if (FIRE.client.getConfig() == null) {
                 fill(0);
@@ -431,10 +449,40 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     @Override
     public void keyPressed(KeyEvent ke) {
-        if (ke.getKeyChar() == 'd') {
+        if (ke.getKeyCode() == KeyEvent.VK_D) {
             DEBUG = !DEBUG;
         } else if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
             agent.paused = !agent.paused;
+        } else if (ke.isAltDown() && ke.getKeyCode() == KeyEvent.VK_F11) {
+            fullscreen = !fullscreen;
+            if (fullscreen) {
+                frame.removeAll();
+                frame.dispose();
+                frame = new JFrame();
+                frame.setTitle("CONG - " + FIRE.client.getName());
+                ((JFrame) frame).setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+                frame.add(this);
+                frame.setResizable(false);
+                frame.setUndecorated(true);
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow(frame);
+                frame.setVisible(true);
+                frame.addWindowListener(windowListener);
+            } else {
+                frame.removeAll();
+                frame.dispose();
+                frame = new JFrame();
+                frame.setTitle("CONG - " + FIRE.client.getName());
+                ((JFrame) frame).setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+                frame.add(this);
+                frame.setSize(INIT_WIDTH, INIT_HEIGHT);
+                frame.setResizable(false);
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow(null);
+                frame.setVisible(true);
+                frame.addWindowListener(windowListener);
+            }
+            resize = true;
+        } else if (ke.getKeyCode() == KeyEvent.VK_R) {
+            resize = true;
         }
     }
 

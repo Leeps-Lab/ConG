@@ -83,7 +83,10 @@ public class Agent extends Thread {
             newTarget[0] = maxStrategy[0] + (float) (0.05 * FIRE.client.getRandom().nextGaussian());
             newTarget[1] = maxStrategy[1] + (float) (0.05 * FIRE.client.getRandom().nextGaussian());
             newTarget[2] = 1 - newTarget[0] - newTarget[1];
-            if (Math.abs(1 - (newTarget[0] + newTarget[1] + newTarget[2])) < Float.MIN_NORMAL) {
+            if (newTarget[0] >= 0 && newTarget[0] <= 1
+                    && newTarget[1] >= 0 && newTarget[1] <= 1
+                    && newTarget[2] >= 0 && newTarget[2] <= 1
+                    && Math.abs(1 - (newTarget[0] + newTarget[1] + newTarget[2])) <= Float.MIN_NORMAL) {
                 state.target[0] = newTarget[0];
                 state.target[1] = newTarget[1];
                 state.target[2] = newTarget[2];
