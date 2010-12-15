@@ -105,6 +105,8 @@ public class Population implements Serializable {
 
         public int population;
         public int world;
+        public boolean discovered;
+        public int pathDist;
         public Set<Integer> members;
         public long evalTime;
         public Map<Integer, float[]> strategies;
@@ -199,6 +201,7 @@ public class Population implements Serializable {
                 setupRandomTuples();
             }
         }
+        setWorlds();
     }
 
     /*
@@ -234,6 +237,7 @@ public class Population implements Serializable {
                 if (tuple.population == match) {
                     m = tuple;
                 }
+
             }
             if (p == null) {
                 p = new Tuple(population);
@@ -414,6 +418,37 @@ public class Population implements Serializable {
             randomTuples.remove(match);
             tuple.match = match;
             match.match = tuple;
+        }
+        // does setWorlds() need to be called after a shuffle?
+    }
+
+    private void setWorlds() {
+        int curWorld = 1;
+        for (Tuple tuple : tuples) {
+            if (tuple.discovered == false) {
+               tuple.discovered = true;
+               tuple.pathDist = 0;
+               int inWorld = discoverNext(tupleMap.get(tuple.match), curWorld, 1);
+               if (inWorld > 0)
+                   tuple.world = curWorld;
+               curWorld++;
+               System.err.println("world " + curWorld + " contains member " + tuple.members.toArray()[0]);
+            }
+        }
+    }
+
+    private int discoverNext(Tuple tuple, int curWorld, int pathLength) {
+        if (tuple.discovered == false) {
+            tuple.pathDist = pathLength;
+            tuple.discovered = true;
+            int inWorld = discoverNext(tupleMap.get(tuple.match), curWorld, pathLength + 1);
+            if (inWorld > 0)
+                tuple.world = curWorld;
+            System.err.println("world " + curWorld + " contains member " + tuple.members.toArray()[0]);
+            return --inWorld;
+        }
+        else {
+            return pathLength - tuple.pathDist;
         }
     }
 }
