@@ -80,8 +80,8 @@ public class Agent extends Thread {
                 }
             }
             float[] newTarget = new float[3];
-            newTarget[0] = maxStrategy[0] + (float) (0.05 * FIRE.client.getRandom().nextGaussian());
-            newTarget[1] = maxStrategy[1] + (float) (0.05 * FIRE.client.getRandom().nextGaussian());
+            newTarget[0] = maxStrategy[0] + (float) (0.01 * FIRE.client.getRandom().nextGaussian());
+            newTarget[1] = maxStrategy[1] + (float) (0.01 * FIRE.client.getRandom().nextGaussian());
             newTarget[2] = 1 - newTarget[0] - newTarget[1];
             if (newTarget[0] >= 0 && newTarget[0] <= 1
                     && newTarget[1] >= 0 && newTarget[1] <= 1
@@ -93,7 +93,7 @@ public class Agent extends Thread {
             }
         }
         try {
-            Thread.sleep(FIRE.client.getRandom().nextInt(1000));
+            Thread.sleep(FIRE.client.getRandom().nextInt(100));
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }

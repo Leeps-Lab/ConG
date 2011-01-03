@@ -328,6 +328,7 @@ public class Chart extends Sprite implements Configurable<Config> {
 
     public void updateLines() {
         updateLines(Client.state.currentPercent);
+        updateMarginalCostLines(Client.state.currentPercent);
     }
 
     public void updateLines(float percent) {
@@ -343,17 +344,11 @@ public class Chart extends Sprite implements Configurable<Config> {
                     for (int id : currentPrices.keySet()) {
                         if (!prices.containsKey(id)) {
                             Line priceLine = new Line(this, 0, scaledMargin, width, scaledHeight);
-                            Line marginalCostLine = new Line(this, 0, scaledMargin, width, scaledHeight);
                             if (id == Client.state.id) {
                                 priceLine.configure(FIRE.client.getConfig().yourStrategy);
-                                marginalCostLine.configure(FIRE.client.getConfig().yourStrategy);
                             } else {
                                 priceLine.configure(FIRE.client.getConfig().matchStrategy);
-                                marginalCostLine.configure(FIRE.client.getConfig().matchStrategy);
                             }
-                            marginalCostLine.mode = Line.Mode.Dashed;
-                            prices.put(id, priceLine);
-                            marginalCosts.put(id, marginalCostLine);
                             Color color;
                             if (id == FIRE.client.getID()) {
                                 color = Color.BLACK;
@@ -368,11 +363,10 @@ public class Chart extends Sprite implements Configurable<Config> {
                             priceLine.g = color.getGreen();
                             priceLine.b = color.getBlue();
                             priceLine.alpha = 255;
+                            prices.put(id, priceLine);
                         }
                         Line priceLine = prices.get(id);
                         addPayoffPoint(priceLine, percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
-                        Line marginalCostLine = marginalCosts.get(id);
-                        addPayoffPoint(marginalCostLine, percent, config.marginalCost);
                     }
                 } else {
                     addPayoffPoint(matchPayoff, percent, PayoffFunction.Utilities.getMatchPayoff());
@@ -395,6 +389,19 @@ public class Chart extends Sprite implements Configurable<Config> {
                 }
             }
         }
+    }
+
+    public void updateMarginalCostLines(float percent) {
+        if (!visible || percent > 1f || mode != Mode.Payoff || !(FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction)) {
+            return;
+        }
+        if (!marginalCosts.containsKey(Client.state.id)) {
+            Line marginalCostLine = new Line(this, 0, scaledMargin, width, scaledHeight);
+            marginalCostLine.configure(FIRE.client.getConfig().yourStrategy);
+            marginalCostLine.mode = Line.Mode.Dashed;
+            marginalCosts.put(Client.state.id, marginalCostLine);
+        }
+        addPayoffPoint(marginalCosts.get(Client.state.id), percent, config.marginalCost);
     }
 
     /**
@@ -426,11 +433,19 @@ public class Chart extends Sprite implements Configurable<Config> {
     public void endSubperiod(int subperiod) {
         float percentStart = (float) (subperiod - 1) / FIRE.client.getConfig().subperiods;
         float percentEnd = (float) subperiod / FIRE.client.getConfig().subperiods;
-        while (percentStart <= percentEnd) {
-            updateLines(percentStart);
-            percentStart += 0.01;
+        float marginalCostStart = (float) (subperiod) / FIRE.client.getConfig().subperiods;
+        float marginalCostEnd = (float) (subperiod + 1) / FIRE.client.getConfig().subperiods;
+        float diff = percentEnd - percentStart;
+        for (float offset = 0; offset < diff; offset += 0.01) {
+            if (subperiod != 0) {
+                updateLines(percentStart + offset);
+            }
+            if (subperiod != FIRE.client.getConfig().subperiods) {
+                updateMarginalCostLines(marginalCostStart + offset);
+            }
         }
         updateLines(percentEnd);
+        updateMarginalCostLines(marginalCostEnd);
     }
 
     public void configChanged(Config config) {

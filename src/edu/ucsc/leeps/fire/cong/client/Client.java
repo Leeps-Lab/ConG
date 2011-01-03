@@ -188,6 +188,12 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             rChart.updateLines();
             pChart.updateLines();
             sChart.updateLines();
+        } else {
+            payoffChart.endSubperiod(0);
+            strategyChart.endSubperiod(0);
+            rChart.endSubperiod(0);
+            pChart.endSubperiod(0);
+            sChart.endSubperiod(0);
         }
         pointsDisplay.startPeriod();
 
