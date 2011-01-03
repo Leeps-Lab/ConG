@@ -337,7 +337,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
         if (percent <= 1f) {
             if (mode == Mode.Payoff) {
-                addPayoffPoint(yourPayoff, percent, PayoffFunction.Utilities.getPayoff());
+                yourPayoff.addPayoffPoint(percent, PayoffFunction.Utilities.getPayoff());
                 if (FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction) {
                     PricingPayoffFunction pf = (PricingPayoffFunction) FIRE.client.getConfig().payoffFunction;
                     Map<Integer, float[]> currentPrices = Client.state.strategies;
@@ -366,26 +366,26 @@ public class Chart extends Sprite implements Configurable<Config> {
                             prices.put(id, priceLine);
                         }
                         Line priceLine = prices.get(id);
-                        addPayoffPoint(priceLine, percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
+                        priceLine.addPayoffPoint(percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
                     }
                 } else {
-                    addPayoffPoint(matchPayoff, percent, PayoffFunction.Utilities.getMatchPayoff());
+                    matchPayoff.addPayoffPoint(percent, PayoffFunction.Utilities.getMatchPayoff());
                 }
             } else {
                 float[] you = Client.state.getMyStrategy();
                 float[] match = PayoffFunction.Utilities.getAverageMatchStrategy();
                 if (mode == Mode.TwoStrategy) {
-                    addStrategyPoint(yourStrategy, percent, you[0]);
-                    addStrategyPoint(matchStrategy, percent, match[0]);
+                    yourStrategy.addStrategyPoint(percent, you[0]);
+                    matchStrategy.addStrategyPoint(percent, match[0]);
                 } else if (mode == Mode.RStrategy) {
-                    addStrategyPoint(yourR, percent, you[0]);
-                    addStrategyPoint(matchR, percent, match[0]);
+                    yourR.addStrategyPoint(percent, you[0]);
+                    matchR.addStrategyPoint(percent, match[0]);
                 } else if (mode == Mode.PStrategy) {
-                    addStrategyPoint(yourP, percent, you[1]);
-                    addStrategyPoint(matchP, percent, match[1]);
+                    yourP.addStrategyPoint(percent, you[1]);
+                    matchP.addStrategyPoint(percent, match[1]);
                 } else if (mode == Mode.SStrategy) {
-                    addStrategyPoint(yourS, percent, you[2]);
-                    addStrategyPoint(matchS, percent, match[2]);
+                    yourS.addStrategyPoint(percent, you[2]);
+                    matchS.addStrategyPoint(percent, match[2]);
                 }
             }
         }
@@ -401,7 +401,7 @@ public class Chart extends Sprite implements Configurable<Config> {
             marginalCostLine.mode = Line.Mode.Dashed;
             marginalCosts.put(Client.state.id, marginalCostLine);
         }
-        addPayoffPoint(marginalCosts.get(Client.state.id), percent, config.marginalCost);
+        marginalCosts.get(Client.state.id).addPayoffPoint(percent, config.marginalCost);
     }
 
     /**
@@ -512,62 +512,6 @@ public class Chart extends Sprite implements Configurable<Config> {
             yourPayoff.width = width;
             yourPayoff.height = scaledHeight;
             yourPayoff.configure(config.yourPayoff);
-        }
-    }
-
-    /**
-     * If current percent is greater than beginning shock as defined in config,
-     * and is less than the ending shock, and line is set to show shocks, set
-     * shocked to true.
-     *
-     * If not shocked, set width of line to the product of width and x. Set the
-     * height of line proportional to 1 minus the quotient of y and the max payoff.
-     * Height is inversely proportional to the max payoff.
-     *
-     * If shocks are backfilled, and current percent is greater than end shock,
-     * clear shocks.
-     * 
-     * @param line
-     * @param x
-     * @param y
-     */
-    public void addPayoffPoint(Line line, float x, float y) {
-        boolean shocked =
-                config != null
-                && config.shock != null
-                && Client.state.currentPercent > config.shock.start
-                && Client.state.currentPercent < config.shock.end
-                && line.showShock;
-        line.setPoint(
-                Math.round(line.width * x),
-                Math.round(line.height * (1 - ((y - minPayoff) / (maxPayoff - minPayoff)))),
-                !shocked);
-        if (FIRE.client.getConfig().shock.backfill && Client.state.currentPercent > config.shock.end) {
-            line.clearShocks();
-        }
-    }
-
-    /**
-     * If current percent is greater than starting shock and less than ending
-     * shock and line shows shock, set shocked to true.
-     *
-     * If not shocked, multiply line width by x and height by 1 minus y.
-     *
-     * If shock is backfilled, and current percent is greater than ending shock,
-     * clear shocks.
-     * 
-     * @param line
-     * @param x
-     * @param y
-     */
-    public void addStrategyPoint(Line line, float x, float y) {
-        boolean shocked = Client.state.currentPercent > config.shock.start && Client.state.currentPercent < config.shock.end && line.showShock;
-        line.setPoint(
-                Math.round(line.width * x),
-                Math.round(line.height * (1 - y)),
-                !shocked);
-        if (FIRE.client.getConfig().shock.backfill && Client.state.currentPercent > config.shock.end) {
-            line.clearShocks();
         }
     }
 }

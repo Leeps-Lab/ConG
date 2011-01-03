@@ -1,13 +1,15 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import processing.core.PApplet;
 
-public class Line extends Sprite implements Serializable {
+public class Line extends Sprite implements Serializable, Configurable<Config> {
 
     public enum Mode {
 
@@ -23,6 +25,7 @@ public class Line extends Sprite implements Serializable {
     private transient LinkedList<FPoint> points;
     private transient int costEnd;
     private transient Marker costMarker;
+    private Config config;
 
     /**
      * Creates a black line, 1 pixel in width.
@@ -33,6 +36,7 @@ public class Line extends Sprite implements Serializable {
         alpha = 255;
         weight = 1.0f;
         mode = Mode.Solid;
+        FIRE.client.addConfigListener(this);
     }
 
     /** 
@@ -343,9 +347,6 @@ public class Line extends Sprite implements Serializable {
         points.clear();
     }
 
-    /**
-     * Removes points from first round, as it is the practice period.
-     */
     public synchronized void removeFirst() {
         FPoint first = points.removeFirst();
         definedPoints.remove(Math.round(first.x));
@@ -358,5 +359,38 @@ public class Line extends Sprite implements Serializable {
         for (FPoint point : points) {
             point.visible = true;
         }
+    }
+
+    public void addPayoffPoint(float x, float y) {
+        boolean shocked =
+                config != null
+                && config.shock != null
+                && Client.state.currentPercent > config.shock.start
+                && Client.state.currentPercent < config.shock.end
+                && showShock;
+        float minPayoff = config.payoffFunction.getMin();
+        float maxPayoff = config.payoffFunction.getMax();
+        setPoint(
+                Math.round(width * x),
+                Math.round(height * (1 - ((y - minPayoff) / (maxPayoff - minPayoff)))),
+                !shocked);
+        if (FIRE.client.getConfig().shock.backfill && Client.state.currentPercent > config.shock.end) {
+            clearShocks();
+        }
+    }
+
+    public void addStrategyPoint(float x, float y) {
+        boolean shocked = Client.state.currentPercent > config.shock.start && Client.state.currentPercent < config.shock.end && showShock;
+        setPoint(
+                Math.round(width * x),
+                Math.round(height * (1 - y)),
+                !shocked);
+        if (FIRE.client.getConfig().shock.backfill && Client.state.currentPercent > config.shock.end) {
+            clearShocks();
+        }
+    }
+
+    public void configChanged(Config config) {
+        this.config = config;
     }
 }
