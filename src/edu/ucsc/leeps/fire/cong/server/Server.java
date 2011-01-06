@@ -23,15 +23,21 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public synchronized void strategyChanged(
-            float[] newStrategy,
-            float[] targetStrategy,
-            Integer id) {
+            final float[] newStrategy,
+            final float[] targetStrategy,
+            final Integer id) {
         if (FIRE.server.getState() == State.RUNNING_PERIOD) {
-            population.strategyChanged(
-                    newStrategy,
-                    targetStrategy,
-                    id,
-                    System.currentTimeMillis());
+            new Thread() {
+
+                @Override
+                public void run() {
+                    population.strategyChanged(
+                            newStrategy,
+                            targetStrategy,
+                            id,
+                            System.currentTimeMillis());
+                }
+            }.start();
         }
     }
 

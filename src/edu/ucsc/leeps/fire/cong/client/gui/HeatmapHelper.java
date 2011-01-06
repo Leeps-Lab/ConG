@@ -129,46 +129,52 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     }
 
     public void updateThreeStrategyHeatmap(
-            float r, float p, float s,
-            ThreeStrategySelector threeStrategySelector) {
-        if (r < 0 || p < 0 || s < 0) {
-            currentBuffer = null;
-            return;
-        }
-        backBuffer = applet.createGraphics(width, height, Client.P2D);
-        backBuffer.loadPixels();
-        PayoffFunction payoffFunction;
-        if (mine) {
-            payoffFunction = config.payoffFunction;
-        } else {
-            payoffFunction = config.counterpartPayoffFunction;
-        }
-        float max = payoffFunction.getMax();
-        float[] rps = new float[]{r, p, s};
-        if (RPSCache == null) {
-            RPSCache = new float[width][height][3];
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
-                    float[] RPS = threeStrategySelector.translate(x, height - y);
-                    RPSCache[x][y][0] = RPS[0];
-                    RPSCache[x][y][1] = RPS[1];
-                    RPSCache[x][y][2] = RPS[2];
+            final float r, final float p, final float s,
+            final ThreeStrategySelector threeStrategySelector) {
+        new Thread() {
+
+            @Override
+            public void run() {
+                if (r < 0 || p < 0 || s < 0) {
+                    currentBuffer = null;
+                    return;
                 }
-            }
-        }
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                float[] RPS = RPSCache[x][y];
-                if (RPS[0] >= 0 && RPS[1] >= 0 && RPS[2] >= 0) {
-                    float u = PayoffFunction.Utilities.getPayoff(RPS, rps);
-                    backBuffer.pixels[y * width + x] = getRGB(u / max);
+                backBuffer = applet.createGraphics(width, height, Client.P2D);
+                backBuffer.loadPixels();
+                PayoffFunction payoffFunction;
+                if (mine) {
+                    payoffFunction = config.payoffFunction;
                 } else {
-                    backBuffer.pixels[y * width + x] = applet.color(255, 0, 0, 0);
+                    payoffFunction = config.counterpartPayoffFunction;
                 }
+                float max = payoffFunction.getMax();
+                float[] rps = new float[]{r, p, s};
+                if (RPSCache == null) {
+                    RPSCache = new float[width][height][3];
+                    for (int x = 0; x < width; x++) {
+                        for (int y = 0; y < height; y++) {
+                            float[] RPS = threeStrategySelector.translate(x, height - y);
+                            RPSCache[x][y][0] = RPS[0];
+                            RPSCache[x][y][1] = RPS[1];
+                            RPSCache[x][y][2] = RPS[2];
+                        }
+                    }
+                }
+                for (int x = 0; x < width; x++) {
+                    for (int y = 0; y < height; y++) {
+                        float[] RPS = RPSCache[x][y];
+                        if (RPS[0] >= 0 && RPS[1] >= 0 && RPS[2] >= 0) {
+                            float u = PayoffFunction.Utilities.getPayoff(RPS, rps);
+                            backBuffer.pixels[y * width + x] = getRGB(u / max);
+                        } else {
+                            backBuffer.pixels[y * width + x] = applet.color(255, 0, 0, 0);
+                        }
+                    }
+                }
+                backBuffer.updatePixels();
+                currentBuffer = backBuffer;
             }
-        }
-        backBuffer.updatePixels();
-        currentBuffer = backBuffer;
+        }.start();
     }
 
     public void updateStripHeatmap() {

@@ -86,7 +86,9 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     private void sendUpdate() {
-        float[] current = Client.state.getMyStrategy();
+        float[] c = Client.state.getMyStrategy();
+        float[] current = new float[c.length];
+        System.arraycopy(c, 0, current, 0, c.length);
         if (config.subperiods == 0) {
             float total = 0;
             for (int i = 0; i < previousStrategy.length; i++) {

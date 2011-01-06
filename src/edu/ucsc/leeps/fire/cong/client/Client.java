@@ -94,6 +94,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         init();
         noLoop();
         frame.setVisible(true);
+        /*
         new Thread() {
 
             @Override
@@ -122,6 +123,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 }
             }
         }.start();
+         * 
+         */
+        loop();
         agent = new Agent();
         agent.start();
     }
