@@ -52,6 +52,7 @@ public class Config extends BaseConfig {
     public int strategyUpdateMillis;
     public boolean subperiodRematch;
     public boolean probPayoffs;
+    public boolean showHeatmap;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -140,6 +141,7 @@ public class Config extends BaseConfig {
         chatroom = false;
         negativePayoffs = false;
         sigmoidHeatmap = false;
+        showHeatmap = true;
         sigmoidAlpha = 0.5f;
         showPayoffTimeAxisLabels = false;
         showMatrix = true;

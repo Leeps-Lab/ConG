@@ -256,10 +256,12 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     private void drawHeatmap() {
-        heatmap.draw(applet);
+        if (config.showHeatmap) {
+            heatmap.draw(applet);
 
-        if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth) {
-            counterpartHeatmap.draw(applet);
+            if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth) {
+                counterpartHeatmap.draw(applet);
+            }
         }
 
         myHeatmapAa.draw(applet);
@@ -394,6 +396,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     public void startPeriod() {
         heatmap.reset();
+        heatmap.updateTwoStrategyHeatmap();
     }
 
     public void endSubperiod(int subperiod) {

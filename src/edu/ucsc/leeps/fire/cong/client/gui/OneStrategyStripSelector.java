@@ -106,7 +106,9 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         }
 
         slider.setStratValue(Client.state.getMyStrategy()[0]);
-        slider.setGhostValue(Client.state.target[0]);
+        if (Client.state.target != null) {
+            slider.setGhostValue(Client.state.target[0]);
+        }
 
         if (enabled && slider.isGhostGrabbed()) {
             float mouseX = applet.mouseX - origin.x;

@@ -248,7 +248,7 @@ public class Population implements Serializable {
                 setupRandomTuples();
             }
         }
-        setWorlds();
+        //setWorlds();
     }
 
     /*
