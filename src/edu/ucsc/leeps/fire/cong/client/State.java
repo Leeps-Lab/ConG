@@ -13,6 +13,7 @@ public class State {
     public int subperiod;
     public float currentPercent;
     public Map<Integer, float[]> strategies, matchStrategies;
+    public float subperiodPayoff, subperiodMatchPayoff;
     public float[] target;
     public StrategyChanger strategyChanger;
 

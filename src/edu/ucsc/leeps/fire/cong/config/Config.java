@@ -51,6 +51,7 @@ public class Config extends BaseConfig {
     public float updatesPerSecond;
     public int strategyUpdateMillis;
     public boolean subperiodRematch;
+    public boolean probPayoffs;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;

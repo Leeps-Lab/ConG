@@ -247,7 +247,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     public void endSubperiod(
             final int subperiod,
             final Map<Integer, float[]> strategies,
-            final Map<Integer, float[]> matchStrategies) {
+            final Map<Integer, float[]> matchStrategies,
+            final float payoff, final float matchPayoff) {
         new Thread() {
 
             @Override
@@ -255,6 +256,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 state.subperiod = subperiod;
                 state.strategies = strategies;
                 state.matchStrategies = matchStrategies;
+                state.subperiodPayoff = payoff;
+                state.subperiodMatchPayoff = matchPayoff;
                 payoffChart.endSubperiod(subperiod);
                 strategyChart.endSubperiod(subperiod);
                 rChart.endSubperiod(subperiod);

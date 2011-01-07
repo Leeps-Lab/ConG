@@ -16,7 +16,6 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
     public float Ab, Ba, Bb;
     public boolean isCounterpart;
     public float min, max;
-    public boolean expectedPayoffs;
 
     public TwoStrategyPayoffFunction() {
         AaStart = Float.NaN;

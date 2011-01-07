@@ -21,5 +21,6 @@ public interface ClientInterface {
     public void endSubperiod(
             int subperiod,
             Map<Integer, float[]> strategies,
-            Map<Integer, float[]> matchStrategies);
+            Map<Integer, float[]> matchStrategies,
+            float payoff, float matchPayoff);
 }

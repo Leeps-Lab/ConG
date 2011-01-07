@@ -22,10 +22,12 @@ public class Population implements Serializable {
     private long periodStartTime;
     private Set<Tuple> tuples;
     private Map<Integer, Tuple> tupleMap;
+    public Map<Integer, Float> subperiodPayoffs;
 
     public Population() {
         tuples = new HashSet<Tuple>();
         tupleMap = new HashMap<Integer, Tuple>();
+        subperiodPayoffs = new HashMap<Integer, Float>();
     }
 
     public void configure(Map<Integer, ClientInterface> members) {
@@ -59,6 +61,14 @@ public class Population implements Serializable {
     public void endSubperiod(int subperiod) {
         if (FIRE.server.getConfig().subperiodRematch) {
             shuffleTuples();
+        }
+        if (FIRE.server.getConfig().probPayoffs) {
+            for (Tuple tuple : tuples) {
+                tuple.actualizeStrategies();
+            }
+        }
+        for (Tuple tuple : tuples) {
+            tuple.evaluateSubperiod(subperiod);
         }
         for (Tuple tuple : tuples) {
             tuple.endSubperiod(subperiod);
@@ -111,6 +121,7 @@ public class Population implements Serializable {
         public long evalTime;
         public Map<Integer, float[]> strategies;
         public Map<Integer, float[]> targets;
+        public Map<Integer, float[]> actualizedStrategies;
         public Tuple match;
 
         public Tuple() {
@@ -123,6 +134,7 @@ public class Population implements Serializable {
             members = new HashSet<Integer>();
             strategies = new HashMap<Integer, float[]>();
             targets = new HashMap<Integer, float[]>();
+            actualizedStrategies = new HashMap<Integer, float[]>();
         }
 
         public void update(int changed, float[] strategy, float[] target, long timestamp) {
@@ -157,26 +169,61 @@ public class Population implements Serializable {
             for (int member : members) {
                 Config config = FIRE.server.getConfig(member);
                 PayoffFunction u = config.payoffFunction;
-                float payoff = u.getPayoff(
-                        member, percent,
-                        strategies, match.strategies,
-                        config);
+                float payoff;
+                if (config.probPayoffs) {
+                    payoff = u.getPayoff(
+                            member, percent,
+                            actualizedStrategies, match.actualizedStrategies,
+                            config);
+                } else {
+                    payoff = u.getPayoff(
+                            member, percent,
+                            strategies, match.strategies,
+                            config);
+                }
+                subperiodPayoffs.put(member, payoff);
                 payoff *= percentElapsed;
                 FIRE.server.addToPeriodPoints(member, payoff);
             }
         }
 
-        public void endSubperiod(final int subperiod) {
+        public void actualizeStrategies() {
+            actualizedStrategies.clear();
+            for (int member : members) {
+                float[] s = strategies.get(member);
+                float[] a = new float[s.length];
+                float total = 1;
+                for (int i = 0; i < s.length; i++) {
+                    if (FIRE.server.getRandom().nextFloat() <= s[i] / total) {
+                        a[i] = 1;
+                        break;
+                    }
+                    total -= s[i];
+                }
+                actualizedStrategies.put(member, a);
+            }
+        }
+
+        public void evaluateSubperiod(final int subperiod) {
             float percentElapsed = 1f / FIRE.server.getConfig().subperiods;
             float percent = subperiod * percentElapsed;
             evaluate(percent, percentElapsed);
+        }
+
+        public void endSubperiod(final int subperiod) {
             for (final int member : members) {
                 new Thread() {
 
                     @Override
                     public void run() {
+                        float payoff = subperiodPayoffs.get(member);
+                        float matchPayoff = 0;
+                        for (int matchMember : Tuple.this.match.members) {
+                            matchPayoff += subperiodPayoffs.get(matchMember);
+                        }
+                        matchPayoff /= Tuple.this.match.members.size();
                         Population.this.members.get(member).endSubperiod(
-                                subperiod, strategies, match.strategies);
+                                subperiod, strategies, match.strategies, payoff, matchPayoff);
                     }
                 }.start();
             }

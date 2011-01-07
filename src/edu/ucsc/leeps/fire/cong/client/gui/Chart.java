@@ -337,7 +337,11 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
         if (percent <= 1f) {
             if (mode == Mode.Payoff) {
-                yourPayoff.addPayoffPoint(percent, PayoffFunction.Utilities.getPayoff());
+                if (config.subperiods != 0) {
+                    yourPayoff.addPayoffPoint(percent, Client.state.subperiodPayoff);
+                } else {
+                    yourPayoff.addPayoffPoint(percent, PayoffFunction.Utilities.getPayoff());
+                }
                 if (FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction) {
                     PricingPayoffFunction pf = (PricingPayoffFunction) FIRE.client.getConfig().payoffFunction;
                     Map<Integer, float[]> currentPrices = Client.state.strategies;
@@ -369,7 +373,11 @@ public class Chart extends Sprite implements Configurable<Config> {
                         priceLine.addPayoffPoint(percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
                     }
                 } else {
-                    matchPayoff.addPayoffPoint(percent, PayoffFunction.Utilities.getMatchPayoff());
+                    if (config.subperiods != 0) {
+                        matchPayoff.addPayoffPoint(percent, Client.state.subperiodMatchPayoff);
+                    } else {
+                        matchPayoff.addPayoffPoint(percent, PayoffFunction.Utilities.getMatchPayoff());
+                    }
                 }
             } else {
                 float[] you = Client.state.getMyStrategy();
