@@ -5,6 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;
@@ -41,7 +42,6 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     public OneStrategyStripSelector(Sprite parent, int x, int y, int width, int height,
             Client applet) {
         super(parent, x, y, width, height);
-
         if (width > height) {
             slider = new Slider(applet, Slider.Alignment.Horizontal, 0, width, height / 2f, Color.black, "A", 1f);
         } else {
@@ -141,7 +141,8 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
 
     public void configChanged(Config config) {
         if (config.mixedStrategySelection && config.stripStrategySelection
-                && config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                && config.payoffFunction instanceof TwoStrategyPayoffFunction
+                && !(config.payoffFunction instanceof CournotPayoffFunction)) {
             setVisible(true);
             if (config.payoffFunction instanceof PricingPayoffFunction) {
                 slider = new Slider(
@@ -201,16 +202,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
                 newTarget -= .01f;
             }
             newTarget = Client.constrain(newTarget, 0, 1);
-            float newPrice =
-                    (newTarget * FIRE.client.getConfig().payoffFunction.getMax()) - FIRE.client.getConfig().payoffFunction.getMin();
-            if (newPrice < FIRE.client.getConfig().marginalCost) {
-                float marginalCostTarget = FIRE.client.getConfig().marginalCost / (FIRE.client.getConfig().payoffFunction.getMax() - FIRE.client.getConfig().payoffFunction.getMin());
-                slider.setGhostValue(marginalCostTarget);
-                Client.state.target[0] = marginalCostTarget;
-            } else {
-                Client.state.target[0] = newTarget;
-            }
-        }
+       }
     }
 
     public void keyReleased(KeyEvent e) {
@@ -218,4 +210,5 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
 
     public void endSubperiod(int subperiod) {
     }
+
 }

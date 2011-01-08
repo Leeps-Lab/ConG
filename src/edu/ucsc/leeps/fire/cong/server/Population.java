@@ -468,7 +468,7 @@ public class Population implements Serializable {
         }
         // does setWorlds() need to be called after a shuffle?
     }
-
+/*
     private void setWorlds() {
         int curWorld = 1;
         for (Tuple tuple : tuples) {
@@ -498,4 +498,5 @@ public class Population implements Serializable {
             return pathLength - tuple.pathDist;
         }
     }
+    */
 }

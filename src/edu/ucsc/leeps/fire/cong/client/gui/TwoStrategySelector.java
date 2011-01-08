@@ -6,6 +6,7 @@ import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
+import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.event.KeyEvent;
@@ -376,7 +377,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     public void configChanged(Config config) {
         this.config = config;
         if (config.mixedStrategySelection && !config.stripStrategySelection
-                && config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+                && config.payoffFunction instanceof TwoStrategyPayoffFunction
+                && !(config.payoffFunction instanceof CournotPayoffFunction)) {
             switch (config.strategySelectionDisplayType) {
                 case HeatmapSingle:
                     setModeHeatmapSingle();

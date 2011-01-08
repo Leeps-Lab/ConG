@@ -12,6 +12,7 @@ import edu.ucsc.leeps.fire.cong.client.gui.Chart;
 import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
+import edu.ucsc.leeps.fire.cong.client.gui.CournotSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
@@ -56,6 +57,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private PureStrategySelector pureMatrix;
     private OneStrategyStripSelector strip;
     private QWERTYStrategySelector qwerty;
+    private CournotSelector cournot;
     private Sprite selector;
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
@@ -157,6 +159,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         } else if (qwerty.visible) {
             selector = qwerty;
             strategyChanger.selector = qwerty;
+        } else if (cournot.visible) {
+            selector = cournot;
+            strategyChanger.selector = cournot;
         }
         strategyChanger.selector.startPrePeriod();
         payoffChart.clearAll();
@@ -333,6 +338,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize,
                 this);
+        cournot = new CournotSelector(null, leftMargin, topMargin + counterpartMatrixSize + 30,
+                matrixSize, matrixSize, this);
         countdown = new Countdown(
                 null, bimatrix.width - 150, 20 + topMargin, this);
         pointsDisplay = new PointsDisplay(

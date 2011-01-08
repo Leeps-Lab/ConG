@@ -38,12 +38,6 @@ public class Chart extends Sprite implements Configurable<Config> {
     // prices
     private Map<Integer, Line> prices;
     private Map<Integer, Line> marginalCosts;
-    private Color[] colors = new Color[]{
-        new Color(0, 226, 20),
-        new Color(52, 95, 255),
-        new Color(247, 64, 24),
-        new Color(255, 121, 0),
-        new Color(206, 0, 118),};
     // threshold
     private Line threshold;
     private HeatmapLegend heatmapLegend;
@@ -357,8 +351,8 @@ public class Chart extends Sprite implements Configurable<Config> {
         if (id == FIRE.client.getID()) {
             color = Color.BLACK;
         } else {
-            if (prices.size() < colors.length) {
-                color = colors[prices.size()];
+            if (prices.size() < Config.colors.length) {
+                color = Config.colors[prices.size()];
             } else {
                 color = new Color(200, 100, 0);
             }
@@ -537,9 +531,9 @@ public class Chart extends Sprite implements Configurable<Config> {
             yourPayoff.origin.y = scaledMargin - Math.round(ratio * scaledHeight);
             yourPayoff.width = width;
             yourPayoff.height = scaledHeight;
-            yourPayoff.r = colors[0].getRed();
-            yourPayoff.g = colors[0].getGreen();
-            yourPayoff.b = colors[0].getBlue();
+            yourPayoff.r = Config.colors[0].getRed();
+            yourPayoff.g = Config.colors[0].getGreen();
+            yourPayoff.b = Config.colors[0].getBlue();
         } else {
             yourPayoff.origin.x = 0;
             yourPayoff.origin.y = scaledMargin;
