@@ -7,7 +7,6 @@ import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.logging.Err;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 

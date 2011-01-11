@@ -1,6 +1,6 @@
 "period","timeConstrained","paid","length","subperiods","percentChangePerSecond","numTuples","payoffFunction","name","mixedStrategySelection","stripStrategySelection","strategySelectionDisplayType","showPayoffTimeAxisLabels"
-1,"TRUE","TRUE",90,0,1,6,"pricing","pf","TRUE","TRUE","Slider","TRUE"
-2,"TRUE","TRUE",90,10,1,4,"pricing","pf","TRUE","TRUE","Slider","TRUE"
+1,"TRUE","TRUE",90,0,1,1,"pricing","pf","TRUE","TRUE","Slider","TRUE"
+2,"TRUE","TRUE",90,25,1,1,"pricing","pf","TRUE","TRUE","Slider","TRUE"
 "SUBJECTS",,,,,,,,,,,,
 "period","subject","marginalCost",,,,,,,,,,
 1,1,20,,,,,,,,,,

@@ -187,7 +187,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         applet.fill(0);
 
         current.update((1 - percent_a) * width, (1 - percent_A) * height);
-        current.setLabel(PayoffFunction.Utilities.getPayoff());
+        if (config.showHeatmap) {
+            current.setLabel(PayoffFunction.Utilities.getPayoff());
+        }
 
         if (applet.mousePressed) {
             dragged.setVisible(true);
@@ -201,7 +203,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             }
             dragged.update((1 - percent_a) * width, (1 - target) * height);
             float hoverPercent_A = 1 - ((applet.mouseY - origin.y) / height);
-            dragged.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}));
+            if (config.showHeatmap) {
+                dragged.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}));
+            }
         } else {
             dragged.setVisible(false);
             dragged.update((1 - percent_a) * width, dragged.origin.y);
@@ -212,7 +216,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             planned.update(
                     (1 - percent_a) * width,
                     (1 - Client.state.target[0]) * height);
-            planned.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{Client.state.target[0]}));
+            if (config.showHeatmap) {
+                planned.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{Client.state.target[0]}));
+            }
         } else {
             planned.setVisible(false);
         }
@@ -225,10 +231,12 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             float hoverPercent_a = 1 - ((applet.mouseX - origin.x) / height);
             if (hoverPercent_A >= 0 && hoverPercent_A <= 1.0
                     && hoverPercent_a >= 0 && hoverPercent_a <= 1.0) {
-                if (((TwoStrategyPayoffFunction) config.payoffFunction).reverseXAxis()) {
-                    hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}, new float[]{1 - hoverPercent_a}));
-                } else {
-                    hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
+                if (config.showHeatmap) {
+                    if (((TwoStrategyPayoffFunction) config.payoffFunction).reverseXAxis()) {
+                        hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}, new float[]{1 - hoverPercent_a}));
+                    } else {
+                        hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
+                    }
                 }
                 hover.update((1 - hoverPercent_a) * width, (1 - hoverPercent_A) * height);
                 hover.setVisible(true);
@@ -248,7 +256,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             applet.line(x, y + h * (1 - percent_A), x + w, y + h * (1 - percent_A));
 
             counterpart.setVisible(true);
-            counterpart.setLabel(PayoffFunction.Utilities.getMatchPayoff());
+            if (config.showHeatmap) {
+                counterpart.setLabel(PayoffFunction.Utilities.getMatchPayoff());
+            }
             counterpart.update(
                     counterpartHeatmap.origin.x + (1 - percent_a) * counterpartHeatmap.width,
                     counterpartHeatmap.origin.y + (1 - percent_A) * counterpartHeatmap.height);
@@ -257,12 +267,10 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     private void drawHeatmap() {
-        if (config.showHeatmap) {
-            heatmap.draw(applet);
+        heatmap.draw(applet);
 
-            if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth) {
-                counterpartHeatmap.draw(applet);
-            }
+        if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth) {
+            counterpartHeatmap.draw(applet);
         }
 
         myHeatmapAa.draw(applet);
@@ -325,7 +333,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         } else {
             target = 1 - ((mouseY - origin.y) / height);
         }
-        Client.state.target[0] = target;
+        if (Client.state.target != null) {
+            Client.state.target[0] = target;
+        }
     }
 
     public void mouseClicked(MouseEvent e) {
