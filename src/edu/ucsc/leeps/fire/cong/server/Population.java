@@ -184,6 +184,10 @@ public class Population implements Serializable {
                 subperiodPayoffs.put(member, payoff);
                 payoff *= percentElapsed;
                 FIRE.server.addToPeriodPoints(member, payoff);
+                if (config.payoffFunction instanceof PricingPayoffFunction) {
+                    float cost = percentElapsed * config.marginalCost;
+                    FIRE.server.addToPeriodPoints(member, -cost);
+                }
             }
         }
 
