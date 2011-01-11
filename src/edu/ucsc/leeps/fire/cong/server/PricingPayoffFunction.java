@@ -25,7 +25,6 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
     public float getMin() {
         return min;
     }
-    float[] marginalCosts = new float[]{0, 25, 50, 30};
 
     @Override
     public float getPayoff(
@@ -61,13 +60,11 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
 
     @Override
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        return null;
-        //return super.getPopStrategySummary(id, percent, popStrategies, matchPopStrategies);
+        return super.getPopStrategySummary(id, percent, popStrategies, matchPopStrategies);
     }
 
     @Override
     public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        return null;
-        //return super.getMatchStrategySummary(id, percent, popStrategies, matchPopStrategies);
+        return super.getMatchStrategySummary(id, percent, popStrategies, matchPopStrategies);
     }
 }

@@ -6,6 +6,7 @@ import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;
@@ -202,7 +203,15 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
                 newTarget -= .01f;
             }
             newTarget = Client.constrain(newTarget, 0, 1);
-       }
+            float max = FIRE.client.getConfig().payoffFunction.getMax();
+            float min = FIRE.client.getConfig().payoffFunction.getMin();
+            float mc = FIRE.client.getConfig().marginalCost;
+            float newPrice = min + newTarget * (max - min);
+            if (newPrice < mc) {
+                newTarget = mc / (max - min);
+            }
+            Client.state.target[0] = newTarget;
+        }
     }
 
     public void keyReleased(KeyEvent e) {
@@ -210,5 +219,4 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
 
     public void endSubperiod(int subperiod) {
     }
-
 }

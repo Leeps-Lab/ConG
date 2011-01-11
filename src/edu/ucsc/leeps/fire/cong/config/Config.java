@@ -158,6 +158,5 @@ public class Config extends BaseConfig {
         new Color(7, 226, 0),
         new Color(52, 95, 255),
         new Color(247, 64, 24),
-        new Color(255, 121, 0),
-        new Color(0, 206, 118),};
+        new Color(255, 121, 0),};
 }

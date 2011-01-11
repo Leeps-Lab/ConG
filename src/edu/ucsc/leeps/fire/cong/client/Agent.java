@@ -39,22 +39,29 @@ public class Agent extends Thread {
     private void act(edu.ucsc.leeps.fire.cong.client.State state) {
         Config config = FIRE.client.getConfig();
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            float maxPayoff = Float.NEGATIVE_INFINITY;
-            float maxStrategy = 0;
-            float[] strategy = new float[]{maxStrategy};
-            for (float s = 0; s <= 1; s += 0.01) {
-                strategy[0] = s;
-                float payoff = PayoffFunction.Utilities.getPayoff(strategy);
-                if (payoff > maxPayoff) {
-                    maxPayoff = payoff;
-                    maxStrategy = s;
+            float newTarget;
+            if (PayoffFunction.Utilities.getPayoff() <= 3) {
+                newTarget = FIRE.client.getRandom().nextFloat();
+            } else {
+                float maxPayoff = Float.NEGATIVE_INFINITY;
+                float maxStrategy = 0;
+                float[] strategy = new float[]{maxStrategy};
+                for (float s = 0; s <= 1; s += 0.01) {
+                    strategy[0] = s;
+                    float payoff = PayoffFunction.Utilities.getPayoff(strategy);
+                    if (payoff > maxPayoff) {
+                        maxPayoff = payoff;
+                        maxStrategy = s;
+                    }
                 }
+                newTarget = maxStrategy + (float) (0.1 * FIRE.client.getRandom().nextGaussian());
             }
-            float newTarget = maxStrategy + (float) (0.1 * FIRE.client.getRandom().nextGaussian());
             if (config.payoffFunction instanceof PricingPayoffFunction) {
-                float newPrice = (maxStrategy * config.payoffFunction.getMax()) - config.payoffFunction.getMin();
+                float max = config.payoffFunction.getMax();
+                float min = config.payoffFunction.getMin();
+                float newPrice = min + (newTarget * (max-min));
                 if (newPrice < config.marginalCost) {
-                    float marginalCostTarget = config.marginalCost / (config.payoffFunction.getMax() - config.payoffFunction.getMin());
+                    float marginalCostTarget = config.marginalCost / (max - min);
                     newTarget = marginalCostTarget;
                 }
             }
@@ -93,7 +100,7 @@ public class Agent extends Thread {
             }
         }
         try {
-            Thread.sleep(FIRE.client.getRandom().nextInt(100));
+            Thread.sleep(1000 + FIRE.client.getRandom().nextInt(1000));
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }

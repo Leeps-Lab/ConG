@@ -322,18 +322,20 @@ public class Chart extends Sprite implements Configurable<Config> {
      * combinations of strategies for two or three strategy payoff functions.
      */
     public void clearAll() {
-        yourPayoff.clear();
-        matchPayoff.clear();
-        yourStrategy.clear();
-        matchStrategy.clear();
-        yourP.clear();
-        yourR.clear();
-        yourS.clear();
-        matchR.clear();
-        matchP.clear();
-        matchS.clear();
-        prices.clear();
-        marginalCosts.clear();
+        synchronized (lock) {
+            yourPayoff.clear();
+            matchPayoff.clear();
+            yourStrategy.clear();
+            matchStrategy.clear();
+            yourP.clear();
+            yourR.clear();
+            yourS.clear();
+            matchR.clear();
+            matchP.clear();
+            matchS.clear();
+            prices.clear();
+            marginalCosts.clear();
+        }
     }
 
     public void updateLines() {
@@ -352,19 +354,13 @@ public class Chart extends Sprite implements Configurable<Config> {
         if (id == FIRE.client.getID()) {
             color = Color.BLACK;
         } else {
-            if (prices.size() < Config.colors.length) {
-                color = Config.colors[prices.size()];
-            } else {
-                color = new Color(200, 100, 0);
-            }
+            color = new Color(200, 100, 0);
         }
         priceLine.r = color.getRed();
         priceLine.g = color.getGreen();
         priceLine.b = color.getBlue();
         priceLine.alpha = 255;
-        synchronized (lock) {
-            prices.put(id, priceLine);
-        }
+        prices.put(id, priceLine);
     }
 
     public void updateLines(float percent) {
@@ -382,11 +378,13 @@ public class Chart extends Sprite implements Configurable<Config> {
                     PricingPayoffFunction pf = (PricingPayoffFunction) FIRE.client.getConfig().payoffFunction;
                     Map<Integer, float[]> currentPrices = Client.state.strategies;
                     for (int id : currentPrices.keySet()) {
-                        if (!prices.containsKey(id)) {
-                            initializePriceLine(id);
+                        synchronized (lock) {
+                            if (!prices.containsKey(id)) {
+                                initializePriceLine(id);
+                            }
+                            Line priceLine = prices.get(id);
+                            priceLine.addPayoffPoint(percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
                         }
-                        Line priceLine = prices.get(id);
-                        priceLine.addPayoffPoint(percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
                     }
                 } else {
                     if (config.subperiods != 0) {
