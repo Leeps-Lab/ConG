@@ -107,11 +107,18 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
         y = height * (1 -
                 (PayoffFunction.Utilities.getPayoff(Client.state.strategies.get(id))
                 - min) / (max - min));
-        applet.stroke(color.getRed(), color.getGreen(), color.getBlue());
-        applet.strokeWeight(3);
-        if (id != FIRE.client.getID())
-           applet.line(x, height - 5, x, height + 5);
-        
+        if (id != FIRE.client.getID()) {
+            applet.stroke(color.getRed(), color.getGreen(), color.getBlue());
+            applet.fill(color.getRed(), color.getGreen(), color.getBlue());
+            applet.strokeWeight(3);
+            applet.line(x, height - 5, x, height + 5);
+        }
+        else {
+            applet.fill(0);
+        }
+        applet.stroke(0);
+        applet.strokeWeight(1);
+        applet.ellipse(x - 5, y - 5, 10, 10);
     }
 
     public void configChanged(Config config) {
