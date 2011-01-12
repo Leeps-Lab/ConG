@@ -58,13 +58,19 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
         return Math.abs(p1 - p2) < 0.5;
     }
 
+    /*
+     * Return the min of popStrategies
+     */
     @Override
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        return super.getPopStrategySummary(id, percent, popStrategies, matchPopStrategies);
+        return null;
     }
 
+    /*
+     * Return an array of the strategies for everyone in popStrategies except id
+     */
     @Override
     public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        return super.getMatchStrategySummary(id, percent, popStrategies, matchPopStrategies);
+        return null;
     }
 }

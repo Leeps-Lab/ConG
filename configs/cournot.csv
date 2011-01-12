@@ -1,3 +1,3 @@
 "period","timeConstrained","paid","length","subperiods","percentChangePerSecond","numTuples","payoffFunction","name","A","B","C","min","max","showPayoffTimeAxisLabels"
 1,"TRUE","TRUE",90,0,1,1,"cournot","pf",1,1,0,0,0.5,"TRUE"
-2,"TRUE","TRUE",90,0,1,1,"publicGoods","pf",0.75,1,1,0,2.25,"TRUE"
+2,"TRUE","TRUE",90,0,1,1,"cournot","pf",1,1,0,0,2.25,"TRUE"

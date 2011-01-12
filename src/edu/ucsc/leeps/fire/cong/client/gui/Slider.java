@@ -29,7 +29,8 @@ public class Slider {
     private float R, G, B;
     private boolean colorChanged;
     private PImage texture, ghostTexture;
-    private String label, stratLabel, ghostLabel;
+    private String label, stratLabel;
+    private boolean showStrategyLabel;
     private boolean grabbed;
     private boolean ghostGrabbed;
     private float maxValue;
@@ -67,7 +68,7 @@ public class Slider {
 
         this.label = label;
         stratLabel = String.format(FORMAT, 100 * stratValue);
-        ghostLabel = String.format(FORMAT, 100 * ghostValue);
+        showStrategyLabel = true;
 
         grabbed = false;
         ghostGrabbed = false;
@@ -211,6 +212,10 @@ public class Slider {
         ghosting = true;
     }
 
+    public void setShowStrategyLabel(boolean showStrategyLabel) {
+        this.showStrategyLabel = showStrategyLabel;
+    }
+
     /**
      * Sets ghosting to false.
      */
@@ -235,7 +240,6 @@ public class Slider {
         } else {
             ghostPos = sliderEnd - length * ghostValue / maxValue;
         }
-        ghostLabel = String.format(FORMAT, ghostValue);
     }
 
     /**
@@ -266,7 +270,6 @@ public class Slider {
         } else {
             ghostValue = maxValue * (sliderEnd - ghostPos) / length;
         }
-        ghostLabel = String.format(FORMAT, ghostValue);
     }
 
     /**
@@ -365,13 +368,12 @@ public class Slider {
                 applet.textAlign(Client.LEFT);
                 float labelWidth = applet.textWidth(label);
                 applet.text(label, sliderStart - labelWidth - 10, sliderLine + 2);
-                applet.text(stratLabel, sliderEnd + 10, sliderLine + 2);
+                if (showStrategyLabel) {
+                    applet.text(stratLabel, sliderEnd + 10, sliderLine + 2);
+                }
 
                 if (ghosting) {
                     applet.image(ghostTexture, ghostPos, sliderLine);
-
-                    applet.fill(120);
-                    //applet.text(ghostLabel, sliderEnd + 10, sliderLine + 20);
                 }
             } else {
                 applet.stroke(0);
@@ -386,13 +388,12 @@ public class Slider {
                 applet.textAlign(Client.CENTER);
                 float labelHeight = applet.textAscent() + applet.textDescent();
                 applet.text(label, sliderLine, sliderStart - labelHeight);
-                applet.text(stratLabel, sliderLine, sliderEnd + labelHeight);
+                if (showStrategyLabel) {
+                    applet.text(stratLabel, sliderLine, sliderEnd + labelHeight);
+                }
 
                 if (ghosting) {
                     applet.image(ghostTexture, sliderLine, ghostPos);
-
-                    applet.fill(120);
-                    //applet.text(ghostLabel, sliderLine, sliderEnd + 2 * labelHeight);
                 }
             }
         }

@@ -16,6 +16,7 @@ import edu.ucsc.leeps.fire.cong.client.gui.CournotSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.GraphicsEnvironment;
@@ -457,6 +458,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 strip.origin.x = 10;
                 legend.setVisible(false);
                 payoffChart.configChanged(config);
+            } else if (config.payoffFunction instanceof CournotPayoffFunction) {
+                strategyChart.setVisible(false);
+                payoffChart.setVisible(false);
+                legend.setVisible(false);
             } else {
                 strategyChart.setVisible(true);
             }

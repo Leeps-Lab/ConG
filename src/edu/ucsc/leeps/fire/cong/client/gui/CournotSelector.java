@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
@@ -32,9 +31,9 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
     public CournotSelector(Sprite parent, int x, int y, int width, int height,
             Client applet) {
         super(parent, x, y, width, height);
-        x += (int)(.05 * width);
-        width = (int)(0.89 * width);
-        slider = new Slider(applet, Slider.Alignment.Horizontal, 0, width, height / 2f, Color.black, "A", 1f);
+        slider = new Slider(applet, Slider.Alignment.Horizontal,
+                0, this.width, this.height, Color.black, "", 1f);
+        slider.setShowStrategyLabel(false);
         slider.showGhost();
         this.applet = applet;
         FIRE.client.addConfigListener(this);
@@ -59,12 +58,12 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
         }
 
         slider.setStratValue(Client.state.getMyStrategy()[0]);
-        if (Client.state.target != null)
+        if (Client.state.target != null) {
             slider.setGhostValue(Client.state.target[0]);
+        }
 
         if (enabled && slider.isGhostGrabbed()) {
             float mouseX = applet.mouseX - origin.x;
-            float mouseY = applet.mouseY - origin.y;
             slider.moveGhost(mouseX);
             float newTarget = slider.getGhostValue();
             float newPrice =
@@ -86,9 +85,9 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
         int i = 1;
         for (int id : Client.state.strategies.keySet()) {
             Color color;
-            if (id == FIRE.client.getID())
-               color = Config.colors[0];
-            else {
+            if (id == FIRE.client.getID()) {
+                color = Config.colors[0];
+            } else {
                 color = Config.colors[i];
                 i++;
             }
@@ -104,21 +103,19 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
         min = config.payoffFunction.getMin();
         max = config.payoffFunction.getMax();
         x = width * Client.state.strategies.get(id)[0];
-        y = height * (1 -
-                (PayoffFunction.Utilities.getPayoff(Client.state.strategies.get(id))
+        y = height * (1
+                - (PayoffFunction.Utilities.getPayoff(Client.state.strategies.get(id))
                 - min) / (max - min));
         if (id != FIRE.client.getID()) {
             applet.stroke(color.getRed(), color.getGreen(), color.getBlue());
             applet.fill(color.getRed(), color.getGreen(), color.getBlue());
             applet.strokeWeight(3);
             applet.line(x, height - 5, x, height + 5);
-        }
-        else {
+        } else {
             applet.fill(0);
         }
-        applet.stroke(0);
-        applet.strokeWeight(1);
-        applet.ellipse(x - 5, y - 5, 10, 10);
+        applet.noStroke();
+        applet.ellipse(x, y, 11, 11);
     }
 
     public void configChanged(Config config) {
@@ -126,10 +123,6 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
         if (config.mixedStrategySelection && !config.stripStrategySelection
                 && config.payoffFunction instanceof CournotPayoffFunction) {
             setVisible(true);
-            slider = new Slider(applet, Slider.Alignment.Horizontal,
-                    0, width, height, Color.black, "", 1f);
-            slider.showGhost();
-            slider.setVisible(true);
         } else {
             setVisible(false);
         }
@@ -181,7 +174,8 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
                 newTarget -= .01f;
             }
             newTarget = Client.constrain(newTarget, 0, 1);
-       }
+            Client.state.target[0] = newTarget;
+        }
     }
 
     public void keyReleased(KeyEvent e) {
@@ -189,5 +183,4 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
 
     public void endSubperiod(int subperiod) {
     }
-
 }
