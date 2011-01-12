@@ -153,6 +153,7 @@ public class Config extends BaseConfig {
         marginalCost = 0;
         updatesPerSecond = 1;
         strategyUpdateMillis = 100;
+        probPayoffs = false;
     }
     public static final Color[] colors = new Color[]{
         new Color(7, 226, 0),

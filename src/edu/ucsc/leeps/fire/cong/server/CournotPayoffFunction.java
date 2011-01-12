@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public class CournotPayoffFunction extends TwoStrategyPayoffFunction {
 
-    public float A, B, C;
+    public float A, B, C, smin, smax;
 
     public CournotPayoffFunction() {
     }
@@ -21,30 +21,22 @@ public class CournotPayoffFunction extends TwoStrategyPayoffFunction {
 
     @Override
     public float getMax() {
-        return max * 100;
+        return max;
     }
 
     @Override
     public float getMin() {
-        return min * 100;
+        return min;
     }
 
     @Override
     public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies, Config config) {
         float sum = 0;
-        for (int i : matchPopStrategies.keySet()) {
-            if (i != id) {
-                sum += (A / 2) * matchPopStrategies.get(i)[0];
-            }
+        for (float[] f : popStrategies.values()) {
+            sum += smin + (f[0] * (smax - smin));
         }
-        float s =  popStrategies.get(id)[0];
-        sum += (A / 2) * s;
-        float u = 100 * ((A - B * sum) * s - C * s);
-        if (u < getMin()) {
-            return getMin();
-        } else if (u > getMax()) {
-            return getMax();
-        }
+        float s = smin + (popStrategies.get(id)[0] * (smax - smin));
+        float u = ((A - B * sum) * s - C * s);
         return u;
     }
 }

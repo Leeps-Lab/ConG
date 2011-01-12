@@ -34,6 +34,18 @@ public class State {
         return strategies.get(id);
     }
 
+    public Map<Integer, float[]> getFictitiousStrategies(int id, float[] strategy) {
+        Map<Integer, float[]> fake = new HashMap<Integer, float[]>();
+        for (int i : strategies.keySet()) {
+            if (i == id) {
+                fake.put(i, strategy);
+            } else {
+                fake.put(i, strategies.get(i));
+            }
+        }
+        return fake;
+    }
+
     public Map<Integer, float[]> getFictitiousStrategies(float[] strategy) {
         Map<Integer, float[]> fake = new HashMap<Integer, float[]>();
         for (int i : strategies.keySet()) {

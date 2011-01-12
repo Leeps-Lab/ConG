@@ -104,7 +104,7 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
         max = config.payoffFunction.getMax();
         x = width * Client.state.strategies.get(id)[0];
         y = height * (1
-                - (PayoffFunction.Utilities.getPayoff(Client.state.strategies.get(id))
+                - (PayoffFunction.Utilities.getPayoff(id, Client.state.strategies.get(id))
                 - min) / (max - min));
         if (id != FIRE.client.getID()) {
             applet.stroke(color.getRed(), color.getGreen(), color.getBlue());

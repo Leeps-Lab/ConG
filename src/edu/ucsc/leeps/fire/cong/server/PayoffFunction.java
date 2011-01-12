@@ -101,6 +101,19 @@ public interface PayoffFunction extends Serializable {
         /**
          *
          * @param strategy
+         * @return The fictional flow payoff for ID playing strategy
+         */
+        public static float getPayoff(int id, float[] strategy) {
+            return FIRE.client.getConfig().payoffFunction.getPayoff(
+                    id,
+                    Client.state.currentPercent,
+                    Client.state.getFictitiousStrategies(id, strategy), Client.state.matchStrategies,
+                    FIRE.client.getConfig());
+        }
+
+        /**
+         *
+         * @param strategy
          * @param matchStrategy
          * @return The fictional flow payoff if I was playing strategy and the
          * average of my matched population was matchStrategy
