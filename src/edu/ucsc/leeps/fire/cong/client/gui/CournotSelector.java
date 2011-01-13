@@ -164,9 +164,9 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
             y0 = y * height;
             x1 = width + 10;
             y1 = y * height;
-            applet.line(x0, y0, x1, y1);
+            //applet.line(x0, y0, x1, y1);
             applet.stroke(100, 100, 100, 50);
-            applet.line(x0, y0, x1, y1);
+            //applet.line(x0, y0, x1, y1);
             applet.fill(0);
             float payoff = (1 - y) * (max - min) + min;
             if (payoff < 0) {
