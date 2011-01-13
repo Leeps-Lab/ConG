@@ -19,8 +19,8 @@ public class Slider {
     private final float ERROR_MARGIN = .01f;
     private boolean visible;
     private Alignment align;
-    private float sliderStart, sliderEnd, sliderLine;
-    private float length;
+    public float sliderStart, sliderEnd, sliderLine;
+    public float length;
     private float sliderPos;
     private float stratValue;
     private boolean ghosting;

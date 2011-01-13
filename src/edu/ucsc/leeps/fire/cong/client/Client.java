@@ -462,6 +462,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 strategyChart.setVisible(false);
                 payoffChart.setVisible(false);
                 legend.setVisible(false);
+                cournot.width = Math.round(0.7f * width);
+                cournot.origin.x = 0.15f * width;
             } else {
                 strategyChart.setVisible(true);
             }
