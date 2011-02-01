@@ -53,6 +53,7 @@ public class Config extends BaseConfig {
     public boolean subperiodRematch;
     public boolean probPayoffs;
     public boolean showHeatmap;
+    public boolean trajectory;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -72,7 +73,6 @@ public class Config extends BaseConfig {
     public int marginalCost;
 
     public Config() {
-        timeConstrained = true;
         paid = true;
         length = 120;
         pointsPerSecond = false;
@@ -154,6 +154,7 @@ public class Config extends BaseConfig {
         updatesPerSecond = 1;
         strategyUpdateMillis = 100;
         probPayoffs = false;
+        trajectory = false;
     }
     public static final Color[] colors = new Color[]{
         new Color(7, 226, 0),

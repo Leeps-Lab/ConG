@@ -503,7 +503,8 @@ public class Chart extends Sprite implements Configurable<Config> {
         if (config.payoffFunction instanceof ThresholdPayoffFunction) {
             threshold.clear();
             for (float percent = 0f; percent < 1.0f; percent += .01f) {
-                threshold.setPoint(Math.round(threshold.width * percent),
+                threshold.setPoint(
+                        Math.round(threshold.width * percent),
                         Math.round(threshold.height * (1 - ((ThresholdPayoffFunction) config.payoffFunction).threshold)),
                         true);
             }

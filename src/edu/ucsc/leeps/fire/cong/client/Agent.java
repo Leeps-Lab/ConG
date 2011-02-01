@@ -2,6 +2,7 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
@@ -16,13 +17,13 @@ public class Agent extends Thread {
     public volatile boolean running;
     public volatile boolean paused;
 
-    public Agent() {
+    public Agent(boolean debug) {
+        paused = !debug;
     }
 
     @Override
     public void run() {
         running = true;
-        paused = true;
         while (running) {
             if (!paused && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()
                     && Client.state != null && Client.state.target != null && FIRE.client.getConfig() != null) {

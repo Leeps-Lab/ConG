@@ -22,7 +22,8 @@ public class Population implements Serializable {
     private long periodStartTime;
     private Set<Tuple> tuples;
     private Map<Integer, Tuple> tupleMap;
-    public Map<Integer, Float> subperiodPayoffs;
+    private Map<Integer, Float> subperiodPayoffs;
+    private TickEvent tick = new TickEvent();
 
     public Population() {
         tuples = new HashSet<Tuple>();
@@ -58,6 +59,12 @@ public class Population implements Serializable {
         tupleMap.get(changed).update(changed, newStrategy, targetStrategy, timestamp);
     }
 
+    public void evaluate(long timestamp) {
+        for (Tuple tuple : tuples) {
+            tuple.evaluate(timestamp);
+        }
+    }
+
     public void endSubperiod(int subperiod) {
         if (FIRE.server.getConfig().subperiodRematch) {
             shuffleTuples();
@@ -88,7 +95,6 @@ public class Population implements Serializable {
         float length = FIRE.server.getConfig().length;
         float percent = (float) (length * secondsLeft) / (float) length;
         for (int member : members.keySet()) {
-            TickEvent tick = new TickEvent();
             tick.period = period;
             tick.subject = member;
             tick.config = FIRE.server.getConfig(member);
@@ -100,10 +106,17 @@ public class Population implements Serializable {
             tick.strategy = tuple.strategies.get(member);
             tick.target = tuple.targets.get(member);
             tick.match = tuple.match.population;
-            tick.payoff = tick.config.payoffFunction.getPayoff(
-                    member, percent,
-                    tuple.strategies, tuple.match.strategies,
-                    tick.config);
+            if (tick.config.subperiods != 0 && tick.config.probPayoffs) {
+                tick.payoff = tick.config.payoffFunction.getPayoff(
+                        member, percent,
+                        tuple.actualizedStrategies, tuple.match.actualizedStrategies,
+                        tick.config);
+            } else {
+                tick.payoff = tick.config.payoffFunction.getPayoff(
+                        member, percent,
+                        tuple.strategies, tuple.match.strategies,
+                        tick.config);
+            }
             // get summary statistics from payoff function
             tick.popStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
             tick.matchStrategy = tick.config.payoffFunction.getMatchStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
@@ -468,35 +481,35 @@ public class Population implements Serializable {
         }
         // does setWorlds() need to be called after a shuffle?
     }
-/*
+    /*
     private void setWorlds() {
-        int curWorld = 1;
-        for (Tuple tuple : tuples) {
-            if (tuple.discovered == false) {
-               tuple.discovered = true;
-               tuple.pathDist = 0;
-               int inWorld = discoverNext(tupleMap.get(tuple.match), curWorld, 1);
-               if (inWorld > 0)
-                   tuple.world = curWorld;
-               curWorld++;
-               System.err.println("world " + curWorld + " contains member " + tuple.members.toArray()[0]);
-            }
-        }
+    int curWorld = 1;
+    for (Tuple tuple : tuples) {
+    if (tuple.discovered == false) {
+    tuple.discovered = true;
+    tuple.pathDist = 0;
+    int inWorld = discoverNext(tupleMap.get(tuple.match), curWorld, 1);
+    if (inWorld > 0)
+    tuple.world = curWorld;
+    curWorld++;
+    System.err.println("world " + curWorld + " contains member " + tuple.members.toArray()[0]);
+    }
+    }
     }
 
     private int discoverNext(Tuple tuple, int curWorld, int pathLength) {
-        if (tuple.discovered == false) {
-            tuple.pathDist = pathLength;
-            tuple.discovered = true;
-            int inWorld = discoverNext(tupleMap.get(tuple.match), curWorld, pathLength + 1);
-            if (inWorld > 0)
-                tuple.world = curWorld;
-            System.err.println("world " + curWorld + " contains member " + tuple.members.toArray()[0]);
-            return --inWorld;
-        }
-        else {
-            return pathLength - tuple.pathDist;
-        }
+    if (tuple.discovered == false) {
+    tuple.pathDist = pathLength;
+    tuple.discovered = true;
+    int inWorld = discoverNext(tupleMap.get(tuple.match), curWorld, pathLength + 1);
+    if (inWorld > 0)
+    tuple.world = curWorld;
+    System.err.println("world " + curWorld + " contains member " + tuple.members.toArray()[0]);
+    return --inWorld;
     }
-    */
+    else {
+    return pathLength - tuple.pathDist;
+    }
+    }
+     */
 }

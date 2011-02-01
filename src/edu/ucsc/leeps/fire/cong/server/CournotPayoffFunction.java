@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public class CournotPayoffFunction extends TwoStrategyPayoffFunction {
 
-    public float A, B, C, smin, smax;
+    public float A, B, C, D, smin, smax;
 
     public CournotPayoffFunction() {
     }
@@ -36,7 +36,35 @@ public class CournotPayoffFunction extends TwoStrategyPayoffFunction {
             sum += smin + (f[0] * (smax - smin));
         }
         float s = smin + (popStrategies.get(id)[0] * (smax - smin));
-        float u = ((A - B * sum) * s - C * s);
+        float u = ((A - B * sum) * s - C * s) + D;
         return u;
+    }
+
+    @Override
+    public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
+        float[] summary = new float[4];
+        int i = 0;
+        for (int match : popStrategies.keySet()) {
+            summary[i++] = popStrategies.get(match)[0];
+        }
+        for (; i < summary.length; i++) {
+            summary[i] = Float.NaN;
+        }
+        return summary;
+    }
+
+    @Override
+    public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
+        float[] summary = new float[4];
+        int i = 0;
+        for (int match : popStrategies.keySet()) {
+            if (match != id) {
+                summary[i++] = popStrategies.get(match)[0];
+            }
+        }
+        for (; i < summary.length; i++) {
+            summary[i] = Float.NaN;
+        }
+        return summary;
     }
 }

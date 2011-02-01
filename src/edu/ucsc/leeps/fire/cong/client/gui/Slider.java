@@ -34,6 +34,7 @@ public class Slider {
     private boolean grabbed;
     private boolean ghostGrabbed;
     private float maxValue;
+    private boolean outline;
 
     // Constructor ////////////////
     public Slider(Client applet, Alignment align, float start, float end, float line, Color C,
@@ -73,6 +74,7 @@ public class Slider {
         grabbed = false;
         ghostGrabbed = false;
         this.maxValue = maxValue;
+        outline = false;
     }
 
     // Methods ///////////////////
@@ -210,6 +212,10 @@ public class Slider {
      */
     public void showGhost() {
         ghosting = true;
+    }
+
+    public void setOutline(boolean outline) {
+        this.outline = outline;
     }
 
     public void setShowStrategyLabel(boolean showStrategyLabel) {
@@ -361,8 +367,16 @@ public class Slider {
                 applet.line(sliderStart, sliderLine, sliderEnd, sliderLine);
 
                 applet.noStroke();
-                applet.imageMode(Client.CENTER);
-                applet.image(texture, sliderPos, sliderLine);
+                if (outline) {
+                    applet.noFill();
+                    applet.stroke(0);
+                    applet.strokeWeight(2f);
+                    applet.rectMode(Client.CENTER);
+                    applet.rect(sliderPos, sliderLine, HANDLE_WIDTH, HANDLE_HEIGHT);
+                } else {
+                    applet.imageMode(Client.CENTER);
+                    applet.image(texture, sliderPos, sliderLine);
+                }
 
                 applet.fill(0);
                 applet.textAlign(Client.LEFT);
@@ -381,8 +395,16 @@ public class Slider {
                 applet.line(sliderLine, sliderStart, sliderLine, sliderEnd);
 
                 applet.noStroke();
-                applet.imageMode(Client.CENTER);
-                applet.image(texture, sliderLine, sliderPos);
+                if (outline) {
+                    applet.noFill();
+                    applet.stroke(0);
+                    applet.strokeWeight(2f);
+                    applet.rectMode(Client.CENTER);
+                    applet.rect(sliderPos, sliderLine, HANDLE_WIDTH, HANDLE_HEIGHT);
+                } else {
+                    applet.imageMode(Client.CENTER);
+                    applet.image(texture, sliderLine, sliderPos);
+                }
 
                 applet.fill(0);
                 applet.textAlign(Client.CENTER);

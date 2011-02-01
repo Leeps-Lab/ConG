@@ -47,8 +47,9 @@ import processing.core.PFont;
  */
 public class Client extends PApplet implements ClientInterface, FIREClientInterface, Configurable<Config> {
 
-    public static boolean DEBUG = System.getProperty("fire.client.debug") != null;
+    public static boolean ALLOW_DEBUG = System.getProperty("fire.client.debug") != null;
     public static State state;
+    public boolean debug;
     public int framesPerUpdate;
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
@@ -97,39 +98,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         init();
         noLoop();
         frame.setVisible(true);
-        /*
-        new Thread() {
-
-            @Override
-            public void run() {
-                setPriority(Thread.MAX_PRIORITY);
-                long nanoWait = Math.round((1000f / frameRateTarget) * 1000000);
-                long oversleep = 0;
-                while (true) {
-                    if (Math.abs(oversleep) > 20 * 1000000) {
-                        System.err.println("overslept " + (oversleep / 1000000) + "ms");
-                    }
-                    long start = System.nanoTime();
-                    redraw();
-                    long elapsed = System.nanoTime() - start;
-                    long sleepTime = nanoWait - elapsed;
-                    if (sleepTime > 0) {
-                        try {
-                            start = System.nanoTime();
-                            Thread.sleep(Math.round(sleepTime / 1000000));
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
-                        }
-                        elapsed = System.nanoTime() - start;
-                        oversleep = elapsed - sleepTime;
-                    }
-                }
-            }
-        }.start();
-         * 
-         */
         loop();
-        agent = new Agent();
+        debug = ALLOW_DEBUG;
+        agent = new Agent(debug);
         agent.start();
     }
 
@@ -339,7 +310,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize,
                 this);
-        cournot = new CournotSelector(null, leftMargin, topMargin + counterpartMatrixSize + 30,
+        cournot = new CournotSelector(null, leftMargin, topMargin + counterpartMatrixSize,
                 matrixSize, matrixSize, this);
         countdown = new Countdown(
                 null, bimatrix.width - 150, 20 + topMargin, this);
@@ -379,7 +350,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     @Override
     public void draw() {
         try {
-
             if (resize) {
                 setupFonts();
                 textFont(size14);
@@ -394,7 +364,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 return;
             }
 
-            if (frameCount % 5 == 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
+            if (FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
                 long length = FIRE.client.getConfig().length * 1000l;
                 state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
 
@@ -406,7 +376,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                     sChart.updateLines();
                 }
             }
-            if (frameCount % Math.round(frameRateTarget) == 0 && FIRE.client.isRunningPeriod()) {
+            if (FIRE.client.isRunningPeriod()) {
                 pointsDisplay.update();
             }
 
@@ -428,8 +398,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             }
             countdown.draw(this);
             pointsDisplay.draw(this);
-            if (DEBUG) {
-                String frameRateString = String.format("FPS: %.2f", frameRate);
+            if (debug) {
+                String frameRateString = String.format("FPS: %.2f, Agent: %s", frameRate, agent.paused ? "off" : "on");
                 if (frameRate < 8) {
                     fill(255, 0, 0);
                 } else {
@@ -476,9 +446,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     @Override
     public void keyPressed(KeyEvent ke) {
-        if (ke.getKeyCode() == KeyEvent.VK_D) {
-            DEBUG = !DEBUG;
-        } else if (ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
+        if (ALLOW_DEBUG && ke.getKeyCode() == KeyEvent.VK_D) {
+            debug = !debug;
+        } else if (ALLOW_DEBUG && ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
             agent.paused = !agent.paused;
         } else if (ke.isAltDown() && ke.getKeyCode() == KeyEvent.VK_F11) {
             fullscreen = !fullscreen;
