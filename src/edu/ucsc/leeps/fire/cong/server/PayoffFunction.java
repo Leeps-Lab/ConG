@@ -56,14 +56,12 @@ public interface PayoffFunction extends Serializable {
                     }
                 }
             }
-            float sum = 0;
             for (int i = 0; i < average.length; i++) {
                 if (excludeSelf) {
                     average[i] /= (matchPopStrategies.size() - 1);
                 } else {
                     average[i] /= matchPopStrategies.size();
                 }
-                sum += average[i];
             }
             return average;
         }

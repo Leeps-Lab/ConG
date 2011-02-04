@@ -144,7 +144,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void startPeriod() {
-        System.err.println("starting period");
+        state.subperiod = 0;
         state.setMyStrategy(FIRE.client.getConfig().initialStrategy);
         if (FIRE.client.getConfig().preLength == 0) {
             state.currentPercent = 0;

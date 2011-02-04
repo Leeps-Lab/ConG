@@ -9,6 +9,7 @@ import java.util.Map;
  */
 public class ThreeStrategyPayoffFunction implements PayoffFunction {
 
+    public String name;
     public float min;
     public float max;
     public float Rr, Rp, Rs,

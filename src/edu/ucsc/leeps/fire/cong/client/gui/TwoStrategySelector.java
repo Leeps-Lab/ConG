@@ -409,6 +409,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     public void startPeriod() {
         heatmap.reset();
         heatmap.updateTwoStrategyHeatmap();
+        updateLabels();
     }
 
     public void endSubperiod(int subperiod) {

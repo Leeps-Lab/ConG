@@ -71,7 +71,7 @@ public class Population implements Serializable {
         }
         if (FIRE.server.getConfig().probPayoffs) {
             for (Tuple tuple : tuples) {
-                tuple.actualizeStrategies();
+                tuple.realizeStrategies();
             }
         }
         for (Tuple tuple : tuples) {
@@ -91,7 +91,7 @@ public class Population implements Serializable {
 
     public void logTick(int subperiod, int secondsLeft) {
         // Log the tick information
-        int period = FIRE.server.getConfig().period;
+        String period = FIRE.server.getConfig().period;
         float length = FIRE.server.getConfig().length;
         float percent = (float) (length * secondsLeft) / (float) length;
         for (int member : members.keySet()) {
@@ -109,8 +109,11 @@ public class Population implements Serializable {
             if (tick.config.subperiods != 0 && tick.config.probPayoffs) {
                 tick.payoff = tick.config.payoffFunction.getPayoff(
                         member, percent,
-                        tuple.actualizedStrategies, tuple.match.actualizedStrategies,
+                        tuple.realizedStrategies, tuple.match.realizedStrategies,
                         tick.config);
+                tick.realizedStrategy = tuple.realizedStrategies.get(member);
+                tick.realizedPopStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.realizedStrategies, tuple.match.realizedStrategies);
+                tick.realizedMatchStrategy = tick.config.payoffFunction.getMatchStrategySummary(member, percent, tuple.realizedStrategies, tuple.match.realizedStrategies);
             } else {
                 tick.payoff = tick.config.payoffFunction.getPayoff(
                         member, percent,
@@ -134,7 +137,7 @@ public class Population implements Serializable {
         public long evalTime;
         public Map<Integer, float[]> strategies;
         public Map<Integer, float[]> targets;
-        public Map<Integer, float[]> actualizedStrategies;
+        public Map<Integer, float[]> realizedStrategies;
         public Tuple match;
 
         public Tuple() {
@@ -147,7 +150,7 @@ public class Population implements Serializable {
             members = new HashSet<Integer>();
             strategies = new HashMap<Integer, float[]>();
             targets = new HashMap<Integer, float[]>();
-            actualizedStrategies = new HashMap<Integer, float[]>();
+            realizedStrategies = new HashMap<Integer, float[]>();
         }
 
         public void update(int changed, float[] strategy, float[] target, long timestamp) {
@@ -186,7 +189,7 @@ public class Population implements Serializable {
                 if (config.probPayoffs) {
                     payoff = u.getPayoff(
                             member, percent,
-                            actualizedStrategies, match.actualizedStrategies,
+                            realizedStrategies, match.realizedStrategies,
                             config);
                 } else {
                     payoff = u.getPayoff(
@@ -200,8 +203,8 @@ public class Population implements Serializable {
             }
         }
 
-        public void actualizeStrategies() {
-            actualizedStrategies.clear();
+        public void realizeStrategies() {
+            realizedStrategies.clear();
             for (int member : members) {
                 float[] s = strategies.get(member);
                 float[] a = new float[s.length];
@@ -213,7 +216,7 @@ public class Population implements Serializable {
                     }
                     total -= s[i];
                 }
-                actualizedStrategies.put(member, a);
+                realizedStrategies.put(member, a);
             }
         }
 
@@ -347,7 +350,6 @@ public class Population implements Serializable {
     }
 
     private void setupRandomTuples() {
-        System.err.println("setting up random tuples");
         ArrayList<Integer> randomMembers = new ArrayList<Integer>();
         randomMembers.addAll(members.keySet());
         Collections.shuffle(randomMembers, FIRE.server.getRandom());
@@ -398,7 +400,6 @@ public class Population implements Serializable {
                 config.playersInTuple = tuple1.match.members.size();
             }
         }
-        System.err.println(tuples.size());
         assert (randomMembers.size() == 0);
         assert (randomTuples.size() == 0);
     }

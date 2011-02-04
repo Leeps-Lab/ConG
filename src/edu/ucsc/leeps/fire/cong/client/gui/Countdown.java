@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 
 /**
@@ -22,10 +23,15 @@ public class Countdown extends Sprite {
      */
     @Override
     public void draw(Client applet) {
-        String string = String.format("Seconds Left: %d", secondsLeft);
+        String s;
+        if (FIRE.client.getConfig().subperiods != 0) {
+            s = String.format("Subperiods Left: %d", FIRE.client.getConfig().subperiods - Client.state.subperiod);
+        } else {
+            s = String.format("Seconds Left: %d", secondsLeft);
+        }
         applet.fill(0);
         applet.textAlign(Client.LEFT);
-        applet.text(string, origin.x, origin.y);
+        applet.text(s, origin.x, origin.y);
     }
 
     /**

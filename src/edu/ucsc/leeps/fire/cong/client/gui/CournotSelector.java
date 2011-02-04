@@ -19,10 +19,10 @@ import java.awt.event.MouseListener;
  */
 public class CournotSelector extends Sprite implements Configurable<Config>, Selector, MouseListener, KeyListener {
 
-    private Client applet;
     private boolean enabled;
     private Slider slider;
     private Config config;
+    private float[] subperiodStrategy;
 
     public CournotSelector(Sprite parent, int x, int y, int width, int height,
             Client applet) {
@@ -32,10 +32,10 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
         slider.setShowStrategyLabel(false);
         slider.hideGhost();
         slider.setOutline(true);
-        this.applet = applet;
         FIRE.client.addConfigListener(this);
         applet.addMouseListener(this);
         applet.addKeyListener(this);
+        subperiodStrategy = new float[1];
     }
 
     public void setEnabled(boolean enabled) {
@@ -85,20 +85,59 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
                 i++;
             }
             if (FIRE.client.getID() != id) {
-                drawTickMark(applet, color, id);
+                drawStrategy(applet, color, id);
             }
         }
-        drawTickMark(applet, Color.BLACK, FIRE.client.getID());
+        drawStrategy(applet, Color.BLACK, FIRE.client.getID());
+        if (config.subperiods != 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
+            drawSubperiodTicker(applet);
+            drawPlannedStrategy(applet);
+        }
         applet.popMatrix();
-
     }
 
-    private void drawTickMark(Client applet, Color color, int id) {
+    private void drawSubperiodTicker(Client applet) {
+        applet.strokeWeight(2f);
+        applet.stroke(0);
+        applet.fill(255);
+        applet.rectMode(Client.CORNERS);
+        applet.rect(0, 0, 150, -20);
+        applet.noStroke();
+        applet.fill(0, 50, 255, 50);
+        float x = 0;
+        if (Client.state.currentPercent >= 0 && Client.state.currentPercent <= 1) {
+            float percentPerSub = 1f / config.subperiods;
+            float percentElapsed = Client.state.subperiod * percentPerSub;
+            float remainder = Client.state.currentPercent - percentElapsed;
+            x = remainder / percentPerSub;
+        }
+        applet.rect(1, 1, x * 149, -19);
+    }
+
+    private void drawPlannedStrategy(Client applet) {
+        applet.stroke(0, 0, 0, 20);
+        applet.line(width * Client.state.getMyStrategy()[0], 0, width * Client.state.getMyStrategy()[0], height);
+    }
+
+    private void drawStrategy(Client applet, Color color, int id) {
         float x, y, min, max;
         min = config.payoffFunction.getMin();
         max = config.payoffFunction.getMax();
-        float payoff = PayoffFunction.Utilities.getPayoff(id, Client.state.strategies.get(id));
-        x = width * Client.state.strategies.get(id)[0];
+        float payoff, strategy;
+        if (config.subperiods != 0) {
+            if (id == FIRE.client.getID()) {
+                payoff = Client.state.subperiodPayoff;
+                strategy = subperiodStrategy[0];
+            } else {
+                payoff = config.payoffFunction.getPayoff(
+                        id, 0, Client.state.getFictitiousStrategies(FIRE.client.getID(), subperiodStrategy), null, config);
+                strategy = Client.state.strategies.get(id)[0];
+            }
+        } else {
+            payoff = PayoffFunction.Utilities.getPayoff(id, Client.state.strategies.get(id));
+            strategy = Client.state.strategies.get(id)[0];
+        }
+        x = width * strategy;
         y = height * (1 - (payoff - min) / (max - min));
         if (y > height) {
             y = height;
@@ -106,29 +145,32 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
             y = 0;
         }
         if (id == FIRE.client.getID()) {
+            applet.strokeWeight(3);
             applet.stroke(-40, 160, 60);
             applet.fill(40, 240, 140);
-        } else {
+        } else if (config.subperiods == 0 || Client.state.subperiod != 0) {
             applet.stroke(color.getRed() - 40, color.getGreen() - 40, color.getBlue() - 40);
             applet.fill(color.getRed() + 40, color.getGreen() + 40, color.getBlue() + 40);
             applet.strokeWeight(3);
             applet.line(x, height - 5, x, height + 5);
         }
         applet.strokeWeight(1);
-        if (id == FIRE.client.getID()) {
+        if (id == FIRE.client.getID() && (config.subperiods == 0 || Client.state.subperiod != 0)) {
             applet.ellipse(x, y, 11, 11);
             applet.fill(40 - 30, 240 - 30, 140 - 30);
             applet.stroke(40 - 30, 240 - 30, 140 - 30);
-        } else {
+        } else if (config.subperiods == 0 || Client.state.subperiod != 0) {
             applet.ellipse(x, y, 8, 8);
             applet.fill(color.getRed() - 70, color.getGreen() - 70, color.getBlue() - 70);
             applet.stroke(color.getRed() - 70, color.getGreen() - 70, color.getBlue() - 70);
         }
-        String label = String.format("%.0f", payoff);
-        applet.text(label, Math.round(x + 5), Math.round(y - 3));
-        if (payoff > max) {
+        if (config.subperiods == 0 || Client.state.subperiod != 0) {
+            String label = String.format("%.0f", payoff);
+            applet.text(label, Math.round(x + 5), Math.round(y - 3));
+        }
+        if (payoff > max && (config.subperiods == 0 || Client.state.subperiod != 0)) {
             drawUpArrow(applet, color, x);
-        } else if (payoff < min) {
+        } else if (payoff < min && (config.subperiods == 0 || Client.state.subperiod != 0)) {
             drawDownArrow(applet, color, x);
         }
     }
@@ -278,5 +320,6 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
     }
 
     public void endSubperiod(int subperiod) {
+        subperiodStrategy[0] = Client.state.getMyStrategy()[0];
     }
 }

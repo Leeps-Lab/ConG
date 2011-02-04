@@ -1,7 +1,6 @@
 package edu.ucsc.leeps.fire.cong.logging;
 
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.logging.LogEvent;
 
 /**
@@ -10,7 +9,7 @@ import edu.ucsc.leeps.fire.logging.LogEvent;
  */
 public class TickEvent implements LogEvent {
 
-    public int period;
+    public String period;
     public int subperiod;
     public int secondsLeft;
     public int subject;
@@ -21,6 +20,9 @@ public class TickEvent implements LogEvent {
     public float[] target;
     public float[] popStrategy;
     public float[] matchStrategy;
+    public float[] realizedStrategy;
+    public float[] realizedPopStrategy;
+    public float[] realizedMatchStrategy;
     public float payoff;
     public Config config;
 }
