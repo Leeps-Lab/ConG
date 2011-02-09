@@ -9,7 +9,7 @@ import java.util.Map;
  */
 public class PublicGoodsPayoffFunction extends TwoStrategyPayoffFunction {
 
-    public float A, B, C;
+    public float A;
 
     public PublicGoodsPayoffFunction() {
     }
@@ -21,17 +21,17 @@ public class PublicGoodsPayoffFunction extends TwoStrategyPayoffFunction {
 
     @Override
     public float getMax() {
-        return max * 100;
+        return 400;
     }
 
     @Override
     public float getMin() {
-        return min * 100;
+        return 0;
     }
 
     @Override
     public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies, Config config) {
-        max = popStrategies.size();
+        int n = popStrategies.size();
         float sum = 0;
         for (int i : matchPopStrategies.keySet()) {
             if (i != id) {
@@ -40,7 +40,7 @@ public class PublicGoodsPayoffFunction extends TwoStrategyPayoffFunction {
         }
         float s = popStrategies.get(id)[0];
         sum += s;
-        float u = 100 * ((A * sum) + (1 - s));
+        float u = 100 * ((0.5f * sum) + (1 - s));
         if (u < getMin()) {
             return getMin();
         } else if (u > getMax()) {

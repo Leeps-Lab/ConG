@@ -60,7 +60,7 @@ public class Agent extends Thread {
             if (config.payoffFunction instanceof PricingPayoffFunction) {
                 float max = config.payoffFunction.getMax();
                 float min = config.payoffFunction.getMin();
-                float newPrice = min + (newTarget * (max-min));
+                float newPrice = min + (newTarget * (max - min));
                 if (newPrice < config.marginalCost) {
                     float marginalCostTarget = config.marginalCost / (max - min);
                     newTarget = marginalCostTarget;

@@ -44,10 +44,10 @@ public class Population implements Serializable {
         }
     }
 
-    public void setPeriodStartTime(long timestamp) {
-        periodStartTime = timestamp;
+    public void setPeriodStartTime() {
+        periodStartTime = System.nanoTime();
         for (Tuple tuple : tuples) {
-            tuple.evalTime = timestamp;
+            tuple.evalTime = periodStartTime;
             tuple.update();
         }
     }
@@ -55,13 +55,13 @@ public class Population implements Serializable {
     public void strategyChanged(
             float[] newStrategy,
             float[] targetStrategy,
-            Integer changed, long timestamp) {
-        tupleMap.get(changed).update(changed, newStrategy, targetStrategy, timestamp);
+            Integer changed) {
+        tupleMap.get(changed).update(changed, newStrategy, targetStrategy);
     }
 
-    public void evaluate(long timestamp) {
+    public void evaluate() {
         for (Tuple tuple : tuples) {
-            tuple.evaluate(timestamp);
+            tuple.evaluate();
         }
     }
 
@@ -83,9 +83,8 @@ public class Population implements Serializable {
     }
 
     public void endPeriod() {
-        long timestamp = System.currentTimeMillis();
         for (Tuple tuple : tuples) {
-            tuple.endPeriod(timestamp);
+            tuple.endPeriod();
         }
     }
 
@@ -153,10 +152,10 @@ public class Population implements Serializable {
             realizedStrategies = new HashMap<Integer, float[]>();
         }
 
-        public void update(int changed, float[] strategy, float[] target, long timestamp) {
+        public void update(int changed, float[] strategy, float[] target) {
             if (FIRE.server.getConfig().subperiods == 0) {
-                evaluate(timestamp);
-                match.evaluate(timestamp);
+                evaluate();
+                match.evaluate();
             }
             strategies.put(changed, strategy);
             targets.put(changed, target);
@@ -166,17 +165,30 @@ public class Population implements Serializable {
         }
 
         public void update() {
-            for (int member : members) {
-                Population.this.members.get(member).setStrategies(strategies);
+            for (final int member : members) {
+                new Thread() {
+
+                    @Override
+                    public void run() {
+                        Population.this.members.get(member).setStrategies(strategies);
+                    }
+                }.start();
             }
-            for (int member : match.members) {
-                Population.this.members.get(member).setMatchStrategies(strategies);
+            for (final int member : match.members) {
+                new Thread() {
+
+                    @Override
+                    public void run() {
+                        Population.this.members.get(member).setMatchStrategies(strategies);
+                    }
+                }.start();
             }
         }
 
-        public void evaluate(long timestamp) {
-            float percent = (timestamp - periodStartTime) / (FIRE.server.getConfig().length * 1000f);
-            float percentElapsed = (timestamp - evalTime) / (FIRE.server.getConfig().length * 1000f);
+        public void evaluate() {
+            long timestamp = System.nanoTime();
+            float percent = (timestamp - periodStartTime) / (FIRE.server.getConfig().length * 1000000000f);
+            float percentElapsed = (timestamp - evalTime) / (FIRE.server.getConfig().length * 1000000000f);
             evaluate(percent, percentElapsed);
             evalTime = timestamp;
         }
@@ -246,8 +258,8 @@ public class Population implements Serializable {
             update();
         }
 
-        public void endPeriod(long timestamp) {
-            evaluate(timestamp);
+        public void endPeriod() {
+            evaluate();
         }
     }
 

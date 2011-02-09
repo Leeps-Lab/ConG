@@ -8,4 +8,11 @@ public class StrategyChangeEvent implements LogEvent {
     public int id;
     public float[] newStrategy;
     public float[] targetStrategy;
+
+    public StrategyChangeEvent(long timestamp, int id, float[] newStrategy, float[] targetStrategy) {
+        this.timestamp = timestamp;
+        this.id = id;
+        this.newStrategy = newStrategy;
+        this.targetStrategy = targetStrategy;
+    }
 }

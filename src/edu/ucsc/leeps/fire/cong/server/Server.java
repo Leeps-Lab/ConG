@@ -4,6 +4,7 @@ import edu.ucsc.leeps.fire.FIREServerInterface;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
 import edu.ucsc.leeps.fire.server.ServerController.State;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,27 +18,26 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     private Map<Integer, ClientInterface> clients;
     private Population population;
+    private final Object eventLock = new Object();
+    private Map<Integer, StrategyChangeEvent> strategyChangeEvents;
+    private StrategyProcessor strategyProcessor;
 
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
+        strategyChangeEvents = new HashMap<Integer, StrategyChangeEvent>();
+        strategyProcessor = new StrategyProcessor();
+        strategyProcessor.start();
     }
 
-    public synchronized void strategyChanged(
+    public void strategyChanged(
             final float[] newStrategy,
             final float[] targetStrategy,
             final Integer id) {
         if (FIRE.server.getState() == State.RUNNING_PERIOD) {
-            new Thread() {
-
-                @Override
-                public void run() {
-                    population.strategyChanged(
-                            newStrategy,
-                            targetStrategy,
-                            id,
-                            System.currentTimeMillis());
-                }
-            }.start();
+            synchronized (eventLock) {
+                StrategyChangeEvent newEvent = new StrategyChangeEvent(System.nanoTime(), id, newStrategy, targetStrategy);
+                strategyChangeEvents.put(id, newEvent);
+            }
         }
     }
 
@@ -59,7 +59,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void startPeriod(long periodStartTime) {
-        population.setPeriodStartTime(periodStartTime);
+        population.setPeriodStartTime();
         configureImpulses();
         configureSubperiods();
     }
@@ -85,6 +85,8 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public void tick(int secondsLeft) {
         if (FIRE.server.getConfig().subperiods == 0) {
             population.logTick(0, secondsLeft);
+            population.evaluate();
+            System.err.println(strategyChangeEvents.size());
         }
     }
 
@@ -159,5 +161,23 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public boolean register(int id, ClientInterface client) {
         clients.put(id, client);
         return true;
+    }
+
+    private class StrategyProcessor extends Thread {
+
+        @Override
+        public void run() {
+            while (true) {
+                synchronized (eventLock) {
+                    for (Integer id : strategyChangeEvents.keySet()) {
+                        StrategyChangeEvent event = strategyChangeEvents.get(id);
+                        if (event != null) {
+                            population.strategyChanged(event.newStrategy, event.targetStrategy, event.id);
+                            strategyChangeEvents.put(id, null);
+                        }
+                    }
+                }
+            }
+        }
     }
 }
