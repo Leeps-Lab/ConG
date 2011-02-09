@@ -9,6 +9,8 @@ import edu.ucsc.leeps.fire.server.ServerController.State;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -18,13 +20,12 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     private Map<Integer, ClientInterface> clients;
     private Population population;
-    private final Object eventLock = new Object();
-    private Map<Integer, StrategyChangeEvent> strategyChangeEvents;
+    private BlockingQueue<StrategyChangeEvent> strategyChangeEvents;
     private StrategyProcessor strategyProcessor;
 
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
-        strategyChangeEvents = new HashMap<Integer, StrategyChangeEvent>();
+        strategyChangeEvents = new LinkedBlockingQueue<StrategyChangeEvent>();
         strategyProcessor = new StrategyProcessor();
         strategyProcessor.start();
     }
@@ -34,10 +35,8 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             final float[] targetStrategy,
             final Integer id) {
         if (FIRE.server.getState() == State.RUNNING_PERIOD) {
-            synchronized (eventLock) {
-                StrategyChangeEvent newEvent = new StrategyChangeEvent(System.nanoTime(), id, newStrategy, targetStrategy);
-                strategyChangeEvents.put(id, newEvent);
-            }
+            StrategyChangeEvent newEvent = new StrategyChangeEvent(System.nanoTime(), id, newStrategy, targetStrategy);
+            strategyChangeEvents.add(newEvent);
         }
     }
 
@@ -86,7 +85,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         if (FIRE.server.getConfig().subperiods == 0) {
             population.logTick(0, secondsLeft);
             population.evaluate();
-            System.err.println(strategyChangeEvents.size());
         }
     }
 
@@ -145,8 +143,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public void newMessage(String message, int senderID) {
         for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
             ClientInterface client = entry.getValue();
-            client.newMessage(message, senderID);
-
         }
     }
 
@@ -168,14 +164,11 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         @Override
         public void run() {
             while (true) {
-                synchronized (eventLock) {
-                    for (Integer id : strategyChangeEvents.keySet()) {
-                        StrategyChangeEvent event = strategyChangeEvents.get(id);
-                        if (event != null) {
-                            population.strategyChanged(event.newStrategy, event.targetStrategy, event.id);
-                            strategyChangeEvents.put(id, null);
-                        }
-                    }
+                try {
+                    StrategyChangeEvent event = strategyChangeEvents.take();
+                    population.strategyChanged(event.newStrategy, event.targetStrategy, event.id);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
                 }
             }
         }

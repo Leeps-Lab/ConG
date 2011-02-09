@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -24,15 +26,24 @@ public class Population implements Serializable {
     private Map<Integer, Tuple> tupleMap;
     private Map<Integer, Float> subperiodPayoffs;
     private TickEvent tick = new TickEvent();
+    private Map<Integer, BlockingQueue<StrategyUpdateEvent>> strategyUpdateEvents;
+    private Map<Integer, StrategyUpdateProcessor> strategyUpdateProcessors;
 
     public Population() {
         tuples = new HashSet<Tuple>();
         tupleMap = new HashMap<Integer, Tuple>();
         subperiodPayoffs = new HashMap<Integer, Float>();
+        strategyUpdateEvents = new HashMap<Integer, BlockingQueue<StrategyUpdateEvent>>();
+        strategyUpdateProcessors = new HashMap<Integer, StrategyUpdateProcessor>();
     }
 
     public void configure(Map<Integer, ClientInterface> members) {
         this.members = members;
+        for (int member : members.keySet()) {
+            strategyUpdateEvents.put(member, new LinkedBlockingQueue<StrategyUpdateEvent>());
+            strategyUpdateProcessors.put(member, new StrategyUpdateProcessor(strategyUpdateEvents.get(member)));
+            strategyUpdateProcessors.get(member).start();
+        }
         // fixme: better way of doing this. config can auto-configure some parts?
         if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction
                 && FIRE.server.getConfig().counterpartPayoffFunction != null) {
@@ -155,7 +166,9 @@ public class Population implements Serializable {
         public void update(int changed, float[] strategy, float[] target) {
             if (FIRE.server.getConfig().subperiods == 0) {
                 evaluate();
-                match.evaluate();
+                if (this != match) {
+                    match.evaluate();
+                }
             }
             strategies.put(changed, strategy);
             targets.put(changed, target);
@@ -165,23 +178,11 @@ public class Population implements Serializable {
         }
 
         public void update() {
-            for (final int member : members) {
-                new Thread() {
-
-                    @Override
-                    public void run() {
-                        Population.this.members.get(member).setStrategies(strategies);
-                    }
-                }.start();
+            for (int member : members) {
+                strategyUpdateEvents.get(member).add(new StrategyUpdateEvent(member, strategies, null));
             }
-            for (final int member : match.members) {
-                new Thread() {
-
-                    @Override
-                    public void run() {
-                        Population.this.members.get(member).setMatchStrategies(strategies);
-                    }
-                }.start();
+            for (int member : match.members) {
+                strategyUpdateEvents.get(member).add(new StrategyUpdateEvent(member, null, strategies));
             }
         }
 
@@ -189,8 +190,10 @@ public class Population implements Serializable {
             long timestamp = System.nanoTime();
             float percent = (timestamp - periodStartTime) / (FIRE.server.getConfig().length * 1000000000f);
             float percentElapsed = (timestamp - evalTime) / (FIRE.server.getConfig().length * 1000000000f);
-            evaluate(percent, percentElapsed);
-            evalTime = timestamp;
+            if (percentElapsed > 0.01) {
+                evaluate(percent, percentElapsed);
+                evalTime = timestamp;
+            }
         }
 
         public void evaluate(float percent, float percentElapsed) {
@@ -525,4 +528,42 @@ public class Population implements Serializable {
     }
     }
      */
+
+    private class StrategyUpdateEvent {
+
+        public int id;
+        public Map<Integer, float[]> strategies;
+        public Map<Integer, float[]> matchStrategies;
+
+        public StrategyUpdateEvent(int id, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies) {
+            this.id = id;
+            this.strategies = strategies;
+            this.matchStrategies = matchStrategies;
+        }
+    }
+
+    private class StrategyUpdateProcessor extends Thread {
+
+        private BlockingQueue<StrategyUpdateEvent> queue;
+
+        public StrategyUpdateProcessor(BlockingQueue<StrategyUpdateEvent> queue) {
+            this.queue = queue;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    StrategyUpdateEvent event = queue.take();
+                    if (event.strategies != null) {
+                        members.get(event.id).setStrategies(event.strategies);
+                    } else {
+                        members.get(event.id).setMatchStrategies(event.matchStrategies);
+                    }
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
 }

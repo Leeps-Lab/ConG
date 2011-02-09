@@ -1,0 +1,3 @@
+"period","paid","length","subperiods","percentChangePerSecond","numTuples","excludeSelf","payoffFunction","name","A","min","max","strategySelectionDisplayType","showPayoffTimeAxisLabels"
+1,"TRUE",120,0,1,1,TRUE,"publicGoods","pf",2,0,300,"heatmapSingle","TRUE"
+2,"TRUE",120,0,1,1,TRUE,"publicGoods","pf",2,0,300,"heatmapSingle","TRUE"
