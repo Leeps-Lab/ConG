@@ -141,9 +141,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void newMessage(String message, int senderID) {
-        for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
-            ClientInterface client = entry.getValue();
-        }
+        population.newMessage(message, senderID);
     }
 
     public void unregister(int id) {

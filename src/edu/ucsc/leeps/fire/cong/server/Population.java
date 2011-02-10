@@ -415,8 +415,8 @@ public class Population implements Serializable {
                 config.playersInTuple = tuple1.match.members.size();
             }
         }
-        assert (randomMembers.size() == 0);
-        assert (randomTuples.size() == 0);
+        assert (randomMembers.isEmpty());
+        assert (randomTuples.isEmpty());
     }
 
     private void setInitialStrategies() {
@@ -496,6 +496,14 @@ public class Population implements Serializable {
             match.match = tuple;
         }
         // does setWorlds() need to be called after a shuffle?
+    }
+
+    public void newMessage (String message, int senderID) {
+        Tuple tuple = tupleMap.get(senderID);
+        for (int id : tuple.members) {
+            ClientInterface client = members.get(id);
+            client.newMessage(message, senderID);
+        }
     }
     /*
     private void setWorlds() {
