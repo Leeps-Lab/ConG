@@ -31,6 +31,7 @@ public class Chatroom extends JPanel implements Configurable<Config>{
         frame.add(this);
         frame.setBounds(f.getWidth(), 0, 300, f.getHeight());
         frame.setVisible(true);
+        FIRE.client.addConfigListener(this);
     }
 
     /** This method is called from within the constructor to
