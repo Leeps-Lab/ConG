@@ -54,6 +54,7 @@ public class Config extends BaseConfig {
     public boolean probPayoffs;
     public boolean showHeatmap;
     public boolean trajectory;
+    public ChatMenu menu;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -64,6 +65,7 @@ public class Config extends BaseConfig {
     public static final Class threshold = ThresholdPayoffFunction.class;
     public static final Class shockZone = ShockZone.class;
     public static final Class decisionDelay = DecisionDelay.class;
+    public static final Class chatMenu = ChatMenu.class;
     // per-client
     public float[] initialStrategy;
     public int matchID;
@@ -155,6 +157,15 @@ public class Config extends BaseConfig {
         strategyUpdateMillis = 100;
         probPayoffs = false;
         trajectory = false;
+        menu = new ChatMenu();
+        menu.m1 = "asdf";
+        menu.m2 = "qwer";
+        menu.m3 = "";
+        menu.m4 = "";
+        menu.m5 = "";
+        menu.m6 = "";
+        menu.m7 = "";
+        menu.m8 = "";
     }
     public static final Color[] colors = new Color[]{
         new Color(7, 226, 0),

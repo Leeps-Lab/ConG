@@ -3,6 +3,7 @@ package edu.ucsc.leeps.fire.cong.server;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.logging.MessageEvent;
 import edu.ucsc.leeps.fire.cong.logging.TickEvent;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class Population implements Serializable {
     private TickEvent tick = new TickEvent();
     private Map<Integer, BlockingQueue<StrategyUpdateEvent>> strategyUpdateEvents;
     private Map<Integer, StrategyUpdateProcessor> strategyUpdateProcessors;
+    private MessageEvent mEvent;
 
     public Population() {
         tuples = new HashSet<Tuple>();
@@ -504,6 +506,11 @@ public class Population implements Serializable {
             ClientInterface client = members.get(id);
             client.newMessage(message, senderID);
         }
+        mEvent.period = FIRE.server.getConfig().period;
+        mEvent.timestamp = (int) System.currentTimeMillis();
+        mEvent.subject = senderID;
+        mEvent.tuple = tuple.population;
+        mEvent.text = message;
     }
     /*
     private void setWorlds() {

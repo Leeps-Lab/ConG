@@ -11,7 +11,9 @@
 
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import java.awt.Frame;
 import java.awt.event.KeyEvent;
 import javax.swing.JPanel;
@@ -20,7 +22,7 @@ import javax.swing.JPanel;
  *
  * @author alexlou
  */
-public class Chatroom extends JPanel{
+public class Chatroom extends JPanel implements Configurable<Config>{
 
     /** Creates new form Chat-room */
     public Chatroom(Frame f) {
@@ -40,11 +42,30 @@ public class Chatroom extends JPanel{
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        sendButton = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        inputField = new javax.swing.JTextArea();
         jScrollPane1 = new javax.swing.JScrollPane();
         outputField = new javax.swing.JTextArea();
+        textInputPanel = new javax.swing.JPanel();
+        sendButton = new javax.swing.JButton();
+        menuInputPanel = new javax.swing.JPanel();
+        m1 = new javax.swing.JButton();
+        m3 = new javax.swing.JButton();
+        m2 = new javax.swing.JButton();
+        m4 = new javax.swing.JButton();
+        m5 = new javax.swing.JButton();
+        m6 = new javax.swing.JButton();
+        m7 = new javax.swing.JButton();
+        m8 = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        inputField = new javax.swing.JTextArea();
+
+        outputField.setColumns(20);
+        outputField.setEditable(false);
+        outputField.setLineWrap(true);
+        outputField.setRows(5);
+        outputField.setWrapStyleWord(true);
+        jScrollPane1.setViewportView(outputField);
+
+        textInputPanel.setLayout(new javax.swing.BoxLayout(textInputPanel, javax.swing.BoxLayout.LINE_AXIS));
 
         sendButton.setText("Send");
         sendButton.addActionListener(new java.awt.event.ActionListener() {
@@ -52,6 +73,102 @@ public class Chatroom extends JPanel{
                 sendButtonActionPerformed(evt);
             }
         });
+        textInputPanel.add(sendButton);
+
+        m1.setText("jButton1");
+        m1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m1ActionPerformed(evt);
+            }
+        });
+
+        m3.setText("jButton3");
+        m3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m3ActionPerformed(evt);
+            }
+        });
+
+        m2.setText("jButton2");
+        m2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m2ActionPerformed(evt);
+            }
+        });
+
+        m4.setText("jButton4");
+        m4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m4ActionPerformed(evt);
+            }
+        });
+
+        m5.setText("jButton5");
+        m5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m5ActionPerformed(evt);
+            }
+        });
+
+        m6.setText("jButton6");
+        m6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m6ActionPerformed(evt);
+            }
+        });
+
+        m7.setText("jButton7");
+        m7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m7ActionPerformed(evt);
+            }
+        });
+
+        m8.setText("jButton8");
+        m8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m8ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout menuInputPanelLayout = new javax.swing.GroupLayout(menuInputPanel);
+        menuInputPanel.setLayout(menuInputPanelLayout);
+        menuInputPanelLayout.setHorizontalGroup(
+            menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(menuInputPanelLayout.createSequentialGroup()
+                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(m5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(m1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(m6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(m2, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(m7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(m3, javax.swing.GroupLayout.DEFAULT_SIZE, 109, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(m8, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
+                    .addComponent(m4, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)))
+        );
+        menuInputPanelLayout.setVerticalGroup(
+            menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, menuInputPanelLayout.createSequentialGroup()
+                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(m4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
+                    .addComponent(m3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
+                    .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(m1, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
+                        .addComponent(m2, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)))
+                .addGap(5, 5, 5)
+                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(m6, javax.swing.GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
+                    .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(m8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(m7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(m5, javax.swing.GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE))))
+        );
 
         inputField.setColumns(40);
         inputField.setLineWrap(true);
@@ -64,32 +181,30 @@ public class Chatroom extends JPanel{
         });
         jScrollPane2.setViewportView(inputField);
 
-        outputField.setColumns(20);
-        outputField.setEditable(false);
-        outputField.setLineWrap(true);
-        outputField.setRows(5);
-        outputField.setWrapStyleWord(true);
-        jScrollPane1.setViewportView(outputField);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(2, 2, 2)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 418, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sendButton))
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
+                .addComponent(textInputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(menuInputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(2, 2, 2))
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 471, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 343, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(textInputPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sendButton, javax.swing.GroupLayout.DEFAULT_SIZE, 53, Short.MAX_VALUE)))
+                .addComponent(menuInputPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -103,13 +218,63 @@ public class Chatroom extends JPanel{
         }
     }//GEN-LAST:event_inputFieldKeyReleased
 
+    private void m1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m1ActionPerformed
+        inputField.setText(m1.getText());
+        sendMessage();
+}//GEN-LAST:event_m1ActionPerformed
+
+    private void m2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m2ActionPerformed
+        inputField.setText(m2.getText());
+        sendMessage();
+    }//GEN-LAST:event_m2ActionPerformed
+
+    private void m3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m3ActionPerformed
+        inputField.setText(m3.getText());
+        sendMessage();
+    }//GEN-LAST:event_m3ActionPerformed
+
+    private void m4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m4ActionPerformed
+        inputField.setText(m4.getText());
+        sendMessage();
+    }//GEN-LAST:event_m4ActionPerformed
+
+    private void m5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m5ActionPerformed
+        inputField.setText(m5.getText());
+        sendMessage();
+    }//GEN-LAST:event_m5ActionPerformed
+
+    private void m6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m6ActionPerformed
+        inputField.setText(m6.getText());
+        sendMessage();
+    }//GEN-LAST:event_m6ActionPerformed
+
+    private void m7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m7ActionPerformed
+        inputField.setText(m7.getText());
+        sendMessage();
+    }//GEN-LAST:event_m7ActionPerformed
+
+    private void m8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m8ActionPerformed
+        inputField.setText(m8.getText());
+        sendMessage();
+    }//GEN-LAST:event_m8ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea inputField;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JButton m1;
+    private javax.swing.JButton m2;
+    private javax.swing.JButton m3;
+    private javax.swing.JButton m4;
+    private javax.swing.JButton m5;
+    private javax.swing.JButton m6;
+    private javax.swing.JButton m7;
+    private javax.swing.JButton m8;
+    private javax.swing.JPanel menuInputPanel;
     private javax.swing.JTextArea outputField;
     private javax.swing.JButton sendButton;
+    private javax.swing.JPanel textInputPanel;
     // End of variables declaration//GEN-END:variables
 
     /**
@@ -133,5 +298,22 @@ public class Chatroom extends JPanel{
             outputField.append("SERVER: " + message);
         }
         outputField.append("Player " + senderID + ": " + message);
+    }
+
+    public void configChanged(Config config) {
+        if (FIRE.client.getConfig().menu.m1.equals("")) {
+            menuInputPanel.setVisible(false);
+        }
+        else {
+            textInputPanel.setVisible(false);
+            m1.setText(FIRE.client.getConfig().menu.m1);
+            m2.setText(FIRE.client.getConfig().menu.m2);
+            m3.setText(FIRE.client.getConfig().menu.m3);
+            m4.setText(FIRE.client.getConfig().menu.m4);
+            m5.setText(FIRE.client.getConfig().menu.m5);
+            m6.setText(FIRE.client.getConfig().menu.m6);
+            m7.setText(FIRE.client.getConfig().menu.m7);
+            m8.setText(FIRE.client.getConfig().menu.m8);
+        }
     }
 }
