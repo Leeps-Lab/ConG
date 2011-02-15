@@ -27,6 +27,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     private boolean enabled;
     private HeatmapHelper heatmap;
     private Client client;
+    private Config config;
     // Markers for droplines
     private Marker rDrop, pDrop, sDrop;
     private Marker hoverRDrop, hoverPDrop, hoverSDrop;
@@ -142,7 +143,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             return;
         }
 
-        if (applet.frameCount % applet.framesPerUpdate == 0 && FIRE.client.getConfig().subperiods == 0) {
+        if (applet.frameCount % applet.framesPerUpdate == 0 && config.subperiods == 0) {
             updateHeatmap();
         }
 
@@ -152,7 +153,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         applet.translate(origin.x, origin.y);
 
         float mouseX = applet.mouseX - origin.x;
-        float mouseY = applet.mouseY - origin.y;
+        float mouseY = applet.mouseY - origin.y + 1;
 
         applet.stroke(0);
         applet.strokeWeight(2);
@@ -163,7 +164,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         paper.draw(applet);
         scissors.draw(applet);
 
-        if (FIRE.client.getConfig().showMatrix) {
+        if (config.showMatrix) {
             drawMatrix(applet);
         }
 
@@ -234,8 +235,6 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             hoverSDrop.draw(applet);
         }
 
-        hover.draw(applet);
-
         if (target.visible && Client.state.target != null) {
             target.setLabel(PayoffFunction.Utilities.getPayoff(Client.state.target));
             adjustLabels(Client.state.target, target, null, null);
@@ -270,15 +269,26 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         rDrop.draw(applet);
         pDrop.draw(applet);
         sDrop.draw(applet);
-        target.draw(applet);
-        current.draw(applet);
-        opponent.draw(applet);
+
+        if (config.subperiods != 0 && Client.state.subperiod == 0) {
+            target.setLabel("");
+            current.setLabel("");
+            hover.setLabel("");
+            target.draw(applet);
+            current.draw(applet);
+            hover.draw(applet);
+        } else {
+            target.draw(applet);
+            current.draw(applet);
+            hover.draw(applet);
+            opponent.draw(applet);
+        }
 
         applet.popMatrix();
     }
 
     private void drawMatrix(Client applet) {
-        ThreeStrategyPayoffFunction pf = ((ThreeStrategyPayoffFunction) FIRE.client.getConfig().payoffFunction);
+        ThreeStrategyPayoffFunction pf = ((ThreeStrategyPayoffFunction) config.payoffFunction);
         float[][] table = new float[][]{
             {pf.Rr, pf.Rp, pf.Rs},
             {pf.Pr, pf.Pp, pf.Ps},
@@ -544,6 +554,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     }
 
     public void configChanged(Config config) {
+        this.config = config;
         if (config.mixedStrategySelection
                 && config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             rock.setLabel(config.shortRLabel);

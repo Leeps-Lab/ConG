@@ -44,6 +44,17 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         Map<Integer, ClientInterface> members = new HashMap<Integer, ClientInterface>();
         members.clear();
         members.putAll(clients);
+        Config config = FIRE.server.getConfig();
+        if (config.indefiniteEnd != null) {
+            if (config.subperiods != 0) {
+                int subperiodLength = config.subperiods;
+                int maxLength = config.indefiniteEnd.length(FIRE.server.getRandom());
+                config.subperiods = maxLength % subperiodLength;
+                config.length = config.subperiods * subperiodLength;
+            } else {
+                config.length = config.indefiniteEnd.length(FIRE.server.getRandom());
+            }
+        }
         population = new Population();
         population.configure(members);
     }

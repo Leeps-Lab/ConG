@@ -1,43 +1,53 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
+import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.config.Config;
 
 /**
  *
  * @author jpettit
  */
-public class Countdown extends Sprite {
+public class Countdown extends Sprite implements Configurable<Config> {
 
+    private Config config;
     private int secondsLeft;
 
     public Countdown(Sprite parent, int x, int y, Client embed) {
         super(parent, x, y, (int) embed.textWidth("Seconds Left: 00"), (int) (embed.textAscent() + embed.textDescent()));
         secondsLeft = 0;
+        FIRE.client.addConfigListener(this);
     }
 
-    /**
-     * Creates a string with the seconds left. Text is black. Aligns text to the
-     * left. Draws text at the origin of applet.
-     * @param applet Countdown applet.
-     */
+    public void configChanged(Config config) {
+        this.config = config;
+    }
+
     @Override
     public void draw(Client applet) {
+        if (config == null) {
+            return;
+        }
         String s;
-        if (FIRE.client.getConfig().subperiods != 0) {
-            s = String.format("Subperiods Left: %d", FIRE.client.getConfig().subperiods - Client.state.subperiod);
+        if (config.indefiniteEnd == null) {
+            if (config.subperiods != 0) {
+                s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
+            } else {
+                s = String.format("Seconds Left: %d", secondsLeft);
+            }
         } else {
-            s = String.format("Seconds Left: %d", secondsLeft);
+            if (config.subperiods != 0) {
+                s = String.format("Subperiod: %d", Client.state.subperiod + 1);
+            } else {
+                s = String.format("Seconds Elapsed: %.0f", FIRE.client.getElapsedMillis() / 1000f);
+            }
         }
         applet.fill(0);
         applet.textAlign(Client.LEFT);
         applet.text(s, origin.x, origin.y);
     }
 
-    /**
-     * Uses secondsLeft to determine the amount of time in the period. 
-     * @param secondsLeft How many seconds remain in the period.
-     */
     public void setSecondsLeft(int secondsLeft) {
         this.secondsLeft = secondsLeft;
     }

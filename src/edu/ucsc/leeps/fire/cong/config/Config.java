@@ -38,6 +38,7 @@ public class Config extends BaseConfig {
     public boolean showRPSSliders;
     public ShockZone shock;
     public DecisionDelay initialDelay, delay;
+    public IndefiniteEnd indefiniteEnd;
     public float impulse;
     public float changeCost;
     public boolean showHeatmapLegend;
@@ -66,6 +67,7 @@ public class Config extends BaseConfig {
     public static final Class shockZone = ShockZone.class;
     public static final Class decisionDelay = DecisionDelay.class;
     public static final Class chatMenu = ChatMenu.class;
+    public static final Class uniform = IndefiniteEnd.Uniform.class;
     // per-client
     public float[] initialStrategy;
     public int matchID;

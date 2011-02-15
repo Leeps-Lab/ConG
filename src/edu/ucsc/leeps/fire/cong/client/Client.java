@@ -48,6 +48,7 @@ import processing.core.PFont;
 public class Client extends PApplet implements ClientInterface, FIREClientInterface, Configurable<Config> {
 
     public static boolean ALLOW_DEBUG = System.getProperty("fire.client.debug") != null;
+    public final static boolean USE_OPENGL = true;
     public static State state;
     public boolean debug;
     public int framesPerUpdate;
@@ -262,9 +263,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     @Override
     public void setup() {
-        boolean opengl = true;
         textMode(MODEL);
-        if (opengl) {
+        if (USE_OPENGL) {
             try {
                 size(INIT_WIDTH, INIT_HEIGHT - 40, OPENGL);
             } catch (GLException ex1) {

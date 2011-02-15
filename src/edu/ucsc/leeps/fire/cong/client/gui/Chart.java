@@ -44,37 +44,12 @@ public class Chart extends Sprite implements Configurable<Config> {
     private int subperiod;
     private final Object lock = new Object();
 
-    /**
-     *A list of modes. Payoff, two-strategy and three-strategy. 
-     */
     public enum Mode {
 
         Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy,
     };
     private Mode mode;
 
-    /**
-     * Creates the chart. Scales the height and margin. Shows line depicting
-     * actual payoff for subject and subject's counterpart.
-     *
-     * For 2 strategy payoff, shows actual and future payoffs for your and
-     * counterpart's strategy, Using different combinations: A, B, Aa ,Ab, Ba, Bb.
-     *
-     * For a 3 strategy, shows actual RPS payoffs. Shows future payoffs for
-     * various combinations of R, P, and S. Shows your R, P and S over time, and
-     * shows counterpart's R, P and S over time.
-     *
-     * Shows threshold and draws a simplex. Adds a configListener.
-     * 
-     * @param parent
-     * @param x x-coordinate
-     * @param y y-coordinate
-     * @param width width of display
-     * @param height height of display
-     * @param simplex simplex is selected for the strategy changer-- 3 strategies used
-     * @param mode mode used
-     * @param strategyChanger
-     */
     public Chart(Sprite parent, int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode) {
         super(parent, x, y, width, height);
 
@@ -255,19 +230,6 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
-    /**
-     * Draw chart. Embed the applet in the corner. Translate the origin of the
-     * applet to x and y.
-     *
-     * If the config is not null, draw shockZone applet. When using the two
-     * strategy payoff function, if the mode is set to payoff, Draw two strategy
-     * payoff lines. Otherwise, if the mode is TwoStrategy, use  drawTwoStrategyLines.
-     * Use threshold. If the config of the payoff function is an instance of
-     * ThresholdPayoffFunction, have no borders and fill with a transparent
-     * yellow. Embed applet in corner, 
-     *
-     * @param applet a sub-program to be run in Cong.
-     */
     @Override
     public void draw(Client applet) {
         if (config == null || !visible) {
@@ -428,32 +390,6 @@ public class Chart extends Sprite implements Configurable<Config> {
         marginalCosts.get(Client.state.id).addPayoffPoint(percent, config.marginalCost);
     }
 
-    /**
-     * Sets strategy at end of period. In the event that a two strategy payoff
-     * function is being used, sets subject's strategy as subperiodStrategy, and
-     * sets counterpart's strategy as counterpartSubperiodStrategy. If a three
-     * strategy payoff function is used, sets RPS as the first, second and third
-     * elements of subperiodStrategy, respectively. Similarly, the rps elements
-     * are set as the first, second and third elements of the
-     * counterpartSubperiodStrategy.
-     *
-     * Calculates the percent start using the quotient if one less than the
-     * subperiod and the total number of subperiods. Calculates the percent end
-     * using the quotient of the subperiod and the total number of subperiods.
-     * The current percent is called tmpCurrentPercent.
-     *
-     * Your current payoff is based on the payoffFunction using tmpCurrentPercent,
-     * subperiodStrategy, and counterpartSubperiodStrategy. Counterpart's payoff
-     * is determined by counterpartPayoffFunction, using tmpCurrentPercent,
-     * counterpartSubperiodStrategy, and subperiodStrategy.
-     *
-     * Update lines using percent start and percent end. Sets current percent to
-     * tmpCurrentPercent.
-     *
-     * @param subperiod number of subperiod.
-     * @param subperiodStrategy strategy selected by subject for subperiod
-     * @param counterpartSubperiodStrategy counterpart's strategy for subperiod.
-     */
     public void endSubperiod(int subperiod) {
         this.subperiod = subperiod;
         float percentStart = (float) (subperiod - 1) / FIRE.client.getConfig().subperiods;
@@ -505,8 +441,7 @@ public class Chart extends Sprite implements Configurable<Config> {
             for (float percent = 0f; percent < 1.0f; percent += .01f) {
                 threshold.setPoint(
                         Math.round(threshold.width * percent),
-                        Math.round(threshold.height * (1 - ((ThresholdPayoffFunction) config.payoffFunction).threshold)),
-                        true);
+                        Math.round(threshold.height * (1 - ((ThresholdPayoffFunction) config.payoffFunction).threshold)));
             }
             threshold.visible = true;
         } else {

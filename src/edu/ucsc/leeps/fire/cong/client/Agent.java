@@ -2,7 +2,6 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
@@ -14,6 +13,8 @@ import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
  */
 public class Agent extends Thread {
 
+    private final static int MIN_SLEEP = 250;
+    private final static int AVG_SLEEP = 250;
     public volatile boolean running;
     public volatile boolean paused;
 
@@ -101,7 +102,7 @@ public class Agent extends Thread {
             }
         }
         try {
-            Thread.sleep(1000 + FIRE.client.getRandom().nextInt(1000));
+            Thread.sleep(MIN_SLEEP + FIRE.client.getRandom().nextInt(AVG_SLEEP));
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
