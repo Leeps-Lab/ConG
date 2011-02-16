@@ -48,8 +48,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         if (config.indefiniteEnd != null) {
             if (config.subperiods != 0) {
                 int subperiodLength = config.subperiods;
-                int maxLength = config.indefiniteEnd.length(FIRE.server.getRandom());
-                config.subperiods = maxLength % subperiodLength;
+                config.subperiods = config.indefiniteEnd.length(FIRE.server.getRandom());
                 config.length = config.subperiods * subperiodLength;
             } else {
                 config.length = config.indefiniteEnd.length(FIRE.server.getRandom());

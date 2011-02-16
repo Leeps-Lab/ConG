@@ -1,36 +1,28 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/*
  * Chatroom.java
  *
  * Created on Jul 7, 2010, 1:01:33 PM
  */
-
 package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import java.awt.Frame;
 import java.awt.event.KeyEvent;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
  *
  * @author alexlou
  */
-public class Chatroom extends JPanel implements Configurable<Config>{
+public class Chatroom extends JPanel implements Configurable<Config> {
 
-    /** Creates new form Chat-room */
-    public Chatroom(Frame f) {
+    private JFrame frame;
+
+    public Chatroom(JFrame frame) {
         initComponents();
-        Frame frame = new Frame();
-        frame.add(this);
-        frame.setBounds(f.getWidth(), 0, 300, f.getHeight());
-        frame.setVisible(true);
+        this.frame = frame;
         FIRE.client.addConfigListener(this);
     }
 
@@ -42,6 +34,7 @@ public class Chatroom extends JPanel implements Configurable<Config>{
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
         jScrollPane1 = new javax.swing.JScrollPane();
         outputField = new javax.swing.JTextArea();
@@ -59,12 +52,27 @@ public class Chatroom extends JPanel implements Configurable<Config>{
         jScrollPane2 = new javax.swing.JScrollPane();
         inputField = new javax.swing.JTextArea();
 
+        setMaximumSize(new java.awt.Dimension(300, 300));
+        setMinimumSize(new java.awt.Dimension(300, 300));
+        setPreferredSize(new java.awt.Dimension(300, 300));
+        setLayout(new java.awt.GridBagLayout());
+
         outputField.setColumns(20);
         outputField.setEditable(false);
         outputField.setLineWrap(true);
         outputField.setRows(5);
         outputField.setWrapStyleWord(true);
         jScrollPane1.setViewportView(outputField);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        add(jScrollPane1, gridBagConstraints);
 
         textInputPanel.setLayout(new javax.swing.BoxLayout(textInputPanel, javax.swing.BoxLayout.LINE_AXIS));
 
@@ -76,12 +84,24 @@ public class Chatroom extends JPanel implements Configurable<Config>{
         });
         textInputPanel.add(sendButton);
 
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        add(textInputPanel, gridBagConstraints);
+
+        menuInputPanel.setLayout(new java.awt.GridBagLayout());
+
         m1.setText("jButton1");
         m1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 m1ActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m1, gridBagConstraints);
 
         m3.setText("jButton3");
         m3.addActionListener(new java.awt.event.ActionListener() {
@@ -89,6 +109,11 @@ public class Chatroom extends JPanel implements Configurable<Config>{
                 m3ActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m3, gridBagConstraints);
 
         m2.setText("jButton2");
         m2.addActionListener(new java.awt.event.ActionListener() {
@@ -96,6 +121,11 @@ public class Chatroom extends JPanel implements Configurable<Config>{
                 m2ActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m2, gridBagConstraints);
 
         m4.setText("jButton4");
         m4.addActionListener(new java.awt.event.ActionListener() {
@@ -103,6 +133,11 @@ public class Chatroom extends JPanel implements Configurable<Config>{
                 m4ActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m4, gridBagConstraints);
 
         m5.setText("jButton5");
         m5.addActionListener(new java.awt.event.ActionListener() {
@@ -110,6 +145,11 @@ public class Chatroom extends JPanel implements Configurable<Config>{
                 m5ActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m5, gridBagConstraints);
 
         m6.setText("jButton6");
         m6.addActionListener(new java.awt.event.ActionListener() {
@@ -117,6 +157,11 @@ public class Chatroom extends JPanel implements Configurable<Config>{
                 m6ActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m6, gridBagConstraints);
 
         m7.setText("jButton7");
         m7.addActionListener(new java.awt.event.ActionListener() {
@@ -124,6 +169,11 @@ public class Chatroom extends JPanel implements Configurable<Config>{
                 m7ActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m7, gridBagConstraints);
 
         m8.setText("jButton8");
         m8.addActionListener(new java.awt.event.ActionListener() {
@@ -131,49 +181,22 @@ public class Chatroom extends JPanel implements Configurable<Config>{
                 m8ActionPerformed(evt);
             }
         });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m8, gridBagConstraints);
 
-        javax.swing.GroupLayout menuInputPanelLayout = new javax.swing.GroupLayout(menuInputPanel);
-        menuInputPanel.setLayout(menuInputPanelLayout);
-        menuInputPanelLayout.setHorizontalGroup(
-            menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(menuInputPanelLayout.createSequentialGroup()
-                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(m5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(m1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(m6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(m2, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(m7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(m3, javax.swing.GroupLayout.DEFAULT_SIZE, 109, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(m8, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)
-                    .addComponent(m4, javax.swing.GroupLayout.DEFAULT_SIZE, 119, Short.MAX_VALUE)))
-        );
-        menuInputPanelLayout.setVerticalGroup(
-            menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, menuInputPanelLayout.createSequentialGroup()
-                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(m4, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
-                    .addComponent(m3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
-                    .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(m1, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)
-                        .addComponent(m2, javax.swing.GroupLayout.DEFAULT_SIZE, 47, Short.MAX_VALUE)))
-                .addGap(5, 5, 5)
-                .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(m6, javax.swing.GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
-                    .addGroup(menuInputPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(m8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(m7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(m5, javax.swing.GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE))))
-        );
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        add(menuInputPanel, gridBagConstraints);
 
         inputField.setColumns(40);
         inputField.setLineWrap(true);
-        inputField.setRows(3);
+        inputField.setRows(1);
         inputField.setWrapStyleWord(true);
         inputField.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -182,31 +205,13 @@ public class Chatroom extends JPanel implements Configurable<Config>{
         });
         jScrollPane2.setViewportView(inputField);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 418, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(textInputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(menuInputPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(2, 2, 2))
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 471, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(textInputPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(menuInputPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 1;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 0.1;
+        add(jScrollPane2, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
 
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
@@ -214,7 +219,7 @@ public class Chatroom extends JPanel implements Configurable<Config>{
     }//GEN-LAST:event_sendButtonActionPerformed
 
     private void inputFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inputFieldKeyReleased
-        if(evt.getKeyCode() == KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
             sendMessage();
         }
     }//GEN-LAST:event_inputFieldKeyReleased
@@ -258,8 +263,6 @@ public class Chatroom extends JPanel implements Configurable<Config>{
         inputField.setText(m8.getText());
         sendMessage();
     }//GEN-LAST:event_m8ActionPerformed
-
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea inputField;
     private javax.swing.JScrollPane jScrollPane1;
@@ -283,7 +286,7 @@ public class Chatroom extends JPanel implements Configurable<Config>{
      * user ID. 
      */
     public void sendMessage() {
-        String message = inputField.getText();
+        String message = inputField.getText().trim();
         inputField.setText("");
         FIRE.client.getServer().newMessage(message, FIRE.client.getID());
     }
@@ -296,25 +299,76 @@ public class Chatroom extends JPanel implements Configurable<Config>{
      */
     public void newMessage(String message, int senderID) {
         if (senderID == -1) {
-            outputField.append("SERVER: " + message);
+            outputField.append("SERVER: " + message + "\n");
         }
-        outputField.append("Player " + senderID + ": " + message);
+        outputField.append("Player " + senderID + ": " + message + "\n");
     }
 
-    public void configChanged(Config config) {
-        if (FIRE.client.getConfig().menu.m1.equals("")) {
+    public void configChanged(final Config config) {
+        new Thread() {
+
+            @Override
+            public void run() {
+                if (config.chatroom) {
+                    frame.pack();
+                } else {
+                    frame.dispose();
+                }
+                frame.setVisible(config.chatroom);
+            }
+        }.start();
+        if (config.menu.m1.equals("")) {
             menuInputPanel.setVisible(false);
-        }
-        else {
+        } else {
             textInputPanel.setVisible(false);
-            m1.setText(FIRE.client.getConfig().menu.m1);
-            m2.setText(FIRE.client.getConfig().menu.m2);
-            m3.setText(FIRE.client.getConfig().menu.m3);
-            m4.setText(FIRE.client.getConfig().menu.m4);
-            m5.setText(FIRE.client.getConfig().menu.m5);
-            m6.setText(FIRE.client.getConfig().menu.m6);
-            m7.setText(FIRE.client.getConfig().menu.m7);
-            m8.setText(FIRE.client.getConfig().menu.m8);
+            if (config.menu.m1 == null) {
+                m1.setVisible(false);
+            } else {
+                m1.setVisible(true);
+                m1.setText(config.menu.m1);
+            }
+            if (config.menu.m2 == null) {
+                m2.setVisible(false);
+            } else {
+                m2.setVisible(true);
+                m2.setText(config.menu.m2);
+            }
+            if (config.menu.m3 == null) {
+                m3.setVisible(false);
+            } else {
+                m3.setVisible(true);
+                m3.setText(config.menu.m3);
+            }
+            if (config.menu.m4 == null) {
+                m4.setVisible(false);
+            } else {
+                m4.setVisible(true);
+                m4.setText(config.menu.m4);
+            }
+            if (config.menu.m5 == null) {
+                m5.setVisible(false);
+            } else {
+                m5.setVisible(true);
+                m5.setText(config.menu.m5);
+            }
+            if (config.menu.m6 == null) {
+                m6.setVisible(false);
+            } else {
+                m6.setVisible(true);
+                m6.setText(config.menu.m6);
+            }
+            if (config.menu.m7 == null) {
+                m7.setVisible(false);
+            } else {
+                m7.setVisible(true);
+                m7.setText(config.menu.m7);
+            }
+            if (config.menu.m8 == null) {
+                m8.setVisible(false);
+            } else {
+                m8.setVisible(true);
+                m8.setText(config.menu.m8);
+            }
         }
     }
 }

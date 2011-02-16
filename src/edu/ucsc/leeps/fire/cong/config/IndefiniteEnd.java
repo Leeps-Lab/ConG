@@ -7,11 +7,14 @@ import java.util.Random;
  *
  * @author jpettit
  */
-public interface IndefiniteEnd extends Serializable {
+public abstract class IndefiniteEnd implements Serializable {
 
-    public int length(Random random);
+    public int secondsToDisplay = 60;
+    public float percentToDisplay = 0.5f;
 
-    public class Uniform implements IndefiniteEnd {
+    public abstract int length(Random random);
+
+    public static class Uniform extends IndefiniteEnd {
 
         public int max;
 

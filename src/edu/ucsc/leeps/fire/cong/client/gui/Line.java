@@ -22,6 +22,7 @@ public class Line extends Sprite implements Serializable, Configurable<Config> {
     private transient ArrayList<Integer> ypoints;
     private transient int xMax;
     private transient int maxWidth;
+    private transient Config config;
     private transient float minPayoff;
     private transient float maxPayoff;
 
@@ -50,12 +51,13 @@ public class Line extends Sprite implements Serializable, Configurable<Config> {
     }
 
     public void configChanged(Config config) {
+        this.config = config;
         maxPayoff = config.payoffFunction.getMax();
         minPayoff = config.payoffFunction.getMin();
         if (config.indefiniteEnd != null) {
-            maxWidth = (int) (0.75f * width);
+            maxWidth = (int) (config.indefiniteEnd.percentToDisplay * width);
         } else {
-            maxWidth = Integer.MAX_VALUE;
+            maxWidth = width;
         }
     }
 
@@ -148,12 +150,20 @@ public class Line extends Sprite implements Serializable, Configurable<Config> {
     }
 
     public void addPayoffPoint(float x, float y) {
+        if (config.indefiniteEnd != null) {
+            x = (x * config.length)
+                    / (config.indefiniteEnd.secondsToDisplay / config.indefiniteEnd.percentToDisplay);
+        }
         setPoint(
                 Math.round(width * x),
                 Math.round(height * (1 - ((y - minPayoff) / (maxPayoff - minPayoff)))));
     }
 
     public void addStrategyPoint(float x, float y) {
+        if (config.indefiniteEnd != null) {
+            x = (x * config.length)
+                    / (config.indefiniteEnd.secondsToDisplay / config.indefiniteEnd.percentToDisplay);
+        }
         setPoint(
                 Math.round(width * x),
                 Math.round(height * (1 - y)));

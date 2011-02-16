@@ -29,7 +29,7 @@ public class Population implements Serializable {
     private TickEvent tick = new TickEvent();
     private Map<Integer, BlockingQueue<StrategyUpdateEvent>> strategyUpdateEvents;
     private Map<Integer, StrategyUpdateProcessor> strategyUpdateProcessors;
-    private MessageEvent mEvent;
+    private MessageEvent mEvent = new MessageEvent();
 
     public Population() {
         tuples = new HashSet<Tuple>();

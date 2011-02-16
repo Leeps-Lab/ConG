@@ -170,7 +170,16 @@ public class Chart extends Sprite implements Configurable<Config> {
     private void drawPercentLine(Client applet) {
         applet.strokeWeight(2f);
         applet.stroke(116, 202, 200);
-        applet.line(Client.state.currentPercent * width, 0, Client.state.currentPercent * width, height);
+        if (config.indefiniteEnd != null) {
+            float x = (Client.state.currentPercent * config.length)
+                    / (config.indefiniteEnd.secondsToDisplay / config.indefiniteEnd.percentToDisplay);
+            if (x > config.indefiniteEnd.percentToDisplay) {
+                x = config.indefiniteEnd.percentToDisplay;
+            }
+            applet.line(x * width, 0, x * width, height);
+        } else {
+            applet.line(Client.state.currentPercent * width, 0, Client.state.currentPercent * width, height);
+        }
     }
 
     private void drawTwoStrategyLines(Client applet) {
@@ -202,6 +211,8 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
+    // TODO:
+    //  Work with indefinite end
     private void drawSubperiodInfo(Client applet) {
         if (config == null || config.subperiods == 0) {
             return;
@@ -209,24 +220,27 @@ public class Chart extends Sprite implements Configurable<Config> {
         // markers
         applet.strokeWeight(1f);
         applet.stroke(100, 100, 100);
-        float interval = 1f / (float) config.subperiods;
-        float offset = interval;
-        for (int i = 0; i < config.subperiods; ++i) {
-            applet.line(width * offset, 0, width * offset, height);
-            offset += interval;
-        }
-        // live strategy preview
-        if (Client.state.target != null
-                && (mode == Mode.TwoStrategy
-                || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction))
-                && config.mixedStrategySelection) {
-            int start = Math.round(subperiod * interval * width);
-            int end = Math.round((subperiod + 1) * interval * width);
-            int y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
-            for (int x = start; x < end; x++) {
-                applet.point(x, y);
-                applet.point(x, y + 1);
+        if (config.indefiniteEnd == null) {
+            float interval = 1f / (float) config.subperiods;
+            float offset = interval;
+            for (int i = 0; i < config.subperiods; ++i) {
+                applet.line(width * offset, 0, width * offset, height);
+                offset += interval;
             }
+            // live strategy preview
+            if (Client.state.target != null
+                    && (mode == Mode.TwoStrategy
+                    || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction))
+                    && config.mixedStrategySelection) {
+                int start = Math.round(subperiod * interval * width);
+                int end = Math.round((subperiod + 1) * interval * width);
+                int y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
+                for (int x = start; x < end; x++) {
+                    applet.point(x, y);
+                    applet.point(x, y + 1);
+                }
+            }
+        } else {
         }
     }
 

@@ -67,8 +67,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     // heatmap legend off/on
     private ChartLegend legend;
     private StrategyChanger strategyChanger;
+    private JFrame chatFrame;
     private Chatroom chatroom;
-    private boolean chatroomEnabled = false;
     private boolean haveInitialStrategy;
     private int INIT_WIDTH, INIT_HEIGHT;
     public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
@@ -103,6 +103,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         debug = ALLOW_DEBUG;
         agent = new Agent(debug);
         agent.start();
+        chatFrame = new JFrame("Chat");
+        chatroom = new Chatroom(chatFrame);
+        chatFrame.add(chatroom);
+        chatFrame.setVisible(false);
     }
 
     public boolean haveInitialStrategy() {
@@ -178,11 +182,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             sChart.endSubperiod(0);
         }
         pointsDisplay.startPeriod();
-
-        if (FIRE.client.getConfig().chatroom && !chatroomEnabled) {
-            chatroomEnabled = true;
-            chatroom = new Chatroom(frame);
-        }
     }
 
     public void endPeriod() {

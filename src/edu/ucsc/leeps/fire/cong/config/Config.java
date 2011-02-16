@@ -159,15 +159,6 @@ public class Config extends BaseConfig {
         strategyUpdateMillis = 100;
         probPayoffs = false;
         trajectory = false;
-        menu = new ChatMenu();
-        menu.m1 = "asdf";
-        menu.m2 = "qwer";
-        menu.m3 = "";
-        menu.m4 = "";
-        menu.m5 = "";
-        menu.m6 = "";
-        menu.m7 = "";
-        menu.m8 = "";
     }
     public static final Color[] colors = new Color[]{
         new Color(7, 226, 0),
