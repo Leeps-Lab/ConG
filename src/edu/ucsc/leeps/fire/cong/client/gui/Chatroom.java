@@ -87,6 +87,9 @@ public class Chatroom extends JPanel implements Configurable<Config> {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 1;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+        gridBagConstraints.weightx = 0.1;
+        gridBagConstraints.weighty = 0.1;
         add(textInputPanel, gridBagConstraints);
 
         menuInputPanel.setLayout(new java.awt.GridBagLayout());
@@ -280,6 +283,14 @@ public class Chatroom extends JPanel implements Configurable<Config> {
     private javax.swing.JButton sendButton;
     private javax.swing.JPanel textInputPanel;
     // End of variables declaration//GEN-END:variables
+
+    public void addCharacter(char c) {
+        if (c == '\n') {
+            sendMessage();
+        } else {
+            inputField.setText(inputField.getText() + c);
+        }
+    }
 
     /**
      * Allows text to be inputted. Sets text to string, and sends message with

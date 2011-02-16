@@ -477,9 +477,14 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 frame.addWindowListener(windowListener);
             }
             resize = true;
-        } else if (ke.getKeyCode() == KeyEvent.VK_R) {
+        } else if (ke.isAltDown() && ke.getKeyCode() == KeyEvent.VK_R) {
             resize = true;
         }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent ke) {
+        chatroom.addCharacter(ke.getKeyChar());
     }
 
     private void setupFonts() {
