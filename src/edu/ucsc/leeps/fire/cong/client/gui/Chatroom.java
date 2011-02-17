@@ -308,11 +308,8 @@ public class Chatroom extends JPanel implements Configurable<Config> {
      * @param message message inputted by subject.
      * @param senderID ID of sender.
      */
-    public void newMessage(String message, int senderID) {
-        if (senderID == -1) {
-            outputField.append("SERVER: " + message + "\n");
-        }
-        outputField.append("Player " + senderID + ": " + message + "\n");
+    public void newMessage(String message) {
+        outputField.append(message + "\n");
     }
 
     public void configChanged(final Config config) {

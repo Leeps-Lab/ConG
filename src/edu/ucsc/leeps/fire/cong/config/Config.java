@@ -75,6 +75,7 @@ public class Config extends BaseConfig {
     public int playersInTuple;
     public int population, match;
     public int marginalCost;
+    public String[] alphabet;
 
     public Config() {
         paid = true;
@@ -159,6 +160,9 @@ public class Config extends BaseConfig {
         strategyUpdateMillis = 100;
         probPayoffs = false;
         trajectory = false;
+        alphabet = new String[] {"Alpha", "Beta", "Gamma", "Delta", "Epsilon",
+        "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu", "Nu", "Ksi",
+        "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega"};
     }
     public static final Color[] colors = new Color[]{
         new Color(7, 226, 0),

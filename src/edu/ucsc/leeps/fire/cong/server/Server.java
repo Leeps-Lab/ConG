@@ -22,6 +22,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     private Population population;
     private BlockingQueue<StrategyChangeEvent> strategyChangeEvents;
     private StrategyProcessor strategyProcessor;
+    private String[] aliases;
 
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
@@ -56,6 +57,24 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         }
         population = new Population();
         population.configure(members);
+        aliases = new String[clients.size()];
+        int n = clients.size();
+        for (int m = 0; m < clients.size(); m++) {
+            int index = 0;
+            int k = (int) (Math.random() * n);
+            while (aliases[index] != null) {
+                index++;
+            }
+            while(k > 0){
+                while (aliases[index] != null) {
+                    index++;
+                }
+                index++;
+                k--;
+            }
+            aliases[index] = config.alphabet[m];
+            n--;
+        }
     }
 
     public boolean readyToEndPrePeriod() {
@@ -151,6 +170,12 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void newMessage(String message, int senderID) {
+        if (senderID == -1) {
+            message = "SERVER: " + message;
+        }
+        else{
+            message = aliases[senderID - 1] + ": " + message;
+        }
         population.newMessage(message, senderID);
     }
 

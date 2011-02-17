@@ -12,7 +12,7 @@ public interface ClientInterface {
 
     public float getCost();
 
-    public void newMessage(String s, int i);
+    public void newMessage(String s);
 
     public void setStrategies(Map<Integer, float[]> strategies);
 

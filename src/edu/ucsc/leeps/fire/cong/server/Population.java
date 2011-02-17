@@ -504,7 +504,7 @@ public class Population implements Serializable {
         Tuple tuple = tupleMap.get(senderID);
         for (int id : tuple.members) {
             ClientInterface client = members.get(id);
-            client.newMessage(message, senderID);
+            client.newMessage(message);
         }
         mEvent.period = FIRE.server.getConfig().period;
         mEvent.timestamp = (int) System.currentTimeMillis();

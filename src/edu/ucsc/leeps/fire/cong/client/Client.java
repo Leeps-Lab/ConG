@@ -245,8 +245,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         }.start();
     }
 
-    public void newMessage(String message, int senderID) {
-        chatroom.newMessage(message, senderID);
+    public void newMessage(String message) {
+        chatroom.newMessage(message);
     }
 
     public boolean readyForNextPeriod() {
