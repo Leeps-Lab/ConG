@@ -1,14 +1,11 @@
 package edu.ucsc.leeps.fire.cong.client.gui;
 
-import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
-import edu.ucsc.leeps.fire.cong.config.Config;
-import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Line extends Sprite implements Serializable, Configurable<Config> {
+public class Line extends Sprite implements Serializable {
 
     public enum Mode {
 
@@ -18,13 +15,8 @@ public class Line extends Sprite implements Serializable, Configurable<Config> {
     public int r, g, b, alpha;
     public Mode mode;
     public boolean stepFunction;
-    private transient int color;
     private transient ArrayList<Integer> ypoints;
     private transient int xMax;
-    private transient int maxWidth;
-    private transient Config config;
-    private transient float minPayoff;
-    private transient float maxPayoff;
 
     public Line() {
         super(null, 0, 0, 0, 0);
@@ -39,29 +31,27 @@ public class Line extends Sprite implements Serializable, Configurable<Config> {
         visible = false;
         ypoints = new ArrayList<Integer>();
         xMax = 0;
-        FIRE.client.addConfigListener(this);
     }
 
     public void configure(Line config) {
         this.visible = true;
-        this.color = new Color(config.r, config.g, config.b, config.alpha).getRGB();
+        this.r = config.r;
+        this.g = config.g;
+        this.b = config.b;
+        this.alpha = config.alpha;
         this.weight = config.weight;
         this.mode = config.mode;
         stepFunction = FIRE.client.getConfig().subperiods != 0;
     }
 
-    public void configChanged(Config config) {
-        this.config = config;
-        maxPayoff = config.payoffFunction.getMax();
-        minPayoff = config.payoffFunction.getMin();
-        if (config.indefiniteEnd != null) {
-            maxWidth = (int) (config.indefiniteEnd.percentToDisplay * width);
+    public void setPoint(int x, int y) {
+        int maxWidth;
+        if (FIRE.client.getConfig().indefiniteEnd != null) {
+            maxWidth = (int) (FIRE.client.getConfig().indefiniteEnd.percentToDisplay * width);
         } else {
             maxWidth = width;
         }
-    }
 
-    public void setPoint(int x, int y) {
         while (xMax < x) {
             ypoints.add(y);
             if (ypoints.size() > maxWidth) {
@@ -72,9 +62,9 @@ public class Line extends Sprite implements Serializable, Configurable<Config> {
     }
 
     private void drawSolidLine(Client applet) {
-        applet.stroke(color);
+        applet.stroke(r, g, b, alpha);
         applet.strokeWeight(weight);
-        applet.fill(color);
+        applet.fill(r, g, b, alpha);
         for (int x = 0; x < ypoints.size(); x++) {
             applet.point(x, ypoints.get(x));
             if (x > 1 && Math.abs(ypoints.get(x) - ypoints.get(x - 1)) > 1) {
@@ -88,7 +78,8 @@ public class Line extends Sprite implements Serializable, Configurable<Config> {
     }
 
     private void drawDashedLine(Client applet) {
-        throw new UnsupportedOperationException();
+        drawSolidLine(applet);
+        //throw new UnsupportedOperationException();
     }
 
     private void drawLineEndPoint(Client applet) {
@@ -96,9 +87,9 @@ public class Line extends Sprite implements Serializable, Configurable<Config> {
     }
 
     private void drawShadedArea(Client applet) {
-        applet.stroke(color);
+        applet.stroke(r, g, b, alpha);
         applet.strokeWeight(weight);
-        applet.fill(color);
+        applet.fill(r, g, b, alpha);
         applet.beginShape();
         for (int x = 0; x < ypoints.size(); x++) {
             if (x > 0 && stepFunction && Math.abs(ypoints.get(x) - ypoints.get(x - 1)) > 1) {
@@ -144,25 +135,25 @@ public class Line extends Sprite implements Serializable, Configurable<Config> {
         applet.popMatrix();
     }
 
-    public void clear() {
+    public synchronized void clear() {
         xMax = 0;
         ypoints.clear();
     }
 
-    public void addPayoffPoint(float x, float y) {
-        if (config.indefiniteEnd != null) {
-            x = (x * config.length)
-                    / (config.indefiniteEnd.secondsToDisplay / config.indefiniteEnd.percentToDisplay);
+    public synchronized void addPayoffPoint(float x, float y) {
+        if (FIRE.client.getConfig().indefiniteEnd != null) {
+            x = (x * FIRE.client.getConfig().length)
+                    / (FIRE.client.getConfig().indefiniteEnd.secondsToDisplay / FIRE.client.getConfig().indefiniteEnd.percentToDisplay);
         }
         setPoint(
                 Math.round(width * x),
-                Math.round(height * (1 - ((y - minPayoff) / (maxPayoff - minPayoff)))));
+                Math.round(height * (1 - ((y - FIRE.client.getConfig().payoffFunction.getMin()) / (FIRE.client.getConfig().payoffFunction.getMax() - FIRE.client.getConfig().payoffFunction.getMin())))));
     }
 
-    public void addStrategyPoint(float x, float y) {
-        if (config.indefiniteEnd != null) {
-            x = (x * config.length)
-                    / (config.indefiniteEnd.secondsToDisplay / config.indefiniteEnd.percentToDisplay);
+    public synchronized void addStrategyPoint(float x, float y) {
+        if (FIRE.client.getConfig().indefiniteEnd != null) {
+            x = (x * FIRE.client.getConfig().length)
+                    / (FIRE.client.getConfig().indefiniteEnd.secondsToDisplay / FIRE.client.getConfig().indefiniteEnd.percentToDisplay);
         }
         setPoint(
                 Math.round(width * x),

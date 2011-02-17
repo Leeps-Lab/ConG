@@ -54,6 +54,9 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             } else {
                 config.length = config.indefiniteEnd.length(FIRE.server.getRandom());
             }
+            for (int id : members.keySet()) {
+                FIRE.server.getConfig(id).length = config.length;
+            }
         }
         population = new Population();
         population.configure(members);

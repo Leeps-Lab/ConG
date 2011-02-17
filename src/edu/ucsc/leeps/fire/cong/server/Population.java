@@ -500,7 +500,7 @@ public class Population implements Serializable {
         // does setWorlds() need to be called after a shuffle?
     }
 
-    public void newMessage (String message, int senderID) {
+    public void newMessage(String message, int senderID) {
         Tuple tuple = tupleMap.get(senderID);
         for (int id : tuple.members) {
             ClientInterface client = members.get(id);

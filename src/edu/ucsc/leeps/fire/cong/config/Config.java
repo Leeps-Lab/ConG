@@ -18,7 +18,6 @@ import java.awt.Color;
  */
 public class Config extends BaseConfig {
 
-    public boolean pointsPerSecond;
     public float percentChangePerSecond;
     public PayoffFunction payoffFunction;
     public PayoffFunction counterpartPayoffFunction;
@@ -67,7 +66,7 @@ public class Config extends BaseConfig {
     public static final Class shockZone = ShockZone.class;
     public static final Class decisionDelay = DecisionDelay.class;
     public static final Class chatMenu = ChatMenu.class;
-    public static final Class uniform = IndefiniteEnd.Uniform.class;
+    public static final Class endUniform = IndefiniteEnd.Uniform.class;
     // per-client
     public float[] initialStrategy;
     public int matchID;
@@ -80,7 +79,6 @@ public class Config extends BaseConfig {
     public Config() {
         paid = true;
         length = 120;
-        pointsPerSecond = false;
         percentChangePerSecond = 0.1f;
         changeCost = 0;
         subperiods = 0;

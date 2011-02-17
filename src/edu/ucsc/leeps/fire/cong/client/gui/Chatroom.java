@@ -313,18 +313,19 @@ public class Chatroom extends JPanel implements Configurable<Config> {
     }
 
     public void configChanged(final Config config) {
-        new Thread() {
+        if (config.chatroom) {
+            new Thread() {
 
-            @Override
-            public void run() {
-                if (config.chatroom) {
+                @Override
+                public void run() {
                     frame.pack();
-                } else {
-                    frame.dispose();
+                    frame.setVisible(true);
                 }
-                frame.setVisible(config.chatroom);
-            }
-        }.start();
+            }.start();
+        } else {
+            frame.dispose();
+            return;
+        }
         if (config.menu.m1.equals("")) {
             menuInputPanel.setVisible(false);
         } else {

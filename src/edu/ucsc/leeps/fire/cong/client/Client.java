@@ -209,7 +209,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void tick(int secondsLeft) {
-        state.currentPercent = width * (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
+        state.currentPercent = (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
         countdown.setSecondsLeft(secondsLeft);
     }
 

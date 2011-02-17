@@ -315,16 +315,18 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     public void updateLines() {
-        updateLines(Client.state.currentPercent);
-        updateMarginalCostLines(Client.state.currentPercent);
+        synchronized (lock) {
+            updateLines(Client.state.currentPercent);
+            updateMarginalCostLines(Client.state.currentPercent);
+        }
     }
 
     private void initializePriceLine(int id) {
         Line priceLine = new Line(this, 0, scaledMargin, width, scaledHeight);
         if (id == Client.state.id) {
-            priceLine.configure(FIRE.client.getConfig().yourStrategy);
+            priceLine.configure(config.yourStrategy);
         } else {
-            priceLine.configure(FIRE.client.getConfig().matchStrategy);
+            priceLine.configure(config.matchStrategy);
         }
         Color color;
         if (id == FIRE.client.getID()) {
@@ -354,13 +356,11 @@ public class Chart extends Sprite implements Configurable<Config> {
                     PricingPayoffFunction pf = (PricingPayoffFunction) FIRE.client.getConfig().payoffFunction;
                     Map<Integer, float[]> currentPrices = Client.state.strategies;
                     for (int id : currentPrices.keySet()) {
-                        synchronized (lock) {
-                            if (!prices.containsKey(id)) {
-                                initializePriceLine(id);
-                            }
-                            Line priceLine = prices.get(id);
-                            priceLine.addPayoffPoint(percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
+                        if (!prices.containsKey(id)) {
+                            initializePriceLine(id);
                         }
+                        Line priceLine = prices.get(id);
+                        priceLine.addPayoffPoint(percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
                     }
                 } else {
                     if (config.subperiods != 0) {
@@ -397,9 +397,7 @@ public class Chart extends Sprite implements Configurable<Config> {
             Line marginalCostLine = new Line(this, 0, scaledMargin, width, scaledHeight);
             marginalCostLine.configure(FIRE.client.getConfig().yourStrategy);
             marginalCostLine.mode = Line.Mode.Dashed;
-            synchronized (lock) {
-                marginalCosts.put(Client.state.id, marginalCostLine);
-            }
+            marginalCosts.put(Client.state.id, marginalCostLine);
         }
         marginalCosts.get(Client.state.id).addPayoffPoint(percent, config.marginalCost);
     }
@@ -427,7 +425,6 @@ public class Chart extends Sprite implements Configurable<Config> {
 
     public void configChanged(Config config) {
         this.config = config;
-        assert config != null;
         minPayoff = config.payoffFunction.getMin();
         maxPayoff = config.payoffFunction.getMax();
         yourPayoff.configure(config.yourPayoff);
