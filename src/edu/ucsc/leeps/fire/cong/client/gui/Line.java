@@ -65,21 +65,26 @@ public class Line extends Sprite implements Serializable {
         applet.stroke(r, g, b, alpha);
         applet.strokeWeight(weight);
         applet.fill(r, g, b, alpha);
-        for (int x = 0; x < ypoints.size(); x++) {
-            applet.point(x, ypoints.get(x));
-            if (x > 1 && Math.abs(ypoints.get(x) - ypoints.get(x - 1)) > 1) {
-                if (stepFunction) {
-                    applet.line(x, ypoints.get(x), x, ypoints.get(x - 1));
-                } else {
-                    applet.line(x, ypoints.get(x), x - 1, ypoints.get(x - 1));
-                }
+        for (int x = 1; x < ypoints.size(); x++) {
+            if (stepFunction) {
+                applet.line(x - 1, ypoints.get(x - 1), x, ypoints.get(x - 1));
+                applet.line(x, ypoints.get(x - 1), x, ypoints.get(x));
+                applet.line(x - 1, ypoints.get(x), x, ypoints.get(x));
+            } else {
+                applet.line(x - 1, ypoints.get(x - 1), x, ypoints.get(x));
             }
         }
     }
 
     private void drawDashedLine(Client applet) {
-        drawSolidLine(applet);
-        //throw new UnsupportedOperationException();
+        applet.stroke(r, g, b, alpha);
+        applet.strokeWeight(weight);
+        applet.fill(r, g, b, alpha);
+        for (int x = 1; x < ypoints.size(); x++) {
+            if (x % 4 != 0) {
+                applet.line(x - 1, ypoints.get(x - 1), x, ypoints.get(x));
+            }
+        }
     }
 
     private void drawLineEndPoint(Client applet) {
@@ -102,7 +107,7 @@ public class Line extends Sprite implements Serializable {
         }
         applet.vertex(ypoints.size(), height);
         applet.vertex(0, height);
-        applet.endShape(Client.CLOSE);
+        applet.endShape();
     }
 
     public synchronized void drawCostArea(Client applet, float cost) {

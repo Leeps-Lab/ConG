@@ -55,6 +55,7 @@ public class Config extends BaseConfig {
     public boolean showHeatmap;
     public boolean trajectory;
     public ChatMenu menu;
+    public boolean turnTaking;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;

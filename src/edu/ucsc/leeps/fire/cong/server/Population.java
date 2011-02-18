@@ -61,15 +61,12 @@ public class Population implements Serializable {
         periodStartTime = System.nanoTime();
         for (Tuple tuple : tuples) {
             tuple.evalTime = periodStartTime;
-            tuple.update();
+            tuple.update(-1);
         }
     }
 
-    public void strategyChanged(
-            float[] newStrategy,
-            float[] targetStrategy,
-            Integer changed) {
-        tupleMap.get(changed).update(changed, newStrategy, targetStrategy);
+    public void strategyChanged(int whoChanged, float[] newStrategy, float[] targetStrategy) {
+        tupleMap.get(whoChanged).update(whoChanged, newStrategy, targetStrategy);
     }
 
     public void evaluate() {
@@ -165,26 +162,28 @@ public class Population implements Serializable {
             realizedStrategies = new HashMap<Integer, float[]>();
         }
 
-        public void update(int changed, float[] strategy, float[] target) {
+        public void update(int whoChanged, float[] strategy, float[] target) {
             if (FIRE.server.getConfig().subperiods == 0) {
                 evaluate();
                 if (this != match) {
                     match.evaluate();
                 }
             }
-            strategies.put(changed, strategy);
-            targets.put(changed, target);
+            strategies.put(whoChanged, strategy);
+            targets.put(whoChanged, target);
             if (FIRE.server.getConfig().subperiods == 0) {
-                update();
+                update(whoChanged);
             }
         }
 
-        public void update() {
+        public void update(int whoChanged) {
             for (int member : members) {
-                strategyUpdateEvents.get(member).add(new StrategyUpdateEvent(member, strategies, null));
+                strategyUpdateEvents.get(member).add(
+                        new StrategyUpdateEvent(member, whoChanged, strategies, null));
             }
             for (int member : match.members) {
-                strategyUpdateEvents.get(member).add(new StrategyUpdateEvent(member, null, strategies));
+                strategyUpdateEvents.get(member).add(
+                        new StrategyUpdateEvent(member, whoChanged, null, strategies));
             }
         }
 
@@ -215,7 +214,12 @@ public class Population implements Serializable {
                             config);
                 }
                 subperiodPayoffs.put(member, payoff);
-                payoff *= percentElapsed;
+                if (config.indefiniteEnd != null) {
+                    float secondsElapsed = percentElapsed * config.length;
+                    payoff *= secondsElapsed;
+                } else {
+                    payoff *= percentElapsed;
+                }
                 FIRE.server.addToPeriodPoints(member, payoff);
             }
         }
@@ -260,7 +264,7 @@ public class Population implements Serializable {
                     }
                 }.start();
             }
-            update();
+            update(-1);
         }
 
         public void endPeriod() {
@@ -457,7 +461,7 @@ public class Population implements Serializable {
             }
         }
         for (Tuple tuple : tuples) {
-            tuple.update();
+            tuple.update(-1);
         }
     }
 
@@ -547,11 +551,13 @@ public class Population implements Serializable {
     private class StrategyUpdateEvent {
 
         public int id;
+        public int changedId;
         public Map<Integer, float[]> strategies;
         public Map<Integer, float[]> matchStrategies;
 
-        public StrategyUpdateEvent(int id, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies) {
+        public StrategyUpdateEvent(int id, int changedId, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies) {
             this.id = id;
+            this.changedId = changedId;
             this.strategies = strategies;
             this.matchStrategies = matchStrategies;
         }
@@ -571,9 +577,9 @@ public class Population implements Serializable {
                 try {
                     StrategyUpdateEvent event = queue.take();
                     if (event.strategies != null) {
-                        members.get(event.id).setStrategies(event.strategies);
+                        members.get(event.id).setStrategies(event.changedId, event.strategies);
                     } else {
-                        members.get(event.id).setMatchStrategies(event.matchStrategies);
+                        members.get(event.id).setMatchStrategies(event.changedId, event.matchStrategies);
                     }
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();

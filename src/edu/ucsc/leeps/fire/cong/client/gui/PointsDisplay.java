@@ -43,26 +43,23 @@ public class PointsDisplay extends Sprite {
         String netEarningsString = "";
         totalEarningsString = String.format("Previous Earnings: %.2f", totalPoints);
         periodEarningsString = String.format("Current Earnings: %.2f", periodPoints);
-        try {
-            if (FIRE.client.getConfig().changeCost != 0) {
-                periodCostString = String.format("Gross Cost: %.2f", periodCost);
-                netEarningsString = String.format("Net Earnings: %.2f", periodPoints - periodCost);
-            }
-        } catch (Exception e) {
-        }
         float textHeight = applet.textAscent() + applet.textDescent();
         applet.fill(0);
         applet.textAlign(Client.LEFT);
-        applet.text(totalEarningsString, Math.round(origin.x), Math.round(origin.y));
-        applet.text(periodEarningsString, Math.round(origin.x), Math.round(origin.y + textHeight));
+        applet.text(totalEarningsString, (int) origin.x, (int) origin.y);
+        applet.text(periodEarningsString, (int) origin.x, (int) (origin.y + textHeight));
         applet.fill(200, 0, 0);
-        applet.text(periodCostString, Math.round(origin.x), Math.round(origin.y + 2 * textHeight));
+        applet.text(periodCostString, (int) origin.x, (int) (origin.y + 2 * textHeight));
         if (periodCost <= periodPoints) {
             applet.fill(0);
         }
-        applet.text(netEarningsString, Math.round(origin.x), Math.round(origin.y + 3 * textHeight));
+        applet.text(netEarningsString, (int) origin.x, (int) (origin.y + 3 * textHeight));
         applet.fill(0);
         if (displaySwitchCosts) {
+            //if (FIRE.client.getConfig().changeCost != 0) {
+            //    periodCostString = String.format("Gross Cost: %.2f", periodCost);
+            //    netEarningsString = String.format("Net Earnings: %.2f", periodPoints - periodCost);
+            //}
             /*
             String costString = String.format("Switch Costs: -%.2f", switchCosts);
             String totalString = String.format("Total: %.2f", points - switchCosts);

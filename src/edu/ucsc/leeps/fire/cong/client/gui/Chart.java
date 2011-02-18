@@ -122,8 +122,8 @@ public class Chart extends Sprite implements Configurable<Config> {
                     int percent = Math.round(x * 100);
                     String label = String.format("%d%%", percent);
                     applet.text(label,
-                            Math.round(x0),
-                            Math.round(y0 + 1.2f * applet.textAscent() + applet.textDescent()));
+                            (int) x0,
+                            (int) (y0 + 1.2f * applet.textAscent() + applet.textDescent()));
                 }
             }
             String maxPayoffLabel = String.format("%.1f", maxPayoff);
@@ -149,20 +149,20 @@ public class Chart extends Sprite implements Configurable<Config> {
                     payoff = 0f;
                 }
                 String label = String.format("%.1f", payoff);
-                applet.text(label, Math.round(labelX), Math.round(y0));
+                applet.text(label, (int) labelX, (int) y0);
             }
         } else {
             applet.textAlign(Client.RIGHT);
             applet.fill(0);
             if (mode == Mode.RStrategy) {
                 applet.text(config.rLabel, -10,
-                        Math.round(height / 2f + (applet.textAscent() + applet.textDescent()) / 2f));
+                        (int) (height / 2f + (applet.textAscent() + applet.textDescent()) / 2f));
             } else if (mode == Mode.PStrategy) {
                 applet.text(config.pLabel, -10,
-                        Math.round(height / 2f + (applet.textAscent() + applet.textDescent()) / 2f));
+                        (int) (height / 2f + (applet.textAscent() + applet.textDescent()) / 2f));
             } else if (mode == Mode.SStrategy) {
                 applet.text(config.sLabel, -10,
-                        Math.round(height / 2f + (applet.textAscent() + applet.textDescent()) / 2f));
+                        (int) (height / 2f + (applet.textAscent() + applet.textDescent()) / 2f));
             }
         }
     }
@@ -255,12 +255,12 @@ public class Chart extends Sprite implements Configurable<Config> {
         drawShockZone(applet);
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             if (mode == Mode.Payoff) {
-                yourPayoff.draw(applet);
                 if (config.payoffFunction instanceof PricingPayoffFunction) {
                     drawPriceLines(applet);
                 } else {
                     matchPayoff.draw(applet);
                 }
+                yourPayoff.draw(applet);
             } else if (mode == Mode.TwoStrategy) {
                 drawTwoStrategyLines(applet);
                 if (config.payoffFunction instanceof ThresholdPayoffFunction) {
@@ -274,8 +274,8 @@ public class Chart extends Sprite implements Configurable<Config> {
             }
         } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
             if (mode == Mode.Payoff) {
-                yourPayoff.draw(applet);
                 matchPayoff.draw(applet);
+                yourPayoff.draw(applet);
             } else if (mode == Mode.RStrategy
                     || mode == Mode.PStrategy
                     || mode == Mode.SStrategy) {

@@ -14,9 +14,9 @@ public interface ClientInterface {
 
     public void newMessage(String s);
 
-    public void setStrategies(Map<Integer, float[]> strategies);
+    public void setStrategies(int whoChanged, Map<Integer, float[]> strategies);
 
-    public void setMatchStrategies(Map<Integer, float[]> matchStrategies);
+    public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies);
 
     public void endSubperiod(
             int subperiod,

@@ -90,28 +90,9 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
         }
         drawStrategy(applet, Color.BLACK, FIRE.client.getID());
         if (config.subperiods != 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
-            drawSubperiodTicker(applet);
             drawPlannedStrategy(applet);
         }
         applet.popMatrix();
-    }
-
-    private void drawSubperiodTicker(Client applet) {
-        applet.strokeWeight(2f);
-        applet.stroke(0);
-        applet.fill(255);
-        applet.rectMode(Client.CORNERS);
-        applet.rect(0, 0, 150, -20);
-        applet.noStroke();
-        applet.fill(0, 50, 255, 50);
-        float x = 0;
-        if (Client.state.currentPercent >= 0 && Client.state.currentPercent <= 1) {
-            float percentPerSub = 1f / config.subperiods;
-            float percentElapsed = Client.state.subperiod * percentPerSub;
-            float remainder = Client.state.currentPercent - percentElapsed;
-            x = remainder / percentPerSub;
-        }
-        applet.rect(1, 1, x * 149, -19);
     }
 
     private void drawPlannedStrategy(Client applet) {

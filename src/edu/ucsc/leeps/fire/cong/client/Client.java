@@ -213,12 +213,14 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         countdown.setSecondsLeft(secondsLeft);
     }
 
-    public void setStrategies(Map<Integer, float[]> strategies) {
+    public void setStrategies(int whoChanged, Map<Integer, float[]> strategies) {
         state.strategies = strategies;
+        strategyChanger.strategyChanged(whoChanged);
     }
 
-    public void setMatchStrategies(Map<Integer, float[]> matchStrategies) {
+    public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies) {
         state.matchStrategies = matchStrategies;
+        strategyChanger.strategyChanged(whoChanged);
     }
 
     public void endSubperiod(

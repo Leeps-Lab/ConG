@@ -54,6 +54,9 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             } else {
                 config.length = config.indefiniteEnd.length(FIRE.server.getRandom());
             }
+            if (config.length == 0) {
+                config.length = 1;
+            }
             for (int id : members.keySet()) {
                 FIRE.server.getConfig(id).length = config.length;
             }
@@ -202,7 +205,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             while (true) {
                 try {
                     StrategyChangeEvent event = strategyChangeEvents.take();
-                    population.strategyChanged(event.newStrategy, event.targetStrategy, event.id);
+                    population.strategyChanged(event.id, event.newStrategy, event.targetStrategy);
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }

@@ -20,7 +20,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     private float strategyDelta;
     private long nextAllowedChangeTime;
     private boolean initialLock;
-    public volatile boolean isLocked;
     public Selector selector;
 
     public StrategyChanger() {
@@ -82,6 +81,8 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         if (config.delay != null) {
             int delay = config.delay.getDelay();
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
+        } else if (config.turnTaking) {
+            nextAllowedChangeTime = Long.MAX_VALUE;
         }
     }
 
@@ -114,11 +115,10 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             }
             long nanoWait = config.strategyUpdateMillis * 1000000;
             long start = System.nanoTime();
-            isLocked = decisionDelayed();
             if (shouldUpdate) {
-                selector.setEnabled(!isLocked);
+                selector.setEnabled(!isLocked());
             }
-            if (!isLocked && shouldUpdate) {
+            if (!isLocked() && shouldUpdate) {
                 update();
             }
             long elapsed = System.nanoTime() - start;
@@ -132,7 +132,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         }
     }
 
-    private boolean decisionDelayed() {
+    private boolean isLocked() {
         return System.currentTimeMillis() < nextAllowedChangeTime;
     }
 
@@ -177,6 +177,14 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         shouldUpdate = false;
         initialLock = true;
         selector.setEnabled(false);
+    }
+
+    public void strategyChanged(int whoChanged) {
+        if (config != null && config.turnTaking) {
+            if (whoChanged != Client.state.id) {
+                nextAllowedChangeTime = System.currentTimeMillis();
+            }
+        }
     }
 
     public static interface Selector {

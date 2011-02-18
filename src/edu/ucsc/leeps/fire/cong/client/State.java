@@ -11,10 +11,10 @@ public class State {
 
     public int id;
     public int subperiod;
-    public float currentPercent;
-    public Map<Integer, float[]> strategies, matchStrategies;
-    public float subperiodPayoff, subperiodMatchPayoff;
-    public float[] target;
+    public volatile float currentPercent;
+    public volatile Map<Integer, float[]> strategies, matchStrategies;
+    public volatile float subperiodPayoff, subperiodMatchPayoff;
+    public volatile float[] target;
     public StrategyChanger strategyChanger;
 
     public State(StrategyChanger changer) {
