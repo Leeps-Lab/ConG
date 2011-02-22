@@ -10,6 +10,12 @@ import java.util.Map;
 public class CournotPayoffFunction extends TwoStrategyPayoffFunction {
 
     public float A, B, C, D, smin, smax;
+    public Type type;
+
+    public enum Type {
+
+        proportional, linear
+    };
 
     public CournotPayoffFunction() {
     }
@@ -30,13 +36,22 @@ public class CournotPayoffFunction extends TwoStrategyPayoffFunction {
     }
 
     @Override
+    /*
+     * proportional: (A * s / sum ) - C * s + D
+     * linear: (A - B * sum) * s - C * s + D
+     */
     public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies, Config config) {
         float sum = 0;
         for (float[] f : popStrategies.values()) {
             sum += smin + (f[0] * (smax - smin));
         }
         float s = smin + (popStrategies.get(id)[0] * (smax - smin));
-        float u = ((A - B * sum) * s - C * s) + D;
+        float u = 0;
+        if (type == Type.proportional) {
+            u = (A * s / sum) - C * s + D;
+        } else if (type == Type.linear) {
+            u = ((A - B * sum) * s - C * s) + D;
+        }
         return u;
     }
 

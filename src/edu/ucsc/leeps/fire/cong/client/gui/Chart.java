@@ -411,16 +411,16 @@ public class Chart extends Sprite implements Configurable<Config> {
         float diff = percentEnd - percentStart;
         for (float offset = 0; offset < diff; offset += 0.01) {
             if (subperiod != 0) {
-                updateLines(percentStart + offset);
+                //updateLines(percentStart + offset);
             }
             if (subperiod != FIRE.client.getConfig().subperiods) {
-                updateMarginalCostLines(marginalCostStart + offset);
+                //updateMarginalCostLines(marginalCostStart + offset);
             }
         }
         if (subperiod != 0) {
-            updateLines(percentEnd);
+            //updateLines(percentEnd);
         }
-        updateMarginalCostLines(marginalCostEnd);
+        //updateMarginalCostLines(marginalCostEnd);
     }
 
     public void configChanged(Config config) {

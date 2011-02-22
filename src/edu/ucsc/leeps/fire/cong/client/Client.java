@@ -369,13 +369,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 long length = FIRE.client.getConfig().length * 1000l;
                 state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
 
-                if (FIRE.client.getConfig().subperiods == 0) {
+                //if (FIRE.client.getConfig().subperiods == 0) {
                     payoffChart.updateLines();
                     strategyChart.updateLines();
                     rChart.updateLines();
                     pChart.updateLines();
                     sChart.updateLines();
-                }
+                //}
             }
             if (FIRE.client.isRunningPeriod()) {
                 pointsDisplay.update();
