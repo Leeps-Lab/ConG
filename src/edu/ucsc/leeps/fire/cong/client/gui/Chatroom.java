@@ -310,6 +310,7 @@ public class Chatroom extends JPanel implements Configurable<Config> {
      */
     public void newMessage(String message) {
         outputField.append(message + "\n");
+        outputField.setCaretPosition(outputField.getDocument().getLength());
     }
 
     public void configChanged(final Config config) {

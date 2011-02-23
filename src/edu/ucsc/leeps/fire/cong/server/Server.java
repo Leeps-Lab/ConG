@@ -176,13 +176,15 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void newMessage(String message, int senderID) {
-        if (senderID == -1) {
-            message = "SERVER: " + message;
+        if (message.equals("")) {
+        } else {
+            if (senderID == -1) {
+                message = "SERVER: " + message;
+            } else {
+                message = aliases[senderID - 1] + ": " + message;
+            }
+            population.newMessage(message, senderID);
         }
-        else{
-            message = aliases[senderID - 1] + ": " + message;
-        }
-        population.newMessage(message, senderID);
     }
 
     public void unregister(int id) {
