@@ -16,9 +16,6 @@ import edu.ucsc.leeps.fire.cong.client.gui.BubblesSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -60,7 +57,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private PureStrategySelector pureMatrix;
     private OneStrategyStripSelector strip;
     private QWERTYStrategySelector qwerty;
-    private BubblesSelector cournot;
+    private BubblesSelector bubbles;
     private Sprite selector;
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
@@ -106,6 +103,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         chatFrame = new JFrame("Chat");
         chatroom = new Chatroom(chatFrame);
         chatFrame.add(chatroom);
+        chatFrame.pack();
         chatFrame.setVisible(false);
     }
 
@@ -136,9 +134,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         } else if (qwerty.visible) {
             selector = qwerty;
             strategyChanger.selector = qwerty;
-        } else if (cournot.visible) {
-            selector = cournot;
-            strategyChanger.selector = cournot;
+        } else if (bubbles.visible) {
+            selector = bubbles;
+            strategyChanger.selector = bubbles;
         }
         strategyChanger.selector.startPrePeriod();
         payoffChart.clearAll();
@@ -189,7 +187,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.endPeriod();
 
         state.currentPercent = 1f;
-        
+
         chatroom.endPeriod();
 
         if (FIRE.client.getConfig().subperiods == 0) {
@@ -314,7 +312,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize,
                 this);
-        cournot = new BubblesSelector(null, leftMargin, topMargin + counterpartMatrixSize,
+        bubbles = new BubblesSelector(null, leftMargin, topMargin + counterpartMatrixSize,
                 matrixSize, matrixSize, this);
         countdown = new Countdown(
                 null, bimatrix.width - 150, 20 + topMargin, this);
@@ -373,11 +371,11 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
 
                 //if (FIRE.client.getConfig().subperiods == 0) {
-                    payoffChart.updateLines();
-                    strategyChart.updateLines();
-                    rChart.updateLines();
-                    pChart.updateLines();
-                    sChart.updateLines();
+                payoffChart.updateLines();
+                strategyChart.updateLines();
+                rChart.updateLines();
+                pChart.updateLines();
+                sChart.updateLines();
                 //}
             }
             if (FIRE.client.isRunningPeriod()) {
@@ -424,24 +422,24 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         rChart.setVisible(false);
         pChart.setVisible(false);
         sChart.setVisible(false);
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
-            if (config.payoffFunction instanceof PricingPayoffFunction) {
-                payoffChart.width = width - 110;
-                payoffChart.origin.x = 100;
-                payoffChart.clearAll();
-                strip.origin.x = 10;
-                legend.setVisible(false);
-                payoffChart.configChanged(config);
-            } else if (config.payoffFunction instanceof SumPayoffFunction) {
-                strategyChart.setVisible(false);
-                payoffChart.setVisible(false);
-                legend.setVisible(false);
-                cournot.width = Math.round(0.7f * width);
-                cournot.origin.x = 0.15f * width;
-            } else {
-                strategyChart.setVisible(true);
-            }
+        if (config.selector == Config.StrategySelector.strip) {
+            payoffChart.width = width - 110;
+            payoffChart.origin.x = 100;
+            payoffChart.clearAll();
+            strip.origin.x = 10;
+            legend.setVisible(false);
+            payoffChart.configChanged(config);
+        }
+        if (config.selector == Config.StrategySelector.bubbles) {
+            strategyChart.setVisible(false);
+            payoffChart.setVisible(false);
+            legend.setVisible(false);
+            bubbles.width = Math.round(0.7f * width);
+            bubbles.origin.x = 0.15f * width;
         } else {
+            strategyChart.setVisible(true);
+        }
+        if (config.selector == Config.StrategySelector.simplex) {
             rChart.setVisible(true);
             pChart.setVisible(true);
             sChart.setVisible(true);

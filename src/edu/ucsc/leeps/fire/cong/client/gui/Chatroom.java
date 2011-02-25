@@ -301,72 +301,67 @@ public class Chatroom extends JPanel implements Configurable<Config> {
     }
 
     public void configChanged(final Config config) {
-        if (config.chatroom) {
-            new Thread() {
+        new Thread() {
 
-                @Override
-                public void run() {
-                    frame.pack();
-                    frame.setVisible(true);
+            @Override
+            public void run() {
+                frame.setVisible(config.chatroom);
+                inputField.setEnabled(config.freeChat);
+                inputField.setVisible(config.freeChat);
+                if (config.menu == null) {
+                    menuInputPanel.setVisible(false);
+                } else {
+                    menuInputPanel.setVisible(true);
+                    if (config.menu.m1 == null) {
+                        m1.setVisible(false);
+                    } else {
+                        m1.setVisible(true);
+                        m1.setText(config.menu.m1);
+                    }
+                    if (config.menu.m2 == null) {
+                        m2.setVisible(false);
+                    } else {
+                        m2.setVisible(true);
+                        m2.setText(config.menu.m2);
+                    }
+                    if (config.menu.m3 == null) {
+                        m3.setVisible(false);
+                    } else {
+                        m3.setVisible(true);
+                        m3.setText(config.menu.m3);
+                    }
+                    if (config.menu.m4 == null) {
+                        m4.setVisible(false);
+                    } else {
+                        m4.setVisible(true);
+                        m4.setText(config.menu.m4);
+                    }
+                    if (config.menu.m5 == null) {
+                        m5.setVisible(false);
+                    } else {
+                        m5.setVisible(true);
+                        m5.setText(config.menu.m5);
+                    }
+                    if (config.menu.m6 == null) {
+                        m6.setVisible(false);
+                    } else {
+                        m6.setVisible(true);
+                        m6.setText(config.menu.m6);
+                    }
+                    if (config.menu.m7 == null) {
+                        m7.setVisible(false);
+                    } else {
+                        m7.setVisible(true);
+                        m7.setText(config.menu.m7);
+                    }
+                    if (config.menu.m8 == null) {
+                        m8.setVisible(false);
+                    } else {
+                        m8.setVisible(true);
+                        m8.setText(config.menu.m8);
+                    }
                 }
-            }.start();
-        } else {
-            frame.dispose();
-            return;
-        }
-        inputField.setEnabled(config.freeChat);
-        inputField.setVisible(config.freeChat);
-        if (config.menu == null) {
-            menuInputPanel.setVisible(false);
-        } else {
-            if (config.menu.m1 == null) {
-                m1.setVisible(false);
-            } else {
-                m1.setVisible(true);
-                m1.setText(config.menu.m1);
             }
-            if (config.menu.m2 == null) {
-                m2.setVisible(false);
-            } else {
-                m2.setVisible(true);
-                m2.setText(config.menu.m2);
-            }
-            if (config.menu.m3 == null) {
-                m3.setVisible(false);
-            } else {
-                m3.setVisible(true);
-                m3.setText(config.menu.m3);
-            }
-            if (config.menu.m4 == null) {
-                m4.setVisible(false);
-            } else {
-                m4.setVisible(true);
-                m4.setText(config.menu.m4);
-            }
-            if (config.menu.m5 == null) {
-                m5.setVisible(false);
-            } else {
-                m5.setVisible(true);
-                m5.setText(config.menu.m5);
-            }
-            if (config.menu.m6 == null) {
-                m6.setVisible(false);
-            } else {
-                m6.setVisible(true);
-                m6.setText(config.menu.m6);
-            }
-            if (config.menu.m7 == null) {
-                m7.setVisible(false);
-            } else {
-                m7.setVisible(true);
-                m7.setText(config.menu.m7);
-            }
-            if (config.menu.m8 == null) {
-                m8.setVisible(false);
-            } else {
-                m8.setVisible(true);
-                m8.setText(config.menu.m8);
-            }
-        }
+        }.start();
     }
 }

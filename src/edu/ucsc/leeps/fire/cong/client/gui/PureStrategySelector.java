@@ -272,7 +272,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
         if (config.selector == Config.StrategySelector.pure) {
             setVisible(true);
         } else {
-            setVisible(true);
+            setVisible(false);
         }
     }
 
