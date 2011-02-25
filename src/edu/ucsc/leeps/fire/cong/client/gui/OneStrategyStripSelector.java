@@ -138,7 +138,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     }
 
     public void configChanged(Config config) {
-        if (config.strategySelector == Config.StrategySelector.strip) {
+        if (config.selector == Config.StrategySelector.strip) {
             setVisible(true);
             if (config.payoffFunction instanceof PricingPayoffFunction) {
                 slider = new Slider(

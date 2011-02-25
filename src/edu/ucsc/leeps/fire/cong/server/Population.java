@@ -430,7 +430,7 @@ public class Population implements Serializable {
             float[] s;
             if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                 s = new float[1];
-                if (FIRE.server.getConfig().mixedStrategySelection) {
+                if (FIRE.server.getConfig().mixed) {
                     float costRange = FIRE.server.getConfig().payoffFunction.getMax() - FIRE.server.getConfig(client).marginalCost;
                     float totalRange = FIRE.server.getConfig().payoffFunction.getMax() - FIRE.server.getConfig().payoffFunction.getMin();
                     s[0] = (FIRE.server.getRandom().nextFloat() * costRange + FIRE.server.getConfig(client).marginalCost) / totalRange;
@@ -439,7 +439,7 @@ public class Population implements Serializable {
                 }
             } else if (FIRE.server.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 s = new float[3];
-                if (FIRE.server.getConfig().mixedStrategySelection) {
+                if (FIRE.server.getConfig().mixed) {
                     s[0] = FIRE.server.getRandom().nextFloat();
                     s[1] = (1 - s[0]) * FIRE.server.getRandom().nextFloat();
                     s[2] = 1 - s[0] - s[1];

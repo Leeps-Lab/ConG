@@ -209,7 +209,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.strategySelector == Config.StrategySelector.bubbles) {
+        if (config.selector == Config.StrategySelector.bubbles) {
             setVisible(true);
         } else {
             setVisible(false);

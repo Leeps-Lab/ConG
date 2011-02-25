@@ -14,11 +14,8 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
 
     public enum Type {
 
-        proportional, linear, publicgoods
+        proportional, linear, public_goods
     };
-
-    public SumPayoffFunction() {
-    }
 
     @Override
     public boolean reverseXAxis() {
@@ -35,15 +32,16 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
         return min;
     }
 
-    @Override
     /*
      * proportional: (A * s / sum ) - C * s + D
      * linear: (A - B * sum) * s - C * s + D
+     * public goods: 100 * ((A * sum) + (1 - s))
      */
+    @Override
     public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies, Config config) {
         float sum = 0;
-        for (float[] f : popStrategies.values()) {
-            sum += smin + (f[0] * (smax - smin));
+        for (float[] s : popStrategies.values()) {
+            sum += smin + s[0] * (smax - smin);
         }
         float s = smin + (popStrategies.get(id)[0] * (smax - smin));
         float u = 0;
@@ -54,7 +52,7 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
             case linear:
                 u = ((A - B * sum) * s - C * s) + D;
                 break;
-            case publicgoods:
+            case public_goods:
                 u = 100 * ((A * sum) + (1 - s));
                 break;
         }

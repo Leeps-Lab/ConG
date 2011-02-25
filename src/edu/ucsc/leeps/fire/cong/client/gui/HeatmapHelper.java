@@ -108,46 +108,49 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
     }
 
     public void updateTwoStrategyHeatmap() {
-        if (config.showHeatmap) {
-            int size = 100;
-            TwoStrategyPayoffFunction u;
-            if (mine) {
-                u = (TwoStrategyPayoffFunction) config.payoffFunction;
-            } else {
-                u = (TwoStrategyPayoffFunction) config.counterpartPayoffFunction;
-            }
-            float max = u.getMax();
-            if (backBuffer == null || backBuffer.width != size) {
-                backBuffer = applet.createImage(size, size, Client.RGB);
-            }
-            backBuffer.loadPixels();
-            float[] you = new float[1];
-            float[] other = new float[1];
-            for (int x = 0; x < size; x++) {
-                for (int y = 0; y < size; y++) {
-                    float A = 1 - (y / (float) size);
-                    float a;
-                    if (u.reverseXAxis()) {
-                        a = (x / (float) size);
-                    } else {
-                        a = 1 - (x / (float) size);
-                    }
-                    float value;
-                    you[0] = A;
-                    other[0] = a;
-                    if (mine) {
-                        value = PayoffFunction.Utilities.getPayoff(new float[]{A}, new float[]{a}) / max;
-                    } else {
-                        value = PayoffFunction.Utilities.getMatchPayoff(new float[]{A}, new float[]{a}) / max;
-                    }
-                    backBuffer.pixels[y * size + x] = getRGB(value);
+        try {
+            if (config.showHeatmap) {
+                int size = 100;
+                TwoStrategyPayoffFunction u;
+                if (mine) {
+                    u = (TwoStrategyPayoffFunction) config.payoffFunction;
+                } else {
+                    u = (TwoStrategyPayoffFunction) config.counterpartPayoffFunction;
                 }
+                float max = u.getMax();
+                if (backBuffer == null || backBuffer.width != size) {
+                    backBuffer = applet.createImage(size, size, Client.RGB);
+                }
+                backBuffer.loadPixels();
+                float[] you = new float[1];
+                float[] other = new float[1];
+                for (int x = 0; x < size; x++) {
+                    for (int y = 0; y < size; y++) {
+                        float A = 1 - (y / (float) size);
+                        float a;
+                        if (u.reverseXAxis()) {
+                            a = (x / (float) size);
+                        } else {
+                            a = 1 - (x / (float) size);
+                        }
+                        float value;
+                        you[0] = A;
+                        other[0] = a;
+                        if (mine) {
+                            value = PayoffFunction.Utilities.getPayoff(new float[]{A}, new float[]{a}) / max;
+                        } else {
+                            value = PayoffFunction.Utilities.getMatchPayoff(new float[]{A}, new float[]{a}) / max;
+                        }
+                        backBuffer.pixels[y * size + x] = getRGB(value);
+                    }
+                }
+                backBuffer.updatePixels();
+                backBuffer.resize(width, height);
+                PImage tmp = currentBuffer;
+                currentBuffer = backBuffer;
+                backBuffer = tmp;
             }
-            backBuffer.updatePixels();
-            backBuffer.resize(width, height);
-            PImage tmp = currentBuffer;
-            currentBuffer = backBuffer;
-            backBuffer = tmp;
+        } catch (NullPointerException ex) {
         }
     }
 

@@ -257,6 +257,9 @@ public class Chatroom extends JPanel implements Configurable<Config> {
     // End of variables declaration//GEN-END:variables
 
     public void addCharacter(char c) {
+        if (FIRE.client.getConfig() == null || !FIRE.client.getConfig().freeChat) {
+            return;
+        }
         if (c == '\n') {
             sendMessage();
         } else if (c == 8 || c == 127) {
@@ -311,6 +314,8 @@ public class Chatroom extends JPanel implements Configurable<Config> {
             frame.dispose();
             return;
         }
+        inputField.setEnabled(config.freeChat);
+        inputField.setVisible(config.freeChat);
         if (config.menu == null) {
             menuInputPanel.setVisible(false);
         } else {

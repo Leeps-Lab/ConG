@@ -231,7 +231,7 @@ public class Chart extends Sprite implements Configurable<Config> {
             if (Client.state.target != null
                     && (mode == Mode.TwoStrategy
                     || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction))
-                    && config.mixedStrategySelection) {
+                    && config.mixed) {
                 int start = Math.round(subperiod * interval * width);
                 int end = Math.round((subperiod + 1) * interval * width);
                 int y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;

@@ -34,9 +34,9 @@ public class Config extends BaseConfig {
     public boolean assignedTuples;
     public boolean excludeSelf;
     public int subperiods;
-    public boolean mixedStrategySelection;
-    public StrategySelector strategySelector;
-    public MatrixDisplayType matrixDisplayType;
+    public boolean mixed;
+    public StrategySelector selector;
+    public MatrixDisplayType matrixDisplay;
     public Line yourPayoff, matchPayoff;
     public Line yourStrategy, matchStrategy;
     public Line thresholdLine;
@@ -50,6 +50,7 @@ public class Config extends BaseConfig {
     public float changeCost;
     public boolean showHeatmapLegend;
     public boolean chatroom;
+    public boolean freeChat;
     public boolean negativePayoffs;
     public boolean sigmoidHeatmap;
     public float sigmoidAlpha;

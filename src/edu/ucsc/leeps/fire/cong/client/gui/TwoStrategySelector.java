@@ -241,7 +241,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
                 hover.draw(applet);
             }
         }
-        if (config.matrixDisplayType == Config.MatrixDisplayType.HeatmapBoth) {
+        if (config.matrixDisplay == Config.MatrixDisplayType.HeatmapBoth) {
             float x, y, w, h;
             x = counterpartHeatmap.origin.x;
             y = counterpartHeatmap.origin.y;
@@ -267,7 +267,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private void drawHeatmap() {
         heatmap.draw(applet);
 
-        if (config.matrixDisplayType == Config.MatrixDisplayType.HeatmapBoth) {
+        if (config.matrixDisplay == Config.MatrixDisplayType.HeatmapBoth) {
             counterpartHeatmap.draw(applet);
         }
 
@@ -276,7 +276,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         myHeatmapBa.draw(applet);
         myHeatmapBb.draw(applet);
 
-        if (config.matrixDisplayType == Config.MatrixDisplayType.HeatmapBoth) {
+        if (config.matrixDisplay == Config.MatrixDisplayType.HeatmapBoth) {
             counterpartHeatmapAa.draw(applet);
             cuonterpartHeatmapAb.draw(applet);
             counterpartHeatmapBa.draw(applet);
@@ -384,8 +384,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.strategySelector == Config.StrategySelector.bimatrix) {
-            switch (config.matrixDisplayType) {
+        if (config.selector == Config.StrategySelector.bimatrix) {
+            switch (config.matrixDisplay) {
                 case HeatmapSingle:
                     setModeHeatmapSingle();
                     break;
