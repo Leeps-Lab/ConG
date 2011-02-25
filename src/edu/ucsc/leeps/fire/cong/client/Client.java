@@ -12,11 +12,11 @@ import edu.ucsc.leeps.fire.cong.client.gui.Chart;
 import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
-import edu.ucsc.leeps.fire.cong.client.gui.CournotSelector;
+import edu.ucsc.leeps.fire.cong.client.gui.BubblesSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.GraphicsEnvironment;
@@ -60,7 +60,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private PureStrategySelector pureMatrix;
     private OneStrategyStripSelector strip;
     private QWERTYStrategySelector qwerty;
-    private CournotSelector cournot;
+    private BubblesSelector cournot;
     private Sprite selector;
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
@@ -163,6 +163,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             sChart.clearAll();
         }
         simplex.setEnabled(true);
+        chatroom.startPeriod();
 
         strategyChanger.startPeriod();
         strategyChanger.selector.startPeriod();
@@ -188,6 +189,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.endPeriod();
 
         state.currentPercent = 1f;
+        
+        chatroom.endPeriod();
 
         if (FIRE.client.getConfig().subperiods == 0) {
             payoffChart.updateLines();
@@ -311,7 +314,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize,
                 this);
-        cournot = new CournotSelector(null, leftMargin, topMargin + counterpartMatrixSize,
+        cournot = new BubblesSelector(null, leftMargin, topMargin + counterpartMatrixSize,
                 matrixSize, matrixSize, this);
         countdown = new Countdown(
                 null, bimatrix.width - 150, 20 + topMargin, this);
@@ -429,7 +432,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 strip.origin.x = 10;
                 legend.setVisible(false);
                 payoffChart.configChanged(config);
-            } else if (config.payoffFunction instanceof CournotPayoffFunction) {
+            } else if (config.payoffFunction instanceof SumPayoffFunction) {
                 strategyChart.setVisible(false);
                 payoffChart.setVisible(false);
                 legend.setVisible(false);

@@ -5,7 +5,6 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -17,14 +16,14 @@ import java.awt.event.MouseListener;
  *
  * @author rlou
  */
-public class CournotSelector extends Sprite implements Configurable<Config>, Selector, MouseListener, KeyListener {
+public class BubblesSelector extends Sprite implements Configurable<Config>, Selector, MouseListener, KeyListener {
 
     private boolean enabled;
     private Slider slider;
     private Config config;
     private float[] subperiodStrategy;
 
-    public CournotSelector(Sprite parent, int x, int y, int width, int height,
+    public BubblesSelector(Sprite parent, int x, int y, int width, int height,
             Client applet) {
         super(parent, x, y, width, height);
         slider = new Slider(applet, Slider.Alignment.Horizontal,
@@ -210,8 +209,7 @@ public class CournotSelector extends Sprite implements Configurable<Config>, Sel
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.mixedStrategySelection && !config.stripStrategySelection
-                && config.payoffFunction instanceof CournotPayoffFunction) {
+        if (config.strategySelector == Config.StrategySelector.bubbles) {
             setVisible(true);
         } else {
             setVisible(false);

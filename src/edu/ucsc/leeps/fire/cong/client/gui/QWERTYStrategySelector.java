@@ -104,8 +104,7 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
     }
 
     public void configChanged(Config config) {
-        if (!config.mixedStrategySelection && !config.stripStrategySelection
-                && config.payoffFunction instanceof QWERTYPayoffFunction) {
+        if (config.strategySelector == Config.StrategySelector.qwerty) {
             this.pf = (QWERTYPayoffFunction) config.payoffFunction;
             setVisible(true);
         } else {

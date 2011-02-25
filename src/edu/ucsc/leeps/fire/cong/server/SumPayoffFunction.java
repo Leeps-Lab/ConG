@@ -7,17 +7,17 @@ import java.util.Map;
  *
  * @author jpettit
  */
-public class CournotPayoffFunction extends TwoStrategyPayoffFunction {
+public class SumPayoffFunction extends TwoStrategyPayoffFunction {
 
     public float A, B, C, D, smin, smax;
     public Type type;
 
     public enum Type {
 
-        proportional, linear
+        proportional, linear, publicgoods
     };
 
-    public CournotPayoffFunction() {
+    public SumPayoffFunction() {
     }
 
     @Override
@@ -47,10 +47,16 @@ public class CournotPayoffFunction extends TwoStrategyPayoffFunction {
         }
         float s = smin + (popStrategies.get(id)[0] * (smax - smin));
         float u = 0;
-        if (type == Type.proportional) {
-            u = (A * s / sum) - C * s + D;
-        } else if (type == Type.linear) {
-            u = ((A - B * sum) * s - C * s) + D;
+        switch (type) {
+            case proportional:
+                u = (A * s / sum) - C * s + D;
+                break;
+            case linear:
+                u = ((A - B * sum) * s - C * s) + D;
+                break;
+            case publicgoods:
+                u = 100 * ((A * sum) + (1 - s));
+                break;
         }
         return u;
     }

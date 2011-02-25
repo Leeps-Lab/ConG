@@ -4,8 +4,6 @@ import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
-import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 
 /**
  *
@@ -60,11 +58,7 @@ public class HeatmapLegend extends Sprite implements Configurable<Config> {
     }
 
     public void configChanged(Config config) {
-        if ((config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth ||
-                config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapSingle ||
-                config.payoffFunction instanceof ThreeStrategyPayoffFunction) &&
-                config.showHeatmapLegend) {
-
+        if (config.showHeatmapLegend) {
              setVisible(true);
         } else {
             setVisible(false);

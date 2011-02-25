@@ -38,8 +38,6 @@ public class Chatroom extends JPanel implements Configurable<Config> {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         outputField = new javax.swing.JTextArea();
-        textInputPanel = new javax.swing.JPanel();
-        sendButton = new javax.swing.JButton();
         menuInputPanel = new javax.swing.JPanel();
         m1 = new javax.swing.JButton();
         m3 = new javax.swing.JButton();
@@ -67,30 +65,11 @@ public class Chatroom extends JPanel implements Configurable<Config> {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         add(jScrollPane1, gridBagConstraints);
-
-        textInputPanel.setLayout(new javax.swing.BoxLayout(textInputPanel, javax.swing.BoxLayout.LINE_AXIS));
-
-        sendButton.setText("Send");
-        sendButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                sendButtonActionPerformed(evt);
-            }
-        });
-        textInputPanel.add(sendButton);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 1;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.weightx = 0.1;
-        gridBagConstraints.weighty = 0.1;
-        add(textInputPanel, gridBagConstraints);
 
         menuInputPanel.setLayout(new java.awt.GridBagLayout());
 
@@ -193,7 +172,6 @@ public class Chatroom extends JPanel implements Configurable<Config> {
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.gridwidth = 2;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         add(menuInputPanel, gridBagConstraints);
 
@@ -216,10 +194,6 @@ public class Chatroom extends JPanel implements Configurable<Config> {
         gridBagConstraints.weighty = 0.1;
         add(jScrollPane2, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
-
-    private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
-        sendMessage();
-    }//GEN-LAST:event_sendButtonActionPerformed
 
     private void inputFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inputFieldKeyReleased
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -280,13 +254,13 @@ public class Chatroom extends JPanel implements Configurable<Config> {
     private javax.swing.JButton m8;
     private javax.swing.JPanel menuInputPanel;
     private javax.swing.JTextArea outputField;
-    private javax.swing.JButton sendButton;
-    private javax.swing.JPanel textInputPanel;
     // End of variables declaration//GEN-END:variables
 
     public void addCharacter(char c) {
         if (c == '\n') {
             sendMessage();
+        } else if (c == 8 || c == 127) {
+            inputField.setText(inputField.getText().substring(0, inputField.getText().length() - 1));
         } else {
             inputField.setText(inputField.getText() + c);
         }
@@ -299,7 +273,9 @@ public class Chatroom extends JPanel implements Configurable<Config> {
     public void sendMessage() {
         String message = inputField.getText().trim();
         inputField.setText("");
-        FIRE.client.getServer().newMessage(message, FIRE.client.getID());
+        if (FIRE.client.isRunningPeriod()) {
+            FIRE.client.getServer().newMessage(message, FIRE.client.getID());
+        }
     }
 
     /**
@@ -311,6 +287,14 @@ public class Chatroom extends JPanel implements Configurable<Config> {
     public void newMessage(String message) {
         outputField.append(message + "\n");
         outputField.setCaretPosition(outputField.getDocument().getLength());
+    }
+
+    public void startPeriod() {
+        outputField.setText("");
+        outputField.setCaretPosition(outputField.getDocument().getLength());
+    }
+
+    public void endPeriod() {
     }
 
     public void configChanged(final Config config) {
@@ -327,10 +311,9 @@ public class Chatroom extends JPanel implements Configurable<Config> {
             frame.dispose();
             return;
         }
-        if (config.menu.m1.equals("")) {
+        if (config.menu == null) {
             menuInputPanel.setVisible(false);
         } else {
-            textInputPanel.setVisible(false);
             if (config.menu.m1 == null) {
                 m1.setVisible(false);
             } else {

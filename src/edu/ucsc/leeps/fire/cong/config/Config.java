@@ -5,9 +5,8 @@ import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.config.BaseConfig;
-import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.PublicGoodsPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import java.awt.Color;
@@ -18,6 +17,15 @@ import java.awt.Color;
  */
 public class Config extends BaseConfig {
 
+    public enum StrategySelector {
+
+        bimatrix, simplex, bubbles, strip, pure, qwerty,
+    }
+
+    public enum MatrixDisplayType {
+
+        HeatmapSingle, HeatmapBoth, Matrix, Slider
+    }
     public float percentChangePerSecond;
     public PayoffFunction payoffFunction;
     public PayoffFunction counterpartPayoffFunction;
@@ -25,10 +33,10 @@ public class Config extends BaseConfig {
     public int tupleSize;
     public boolean assignedTuples;
     public boolean excludeSelf;
-    public boolean mixedStrategySelection;
-    public boolean stripStrategySelection;
     public int subperiods;
-    public StrategySelectionDisplayType strategySelectionDisplayType;
+    public boolean mixedStrategySelection;
+    public StrategySelector strategySelector;
+    public MatrixDisplayType matrixDisplayType;
     public Line yourPayoff, matchPayoff;
     public Line yourStrategy, matchStrategy;
     public Line thresholdLine;
@@ -60,8 +68,7 @@ public class Config extends BaseConfig {
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
     public static final Class pricing = PricingPayoffFunction.class;
-    public static final Class cournot = CournotPayoffFunction.class;
-    public static final Class publicGoods = PublicGoodsPayoffFunction.class;
+    public static final Class sum = SumPayoffFunction.class;
     public static final Class line = Line.class;
     public static final Class threshold = ThresholdPayoffFunction.class;
     public static final Class shockZone = ShockZone.class;
@@ -84,9 +91,6 @@ public class Config extends BaseConfig {
         changeCost = 0;
         subperiods = 0;
         preLength = 0;
-        strategySelectionDisplayType = StrategySelectionDisplayType.Matrix;
-        mixedStrategySelection = true;
-        stripStrategySelection = false;
         yourPayoff = new Line();
         yourPayoff.r = 50;
         yourPayoff.g = 50;
@@ -159,9 +163,9 @@ public class Config extends BaseConfig {
         strategyUpdateMillis = 100;
         probPayoffs = false;
         trajectory = false;
-        alphabet = new String[] {"Alpha", "Beta", "Gamma", "Delta", "Epsilon",
-        "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu", "Nu", "Ksi",
-        "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega"};
+        alphabet = new String[]{"Alpha", "Beta", "Gamma", "Delta", "Epsilon",
+                    "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu", "Nu", "Ksi",
+                    "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega"};
     }
     public static final Color[] colors = new Color[]{
         new Color(7, 226, 0),

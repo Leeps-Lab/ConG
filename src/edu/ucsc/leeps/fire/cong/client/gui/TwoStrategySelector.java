@@ -5,8 +5,6 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.config.StrategySelectionDisplayType;
-import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.event.KeyEvent;
@@ -243,7 +241,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
                 hover.draw(applet);
             }
         }
-        if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth) {
+        if (config.matrixDisplayType == Config.MatrixDisplayType.HeatmapBoth) {
             float x, y, w, h;
             x = counterpartHeatmap.origin.x;
             y = counterpartHeatmap.origin.y;
@@ -269,7 +267,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     private void drawHeatmap() {
         heatmap.draw(applet);
 
-        if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth) {
+        if (config.matrixDisplayType == Config.MatrixDisplayType.HeatmapBoth) {
             counterpartHeatmap.draw(applet);
         }
 
@@ -278,7 +276,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
         myHeatmapBa.draw(applet);
         myHeatmapBb.draw(applet);
 
-        if (config.strategySelectionDisplayType == StrategySelectionDisplayType.HeatmapBoth) {
+        if (config.matrixDisplayType == Config.MatrixDisplayType.HeatmapBoth) {
             counterpartHeatmapAa.draw(applet);
             cuonterpartHeatmapAb.draw(applet);
             counterpartHeatmapBa.draw(applet);
@@ -386,10 +384,8 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.mixedStrategySelection && !config.stripStrategySelection
-                && config.payoffFunction instanceof TwoStrategyPayoffFunction
-                && !(config.payoffFunction instanceof CournotPayoffFunction)) {
-            switch (config.strategySelectionDisplayType) {
+        if (config.strategySelector == Config.StrategySelector.bimatrix) {
+            switch (config.matrixDisplayType) {
                 case HeatmapSingle:
                     setModeHeatmapSingle();
                     break;

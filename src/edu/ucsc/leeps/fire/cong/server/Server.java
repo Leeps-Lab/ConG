@@ -6,7 +6,10 @@ import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
 import edu.ucsc.leeps.fire.server.ServerController.State;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
@@ -63,23 +66,14 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         }
         population = new Population();
         population.configure(members);
+        List<String> alphabet = new ArrayList<String>();
+        for (int i = 0; i < clients.size(); i++) {
+            alphabet.add(config.alphabet[i]);
+        }
+        Collections.shuffle(alphabet, FIRE.server.getRandom());
         aliases = new String[clients.size()];
-        int n = clients.size();
-        for (int m = 0; m < clients.size(); m++) {
-            int index = 0;
-            int k = (int) (Math.random() * n);
-            while (aliases[index] != null) {
-                index++;
-            }
-            while(k > 0){
-                while (aliases[index] != null) {
-                    index++;
-                }
-                index++;
-                k--;
-            }
-            aliases[index] = config.alphabet[m];
-            n--;
+        for (int i = 0; i < clients.size(); i++) {
+            aliases[i] = alphabet.get(i);
         }
     }
 

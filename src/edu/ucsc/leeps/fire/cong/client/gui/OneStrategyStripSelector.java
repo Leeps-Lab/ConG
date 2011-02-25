@@ -5,10 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.CournotPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -141,9 +138,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     }
 
     public void configChanged(Config config) {
-        if (config.mixedStrategySelection && config.stripStrategySelection
-                && config.payoffFunction instanceof TwoStrategyPayoffFunction
-                && !(config.payoffFunction instanceof CournotPayoffFunction)) {
+        if (config.strategySelector == Config.StrategySelector.strip) {
             setVisible(true);
             if (config.payoffFunction instanceof PricingPayoffFunction) {
                 slider = new Slider(

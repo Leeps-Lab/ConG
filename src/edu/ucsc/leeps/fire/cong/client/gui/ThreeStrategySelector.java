@@ -555,8 +555,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.mixedStrategySelection
-                && config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        if (config.strategySelector == Config.StrategySelector.simplex) {
             rock.setLabel(config.shortRLabel);
             rock.setColor(config.rColor);
             paper.setLabel(config.shortPLabel);
