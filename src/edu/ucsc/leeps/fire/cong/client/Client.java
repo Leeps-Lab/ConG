@@ -100,11 +100,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         debug = ALLOW_DEBUG;
         agent = new Agent(debug);
         agent.start();
-        chatFrame = new JFrame("Chat");
-        chatroom = new Chatroom(chatFrame);
-        chatFrame.add(chatroom);
-        chatFrame.pack();
-        chatFrame.setVisible(false);
     }
 
     public boolean haveInitialStrategy() {
@@ -161,7 +156,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             sChart.clearAll();
         }
         simplex.setEnabled(true);
-        chatroom.startPeriod();
+        if (chatroom != null) {
+            chatroom.startPeriod();
+        }
 
         strategyChanger.startPeriod();
         strategyChanger.selector.startPeriod();
@@ -188,7 +185,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
         state.currentPercent = 1f;
 
-        chatroom.endPeriod();
+        if (chatroom != null) {
+            chatroom.endPeriod();
+        }
 
         if (FIRE.client.getConfig().subperiods == 0) {
             payoffChart.updateLines();
@@ -249,7 +248,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void newMessage(String message) {
-        chatroom.newMessage(message);
+        if (chatroom != null) {
+            chatroom.newMessage(message);
+        }
     }
 
     public boolean readyForNextPeriod() {
@@ -370,13 +371,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 long length = FIRE.client.getConfig().length * 1000l;
                 state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
 
-                //if (FIRE.client.getConfig().subperiods == 0) {
-                payoffChart.updateLines();
-                strategyChart.updateLines();
-                rChart.updateLines();
-                pChart.updateLines();
-                sChart.updateLines();
-                //}
+                if (FIRE.client.getConfig().subperiods == 0) {
+                    payoffChart.updateLines();
+                    strategyChart.updateLines();
+                    rChart.updateLines();
+                    pChart.updateLines();
+                    sChart.updateLines();
+                }
             }
             if (FIRE.client.isRunningPeriod()) {
                 pointsDisplay.update();
@@ -415,6 +416,17 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void configChanged(Config config) {
+        if (config.chatroom && chatFrame == null) {
+            chatFrame = new JFrame("Chat");
+            chatroom = new Chatroom(chatFrame);
+            chatFrame.add(chatroom);
+            chatFrame.pack();
+            chatFrame.setVisible(false);
+            chatroom.configure(config);
+        } else if (chatFrame != null && chatroom != null) {
+            chatroom.configure(config);
+        }
+
         framesPerUpdate = Math.round(frameRateTarget * (1f / FIRE.client.getConfig().updatesPerSecond));
         payoffChart.setVisible(true);
         legend.setVisible(true);
@@ -427,8 +439,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             payoffChart.origin.x = 100;
             payoffChart.clearAll();
             strip.origin.x = 10;
-            legend.setVisible(false);
             payoffChart.configChanged(config);
+            legend.setVisible(true);
+            strategyChart.setVisible(false);
         }
         if (config.selector == Config.StrategySelector.bubbles) {
             strategyChart.setVisible(false);
@@ -436,13 +449,18 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             legend.setVisible(false);
             bubbles.width = Math.round(0.7f * width);
             bubbles.origin.x = 0.15f * width;
-        } else {
-            strategyChart.setVisible(true);
         }
         if (config.selector == Config.StrategySelector.simplex) {
             rChart.setVisible(true);
             pChart.setVisible(true);
             sChart.setVisible(true);
+            legend.setVisible(true);
+            strategyChart.setVisible(true);
+        }
+        if (config.selector == Config.StrategySelector.bimatrix) {
+            payoffChart.setVisible(true);
+            strategyChart.setVisible(true);
+            bimatrix.setVisible(true);
         }
     }
 
@@ -487,7 +505,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     @Override
     public void keyTyped(KeyEvent ke) {
-        chatroom.addCharacter(ke.getKeyChar());
+        if (chatroom != null) {
+            chatroom.addCharacter(ke.getKeyChar());
+        }
     }
 
     private void setupFonts() {

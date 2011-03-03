@@ -6,10 +6,8 @@ import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
 import edu.ucsc.leeps.fire.server.ServerController.State;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.awt.Color;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
@@ -25,7 +23,8 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     private Population population;
     private BlockingQueue<StrategyChangeEvent> strategyChangeEvents;
     private StrategyProcessor strategyProcessor;
-    private String[] aliases;
+    private Map<Integer, String> aliases;
+    private Map<Integer, Color> colors;
 
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
@@ -65,16 +64,9 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             }
         }
         population = new Population();
-        population.configure(members);
-        List<String> alphabet = new ArrayList<String>();
-        for (int i = 0; i < clients.size(); i++) {
-            alphabet.add(config.alphabet[i]);
-        }
-        Collections.shuffle(alphabet, FIRE.server.getRandom());
-        aliases = new String[clients.size()];
-        for (int i = 0; i < clients.size(); i++) {
-            aliases[i] = alphabet.get(i);
-        }
+        aliases = new HashMap<Integer, String>();
+        colors = new HashMap<Integer, Color>();
+        population.configure(members, aliases, colors);
     }
 
     public boolean readyToEndPrePeriod() {
@@ -175,7 +167,11 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             if (senderID == -1) {
                 message = "SERVER: " + message;
             } else {
-                message = aliases[senderID - 1] + ": " + message;
+                Color c = colors.get(senderID);
+                message = String.format("<font color=\"rgb(%d, %d, %d)\">", c.getRed(), c.getGreen(), c.getBlue())
+                        + aliases.get(senderID)
+                        + "</font>" + ": "
+                        + message;
             }
             population.newMessage(message, senderID);
         }

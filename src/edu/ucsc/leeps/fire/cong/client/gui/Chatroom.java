@@ -5,25 +5,33 @@
  */
 package edu.ucsc.leeps.fire.cong.client.gui;
 
-import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import java.awt.event.KeyEvent;
+import java.util.LinkedList;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 
 /**
  *
  * @author alexlou
  */
-public class Chatroom extends JPanel implements Configurable<Config> {
+public class Chatroom extends JPanel {
 
     private JFrame frame;
+    private List<String> lines;
 
     public Chatroom(JFrame frame) {
         initComponents();
         this.frame = frame;
-        FIRE.client.addConfigListener(this);
+        HTMLEditorKit kit = (HTMLEditorKit) outputArea.getEditorKit();
+        StyleSheet s = kit.getStyleSheet();
+        s.addRule("p { margin: 0px; padding: 0px; }");
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        lines = new LinkedList<String>();
     }
 
     /** This method is called from within the constructor to
@@ -37,7 +45,7 @@ public class Chatroom extends JPanel implements Configurable<Config> {
         java.awt.GridBagConstraints gridBagConstraints;
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        outputField = new javax.swing.JTextArea();
+        outputArea = new javax.swing.JEditorPane();
         menuInputPanel = new javax.swing.JPanel();
         m1 = new javax.swing.JButton();
         m3 = new javax.swing.JButton();
@@ -55,18 +63,16 @@ public class Chatroom extends JPanel implements Configurable<Config> {
         setPreferredSize(new java.awt.Dimension(300, 300));
         setLayout(new java.awt.GridBagLayout());
 
-        outputField.setColumns(20);
-        outputField.setEditable(false);
-        outputField.setLineWrap(true);
-        outputField.setRows(5);
-        outputField.setWrapStyleWord(true);
-        jScrollPane1.setViewportView(outputField);
+        outputArea.setContentType("text/html");
+        outputArea.setEditable(false);
+        outputArea.setText("\n");
+        outputArea.setMinimumSize(new java.awt.Dimension(0, 0));
+        jScrollPane1.setViewportView(outputArea);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         add(jScrollPane1, gridBagConstraints);
@@ -253,7 +259,7 @@ public class Chatroom extends JPanel implements Configurable<Config> {
     private javax.swing.JButton m7;
     private javax.swing.JButton m8;
     private javax.swing.JPanel menuInputPanel;
-    private javax.swing.JTextArea outputField;
+    private javax.swing.JEditorPane outputArea;
     // End of variables declaration//GEN-END:variables
 
     public void addCharacter(char c) {
@@ -262,7 +268,7 @@ public class Chatroom extends JPanel implements Configurable<Config> {
         }
         if (c == '\n') {
             sendMessage();
-        } else if (c == 8 || c == 127) {
+        } else if ((c == 8 || c == 127) && inputField.getText().length() > 0) {
             inputField.setText(inputField.getText().substring(0, inputField.getText().length() - 1));
         } else {
             inputField.setText(inputField.getText() + c);
@@ -288,23 +294,23 @@ public class Chatroom extends JPanel implements Configurable<Config> {
      * @param senderID ID of sender.
      */
     public void newMessage(String message) {
-        outputField.append(message + "\n");
-        outputField.setCaretPosition(outputField.getDocument().getLength());
+        lines.add(message);
+        updateOutputArea();
     }
 
     public void startPeriod() {
-        outputField.setText("");
-        outputField.setCaretPosition(outputField.getDocument().getLength());
+        updateOutputArea();
     }
 
     public void endPeriod() {
     }
 
-    public void configChanged(final Config config) {
+    public void configure(final Config config) {
         new Thread() {
 
             @Override
             public void run() {
+                lines.clear();
                 frame.setVisible(config.chatroom);
                 inputField.setEnabled(config.freeChat);
                 inputField.setVisible(config.freeChat);
@@ -363,5 +369,15 @@ public class Chatroom extends JPanel implements Configurable<Config> {
                 }
             }
         }.start();
+    }
+
+    private void updateOutputArea() {
+        String html = "<html><body>";
+        for (String line : lines) {
+            html += "<p>" + line + "</p>";
+        }
+        html += "</body></html>";
+        outputArea.setText(html);
+        outputArea.setCaretPosition(outputArea.getDocument().getLength());
     }
 }

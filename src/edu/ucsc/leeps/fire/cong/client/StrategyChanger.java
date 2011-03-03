@@ -66,7 +66,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             deltaStrategy[i] = Client.state.target[i] - current[i];
             totalDelta += Math.abs(deltaStrategy[i]);
         }
-        if (config.percentChangePerSecond < 1f && totalDelta > tickDelta) {
+        if (!Float.isNaN(config.percentChangePerSecond) && totalDelta > tickDelta) {
             for (int i = 0; i < deltaStrategy.length; i++) {
                 deltaStrategy[i] = tickDelta * (deltaStrategy[i] / totalDelta);
                 current[i] += deltaStrategy[i];

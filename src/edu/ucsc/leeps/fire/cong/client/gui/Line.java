@@ -2,6 +2,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -17,6 +18,12 @@ public class Line extends Sprite implements Serializable {
     public boolean stepFunction;
     private transient ArrayList<Integer> ypoints;
     private transient int xMax;
+    private transient Config config;
+    private transient long nextRemoveNanos;
+    private transient long nanosPerRemove;
+    private transient int maxLength;
+    private transient long subperiodEndTime;
+    private transient float pixelsPerSubperiod;
 
     public Line() {
         super(null, 0, 0, 0, 0);
@@ -33,15 +40,26 @@ public class Line extends Sprite implements Serializable {
         xMax = 0;
     }
 
-    public void configure(Line config) {
+    public void configure(Config config, Line lconfig) {
         this.visible = true;
-        this.r = config.r;
-        this.g = config.g;
-        this.b = config.b;
-        this.alpha = config.alpha;
-        this.weight = config.weight;
-        this.mode = config.mode;
+        this.r = lconfig.r;
+        this.g = lconfig.g;
+        this.b = lconfig.b;
+        this.alpha = lconfig.alpha;
+        this.weight = lconfig.weight;
+        this.mode = lconfig.mode;
         stepFunction = FIRE.client.getConfig().subperiods != 0;
+        this.config = config;
+        if (config.indefiniteEnd != null && config.subperiods != 0) {
+            nextRemoveNanos = Long.MAX_VALUE;
+            float pixels = config.indefiniteEnd.percentToDisplay * width;
+            int subperiodLength = config.length / config.subperiods;
+            int subperiodsDisplayed = config.indefiniteEnd.secondsToDisplay / subperiodLength;
+            pixelsPerSubperiod = pixels / subperiodsDisplayed;
+            maxLength = Math.round(pixels - pixelsPerSubperiod);
+            int nanosPerSubperiod = config.subperiods * 1000 * 1000;
+            nanosPerRemove = Math.round(nanosPerSubperiod / pixelsPerSubperiod) + 1000000000;
+        }
     }
 
     public void setPoint(int x, int y) {
@@ -59,6 +77,13 @@ public class Line extends Sprite implements Serializable {
             }
             xMax++;
         }
+    }
+
+    public void endSubperiod(int subperiod) {
+        nextRemoveNanos = System.nanoTime() + nanosPerRemove;
+        long nanosPerSubperiod = System.nanoTime() - subperiodEndTime;
+        nanosPerRemove = Math.round(nanosPerSubperiod / pixelsPerSubperiod);
+        subperiodEndTime = System.nanoTime();
     }
 
     private void drawSolidLine(Client applet) {
@@ -138,6 +163,15 @@ public class Line extends Sprite implements Serializable {
                 break;
         }
         applet.popMatrix();
+        if (config != null
+                && config.indefiniteEnd != null
+                && config.subperiods != 0
+                && ypoints.size() > 0
+                && ypoints.size() >= maxLength
+                && System.nanoTime() >= nextRemoveNanos) {
+            ypoints.remove(0);
+            nextRemoveNanos += nanosPerRemove;
+        }
     }
 
     public synchronized void clear() {

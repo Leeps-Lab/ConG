@@ -6,6 +6,7 @@ import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -77,17 +78,18 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         int i = 1;
         for (int id : Client.state.strategies.keySet()) {
             Color color;
-            if (id == FIRE.client.getID()) {
-                color = Config.colors[0];
+            if (config.objectiveColors) {
+                color = config.currColors.get(id);
             } else {
-                color = Config.colors[i];
-                i++;
+                if (id == FIRE.client.getID()) {
+                    color = Config.colors[0];
+                } else {
+                    color = Config.colors[i];
+                    i++;
+                }
             }
-            if (FIRE.client.getID() != id) {
-                drawStrategy(applet, color, id);
-            }
+            drawStrategy(applet, color, id);
         }
-        drawStrategy(applet, Color.BLACK, FIRE.client.getID());
         if (config.subperiods != 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
             drawPlannedStrategy(applet);
         }
@@ -124,25 +126,19 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         } else if (y < 0) {
             y = 0;
         }
-        if (id == FIRE.client.getID()) {
-            applet.strokeWeight(3);
-            applet.stroke(-40, 160, 60);
-            applet.fill(40, 240, 140);
-        } else if (config.subperiods == 0 || Client.state.subperiod != 0) {
-            applet.stroke(color.getRed() - 40, color.getGreen() - 40, color.getBlue() - 40);
-            applet.fill(color.getRed() + 40, color.getGreen() + 40, color.getBlue() + 40);
+        applet.stroke(color.getRed(), color.getGreen(), color.getBlue());
+        applet.fill(color.getRed(), color.getGreen(), color.getBlue());
+        if (id != FIRE.client.getID() && config.subperiods == 0 || Client.state.subperiod != 0) {
             applet.strokeWeight(3);
             applet.line(x, height - 5, x, height + 5);
         }
-        applet.strokeWeight(1);
-        if (id == FIRE.client.getID() && (config.subperiods == 0 || Client.state.subperiod != 0)) {
-            applet.ellipse(x, y, 11, 11);
-            applet.fill(40 - 30, 240 - 30, 140 - 30);
-            applet.stroke(40 - 30, 240 - 30, 140 - 30);
-        } else if (config.subperiods == 0 || Client.state.subperiod != 0) {
-            applet.ellipse(x, y, 8, 8);
-            applet.fill(color.getRed() - 70, color.getGreen() - 70, color.getBlue() - 70);
-            applet.stroke(color.getRed() - 70, color.getGreen() - 70, color.getBlue() - 70);
+        if (config.subperiods == 0 || Client.state.subperiod != 0) {
+            applet.strokeWeight(1);
+            if (id == FIRE.client.getID()) {
+                applet.ellipse(x, y, 11, 11);
+            } else {
+                applet.ellipse(x, y, 8, 8);
+            }
         }
         if (config.subperiods == 0 || Client.state.subperiod != 0) {
             String label = String.format("%.0f", payoff);
@@ -204,6 +200,13 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
             applet.fill(0);
             String label = String.format("%.1f", payoff);
             applet.text(label, Math.round(labelX), Math.round(y0));
+        }
+        if (config.payoffFunction instanceof SumPayoffFunction) {
+            SumPayoffFunction pf = (SumPayoffFunction) config.payoffFunction;
+            String label = String.format("%.1f", pf.smin);
+            applet.text(label, Math.round(0), Math.round(height + 20));
+            label = String.format("%.1f", pf.smax);
+            applet.text(label, Math.round(width), Math.round(height + 20));
         }
     }
 

@@ -40,9 +40,9 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
     @Override
     public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies, Config config) {
         float sum = 0;
-        for (int i : matchPopStrategies.keySet()) {
+        for (int i : popStrategies.keySet()) {
             if (i != id) {
-                sum += matchPopStrategies.get(i)[0];
+                sum += smin + popStrategies.get(i)[0] * (smax - smin);
             }
         }
         float s = smin + (popStrategies.get(id)[0] * (smax - smin));
@@ -56,7 +56,7 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
                 u = ((A - B * sum) * s - C * s) + D;
                 break;
             case public_goods:
-                u = 100 * ((A * sum) + (1 - s));
+                u = A - s + B * sum;
                 break;
         }
         return u;

@@ -1,6 +1,6 @@
-"period","paid","turnTaking","indefiniteEnd","max","secondsToDisplay","percentToDisplay","subperiods","percentChangePerSecond","numTuples","payoffFunction","name","mixedStrategySelection","stripStrategySelection","strategySelectionDisplayType","showPayoffTimeAxisLabels","marginalCost"
-1,"TRUE","TRUE","endUniform",100,10,0.2,0,0.1,1,"pricing","pf","TRUE","TRUE","Slider","TRUE",10
-2,"TRUE","FALSE","endUniform",100,10,0.2,0,0.1,1,"pricing","pf","TRUE","TRUE","Slider","TRUE",10
-3,"TRUE","FALSE","endUniform",100,20,0.2,2,1,1,"pricing","pf","TRUE","TRUE","Slider","TRUE",10
-4,"TRUE","TRUE","endUniform",20,10,0.2,5,1,1,"pricing","pf","TRUE","TRUE","Slider","TRUE",10
-5,"TRUE","TRUE","endUniform",100,10,0.2,0,0.1,1,"pricing","pf","TRUE","TRUE","Slider","TRUE",10
+"period","paid","turnTaking","indefiniteEnd","max","secondsToDisplay","percentToDisplay","subperiods","percentChangePerSecond","numTuples","payoffFunction","name","mixed","selector","showPayoffTimeAxisLabels","marginalCost"
+1,"TRUE","FALSE","endUniform",20,20,0.4,10,1,1,"pricing","pf","TRUE","strip","TRUE",10
+2,"TRUE","TRUE","endUniform",20,20,0.4,10,1,1,"pricing","pf","TRUE","strip","TRUE",10
+3,"TRUE","FALSE","endUniform",100,20,0.2,2,1,1,"pricing","pf","TRUE","strip","TRUE",10
+4,"TRUE","TRUE","endUniform",20,10,0.2,5,1,1,"pricing","pf","TRUE","strip","TRUE",10
+5,"TRUE","TRUE","endUniform",100,10,0.2,0,0.1,1,"pricing","pf","TRUE","strip","TRUE",10

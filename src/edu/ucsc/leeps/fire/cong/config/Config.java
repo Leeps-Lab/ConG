@@ -10,6 +10,7 @@ import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import java.awt.Color;
+import java.util.Map;
 
 /**
  *
@@ -24,7 +25,10 @@ public class Config extends BaseConfig {
 
     public enum MatrixDisplayType {
 
-        HeatmapSingle, HeatmapBoth, Matrix, Slider
+        HeatmapSingle, HeatmapBoth, Matrix
+    }
+    public enum MatchTuple {
+        self, pair;
     }
     public float percentChangePerSecond;
     public PayoffFunction payoffFunction;
@@ -65,6 +69,9 @@ public class Config extends BaseConfig {
     public boolean trajectory;
     public ChatMenu menu;
     public boolean turnTaking;
+    public boolean objectiveColors;
+    public MatchTuple matchType;
+    public float initial = Float.NaN;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -83,7 +90,6 @@ public class Config extends BaseConfig {
     public int playersInTuple;
     public int population, match;
     public int marginalCost;
-    public String[] alphabet;
 
     public Config() {
         paid = true;
@@ -146,7 +152,7 @@ public class Config extends BaseConfig {
         shock.end = 0f;
         shock.backfill = false;
         impulse = 0f;
-        showHeatmapLegend = true;
+        showHeatmapLegend = false;
         chatroom = false;
         negativePayoffs = false;
         sigmoidHeatmap = false;
@@ -164,13 +170,16 @@ public class Config extends BaseConfig {
         strategyUpdateMillis = 100;
         probPayoffs = false;
         trajectory = false;
-        alphabet = new String[]{"Alpha", "Beta", "Gamma", "Delta", "Epsilon",
-                    "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu", "Nu", "Ksi",
-                    "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega"};
+        matchType = MatchTuple.pair;
     }
-    public static final Color[] colors = new Color[]{
-        new Color(7, 226, 0),
-        new Color(52, 95, 255),
-        new Color(247, 64, 24),
-        new Color(255, 121, 0),};
+    public static String[] aliases = new String[]{"Green", "Red", "Blue", "Aqua"};
+    public static Color[] colors = new Color[]{
+        new Color(0x1FCB1A), // green
+        new Color(0xF74018), // red
+        new Color(0x587CFF), // blue
+        new Color(0x5DE6D7), // Purple
+    };
+    // assigned by the server in configurePeriod
+    public Map<Integer, String> currAliases;
+    public Map<Integer, Color> currColors;
 }

@@ -5,11 +5,13 @@ import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.logging.MessageEvent;
 import edu.ucsc.leeps.fire.cong.logging.TickEvent;
+import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -39,7 +41,7 @@ public class Population implements Serializable {
         strategyUpdateProcessors = new HashMap<Integer, StrategyUpdateProcessor>();
     }
 
-    public void configure(Map<Integer, ClientInterface> members) {
+    public void configure(Map<Integer, ClientInterface> members, Map<Integer, String> aliases, Map<Integer, Color> colors) {
         this.members = members;
         for (int member : members.keySet()) {
             strategyUpdateEvents.put(member, new LinkedBlockingQueue<StrategyUpdateEvent>());
@@ -54,6 +56,28 @@ public class Population implements Serializable {
         setupTuples();
         if (FIRE.server.getConfig().preLength == 0) {
             setInitialStrategies();
+        }
+        for (Tuple tuple : tuples) {
+            List<String> possible_aliases = new ArrayList<String>();
+            for (int i = 0; i < tuple.members.size(); i++) {
+                possible_aliases.add(Config.aliases[i]);
+            }
+            Collections.shuffle(possible_aliases, FIRE.server.getRandom());
+            int i = 0;
+            for (int id : tuple.members) {
+                aliases.put(id, possible_aliases.get(i));
+                for (int j = 0; j < Config.aliases.length; j++) {
+                    if (aliases.get(id).equals(Config.aliases[j])) {
+                        colors.put(id, Config.colors[j]);
+                        break;
+                    }
+                }
+                i++;
+            }
+        }
+        for (int id : members.keySet()) {
+            FIRE.server.getConfig(id).currAliases = aliases;
+            FIRE.server.getConfig(id).currColors = colors;
         }
     }
 
@@ -371,16 +395,17 @@ public class Population implements Serializable {
     }
 
     private void setupRandomTuples() {
+        Config config = FIRE.server.getConfig();
         ArrayList<Integer> randomMembers = new ArrayList<Integer>();
         randomMembers.addAll(members.keySet());
         Collections.shuffle(randomMembers, FIRE.server.getRandom());
-        if (FIRE.server.getConfig().tupleSize == -1) {
-            FIRE.server.getConfig().tupleSize = members.size() / FIRE.server.getConfig().numTuples;
+        if (config.tupleSize == -1) {
+            config.tupleSize = members.size() / config.numTuples;
         }
         Tuple current = null;
         ArrayList<Tuple> randomTuples = new ArrayList<Tuple>();
         while (randomMembers.size() > 0) {
-            if (current == null || current.members.size() == FIRE.server.getConfig().tupleSize) {
+            if (current == null || current.members.size() == config.tupleSize) {
                 current = new Tuple();
                 randomTuples.add(current);
             }
@@ -388,37 +413,49 @@ public class Population implements Serializable {
             current.members.add(member);
             tupleMap.put(member, current);
         }
-        Collections.shuffle(randomTuples, FIRE.server.getRandom());
-        while (randomTuples.size() > 0) {
-            Tuple tuple = randomTuples.remove(0);
-            if (tuples.size() == 1) {
+        if (config.matchType == Config.MatchTuple.pair) {
+            Collections.shuffle(randomTuples, FIRE.server.getRandom());
+            while (randomTuples.size() > 0) {
+                Tuple tuple = randomTuples.remove(0);
+                if (tuples.size() == 1) {
+                    tuple.match = tuple;
+                } else {
+                    tuple.match = randomTuples.remove(0);
+                }
+                tuple.match.match = tuple;
+                Tuple tuple1;
+                if (FIRE.server.getRandom().nextBoolean()) {
+                    tuple1 = tuple;
+                } else {
+                    tuple1 = tuple.match;
+                }
+                PayoffFunction payoffFunction = config.payoffFunction;
+                PayoffFunction counterpartPayoffFunction = config.counterpartPayoffFunction == null ? config.payoffFunction : config.counterpartPayoffFunction;
+                for (int member : tuple1.members) {
+                    Config c = FIRE.server.getConfig(member);
+                    c.isCounterpart = false;
+                    c.payoffFunction = payoffFunction;
+                    c.counterpartPayoffFunction = counterpartPayoffFunction;
+                    c.playersInTuple = tuple1.members.size();
+                }
+                for (int member : tuple1.match.members) {
+                    Config c = FIRE.server.getConfig(member);
+                    c.isCounterpart = true;
+                    c.payoffFunction = counterpartPayoffFunction;
+                    c.counterpartPayoffFunction = payoffFunction;
+                    c.playersInTuple = tuple1.match.members.size();
+                }
+            }
+        } else {
+            for (Tuple tuple : tuples) {
                 tuple.match = tuple;
-            } else {
-                tuple.match = randomTuples.remove(0);
-            }
-            tuple.match.match = tuple;
-            Config def = FIRE.server.getConfig();
-            Tuple tuple1;
-            if (FIRE.server.getRandom().nextBoolean()) {
-                tuple1 = tuple;
-            } else {
-                tuple1 = tuple.match;
-            }
-            PayoffFunction payoffFunction = def.payoffFunction;
-            PayoffFunction counterpartPayoffFunction = def.counterpartPayoffFunction == null ? def.payoffFunction : def.counterpartPayoffFunction;
-            for (int member : tuple1.members) {
-                Config config = FIRE.server.getConfig(member);
-                config.isCounterpart = false;
-                config.payoffFunction = payoffFunction;
-                config.counterpartPayoffFunction = counterpartPayoffFunction;
-                config.playersInTuple = tuple1.members.size();
-            }
-            for (int member : tuple1.match.members) {
-                Config config = FIRE.server.getConfig(member);
-                config.isCounterpart = true;
-                config.payoffFunction = counterpartPayoffFunction;
-                config.counterpartPayoffFunction = payoffFunction;
-                config.playersInTuple = tuple1.match.members.size();
+                for (int member : tuple.members) {
+                    Config c = FIRE.server.getConfig(member);
+                    c.isCounterpart = false;
+                    c.payoffFunction = config.payoffFunction;
+                    c.counterpartPayoffFunction = config.payoffFunction;
+                    c.playersInTuple = tuple.members.size();
+                }
             }
         }
         assert (randomMembers.isEmpty());
@@ -428,7 +465,10 @@ public class Population implements Serializable {
     private void setInitialStrategies() {
         for (int client : members.keySet()) {
             float[] s;
-            if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+            if (!Float.isNaN(FIRE.server.getConfig(client).initial)) {
+                s = new float[]{
+                            FIRE.server.getConfig().initial,};
+            } else if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                 s = new float[1];
                 if (FIRE.server.getConfig().mixed) {
                     float costRange = FIRE.server.getConfig().payoffFunction.getMax() - FIRE.server.getConfig(client).marginalCost;

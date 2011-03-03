@@ -324,9 +324,9 @@ public class Chart extends Sprite implements Configurable<Config> {
     private void initializePriceLine(int id) {
         Line priceLine = new Line(this, 0, scaledMargin, width, scaledHeight);
         if (id == Client.state.id) {
-            priceLine.configure(config.yourStrategy);
+            priceLine.configure(config, config.yourStrategy);
         } else {
-            priceLine.configure(config.matchStrategy);
+            priceLine.configure(config, config.matchStrategy);
         }
         Color color;
         if (id == FIRE.client.getID()) {
@@ -395,7 +395,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
         if (!marginalCosts.containsKey(Client.state.id)) {
             Line marginalCostLine = new Line(this, 0, scaledMargin, width, scaledHeight);
-            marginalCostLine.configure(FIRE.client.getConfig().yourStrategy);
+            marginalCostLine.configure(config, config.yourStrategy);
             marginalCostLine.mode = Line.Mode.Dashed;
             marginalCosts.put(Client.state.id, marginalCostLine);
         }
@@ -411,42 +411,58 @@ public class Chart extends Sprite implements Configurable<Config> {
         float diff = percentEnd - percentStart;
         for (float offset = 0; offset < diff; offset += 0.01) {
             if (subperiod != 0) {
-                //updateLines(percentStart + offset);
+                updateLines(percentStart + offset);
             }
             if (subperiod != FIRE.client.getConfig().subperiods) {
-                //updateMarginalCostLines(marginalCostStart + offset);
+                updateMarginalCostLines(marginalCostStart + offset);
             }
         }
         if (subperiod != 0) {
-            //updateLines(percentEnd);
+            updateLines(percentEnd);
         }
-        //updateMarginalCostLines(marginalCostEnd);
+        updateMarginalCostLines(marginalCostEnd);
+        yourPayoff.endSubperiod(subperiod);
+        matchPayoff.endSubperiod(subperiod);
+        yourStrategy.endSubperiod(subperiod);
+        matchStrategy.endSubperiod(subperiod);
+        yourR.endSubperiod(subperiod);
+        matchR.endSubperiod(subperiod);
+        yourP.endSubperiod(subperiod);
+        matchP.endSubperiod(subperiod);
+        yourS.endSubperiod(subperiod);
+        matchS.endSubperiod(subperiod);
+        for (Line line : prices.values()) {
+            line.endSubperiod(subperiod);
+        }
+        for (Line line : marginalCosts.values()) {
+            line.endSubperiod(subperiod);
+        }
     }
 
     public void configChanged(Config config) {
         this.config = config;
         minPayoff = config.payoffFunction.getMin();
         maxPayoff = config.payoffFunction.getMax();
-        yourPayoff.configure(config.yourPayoff);
-        matchPayoff.configure(config.matchPayoff);
-        yourStrategy.configure(config.yourStrategy);
-        matchStrategy.configure(config.matchStrategy);
-        yourR.configure(config.yourPayoff);
+        yourPayoff.configure(config, config.yourPayoff);
+        matchPayoff.configure(config, config.matchPayoff);
+        yourStrategy.configure(config, config.yourStrategy);
+        matchStrategy.configure(config, config.matchStrategy);
+        yourR.configure(config, config.yourPayoff);
         yourR.mode = Line.Mode.Solid;
         yourR.weight = 2f;
-        matchR.configure(config.matchPayoff);
+        matchR.configure(config, config.matchPayoff);
         matchR.mode = Line.Mode.Solid;
-        yourP.configure(config.yourPayoff);
+        yourP.configure(config, config.yourPayoff);
         yourP.mode = Line.Mode.Solid;
         yourP.weight = 2f;
-        matchP.configure(config.matchPayoff);
+        matchP.configure(config, config.matchPayoff);
         matchP.mode = Line.Mode.Solid;
-        yourS.configure(config.yourPayoff);
+        yourS.configure(config, config.yourPayoff);
         yourS.mode = Line.Mode.Solid;
         yourS.weight = 2f;
-        matchS.configure(config.matchPayoff);
+        matchS.configure(config, config.matchPayoff);
         matchS.mode = Line.Mode.Solid;
-        threshold.configure(config.thresholdLine);
+        threshold.configure(config, config.thresholdLine);
         if (config.payoffFunction instanceof ThresholdPayoffFunction) {
             threshold.clear();
             for (float percent = 0f; percent < 1.0f; percent += .01f) {
@@ -485,7 +501,7 @@ public class Chart extends Sprite implements Configurable<Config> {
             yourPayoff.origin.y = scaledMargin;
             yourPayoff.width = width;
             yourPayoff.height = scaledHeight;
-            yourPayoff.configure(config.yourPayoff);
+            yourPayoff.configure(config, config.yourPayoff);
         }
     }
 }
