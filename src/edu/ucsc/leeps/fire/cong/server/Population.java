@@ -332,30 +332,20 @@ public class Population implements Serializable {
     }
 
     private void setupAssignedTuples() {
+        Map<Integer, Tuple> populations = new HashMap<Integer, Tuple>();
         for (int member : members.keySet()) {
             Config config = FIRE.server.getConfig(member);
-            int population = config.population;
-            int match = config.match;
-            Tuple p = null;
-            Tuple m = null;
-            for (Tuple tuple : tuples) {
-                if (tuple.population == population) {
-                    p = tuple;
-                }
-                if (tuple.population == match) {
-                    m = tuple;
-                }
-
+            if (!populations.containsKey(config.population)) {
+                populations.put(config.population, new Tuple(config.population));
             }
-            if (p == null) {
-                p = new Tuple(population);
+            if (!populations.containsKey(config.match)) {
+                populations.put(config.match, new Tuple(config.match));
             }
-            if (m == null) {
-                m = new Tuple(match);
-            }
-            p.members.add(member);
-            p.match = m;
-            tupleMap.put(member, p);
+            populations.get(config.population).members.add(member);
+            populations.get(config.population).match = populations.get(config.match);
+            tupleMap.put(member, populations.get(config.population));
+            tuples.add(populations.get(config.population));
+            tuples.add(populations.get(config.match));
         }
         Set<Tuple> assignedMatches = new HashSet<Tuple>();
         Config def = FIRE.server.getConfig();
@@ -363,31 +353,38 @@ public class Population implements Serializable {
             if (assignedMatches.contains(tuple)) {
                 continue;
             }
-            if (tuple.population > tuple.match.population) {
-                tuple = tuple.match;
-            }
-            for (int member : tuple.members) {
-                Config config = FIRE.server.getConfig(member);
-                if (config.isCounterpart) {
-                    config.payoffFunction = def.counterpartPayoffFunction;
-                    config.counterpartPayoffFunction = def.payoffFunction;
-
-                } else {
+            if (tuple.population == tuple.match.population) {
+                for (int member : tuple.members) {
+                    Config config = FIRE.server.getConfig(member);
                     config.payoffFunction = def.payoffFunction;
-                    config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                    config.playersInTuple = tuple.members.size();
                 }
-                config.playersInTuple = tuple.members.size();
-            }
-            for (int member : tuple.match.members) {
-                Config config = FIRE.server.getConfig(member);
-                if (config.isCounterpart) {
-                    config.payoffFunction = def.counterpartPayoffFunction;
-                    config.counterpartPayoffFunction = def.payoffFunction;
-                } else {
-                    config.payoffFunction = def.payoffFunction;
-                    config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+            } else {
+                if (tuple.population > tuple.match.population) {
+                    tuple = tuple.match;
                 }
-                config.playersInTuple = tuple.match.members.size();
+                for (int member : tuple.members) {
+                    Config config = FIRE.server.getConfig(member);
+                    if (config.isCounterpart) {
+                        config.payoffFunction = def.counterpartPayoffFunction;
+                        config.counterpartPayoffFunction = def.payoffFunction;
+                    } else {
+                        config.payoffFunction = def.payoffFunction;
+                        config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                    }
+                    config.playersInTuple = tuple.members.size();
+                }
+                for (int member : tuple.match.members) {
+                    Config config = FIRE.server.getConfig(member);
+                    if (config.isCounterpart) {
+                        config.payoffFunction = def.counterpartPayoffFunction;
+                        config.counterpartPayoffFunction = def.payoffFunction;
+                    } else {
+                        config.payoffFunction = def.payoffFunction;
+                        config.counterpartPayoffFunction = def.counterpartPayoffFunction;
+                    }
+                    config.playersInTuple = tuple.match.members.size();
+                }
             }
             assignedMatches.add(tuple);
             assignedMatches.add(tuple.match);

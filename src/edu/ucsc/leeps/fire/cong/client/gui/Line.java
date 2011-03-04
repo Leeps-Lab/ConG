@@ -58,7 +58,7 @@ public class Line extends Sprite implements Serializable {
             pixelsPerSubperiod = pixels / subperiodsDisplayed;
             maxLength = Math.round(pixels - pixelsPerSubperiod);
             int nanosPerSubperiod = config.subperiods * 1000 * 1000;
-            nanosPerRemove = Math.round(nanosPerSubperiod / pixelsPerSubperiod) + 1000000000;
+            nanosPerRemove = Math.round(nanosPerSubperiod / pixelsPerSubperiod);
         }
     }
 
@@ -80,10 +80,18 @@ public class Line extends Sprite implements Serializable {
     }
 
     public void endSubperiod(int subperiod) {
-        nextRemoveNanos = System.nanoTime() + nanosPerRemove;
-        long nanosPerSubperiod = System.nanoTime() - subperiodEndTime;
-        nanosPerRemove = Math.round(nanosPerSubperiod / pixelsPerSubperiod);
-        subperiodEndTime = System.nanoTime();
+        nextRemoveNanos = Long.MAX_VALUE;
+        if (config.indefiniteEnd != null) {
+            float pixels = config.indefiniteEnd.percentToDisplay * width;
+            int subperiodLength = config.length / config.subperiods;
+            int subperiodsDisplayed = config.indefiniteEnd.secondsToDisplay / subperiodLength;
+            pixelsPerSubperiod = pixels / subperiodsDisplayed;
+            maxLength = Math.round(pixels - pixelsPerSubperiod);
+            nextRemoveNanos = System.nanoTime() + nanosPerRemove;
+            long nanosPerSubperiod = System.nanoTime() - subperiodEndTime;
+            nanosPerRemove = Math.round(nanosPerSubperiod / pixelsPerSubperiod);
+            subperiodEndTime = System.nanoTime();
+        }
     }
 
     private void drawSolidLine(Client applet) {
@@ -168,7 +176,8 @@ public class Line extends Sprite implements Serializable {
                 && config.subperiods != 0
                 && ypoints.size() > 0
                 && ypoints.size() >= maxLength
-                && System.nanoTime() >= nextRemoveNanos) {
+                && System.nanoTime() >= nextRemoveNanos
+                && FIRE.client.isRunningPeriod()) {
             ypoints.remove(0);
             nextRemoveNanos += nanosPerRemove;
         }

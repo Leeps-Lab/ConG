@@ -440,7 +440,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             payoffChart.clearAll();
             strip.origin.x = 10;
             payoffChart.configChanged(config);
-            legend.setVisible(true);
+            legend.setVisible(false);
             strategyChart.setVisible(false);
         }
         if (config.selector == Config.StrategySelector.bubbles) {

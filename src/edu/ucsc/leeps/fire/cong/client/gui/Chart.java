@@ -220,27 +220,44 @@ public class Chart extends Sprite implements Configurable<Config> {
         // markers
         applet.strokeWeight(1f);
         applet.stroke(100, 100, 100);
+        applet.fill(100, 100, 100);
+
+        // live strategy preview
+        float interval, offset;
         if (config.indefiniteEnd == null) {
-            float interval = 1f / (float) config.subperiods;
-            float offset = interval;
-            for (int i = 0; i < config.subperiods; ++i) {
+            interval = 1f / (float) config.subperiods;
+            offset = interval;
+        } else {
+            int subperiodLength = config.length / config.subperiods;
+            int subperiodsDisplayed = config.indefiniteEnd.secondsToDisplay / subperiodLength;
+            interval = config.indefiniteEnd.percentToDisplay / subperiodsDisplayed;
+            offset = interval;
+        }
+        for (int i = 0; i < config.subperiods; ++i) {
+            if (config.indefiniteEnd == null || offset <= config.indefiniteEnd.percentToDisplay) {
                 applet.line(width * offset, 0, width * offset, height);
                 offset += interval;
             }
-            // live strategy preview
-            if (Client.state.target != null
-                    && (mode == Mode.TwoStrategy
-                    || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction))
-                    && config.mixed) {
-                int start = Math.round(subperiod * interval * width);
-                int end = Math.round((subperiod + 1) * interval * width);
-                int y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
-                for (int x = start; x < end; x++) {
-                    applet.point(x, y);
-                    applet.point(x, y + 1);
-                }
+        }
+        if (Client.state.target != null
+                && (mode == Mode.TwoStrategy
+                || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction))
+                && config.mixed
+                && FIRE.client.isRunningPeriod()) {
+            int start, end;
+            if (config.indefiniteEnd == null || (subperiod + 1) * interval <= config.indefiniteEnd.percentToDisplay) {
+                start = Math.round(subperiod * interval * width);
+                end = Math.round((subperiod + 1) * interval * width);
+            } else {
+                end = Math.round(config.indefiniteEnd.percentToDisplay * width);
+                start = end - Math.round(interval * width);
             }
-        } else {
+            int y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
+            for (int x = start; x < end; x++) {
+                applet.point(x, y);
+                applet.point(x, y + 1);
+            }
+            applet.ellipse(end, y, 10, 10);
         }
     }
 
@@ -331,8 +348,14 @@ public class Chart extends Sprite implements Configurable<Config> {
         Color color;
         if (id == FIRE.client.getID()) {
             color = Color.BLACK;
+        } else if (prices.size() == 1) {
+            color = new Color(215, 28, 28);
+        } else if (prices.size() == 2) {
+            color = new Color(85, 143, 46);
+        } else if (prices.size() == 3) {
+            color = new Color(79, 121, 229);
         } else {
-            color = new Color(200, 100, 0);
+            color = new Color(100, 100, 100);
         }
         priceLine.r = color.getRed();
         priceLine.g = color.getGreen();
@@ -418,7 +441,7 @@ public class Chart extends Sprite implements Configurable<Config> {
             }
         }
         if (subperiod != 0) {
-            updateLines(percentEnd);
+            updateLines(percentEnd + 0.001f);
         }
         updateMarginalCostLines(marginalCostEnd);
         yourPayoff.endSubperiod(subperiod);
