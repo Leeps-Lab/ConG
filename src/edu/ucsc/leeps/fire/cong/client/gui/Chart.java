@@ -228,8 +228,7 @@ public class Chart extends Sprite implements Configurable<Config> {
             interval = 1f / (float) config.subperiods;
             offset = interval;
         } else {
-            int subperiodLength = config.length / config.subperiods;
-            int subperiodsDisplayed = config.indefiniteEnd.secondsToDisplay / subperiodLength;
+            int subperiodsDisplayed = config.indefiniteEnd.secondsToDisplay / config.indefiniteEnd.subperiodLength;
             interval = config.indefiniteEnd.percentToDisplay / subperiodsDisplayed;
             offset = interval;
         }

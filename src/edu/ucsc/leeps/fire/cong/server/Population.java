@@ -32,6 +32,7 @@ public class Population implements Serializable {
     private Map<Integer, BlockingQueue<StrategyUpdateEvent>> strategyUpdateEvents;
     private Map<Integer, StrategyUpdateProcessor> strategyUpdateProcessors;
     private MessageEvent mEvent = new MessageEvent();
+    private final Object logLock = new Object();
 
     public Population() {
         tuples = new HashSet<Tuple>();
@@ -57,27 +58,35 @@ public class Population implements Serializable {
         if (FIRE.server.getConfig().preLength == 0) {
             setInitialStrategies();
         }
-        for (Tuple tuple : tuples) {
-            List<String> possible_aliases = new ArrayList<String>();
-            for (int i = 0; i < tuple.members.size(); i++) {
-                possible_aliases.add(Config.aliases[i]);
-            }
-            Collections.shuffle(possible_aliases, FIRE.server.getRandom());
-            int i = 0;
-            for (int id : tuple.members) {
-                aliases.put(id, possible_aliases.get(i));
-                for (int j = 0; j < Config.aliases.length; j++) {
-                    if (aliases.get(id).equals(Config.aliases[j])) {
-                        colors.put(id, Config.colors[j]);
-                        break;
-                    }
-                }
-                i++;
+        boolean hasChat = false;
+        for (Config config : FIRE.server.getDefaultConfigs().values()) {
+            if (config.chatroom) {
+                hasChat = true;
             }
         }
-        for (int id : members.keySet()) {
-            FIRE.server.getConfig(id).currAliases = aliases;
-            FIRE.server.getConfig(id).currColors = colors;
+        if (hasChat) {
+            for (Tuple tuple : tuples) {
+                List<String> possible_aliases = new ArrayList<String>();
+                for (int i = 0; i < tuple.members.size(); i++) {
+                    possible_aliases.add(Config.aliases[i]);
+                }
+                Collections.shuffle(possible_aliases, FIRE.server.getRandom());
+                int i = 0;
+                for (int id : tuple.members) {
+                    aliases.put(id, possible_aliases.get(i));
+                    for (int j = 0; j < Config.aliases.length; j++) {
+                        if (aliases.get(id).equals(Config.aliases[j])) {
+                            colors.put(id, Config.colors[j]);
+                            break;
+                        }
+                    }
+                    i++;
+                }
+            }
+            for (int id : members.keySet()) {
+                FIRE.server.getConfig(id).currAliases = aliases;
+                FIRE.server.getConfig(id).currColors = colors;
+            }
         }
     }
 
@@ -123,40 +132,42 @@ public class Population implements Serializable {
     }
 
     public void logTick(int subperiod, int secondsLeft) {
-        // Log the tick information
-        String period = FIRE.server.getConfig().period;
-        float length = FIRE.server.getConfig().length;
-        float percent = (float) (length * secondsLeft) / (float) length;
-        for (int member : members.keySet()) {
-            tick.period = period;
-            tick.subject = member;
-            tick.config = FIRE.server.getConfig(member);
-            tick.subperiod = subperiod;
-            tick.secondsLeft = secondsLeft;
-            Tuple tuple = tupleMap.get(member);
-            tick.population = tuple.population;
-            tick.world = tuple.world;
-            tick.strategy = tuple.strategies.get(member);
-            tick.target = tuple.targets.get(member);
-            tick.match = tuple.match.population;
-            if (tick.config.subperiods != 0 && tick.config.probPayoffs) {
-                tick.payoff = tick.config.payoffFunction.getPayoff(
-                        member, percent,
-                        tuple.realizedStrategies, tuple.match.realizedStrategies,
-                        tick.config);
-                tick.realizedStrategy = tuple.realizedStrategies.get(member);
-                tick.realizedPopStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.realizedStrategies, tuple.match.realizedStrategies);
-                tick.realizedMatchStrategy = tick.config.payoffFunction.getMatchStrategySummary(member, percent, tuple.realizedStrategies, tuple.match.realizedStrategies);
-            } else {
-                tick.payoff = tick.config.payoffFunction.getPayoff(
-                        member, percent,
-                        tuple.strategies, tuple.match.strategies,
-                        tick.config);
+        synchronized (logLock) {
+            // Log the tick information
+            String period = FIRE.server.getConfig().period;
+            float length = FIRE.server.getConfig().length;
+            float percent = (float) (length * secondsLeft) / (float) length;
+            for (int member : members.keySet()) {
+                tick.period = period;
+                tick.subject = member;
+                tick.config = FIRE.server.getConfig(member);
+                tick.subperiod = subperiod;
+                tick.secondsLeft = secondsLeft;
+                Tuple tuple = tupleMap.get(member);
+                tick.population = tuple.population;
+                tick.world = tuple.world;
+                tick.strategy = tuple.strategies.get(member);
+                tick.target = tuple.targets.get(member);
+                tick.match = tuple.match.population;
+                if (tick.config.subperiods != 0 && tick.config.probPayoffs) {
+                    tick.payoff = tick.config.payoffFunction.getPayoff(
+                            member, percent,
+                            tuple.realizedStrategies, tuple.match.realizedStrategies,
+                            tick.config);
+                    tick.realizedStrategy = tuple.realizedStrategies.get(member);
+                    tick.realizedPopStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.realizedStrategies, tuple.match.realizedStrategies);
+                    tick.realizedMatchStrategy = tick.config.payoffFunction.getMatchStrategySummary(member, percent, tuple.realizedStrategies, tuple.match.realizedStrategies);
+                } else {
+                    tick.payoff = tick.config.payoffFunction.getPayoff(
+                            member, percent,
+                            tuple.strategies, tuple.match.strategies,
+                            tick.config);
+                }
+                // get summary statistics from payoff function
+                tick.popStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
+                tick.matchStrategy = tick.config.payoffFunction.getMatchStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
+                FIRE.server.commit(tick);
             }
-            // get summary statistics from payoff function
-            tick.popStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
-            tick.matchStrategy = tick.config.payoffFunction.getMatchStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
-            FIRE.server.commit(tick);
         }
     }
 
@@ -461,10 +472,16 @@ public class Population implements Serializable {
 
     private void setInitialStrategies() {
         for (int client : members.keySet()) {
+            Config config = FIRE.server.getConfig(client);
             float[] s;
-            if (!Float.isNaN(FIRE.server.getConfig(client).initial)) {
+            if (!Float.isNaN(config.initial)) {
                 s = new float[]{
                             FIRE.server.getConfig().initial,};
+            } else if (!Float.isNaN(config.initial0) && !Float.isNaN(config.initial1)) {
+                s = new float[3];
+                s[0] = config.initial0;
+                s[1] = config.initial1;
+                s[2] = 1 - s[1] - s[0];
             } else if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
                 s = new float[1];
                 if (FIRE.server.getConfig().mixed) {
@@ -614,10 +631,12 @@ public class Population implements Serializable {
             while (true) {
                 try {
                     StrategyUpdateEvent event = queue.take();
-                    if (event.strategies != null) {
-                        members.get(event.id).setStrategies(event.changedId, event.strategies);
-                    } else {
-                        members.get(event.id).setMatchStrategies(event.changedId, event.matchStrategies);
+                    synchronized (logLock) {
+                        if (event.strategies != null) {
+                            members.get(event.id).setStrategies(event.changedId, event.strategies);
+                        } else {
+                            members.get(event.id).setMatchStrategies(event.changedId, event.matchStrategies);
+                        }
                     }
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();

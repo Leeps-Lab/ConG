@@ -49,10 +49,10 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         members.putAll(clients);
         Config config = FIRE.server.getConfig();
         if (config.indefiniteEnd != null) {
-            if (config.subperiods != 0) {
-                int subperiodLength = config.subperiods;
+            if (config.indefiniteEnd.subperiodLength != 0) {
                 config.subperiods = config.indefiniteEnd.length(FIRE.server.getRandom());
-                config.length = config.subperiods * subperiodLength;
+                config.length = config.subperiods * config.indefiniteEnd.subperiodLength;
+                System.err.println("Subperiods: " + config.subperiods);
             } else {
                 config.length = config.indefiniteEnd.length(FIRE.server.getRandom());
             }
@@ -62,6 +62,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             for (int id : members.keySet()) {
                 FIRE.server.getConfig(id).length = config.length;
             }
+            System.err.println("Length: " + config.length);
         }
         population = new Population();
         aliases = new HashMap<Integer, String>();

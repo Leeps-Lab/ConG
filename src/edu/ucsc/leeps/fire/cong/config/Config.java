@@ -70,8 +70,8 @@ public class Config extends BaseConfig {
     public ChatMenu menu;
     public boolean turnTaking;
     public boolean objectiveColors;
+    public boolean showSMinMax;
     public MatchTuple matchType;
-    public float initial = Float.NaN;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -85,6 +85,9 @@ public class Config extends BaseConfig {
     public static final Class endUniform = IndefiniteEnd.Uniform.class;
     // per-client
     public float[] initialStrategy;
+    public float initial = Float.NaN;
+    public float initial0 = Float.NaN;
+    public float initial1 = Float.NaN;
     public int matchID;
     public boolean isCounterpart;
     public int playersInTuple;
@@ -172,7 +175,9 @@ public class Config extends BaseConfig {
         trajectory = false;
         matchType = MatchTuple.pair;
     }
-    public static String[] aliases = new String[]{"Green", "Red", "Blue", "Aqua"};
+    public static String[] aliases = new String[]{
+        "Green", "Red", "Blue", "Aqua"
+    };
     public static Color[] colors = new Color[]{
         new Color(0x1FCB1A), // green
         new Color(0xF74018), // red

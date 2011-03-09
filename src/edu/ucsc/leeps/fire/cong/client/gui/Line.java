@@ -53,8 +53,7 @@ public class Line extends Sprite implements Serializable {
         if (config.indefiniteEnd != null && config.subperiods != 0) {
             nextRemoveNanos = Long.MAX_VALUE;
             float pixels = config.indefiniteEnd.percentToDisplay * width;
-            int subperiodLength = config.length / config.subperiods;
-            int subperiodsDisplayed = config.indefiniteEnd.secondsToDisplay / subperiodLength;
+            int subperiodsDisplayed = config.indefiniteEnd.secondsToDisplay / config.indefiniteEnd.subperiodLength;
             pixelsPerSubperiod = pixels / subperiodsDisplayed;
             maxLength = Math.round(pixels - pixelsPerSubperiod);
             int nanosPerSubperiod = config.subperiods * 1000 * 1000;
