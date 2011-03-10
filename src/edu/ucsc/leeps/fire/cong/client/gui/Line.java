@@ -19,11 +19,7 @@ public class Line extends Sprite implements Serializable {
     private transient ArrayList<Integer> ypoints;
     private transient int xMax;
     private transient Config config;
-    private transient long nextRemoveNanos;
-    private transient long nanosPerRemove;
     private transient int maxLength;
-    private transient long subperiodEndTime;
-    private transient float pixelsPerSubperiod;
 
     public Line() {
         super(null, 0, 0, 0, 0);
@@ -50,15 +46,6 @@ public class Line extends Sprite implements Serializable {
         this.mode = lconfig.mode;
         stepFunction = FIRE.client.getConfig().subperiods != 0;
         this.config = config;
-        if (config.indefiniteEnd != null && config.subperiods != 0) {
-            nextRemoveNanos = Long.MAX_VALUE;
-            float pixels = config.indefiniteEnd.percentToDisplay * width;
-            int subperiodsDisplayed = config.indefiniteEnd.secondsToDisplay / config.indefiniteEnd.subperiodLength;
-            pixelsPerSubperiod = pixels / subperiodsDisplayed;
-            maxLength = Math.round(pixels - pixelsPerSubperiod);
-            int nanosPerSubperiod = config.subperiods * 1000 * 1000;
-            nanosPerRemove = Math.round(nanosPerSubperiod / pixelsPerSubperiod);
-        }
     }
 
     public void setPoint(int x, int y) {
@@ -75,21 +62,6 @@ public class Line extends Sprite implements Serializable {
                 ypoints.remove(0);
             }
             xMax++;
-        }
-    }
-
-    public void endSubperiod(int subperiod) {
-        nextRemoveNanos = Long.MAX_VALUE;
-        if (config.indefiniteEnd != null) {
-            float pixels = config.indefiniteEnd.percentToDisplay * width;
-            int subperiodLength = config.length / config.subperiods;
-            int subperiodsDisplayed = config.indefiniteEnd.secondsToDisplay / subperiodLength;
-            pixelsPerSubperiod = pixels / subperiodsDisplayed;
-            maxLength = Math.round(pixels - pixelsPerSubperiod);
-            nextRemoveNanos = System.nanoTime() + nanosPerRemove;
-            long nanosPerSubperiod = System.nanoTime() - subperiodEndTime;
-            nanosPerRemove = Math.round(nanosPerSubperiod / pixelsPerSubperiod);
-            subperiodEndTime = System.nanoTime();
         }
     }
 
@@ -170,16 +142,6 @@ public class Line extends Sprite implements Serializable {
                 break;
         }
         applet.popMatrix();
-        if (config != null
-                && config.indefiniteEnd != null
-                && config.subperiods != 0
-                && ypoints.size() > 0
-                && ypoints.size() >= maxLength
-                && System.nanoTime() >= nextRemoveNanos
-                && FIRE.client.isRunningPeriod()) {
-            ypoints.remove(0);
-            nextRemoveNanos += nanosPerRemove;
-        }
     }
 
     public synchronized void clear() {

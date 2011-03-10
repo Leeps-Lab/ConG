@@ -170,16 +170,7 @@ public class Chart extends Sprite implements Configurable<Config> {
     private void drawPercentLine(Client applet) {
         applet.strokeWeight(2f);
         applet.stroke(116, 202, 200);
-        if (config.indefiniteEnd != null) {
-            float x = (Client.state.currentPercent * config.length)
-                    / (config.indefiniteEnd.secondsToDisplay / config.indefiniteEnd.percentToDisplay);
-            if (x > config.indefiniteEnd.percentToDisplay) {
-                x = config.indefiniteEnd.percentToDisplay;
-            }
-            applet.line(x * width, 0, x * width, height);
-        } else {
-            applet.line(Client.state.currentPercent * width, 0, Client.state.currentPercent * width, height);
-        }
+        applet.line(Client.state.currentPercent * width, 0, Client.state.currentPercent * width, height);
     }
 
     private void drawTwoStrategyLines(Client applet) {
@@ -211,8 +202,6 @@ public class Chart extends Sprite implements Configurable<Config> {
         }
     }
 
-    // TODO:
-    //  Work with indefinite end
     private void drawSubperiodInfo(Client applet) {
         if (config == null || config.subperiods == 0) {
             return;
@@ -223,34 +212,14 @@ public class Chart extends Sprite implements Configurable<Config> {
         applet.fill(100, 100, 100);
 
         // live strategy preview
-        float interval, offset;
-        if (config.indefiniteEnd == null) {
-            interval = 1f / (float) config.subperiods;
-            offset = interval;
-        } else {
-            int subperiodsDisplayed = config.indefiniteEnd.secondsToDisplay / config.indefiniteEnd.subperiodLength;
-            interval = config.indefiniteEnd.percentToDisplay / subperiodsDisplayed;
-            offset = interval;
-        }
-        for (int i = 0; i < config.subperiods; ++i) {
-            if (config.indefiniteEnd == null || offset <= config.indefiniteEnd.percentToDisplay) {
-                applet.line(width * offset, 0, width * offset, height);
-                offset += interval;
-            }
-        }
+        float interval = 1f / (float) config.subperiods;
         if (Client.state.target != null
                 && (mode == Mode.TwoStrategy
                 || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction))
                 && config.mixed
                 && FIRE.client.isRunningPeriod()) {
-            int start, end;
-            if (config.indefiniteEnd == null || (subperiod + 1) * interval <= config.indefiniteEnd.percentToDisplay) {
-                start = Math.round(subperiod * interval * width);
-                end = Math.round((subperiod + 1) * interval * width);
-            } else {
-                end = Math.round(config.indefiniteEnd.percentToDisplay * width);
-                start = end - Math.round(interval * width);
-            }
+            int start = Math.round(subperiod * interval * width);
+            int end = Math.round((subperiod + 1) * interval * width);
             int y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
             for (int x = start; x < end; x++) {
                 applet.point(x, y);
@@ -443,22 +412,6 @@ public class Chart extends Sprite implements Configurable<Config> {
             updateLines(percentEnd + 0.001f);
         }
         updateMarginalCostLines(marginalCostEnd);
-        yourPayoff.endSubperiod(subperiod);
-        matchPayoff.endSubperiod(subperiod);
-        yourStrategy.endSubperiod(subperiod);
-        matchStrategy.endSubperiod(subperiod);
-        yourR.endSubperiod(subperiod);
-        matchR.endSubperiod(subperiod);
-        yourP.endSubperiod(subperiod);
-        matchP.endSubperiod(subperiod);
-        yourS.endSubperiod(subperiod);
-        matchS.endSubperiod(subperiod);
-        for (Line line : prices.values()) {
-            line.endSubperiod(subperiod);
-        }
-        for (Line line : marginalCosts.values()) {
-            line.endSubperiod(subperiod);
-        }
     }
 
     public void configChanged(Config config) {

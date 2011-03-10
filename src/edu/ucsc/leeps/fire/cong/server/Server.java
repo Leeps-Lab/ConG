@@ -52,7 +52,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             if (config.indefiniteEnd.subperiodLength != 0) {
                 config.subperiods = config.indefiniteEnd.length(FIRE.server.getRandom());
                 config.length = config.subperiods * config.indefiniteEnd.subperiodLength;
-                System.err.println("Subperiods: " + config.subperiods);
             } else {
                 config.length = config.indefiniteEnd.length(FIRE.server.getRandom());
             }
@@ -60,9 +59,9 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
                 config.length = 1;
             }
             for (int id : members.keySet()) {
+                FIRE.server.getConfig(id).subperiods = config.subperiods;
                 FIRE.server.getConfig(id).length = config.length;
             }
-            System.err.println("Length: " + config.length);
         }
         population = new Population();
         aliases = new HashMap<Integer, String>();

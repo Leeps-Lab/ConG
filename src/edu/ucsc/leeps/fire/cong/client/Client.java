@@ -13,6 +13,7 @@ import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
 import edu.ucsc.leeps.fire.cong.client.gui.BubblesSelector;
+import edu.ucsc.leeps.fire.cong.client.gui.IndefiniteEndPricesChart;
 import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
@@ -61,6 +62,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private Sprite selector;
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
+    private IndefiniteEndPricesChart indefiniteEndPricesChart;
     // heatmap legend off/on
     private ChartLegend legend;
     private StrategyChanger strategyChanger;
@@ -151,6 +153,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             strip.setEnabled(true);
             payoffChart.clearAll();
             strategyChart.clearAll();
+            indefiniteEndPricesChart.clearAll();
             rChart.clearAll();
             pChart.clearAll();
             sChart.clearAll();
@@ -239,6 +242,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 state.subperiodMatchPayoff = matchPayoff;
                 payoffChart.endSubperiod(subperiod);
                 strategyChart.endSubperiod(subperiod);
+                indefiniteEndPricesChart.endSubperiod(subperiod);
                 rChart.endSubperiod(subperiod);
                 pChart.endSubperiod(subperiod);
                 sChart.endSubperiod(subperiod);
@@ -333,6 +337,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 null, chartLeftOffset + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight,
                 simplex, Chart.Mode.Payoff);
+        indefiniteEndPricesChart = new IndefiniteEndPricesChart(
+                null, chartLeftOffset + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
+                chartWidth, payoffChartHeight);
         rChart = new Chart(
                 null, chartLeftOffset + 80 + leftMargin, topMargin,
                 chartWidth, threeStrategyChartHeight,
@@ -377,6 +384,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                     rChart.updateLines();
                     pChart.updateLines();
                     sChart.updateLines();
+                    indefiniteEndPricesChart.update();
                 }
             }
             if (FIRE.client.isRunningPeriod()) {
@@ -392,6 +400,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 rChart.draw(this);
                 pChart.draw(this);
                 sChart.draw(this);
+                indefiniteEndPricesChart.draw(this);
             }
             legend.draw(this);
             if (FIRE.client.getConfig().preLength > 0 && !haveInitialStrategy) {
@@ -434,18 +443,31 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         rChart.setVisible(false);
         pChart.setVisible(false);
         sChart.setVisible(false);
+        indefiniteEndPricesChart.setVisible(false);
         if (config.selector == Config.StrategySelector.strip) {
-            payoffChart.width = width - 110;
-            payoffChart.origin.x = 100;
-            payoffChart.clearAll();
-            strip.origin.x = 10;
-            payoffChart.configChanged(config);
-            legend.setVisible(false);
-            strategyChart.setVisible(false);
+            if (config.indefiniteEnd != null && config.subperiods != 0) {
+                payoffChart.setVisible(false);
+                legend.setVisible(false);
+                strategyChart.setVisible(false);
+                indefiniteEndPricesChart.setVisible(true);
+                indefiniteEndPricesChart.width = width - 110;
+                indefiniteEndPricesChart.origin.x = 100;
+                strip.origin.x = 10;
+                indefiniteEndPricesChart.configChanged(config);
+            } else {
+                payoffChart.setVisible(true);
+                legend.setVisible(false);
+                strategyChart.setVisible(false);
+                payoffChart.width = width - 110;
+                payoffChart.origin.x = 100;
+                strip.origin.x = 10;
+                payoffChart.configChanged(config);
+            }
         }
         if (config.selector == Config.StrategySelector.bubbles) {
             strategyChart.setVisible(false);
             payoffChart.setVisible(false);
+            indefiniteEndPricesChart.setVisible(false);
             legend.setVisible(false);
             bubbles.width = Math.round(0.7f * width);
             bubbles.origin.x = 0.15f * width;

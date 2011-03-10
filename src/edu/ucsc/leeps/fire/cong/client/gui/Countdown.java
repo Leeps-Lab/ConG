@@ -59,7 +59,11 @@ public class Countdown extends Sprite implements Configurable<Config> {
             }
         } else {
             if (config.subperiods != 0) {
-                s = String.format("Subperiod: %d", Client.state.subperiod + 1);
+                if (Client.state.subperiod < config.subperiods) {
+                    s = String.format("Subperiod: %d", Client.state.subperiod + 1);
+                } else {
+                    s = String.format("Subperiod: %d", Client.state.subperiod);
+                }
             } else {
                 s = String.format("Seconds Elapsed: %.0f", FIRE.client.getElapsedMillis() / 1000f);
             }
