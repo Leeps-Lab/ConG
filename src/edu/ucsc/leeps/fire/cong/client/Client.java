@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -561,10 +562,17 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     private void loadLibraries() {
         System.err.println("os.arch: " + System.getProperty("os.arch"));
+        File path = null;
+        try {
+            path = new File(Client.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+            path = path.getParentFile();
+        } catch (URISyntaxException ex) {
+            ex.printStackTrace();
+        }
         if (System.getProperty("os.arch").equals("amd64")) {
-            addDir("./lib/64-bit");
+            addDir(new File(new File(path, "lib"), "64-bit").getAbsolutePath());
         } else {
-            addDir("./lib/32-bit");
+            addDir(new File(new File(path, "lib"), "32-bit").getAbsolutePath());
             String tmpDir = System.getProperty("java.io.tmpdir");
             List<JarEntry> entries = new LinkedList<JarEntry>();
             for (String pathItem : System.getProperty("java.class.path").split(":")) {
