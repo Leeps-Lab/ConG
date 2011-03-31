@@ -27,7 +27,9 @@ public class Config extends BaseConfig {
 
         HeatmapSingle, HeatmapBoth, Matrix
     }
+
     public enum MatchTuple {
+
         self, pair;
     }
     public float percentChangePerSecond;
@@ -68,10 +70,10 @@ public class Config extends BaseConfig {
     public boolean showHeatmap;
     public boolean trajectory;
     public ChatMenu menu;
-    public boolean turnTaking;
     public boolean objectiveColors;
     public boolean showSMinMax;
     public MatchTuple matchType;
+    public boolean turnTaking;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -83,6 +85,7 @@ public class Config extends BaseConfig {
     public static final Class decisionDelay = DecisionDelay.class;
     public static final Class chatMenu = ChatMenu.class;
     public static final Class endUniform = IndefiniteEnd.Uniform.class;
+    public static final Class assigned = IndefiniteEnd.Assigned.class;
     // per-client
     public float[] initialStrategy;
     public float initial = Float.NaN;
@@ -93,6 +96,7 @@ public class Config extends BaseConfig {
     public int playersInTuple;
     public int population, match;
     public int marginalCost;
+    public int[] initiatives;
 
     public Config() {
         paid = true;
@@ -174,15 +178,32 @@ public class Config extends BaseConfig {
         probPayoffs = false;
         trajectory = false;
         matchType = MatchTuple.pair;
+        menu = new ChatMenu();
+        menu.m1 = "go left";
+        menu.m2 = "go right";
+        menu.m3 = "stay still";
+        menu.m4 = "ok";
+        menu.m5 = aliases[0];
+        menu.m6 = aliases[1];
+        menu.m7 = aliases[2];
+        menu.m8 = aliases[3];
+        menu.m9 = aliases[4];
+        menu.m10 = aliases[5];
+        menu.m11 = aliases[6];
+        menu.m12 = aliases[7];
     }
     public static String[] aliases = new String[]{
-        "Green", "Red", "Blue", "Aqua"
+        "Green", "Red", "Blue", "Aqua", "Purple", "Gray", "Orange", "Yellow"
     };
     public static Color[] colors = new Color[]{
         new Color(0x1FCB1A), // green
         new Color(0xF74018), // red
         new Color(0x587CFF), // blue
-        new Color(0x5DE6D7), // Purple
+        new Color(0x5DE6D7), // aqua
+        new Color(0xA646E0), // purple
+        new Color(0xA8A8A8), // gray
+        new Color(0xFF8B00), // orange
+        new Color(0xF6FF00), // yellow
     };
     // assigned by the server in configurePeriod
     public Map<Integer, String> currAliases;

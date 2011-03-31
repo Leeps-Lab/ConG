@@ -16,4 +16,8 @@ public class ChatMenu implements Serializable {
     public String m6;
     public String m7;
     public String m8;
+    public String m9;
+    public String m10;
+    public String m11;
+    public String m12;
 }

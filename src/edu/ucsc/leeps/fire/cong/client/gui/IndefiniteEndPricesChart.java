@@ -53,14 +53,29 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
             int subperiod = i + offset - 1;
             int x1 = Math.round(width * (i - 1) * ((float) config.indefiniteEnd.subperiodLength / config.indefiniteEnd.secondsToDisplay));
             int x2 = Math.round(width * i * ((float) config.indefiniteEnd.subperiodLength / config.indefiniteEnd.secondsToDisplay));
-            float xoff1 = 0;
-            float xoff2 = 0;
+            int xoff1 = 0;
+            int xoff2 = 0;
             if (Client.state.subperiod >= maxSubperiodToDisplay) {
                 if (i != 1) {
-                    xoff1 = -(x2 - x1) * percentThroughSub;
+                    xoff1 = Math.round(-(x2 - x1) * percentThroughSub);
                 }
-                xoff2 = -(x2 - x1) * percentThroughSub;
+                xoff2 = Math.round(-(x2 - x1) * percentThroughSub);
             }
+            // draw any sub-period locks
+            if (config.turnTaking && Client.state.strategyChanger.isTurnTakingLocked(subperiod)) {
+                a.noStroke();
+                a.fill(100, 50);
+                a.rect(x1 + xoff1, 0, x2 + xoff2, height);
+            }
+            if (config.turnTaking
+                    && i == maxSubperiodToDisplay
+                    && subperiod != config.subperiods
+                    && Client.state.strategyChanger.isTurnTakingLocked(subperiod + 1)) {
+                a.noStroke();
+                a.fill(100, 50);
+                a.rect(x2 + xoff1, 0, x2, height);
+            }
+
             // draw your profit area
             if (subperiod < subperiodProfits.size()) {
                 float profit = subperiodProfits.get(subperiod);
@@ -103,21 +118,41 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
             a.stroke(0);
             a.line(x2 + xoff2, 0, x2 + xoff2, height);
             if (Client.state.subperiod >= maxSubperiodToDisplay && i == maxSubperiodToDisplay) {
-                a.line(x2, 0, x2, height);
                 a.line(x1, 0, x1, height);
+                a.stroke(currentTimeColor);
+                a.line(x2, 0, x2, height);
             }
             if (subperiod == Client.state.subperiod) {
-                a.stroke(116, 202, 200);
+                a.stroke(currentTimeColor);
                 a.line(x1 + (x2 - x1) * percentThroughSub, 0, x1 + (x2 - x1) * percentThroughSub, height);
             }
             // draw the target preview line
             if (Client.state.target != null) {
                 int y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
                 a.stroke(100);
+                a.strokeWeight(2);
                 if (subperiod == Client.state.subperiod) {
-                    a.line(x1, y, x2, y);
+                    if (!Client.state.strategyChanger.isTurnTakingLocked(subperiod)) {
+                        // draw a dashed line at y from x1 to x2
+                        for (int x = x1; x <= x2; x++) {
+                            if (x % 6 == 0 || x % 6 == 1) {
+                                a.point(x, y);
+                            }
+                        }
+                    } else {
+                        a.line(x1, y, x2, y);
+                    }
                 } else if (Client.state.subperiod >= maxSubperiodToDisplay && i == maxSubperiodToDisplay) {
-                    a.line(x2 + xoff1, y, x2, y);
+                    if (!Client.state.strategyChanger.isTurnTakingLocked(subperiod + 1)) {
+                        // draw a dashed line at y from x2+xoff1 to x2
+                        for (int x = x2 + xoff1; x <= x2; x++) {
+                            if (x % 6 == 0 || x % 6 == 1) {
+                                a.point(x, y);
+                            }
+                        }
+                    } else {
+                        a.line(x2 + xoff1, y, x2, y);
+                    }
                 }
             }
         }
@@ -128,6 +163,14 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
         a.noFill();
         a.rectMode(Client.CORNER);
         a.rect(0, 0, width, height);
+
+        // draw the axis
+        for (int i = 0; i <= 10; i++) {
+            float p = i / 10f;
+            float u = p * (umax - umin);
+            a.fill(0);
+            a.text(String.format("%.1f", u), -20, Math.round(height - p * scaledHeight - scaledMargin));
+        }
 
         a.popMatrix();
     }
@@ -174,4 +217,5 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
         0xFFA16C1F, // brown
     };
     private final static int profitColor = 0x994EDD43;
+    private final static int currentTimeColor = 0xFF00A7D6;
 }

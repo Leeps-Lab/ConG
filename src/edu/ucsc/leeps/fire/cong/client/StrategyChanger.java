@@ -20,6 +20,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     private float strategyDelta;
     private long nextAllowedChangeTime;
     private boolean initialLock;
+    private boolean turnTakingLock;
     public Selector selector;
 
     public StrategyChanger() {
@@ -81,8 +82,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         if (config.delay != null) {
             int delay = config.delay.getDelay();
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
-        } else if (config.turnTaking) {
-            nextAllowedChangeTime = Long.MAX_VALUE;
         }
     }
 
@@ -132,8 +131,8 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         }
     }
 
-    private boolean isLocked() {
-        return System.currentTimeMillis() < nextAllowedChangeTime;
+    public boolean isLocked() {
+        return System.currentTimeMillis() < nextAllowedChangeTime || turnTakingLock;
     }
 
     public float getCost() {
@@ -152,6 +151,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
             initialLock = false;
         }
+        turnTakingLock = false;
     }
 
     public void setPause(boolean paused) {
@@ -171,6 +171,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         strategyDelta += total / 2;
         System.arraycopy(subperiodStrategy, 0, lastStrategy, 0, lastStrategy.length);
         selector.endSubperiod(subperiod);
+        turnTakingLock = isTurnTakingLocked(subperiod);
     }
 
     public void endPeriod() {
@@ -180,11 +181,28 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     public void strategyChanged(int whoChanged) {
+    }
+
+    public boolean isTurnTakingLocked(int subperiod) {
         if (config != null && config.turnTaking) {
-            if (whoChanged != Client.state.id) {
-                nextAllowedChangeTime = System.currentTimeMillis();
+            if (subperiod == 0) {
+                return false;
             }
+            int myIndex = -1;
+            for (int i = 0; i < config.initiatives.length; i++) {
+                if (config.initiatives[i] == FIRE.client.getID()) {
+                    myIndex = i;
+                }
+            }
+            if (myIndex == -1) {
+                throw new IllegalStateException();
+            }
+            if (subperiod % config.initiatives.length == myIndex) {
+                return false;
+            }
+            return true;
         }
+        return false;
     }
 
     public static interface Selector {

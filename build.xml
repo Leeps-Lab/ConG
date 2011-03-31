@@ -105,25 +105,6 @@
             </manifest>
         </jar>
 
-        <zip destfile="dist/Server.jar">
-            <zipfileset
-                src="dist/final.jar"
-                excludes="META-INF/*.SF, META-INF/*.DSA, META-INF/*.RSA"/>
-        </zip>
-
-        <delete file="dist/final.jar"/>
-
-        <jar destfile="dist/final.jar" filesetmanifest="skip">
-            <zipgroupfileset dir="dist" includes="*.jar"/>
-            <zipgroupfileset dir="lib" includes="*.jar"/>
-            <fileset dir="lib" includes="*.dynlib"/>
-            <zipgroupfileset dir="../../FIREv2.0/trunk/dist" includes="*.jar"/>
-
-            <manifest>
-                <attribute name="Main-Class" value="edu.ucsc.leeps.fire.server.ControlPanel"/>
-            </manifest>
-        </jar>
-
         <zip destfile="dist/Control.jar">
             <zipfileset
                 src="dist/final.jar"

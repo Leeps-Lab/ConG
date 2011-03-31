@@ -1,3 +1,3 @@
-"period","paid","turnTaking","indefiniteEnd","max","subperiodLength","secondsToDisplay","percentToDisplay","percentChangePerSecond","numTuples","payoffFunction","name","mixed","selector","marginalCost"
-1,"TRUE","FALSE","endUniform",50,3,30,0.6,"NaN",1,"pricing","pf","TRUE","strip",10
-2,"TRUE","TRUE","endUniform",50,3,30,0.6,"NaN",1,"pricing","pf","TRUE","strip",10
+"period","paid","turnTaking","indefiniteEnd","max","subperiodLength","secondsToDisplay","percentToDisplay","percentChangePerSecond","tupleSize","payoffFunction","name","mixed","selector","marginalCost"
+1,"TRUE","TRUE","endUniform",10,4,16,0.8,"NaN",2,"pricing","pf","TRUE","strip",10
+2,"TRUE","TRUE","endUniform",10,4,16,0.8,"NaN",2,"pricing","pf","TRUE","strip",10

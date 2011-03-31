@@ -58,6 +58,9 @@ public class Population implements Serializable {
         if (FIRE.server.getConfig().preLength == 0) {
             setInitialStrategies();
         }
+        if (FIRE.server.getConfig().turnTaking) {
+            setInitiative();
+        }
         boolean hasChat = false;
         for (Config config : FIRE.server.getDefaultConfigs().values()) {
             if (config.chatroom) {
@@ -516,6 +519,24 @@ public class Population implements Serializable {
         }
         for (Tuple tuple : tuples) {
             tuple.update(-1);
+        }
+    }
+
+    private void setInitiative() {
+        for (Tuple tuple : tuples) {
+            List<Integer> l = new ArrayList<Integer>();
+            for (Integer member : tuple.members) {
+                l.add(member);
+            }
+            Collections.shuffle(l);
+            int[] initiatives = new int[tuple.members.size()];
+            int i = 0;
+            for (Integer m : l) {
+                initiatives[i++] = m;
+            }
+            for (Integer member : tuple.members) {
+                FIRE.server.getConfig(member).initiatives = initiatives;
+            }
         }
     }
 

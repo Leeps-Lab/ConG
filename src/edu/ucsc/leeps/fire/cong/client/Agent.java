@@ -39,6 +39,9 @@ public class Agent extends Thread {
     }
 
     private void act(edu.ucsc.leeps.fire.cong.client.State state) {
+        if (state.strategyChanger.isLocked()) {
+            return;
+        }
         Config config = FIRE.client.getConfig();
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             float newTarget;

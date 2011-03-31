@@ -23,4 +23,13 @@ public abstract class IndefiniteEnd implements Serializable {
             return random.nextInt(max);
         }
     }
+
+    public static class Assigned extends IndefiniteEnd {
+
+        public int subperiods;
+
+        public int length(Random random) {
+            return subperiods;
+        }
+    }
 }

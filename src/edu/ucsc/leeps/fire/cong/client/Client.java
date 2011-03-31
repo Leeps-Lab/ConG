@@ -100,8 +100,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         frame.setVisible(true);
         loop();
         debug = ALLOW_DEBUG;
-        agent = new Agent(debug);
-        agent.start();
+        if (ALLOW_DEBUG) {
+            agent = new Agent(debug);
+            agent.start();
+        }
     }
 
     public boolean haveInitialStrategy() {
@@ -488,7 +490,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     @Override
     public void keyPressed(KeyEvent ke) {
-        if (ALLOW_DEBUG && ke.getKeyCode() == KeyEvent.VK_D) {
+        if (ALLOW_DEBUG && ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_D) {
             debug = !debug;
         } else if (ALLOW_DEBUG && ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
             agent.paused = !agent.paused;

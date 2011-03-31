@@ -64,7 +64,7 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
 
     @Override
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        float[] summary = new float[4];
+        float[] summary = new float[12];
         int i = 0;
         for (int match : popStrategies.keySet()) {
             summary[i++] = popStrategies.get(match)[0];
@@ -77,7 +77,7 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
 
     @Override
     public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        float[] summary = new float[4];
+        float[] summary = new float[12];
         int i = 0;
         for (int match : popStrategies.keySet()) {
             if (match != id) {

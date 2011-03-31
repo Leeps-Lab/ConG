@@ -7,7 +7,9 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import java.awt.Dimension;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JFrame;
@@ -19,7 +21,7 @@ import javax.swing.text.html.StyleSheet;
  *
  * @author alexlou
  */
-public class Chatroom extends JPanel {
+public class Chatroom extends JPanel implements KeyListener {
 
     private JFrame frame;
     private List<String> lines;
@@ -32,6 +34,22 @@ public class Chatroom extends JPanel {
         s.addRule("p { margin: 0px; padding: 0px; }");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         lines = new LinkedList<String>();
+        Dimension d = new Dimension(360, 300);
+        setPreferredSize(d);
+        frame.setSize(d);
+        outputArea.addKeyListener(this);
+        m1.addKeyListener(this);
+        m2.addKeyListener(this);
+        m3.addKeyListener(this);
+        m4.addKeyListener(this);
+        m5.addKeyListener(this);
+        m6.addKeyListener(this);
+        m7.addKeyListener(this);
+        m8.addKeyListener(this);
+        m9.addKeyListener(this);
+        m10.addKeyListener(this);
+        m11.addKeyListener(this);
+        m12.addKeyListener(this);
     }
 
     /** This method is called from within the constructor to
@@ -55,12 +73,13 @@ public class Chatroom extends JPanel {
         m6 = new javax.swing.JButton();
         m7 = new javax.swing.JButton();
         m8 = new javax.swing.JButton();
+        m9 = new javax.swing.JButton();
+        m10 = new javax.swing.JButton();
+        m11 = new javax.swing.JButton();
+        m12 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         inputField = new javax.swing.JTextArea();
 
-        setMaximumSize(new java.awt.Dimension(300, 300));
-        setMinimumSize(new java.awt.Dimension(300, 300));
-        setPreferredSize(new java.awt.Dimension(300, 300));
         setLayout(new java.awt.GridBagLayout());
 
         outputArea.setContentType("text/html");
@@ -175,6 +194,54 @@ public class Chatroom extends JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         menuInputPanel.add(m8, gridBagConstraints);
 
+        m9.setText("jButton5");
+        m9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m9ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m9, gridBagConstraints);
+
+        m10.setText("jButton6");
+        m10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m10ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m10, gridBagConstraints);
+
+        m11.setText("jButton7");
+        m11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m11ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m11, gridBagConstraints);
+
+        m12.setText("jButton8");
+        m12.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                m12ActionPerformed(evt);
+            }
+        });
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 2;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        menuInputPanel.add(m12, gridBagConstraints);
+
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 2;
@@ -208,49 +275,61 @@ public class Chatroom extends JPanel {
     }//GEN-LAST:event_inputFieldKeyReleased
 
     private void m1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m1ActionPerformed
-        inputField.setText(m1.getText());
-        sendMessage();
+        inputField.setText(inputField.getText() + " " + m1.getText());
 }//GEN-LAST:event_m1ActionPerformed
 
     private void m2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m2ActionPerformed
-        inputField.setText(m2.getText());
-        sendMessage();
+        inputField.setText(inputField.getText() + " " + m2.getText());
     }//GEN-LAST:event_m2ActionPerformed
 
     private void m3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m3ActionPerformed
-        inputField.setText(m3.getText());
-        sendMessage();
+        inputField.setText(inputField.getText() + " " + m3.getText());
     }//GEN-LAST:event_m3ActionPerformed
 
     private void m4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m4ActionPerformed
-        inputField.setText(m4.getText());
-        sendMessage();
+        inputField.setText(inputField.getText() + " " + m4.getText());
     }//GEN-LAST:event_m4ActionPerformed
 
     private void m5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m5ActionPerformed
-        inputField.setText(m5.getText());
-        sendMessage();
+        inputField.setText(inputField.getText() + " " + m5.getText());
     }//GEN-LAST:event_m5ActionPerformed
 
     private void m6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m6ActionPerformed
-        inputField.setText(m6.getText());
-        sendMessage();
+        inputField.setText(inputField.getText() + " " + m6.getText());
     }//GEN-LAST:event_m6ActionPerformed
 
     private void m7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m7ActionPerformed
-        inputField.setText(m7.getText());
-        sendMessage();
+        inputField.setText(inputField.getText() + " " + m7.getText());
     }//GEN-LAST:event_m7ActionPerformed
 
     private void m8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m8ActionPerformed
-        inputField.setText(m8.getText());
-        sendMessage();
+        inputField.setText(inputField.getText() + " " + m8.getText());
     }//GEN-LAST:event_m8ActionPerformed
+
+    private void m9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m9ActionPerformed
+        inputField.setText(inputField.getText() + " " + m9.getText());
+    }//GEN-LAST:event_m9ActionPerformed
+
+    private void m10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m10ActionPerformed
+        inputField.setText(inputField.getText() + " " + m10.getText());
+    }//GEN-LAST:event_m10ActionPerformed
+
+    private void m11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m11ActionPerformed
+        inputField.setText(inputField.getText() + " " + m11.getText());
+    }//GEN-LAST:event_m11ActionPerformed
+
+    private void m12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m12ActionPerformed
+        inputField.setText(inputField.getText() + " " + m12.getText());
+    }//GEN-LAST:event_m12ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea inputField;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton m1;
+    private javax.swing.JButton m10;
+    private javax.swing.JButton m11;
+    private javax.swing.JButton m12;
     private javax.swing.JButton m2;
     private javax.swing.JButton m3;
     private javax.swing.JButton m4;
@@ -258,20 +337,52 @@ public class Chatroom extends JPanel {
     private javax.swing.JButton m6;
     private javax.swing.JButton m7;
     private javax.swing.JButton m8;
+    private javax.swing.JButton m9;
     private javax.swing.JPanel menuInputPanel;
     private javax.swing.JEditorPane outputArea;
     // End of variables declaration//GEN-END:variables
 
     public void addCharacter(char c) {
-        if (FIRE.client.getConfig() == null || !FIRE.client.getConfig().freeChat) {
+        if (FIRE.client.getConfig() == null) {
             return;
         }
-        if (c == '\n') {
+        if (FIRE.client.getConfig().chatroom && c == '\n') {
             sendMessage();
-        } else if ((c == 8 || c == 127) && inputField.getText().length() > 0) {
-            inputField.setText(inputField.getText().substring(0, inputField.getText().length() - 1));
+        } else if (FIRE.client.getConfig().chatroom && !FIRE.client.getConfig().freeChat) {
+            if (c == '1') {
+                m1ActionPerformed(null);
+            } else if (c == '2') {
+                m2ActionPerformed(null);
+            } else if (c == '3') {
+                m3ActionPerformed(null);
+            } else if (c == '4') {
+                m4ActionPerformed(null);
+            } else if (c == '5') {
+                m5ActionPerformed(null);
+            } else if (c == '6') {
+                m6ActionPerformed(null);
+            } else if (c == '7') {
+                m7ActionPerformed(null);
+            } else if (c == '8') {
+                m8ActionPerformed(null);
+            } else if (c == '9') {
+                m9ActionPerformed(null);
+            } else if (c == '0') {
+                m10ActionPerformed(null);
+            } else if (c == '-') {
+                m11ActionPerformed(null);
+            } else if (c == '=') {
+                m12ActionPerformed(null);
+            }
+
         } else {
-            inputField.setText(inputField.getText() + c);
+            if (c == 8 || c == 127) {
+                if (inputField.getText().length() > 0) {
+                    inputField.setText(inputField.getText().substring(0, inputField.getText().length() - 1));
+                }
+            } else if (c >= 32 && c <= 126) {
+                inputField.setText(inputField.getText() + c);
+            }
         }
     }
 
@@ -313,8 +424,7 @@ public class Chatroom extends JPanel {
                 lines.clear();
                 frame.setVisible(config.chatroom);
                 inputField.setEnabled(config.freeChat);
-                inputField.setVisible(config.freeChat);
-                if (config.menu == null) {
+                if (config.menu == null || config.freeChat) {
                     menuInputPanel.setVisible(false);
                 } else {
                     menuInputPanel.setVisible(true);
@@ -366,6 +476,30 @@ public class Chatroom extends JPanel {
                         m8.setVisible(true);
                         m8.setText(config.menu.m8);
                     }
+                    if (config.menu.m9 == null) {
+                        m9.setVisible(false);
+                    } else {
+                        m9.setVisible(true);
+                        m9.setText(config.menu.m9);
+                    }
+                    if (config.menu.m10 == null) {
+                        m10.setVisible(false);
+                    } else {
+                        m10.setVisible(true);
+                        m10.setText(config.menu.m10);
+                    }
+                    if (config.menu.m11 == null) {
+                        m11.setVisible(false);
+                    } else {
+                        m11.setVisible(true);
+                        m11.setText(config.menu.m11);
+                    }
+                    if (config.menu.m12 == null) {
+                        m12.setVisible(false);
+                    } else {
+                        m12.setVisible(true);
+                        m12.setText(config.menu.m12);
+                    }
                 }
             }
         }.start();
@@ -379,5 +513,15 @@ public class Chatroom extends JPanel {
         html += "</body></html>";
         outputArea.setText(html);
         outputArea.setCaretPosition(outputArea.getDocument().getLength());
+    }
+
+    public void keyTyped(KeyEvent e) {
+        addCharacter(e.getKeyChar());
+    }
+
+    public void keyPressed(KeyEvent e) {
+    }
+
+    public void keyReleased(KeyEvent e) {
     }
 }
