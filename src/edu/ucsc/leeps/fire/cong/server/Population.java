@@ -252,10 +252,7 @@ public class Population implements Serializable {
                             config);
                 }
                 subperiodPayoffs.put(member, payoff);
-                if (config.indefiniteEnd != null) {
-                    float secondsElapsed = percentElapsed * config.length;
-                    payoff *= secondsElapsed;
-                } else {
+                if (config.indefiniteEnd == null) {
                     payoff *= percentElapsed;
                 }
                 FIRE.server.addToPeriodPoints(member, payoff);
