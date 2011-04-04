@@ -53,7 +53,7 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
                 profit = 0;
             }
         }
-        return profit + bonus;
+        return profit;
     }
 
     private boolean equalPrices(float p1, float p2) {

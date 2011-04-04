@@ -95,6 +95,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         for (int id : clients.keySet()) {
             float points = FIRE.server.getPeriodPoints(id);
             float cost = clients.get(id).getCost();
+
             if (cost > points && !FIRE.server.getConfig().negativePayoffs) {
                 cost = points;
             }

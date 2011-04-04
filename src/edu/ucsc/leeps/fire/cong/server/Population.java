@@ -288,6 +288,11 @@ public class Population implements Serializable {
 
                     @Override
                     public void run() {
+                        Config config = FIRE.server.getConfig(member);
+                        if (config.payoffFunction instanceof PricingPayoffFunction) {
+                            float bonus = ((PricingPayoffFunction) config.payoffFunction).bonus;
+                            FIRE.server.addToPeriodPoints(member, bonus);
+                        }
                         float payoff = subperiodPayoffs.get(member);
                         float matchPayoff = 0;
                         for (int matchMember : Tuple.this.match.members) {
