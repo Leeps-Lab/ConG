@@ -191,15 +191,18 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     private class StrategyProcessor extends Thread {
-
         @Override
         public void run() {
             while (true) {
                 try {
                     StrategyChangeEvent event = strategyChangeEvents.take();
                     population.strategyChanged(event.id, event.newStrategy, event.targetStrategy);
+                    
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
+                }
+                if (strategyChangeEvents.size() > 10) {
+                    System.err.println("WARNING: Queue depth = " + strategyChangeEvents.size());
                 }
             }
         }
