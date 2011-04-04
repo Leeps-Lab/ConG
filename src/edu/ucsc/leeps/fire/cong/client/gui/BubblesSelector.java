@@ -49,7 +49,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
     }
 
     @Override
-    public void draw(Client applet) {
+    public void draw(Client a) {
         if (!visible) {
             return;
         }
@@ -63,17 +63,21 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         }
 
         if (enabled && !config.trajectory && slider.isGhostGrabbed()) {
-            float mouseX = applet.mouseX - origin.x;
+            float mouseX = a.mouseX - origin.x;
             slider.moveGhost(mouseX);
             setTarget(slider.getGhostValue());
         }
 
-        applet.pushMatrix();
-        applet.translate(origin.x, origin.y);
+        a.pushMatrix();
+        a.translate(origin.x, origin.y);
 
-        drawAxis(applet);
+        if (config.potential) {
+            drawPotentialPayoffs(a);
+        }
 
-        slider.draw(applet);
+        drawAxis(a);
+
+        slider.draw(a);
 
         int i = 1;
         for (int id : Client.state.strategies.keySet()) {
@@ -88,17 +92,29 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
                     i++;
                 }
             }
-            drawStrategy(applet, color, id);
+            drawStrategy(a, color, id);
         }
         if (config.subperiods != 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
-            drawPlannedStrategy(applet);
+            drawPlannedStrategy(a);
         }
-        applet.popMatrix();
+        a.popMatrix();
     }
 
-    private void drawPlannedStrategy(Client applet) {
-        applet.stroke(0, 0, 0, 20);
-        applet.line(width * Client.state.getMyStrategy()[0], 0, width * Client.state.getMyStrategy()[0], height);
+    private void drawPotentialPayoffs(Client a) {
+        float[] s = {0};
+        float max = config.payoffFunction.getMax();
+        a.stroke(50);
+        for (float x = 0; x < width; x++) {
+            s[0] = x / width;
+            float u = PayoffFunction.Utilities.getPayoff(s);
+            float y = u / max;
+            a.point(x, height * (1 - y));
+        }
+    }
+
+    private void drawPlannedStrategy(Client a) {
+        a.stroke(0, 0, 0, 20);
+        a.line(width * Client.state.getMyStrategy()[0], 0, width * Client.state.getMyStrategy()[0], height);
     }
 
     private void drawStrategy(Client applet, Color color, int id) {

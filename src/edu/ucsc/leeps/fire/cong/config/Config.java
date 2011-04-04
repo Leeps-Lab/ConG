@@ -74,6 +74,7 @@ public class Config extends BaseConfig {
     public boolean showSMinMax;
     public MatchTuple matchType;
     public boolean turnTaking;
+    public boolean potential;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
