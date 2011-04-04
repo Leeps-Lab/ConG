@@ -11,6 +11,8 @@ import java.util.Set;
  */
 public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
 
+    public float bonus;
+
     public PricingPayoffFunction() {
         min = 0;
         max = 100;
@@ -51,7 +53,7 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
                 profit = 0;
             }
         }
-        return profit;
+        return profit + bonus;
     }
 
     private boolean equalPrices(float p1, float p2) {
