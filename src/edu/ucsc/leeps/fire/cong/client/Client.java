@@ -571,6 +571,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         }
         if (System.getProperty("os.arch").equals("amd64")) {
             addDir(new File(new File(path, "lib"), "64-bit").getAbsolutePath());
+            addDir(new File("lib", "64-bit").getAbsolutePath());
         } else {
             addDir(new File(new File(path, "lib"), "32-bit").getAbsolutePath());
             String tmpDir = System.getProperty("java.io.tmpdir");

@@ -184,20 +184,25 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     public boolean isTurnTakingLocked(int subperiod) {
+        return isTurnTakingLocked(Client.state.id, subperiod);
+    }
+
+    public boolean isTurnTakingLocked(int id, int subperiod) {
         if (config != null && config.turnTaking) {
             if (subperiod == 0) {
                 return false;
             }
-            int myIndex = -1;
+            int index = -1;
             for (int i = 0; i < config.initiatives.length; i++) {
-                if (config.initiatives[i] == FIRE.client.getID()) {
-                    myIndex = i;
+                if (config.initiatives[i] == id) {
+                    index = i;
                 }
             }
-            if (myIndex == -1) {
-                throw new IllegalStateException();
+            if (index == -1) {
+                System.err.println("isTurnTakingLocked: couldn't find id in initiatives");
+                return false;
             }
-            if (subperiod % config.initiatives.length == myIndex) {
+            if (subperiod % config.initiatives.length == index) {
                 return false;
             }
             return true;
