@@ -15,6 +15,7 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
     public float Rr, Rp, Rs,
             Pr, Pp, Ps,
             Sr, Sp, Ss;
+    public float subperiodBonus;
 
     public ThreeStrategyPayoffFunction() {
         Rr = 0;
@@ -34,6 +35,10 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
 
     public float getMax() {
         return max;
+    }
+
+    public float getSubperiodBonus(int subperiod, Config config) {
+        return subperiodBonus;
     }
 
     public float getPayoff(

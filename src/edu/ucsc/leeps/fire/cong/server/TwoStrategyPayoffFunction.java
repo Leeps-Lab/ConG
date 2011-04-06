@@ -15,6 +15,7 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
     public float Ab, Ba, Bb;
     public boolean isCounterpart;
     public float min, max;
+    public float subperiodBonus;
 
     public TwoStrategyPayoffFunction() {
         AaStart = Float.NaN;
@@ -52,6 +53,10 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
         } else {
             return A * (a * Aa + b * Ab) + B * (a * Ba + b * Bb);
         }
+    }
+
+    public float getSubperiodBonus(int subperiod, Config config) {
+        return subperiodBonus;
     }
 
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
