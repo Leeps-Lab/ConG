@@ -39,6 +39,25 @@ public class Agent extends Thread {
     }
 
     private void act(edu.ucsc.leeps.fire.cong.client.State state) {
+        if (FIRE.client.getRandom().nextFloat() < 0.05) {
+            int n = FIRE.client.getRandom().nextInt(3);
+            String s;
+            switch (n) {
+                case 0:
+                    s = "foo";
+                    break;
+                case 1:
+                    s = "bar";
+                    break;
+                case 2:
+                    s = "baz";
+                    break;
+                default:
+                    s = "def";
+                    break;
+            }
+            FIRE.client.getServer().newMessage(s, state.id);
+        }
         if (state.strategyChanger.isLocked()) {
             return;
         }

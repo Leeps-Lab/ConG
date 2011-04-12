@@ -50,7 +50,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
 
     @Override
     public void draw(Client a) {
-        if (!visible) {
+        if (!visible || config == null) {
             return;
         }
         slider.sliderStart = 0;
@@ -69,33 +69,40 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         }
 
         a.pushMatrix();
-        a.translate(origin.x, origin.y);
+        try {
+            a.translate(origin.x, origin.y);
 
-        if (config.potential) {
-            drawPotentialPayoffs(a);
-        }
-
-        drawAxis(a);
-
-        slider.draw(a);
-
-        int i = 1;
-        for (int id : Client.state.strategies.keySet()) {
-            Color color;
-            if (config.objectiveColors) {
-                color = config.currColors.get(id);
-            } else {
-                if (id == FIRE.client.getID()) {
-                    color = Config.colors[0];
-                } else {
-                    color = Config.colors[i];
-                    i++;
-                }
+            if (config.potential) {
+                drawPotentialPayoffs(a);
             }
-            drawStrategy(a, color, id);
-        }
-        if (config.subperiods != 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
-            drawPlannedStrategy(a);
+
+            drawAxis(a);
+
+            slider.draw(a);
+
+            int i = 1;
+            for (int id : Client.state.strategies.keySet()) {
+                Color color;
+                if (config.objectiveColors) {
+                    color = config.currColors.get(id);
+                } else {
+                    if (id == FIRE.client.getID()) {
+                        color = Config.colors[0];
+                    } else {
+                        color = Config.colors[i];
+                        i++;
+                    }
+                }
+                drawStrategy(a, color, id);
+            }
+            if (config.subperiods != 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
+                drawPlannedStrategy(a);
+            }
+            if (config.objectiveColors) {
+                a.fill(config.currColors.get(FIRE.client.getID()).getRGB());
+                a.text(config.currAliases.get(FIRE.client.getID()), 0, -10);
+            }
+        } catch (NullPointerException ex) {
         }
         a.popMatrix();
     }
