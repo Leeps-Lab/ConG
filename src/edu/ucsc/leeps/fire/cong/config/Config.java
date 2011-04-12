@@ -75,6 +75,8 @@ public class Config extends BaseConfig {
     public MatchTuple matchType;
     public boolean turnTaking;
     public boolean potential;
+    public float grid;
+    public int xAxisTicks;
     public static final Class bimatrix = TwoStrategyPayoffFunction.class;
     public static final Class rps = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -192,6 +194,8 @@ public class Config extends BaseConfig {
         menu.m10 = aliases[5];
         menu.m11 = aliases[6];
         menu.m12 = aliases[7];
+        grid = Float.NaN;
+        xAxisTicks = 10;
     }
     public static String[] aliases = new String[]{
         "Green", "Red", "Blue", "Aqua", "Purple", "Gray", "Orange", "Yellow"

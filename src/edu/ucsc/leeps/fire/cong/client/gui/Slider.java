@@ -162,7 +162,7 @@ public class Slider {
 
     public void setStratValue(float newStrat) {
         if (newStrat > maxValue + ERROR_MARGIN || newStrat < -ERROR_MARGIN) {
-            throw new RuntimeException("Error: strategy value out of range.");
+            throw new RuntimeException(String.format("Strategy value out of range. s=%.2f > max=%.2f || < min=%.2f", newStrat, maxValue, ERROR_MARGIN));
         }
 
         stratValue = newStrat;

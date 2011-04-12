@@ -11,11 +11,12 @@ import java.util.Set;
  */
 public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
 
-    public float bonus;
+    public float E;
 
     public PricingPayoffFunction() {
         min = 0;
         max = 100;
+        E = Float.NaN;
     }
 
     @Override
@@ -48,7 +49,11 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
         }
         float profit = 0;
         if (minIDs.contains(id)) {
-            profit = (minPrice - config.marginalCost) / minIDs.size();
+            if (Float.isNaN(E)) {
+                profit = (minPrice - config.marginalCost) / minIDs.size();
+            } else {
+                profit = (((1 - (float) Math.pow(minPrice, E)) / minIDs.size()) - config.marginalCost) * minPrice;
+            }
             if (profit < 0) {
                 profit = 0;
             }

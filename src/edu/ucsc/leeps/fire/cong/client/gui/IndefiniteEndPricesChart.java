@@ -145,7 +145,17 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
                 }
                 // draw the target preview line
                 if (Client.state.target != null) {
-                    int y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
+                    float target = Client.state.target[0];
+                    if (!Float.isNaN(config.grid)) {
+                        float r = target % config.grid;
+                        if (r > config.grid / 2f) {
+                            target -= r;
+                            target += config.grid;
+                        } else {
+                            target -= r;
+                        }
+                    }
+                    int y = height - Math.round(target * scaledHeight) - scaledMargin;
                     a.stroke(100);
                     a.strokeWeight(2);
                     if (subperiod == Client.state.subperiod) {
@@ -181,11 +191,12 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
             a.rect(0, 0, width, height);
 
             // draw the axis
-            for (int i = 0; i <= 10; i++) {
-                float p = i / 10f;
+            a.textAlign(Client.RIGHT, Client.CENTER);
+            for (int i = 0; i <= config.xAxisTicks; i++) {
+                float p = i / (float)config.xAxisTicks;
                 float u = p * (umax - umin);
                 a.fill(0);
-                a.text(String.format("%.1f", u), -20, Math.round(height - p * scaledHeight - scaledMargin));
+                a.text(String.format("%.1f", u), -5, Math.round(height - p * scaledHeight - scaledMargin));
             }
 
         } catch (NullPointerException ex) {

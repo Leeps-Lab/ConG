@@ -50,6 +50,17 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         if (current.length == 1) {
             tickDelta /= 2f;
         }
+        if (!Float.isNaN(config.grid)) {
+            for (int i = 0; i < Client.state.target.length; i++) {
+                float r = Client.state.target[i] % config.grid;
+                if (r > config.grid / 2f) {
+                    Client.state.target[i] -= r;
+                    Client.state.target[i] += config.grid;
+                } else {
+                    Client.state.target[i] -= r;
+                }
+            }
+        }
         boolean same = true;
         for (int i = 0; i < Client.state.target.length; i++) {
             if (Math.abs(Client.state.target[i] - current[i]) > Float.MIN_NORMAL) {

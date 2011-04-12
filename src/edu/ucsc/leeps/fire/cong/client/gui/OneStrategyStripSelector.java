@@ -21,6 +21,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     private Client applet;
     private boolean enabled;
     private Slider slider;
+    private Config config;
 
     /**
      * Creates a strip strategy selector for use with a one-strategy payoff
@@ -45,7 +46,6 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         } else {
             slider = new Slider(applet, Slider.Alignment.Vertical, 0, height, width / 2f, Color.black, "A", 1f);
         }
-        slider.showGhost();
         this.applet = applet;
         FIRE.client.addConfigListener(this);
         applet.addMouseListener(this);
@@ -112,11 +112,24 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             float mouseX = applet.mouseX - origin.x;
             float mouseY = applet.mouseY - origin.y;
 
+            if (!Float.isNaN(config.grid)) {
+                float ghostValue = slider.getGhostValue();
+                float r = ghostValue % config.grid;
+                if (r > config.grid / 2f) {
+                    ghostValue -= r;
+                    ghostValue += config.grid;
+                } else {
+                    ghostValue -= r;
+                }
+                slider.setStratValue(ghostValue);
+            }
+
             if (slider.getAlignment() == Slider.Alignment.Horizontal) {
                 slider.moveGhost(mouseX);
             } else {
                 slider.moveGhost(mouseY);
             }
+
             float newTarget = slider.getGhostValue();
             float newPrice =
                     (newTarget * FIRE.client.getConfig().payoffFunction.getMax()) - FIRE.client.getConfig().payoffFunction.getMin();
@@ -138,14 +151,19 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
     }
 
     public void configChanged(Config config) {
+        this.config = config;
         if (config.selector == Config.StrategySelector.strip) {
             setVisible(true);
             if (config.payoffFunction instanceof PricingPayoffFunction) {
                 slider = new Slider(
                         applet,
                         Slider.Alignment.Vertical, height * 0.05f, height * 0.94f, width / 2f, Color.black, "", 1f);
-                slider.showGhost();
                 slider.setVisible(true);
+            }
+            if (Float.isNaN(config.percentChangePerSecond)) {
+                slider.hideGhost();
+            } else {
+                slider.showGhost();
             }
         } else {
             setVisible(false);
