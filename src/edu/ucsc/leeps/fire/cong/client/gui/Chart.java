@@ -206,10 +206,14 @@ public class Chart extends Sprite implements Configurable<Config> {
         if (config == null || config.subperiods == 0) {
             return;
         }
-        // markers
-        applet.strokeWeight(1f);
-        applet.stroke(100, 100, 100);
-        applet.fill(100, 100, 100);
+
+        for (int i = 1; i < config.subperiods; i++) {
+            applet.noFill();
+            applet.stroke(100, 100, 100);
+            applet.strokeWeight(2);
+            float x = (i / (float) config.subperiods) * width;
+            applet.line(x, 0, x, height);
+        }
 
         // live strategy preview
         float interval = 1f / (float) config.subperiods;
@@ -225,6 +229,9 @@ public class Chart extends Sprite implements Configurable<Config> {
                 applet.point(x, y);
                 applet.point(x, y + 1);
             }
+            applet.strokeWeight(1f);
+            applet.stroke(100, 100, 100);
+            applet.fill(100, 100, 100);
             applet.ellipse(end, y, 10, 10);
         }
     }

@@ -103,6 +103,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
                 a.text(config.currAliases.get(FIRE.client.getID()), 0, -10);
             }
         } catch (NullPointerException ex) {
+            ex.printStackTrace();
         }
         a.popMatrix();
     }
@@ -164,8 +165,9 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
             }
         }
         if (config.subperiods == 0 || Client.state.subperiod != 0) {
-            String label = String.format("%.0f", payoff);
-            applet.text(label, Math.round(x + 5), Math.round(y - 3));
+            applet.textAlign(Client.RIGHT, Client.CENTER);
+            String label = String.format("%.1f", payoff);
+            applet.text(label, Math.round(x - 5), Math.round(y - 6));
         }
         if (payoff > max && (config.subperiods == 0 || Client.state.subperiod != 0)) {
             drawUpArrow(applet, color, x);

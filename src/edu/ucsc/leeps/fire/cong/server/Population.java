@@ -61,35 +61,27 @@ public class Population implements Serializable {
         if (FIRE.server.getConfig().turnTaking) {
             setInitiative();
         }
-        boolean hasChat = false;
-        for (Config config : FIRE.server.getDefaultConfigs().values()) {
-            if (config.chatroom) {
-                hasChat = true;
+        for (Tuple tuple : tuples) {
+            List<String> possible_aliases = new ArrayList<String>();
+            for (int i = 0; i < tuple.members.size(); i++) {
+                possible_aliases.add(Config.aliases[i]);
+            }
+            Collections.shuffle(possible_aliases, FIRE.server.getRandom());
+            int i = 0;
+            for (int id : tuple.members) {
+                aliases.put(id, possible_aliases.get(i));
+                for (int j = 0; j < Config.aliases.length; j++) {
+                    if (aliases.get(id).equals(Config.aliases[j])) {
+                        colors.put(id, Config.colors[j]);
+                        break;
+                    }
+                }
+                i++;
             }
         }
-        if (hasChat) {
-            for (Tuple tuple : tuples) {
-                List<String> possible_aliases = new ArrayList<String>();
-                for (int i = 0; i < tuple.members.size(); i++) {
-                    possible_aliases.add(Config.aliases[i]);
-                }
-                Collections.shuffle(possible_aliases, FIRE.server.getRandom());
-                int i = 0;
-                for (int id : tuple.members) {
-                    aliases.put(id, possible_aliases.get(i));
-                    for (int j = 0; j < Config.aliases.length; j++) {
-                        if (aliases.get(id).equals(Config.aliases[j])) {
-                            colors.put(id, Config.colors[j]);
-                            break;
-                        }
-                    }
-                    i++;
-                }
-            }
-            for (int id : members.keySet()) {
-                FIRE.server.getConfig(id).currAliases = aliases;
-                FIRE.server.getConfig(id).currColors = colors;
-            }
+        for (int id : members.keySet()) {
+            FIRE.server.getConfig(id).currAliases = aliases;
+            FIRE.server.getConfig(id).currColors = colors;
         }
     }
 

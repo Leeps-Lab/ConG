@@ -10,10 +10,14 @@ import edu.ucsc.leeps.fire.cong.config.Config;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Element;
+import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
@@ -25,6 +29,8 @@ public class Chatroom extends JPanel implements KeyListener {
 
     private JFrame frame;
     private List<String> lines;
+    private static final String prefix = "<html><body id=\"body\">";
+    private static final String suffix = "</body></html>";
 
     public Chatroom(JFrame frame) {
         initComponents();
@@ -84,7 +90,6 @@ public class Chatroom extends JPanel implements KeyListener {
 
         outputArea.setContentType("text/html");
         outputArea.setEditable(false);
-        outputArea.setText("\n");
         outputArea.setMinimumSize(new java.awt.Dimension(0, 0));
         jScrollPane1.setViewportView(outputArea);
 
@@ -321,7 +326,6 @@ public class Chatroom extends JPanel implements KeyListener {
     private void m12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_m12ActionPerformed
         inputField.setText(inputField.getText() + " " + m12.getText());
     }//GEN-LAST:event_m12ActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea inputField;
     private javax.swing.JScrollPane jScrollPane1;
@@ -404,13 +408,13 @@ public class Chatroom extends JPanel implements KeyListener {
      * @param message message inputted by subject.
      * @param senderID ID of sender.
      */
-    public void newMessage(String message) {
+    public void newMessage(final String message) {
         lines.add(message);
-        updateOutputArea();
+        updateOutputArea(message);
     }
 
     public void startPeriod() {
-        updateOutputArea();
+        outputArea.setText(prefix + suffix);
     }
 
     public void endPeriod() {
@@ -505,14 +509,23 @@ public class Chatroom extends JPanel implements KeyListener {
         }.start();
     }
 
-    private void updateOutputArea() {
-        String html = "<html><body>";
-        for (String line : lines) {
-            html += "<p>" + line + "</p>";
+    private void updateOutputArea(String line) {
+        try {
+            HTMLDocument doc = (HTMLDocument) outputArea.getDocument();
+            Element body = doc.getElement("body");
+            Element lastChild = body.getElement(body.getElementCount() - 1);
+            try {
+                doc.insertAfterEnd(lastChild, "<p>" + line + "</p>");
+            } catch (BadLocationException ex) {
+                ex.printStackTrace();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            outputArea.setCaretPosition(outputArea.getDocument().getLength());
+        } catch (NullPointerException ex) {
+            outputArea.setText(prefix + suffix);
+            ex.printStackTrace();
         }
-        html += "</body></html>";
-        outputArea.setText(html);
-        outputArea.setCaretPosition(outputArea.getDocument().getLength());
     }
 
     public void keyTyped(KeyEvent e) {

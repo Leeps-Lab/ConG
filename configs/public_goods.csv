@@ -1,3 +1,2 @@
-"period","paid","length","subperiods","percentChangePerSecond","numTuples","payoffFunction","type","name","A",,,"smin","smax","min","max","mixed","selector","matrixDisplay","showPayoffTimeAxisLabels","chatroom","freeChat","menu","m1","m2","m3"
-1,"TRUE",120,0,0.1,1,"sum","public_goods","pf",0.75,,,0,1,0,300,TRUE,"bimatrix","heatmapSingle","TRUE","TRUE","TRUE",,,,
-2,"TRUE",120,0,0.1,1,"sum","public_goods","pf",0.75,,,0,1,0,300,TRUE,"bubbles",,"TRUE","TRUE","FALSE","chatMenu","Go Left","Stay Still","Go Right"
+"period","paid","length","subperiods","percentChangePerSecond","tupleSize","matchType","payoffFunction","type","name","A","B","smin","smax","min","max","mixed","selector","objectiveColors","chatroom","freeChat","initial","showSMinMax"
+1,"TRUE",60,10,"NaN",3,"self","sum","public_goods","pf",25,0.2,0,25,0,60,"TRUE","bubbles","TRUE","FALSE","FALSE",0,"TRUE"

@@ -39,7 +39,7 @@ public class Agent extends Thread {
     }
 
     private void act(edu.ucsc.leeps.fire.cong.client.State state) {
-        if (FIRE.client.getRandom().nextFloat() < 0.05) {
+        if (FIRE.client.getConfig().chatroom && FIRE.client.getConfig().freeChat && FIRE.client.getRandom().nextFloat() < 0.05) {
             int n = FIRE.client.getRandom().nextInt(3);
             String s;
             switch (n) {

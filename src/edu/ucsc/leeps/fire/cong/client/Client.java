@@ -362,6 +362,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     @Override
     public void draw() {
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         try {
             if (resize) {
                 setupFonts();
@@ -427,14 +428,20 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         }
     }
 
-    public void configChanged(Config config) {
+    public void configChanged(final Config config) {
         if (config.chatroom && chatFrame == null) {
-            chatFrame = new JFrame("Chat");
-            chatroom = new Chatroom(chatFrame);
-            chatFrame.add(chatroom);
-            chatFrame.pack();
-            chatFrame.setVisible(false);
-            chatroom.configure(config);
+            new Thread() {
+
+                @Override
+                public void run() {
+                    chatFrame = new JFrame("Chat");
+                    chatroom = new Chatroom(chatFrame);
+                    chatFrame.add(chatroom);
+                    chatFrame.pack();
+                    chatFrame.setVisible(false);
+                    chatroom.configure(config);
+                }
+            }.start();
         } else if (chatFrame != null && chatroom != null) {
             chatroom.configure(config);
         }
@@ -530,6 +537,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     @Override
     public void keyTyped(KeyEvent ke) {
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         if (chatroom != null) {
             chatroom.addCharacter(ke.getKeyChar());
         }

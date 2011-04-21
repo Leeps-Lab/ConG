@@ -32,7 +32,6 @@
           <Properties>
             <Property name="contentType" type="java.lang.String" value="text/html"/>
             <Property name="editable" type="boolean" value="false"/>
-            <Property name="text" type="java.lang.String" value="&#xa;"/>
             <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
               <Dimension value="[0, 0]"/>
             </Property>
