@@ -355,7 +355,6 @@ public class Population implements Serializable {
             tuples.add(populations.get(config.match));
         }
         Set<Tuple> assignedMatches = new HashSet<Tuple>();
-        Config def = FIRE.server.getConfig();
         for (Tuple tuple : tuples) {
             if (assignedMatches.contains(tuple)) {
                 continue;
@@ -363,7 +362,6 @@ public class Population implements Serializable {
             if (tuple.population == tuple.match.population) {
                 for (int member : tuple.members) {
                     Config config = FIRE.server.getConfig(member);
-                    config.payoffFunction = def.payoffFunction;
                     config.playersInTuple = tuple.members.size();
                 }
             } else {
@@ -372,24 +370,10 @@ public class Population implements Serializable {
                 }
                 for (int member : tuple.members) {
                     Config config = FIRE.server.getConfig(member);
-                    if (config.isCounterpart) {
-                        config.payoffFunction = def.counterpartPayoffFunction;
-                        config.counterpartPayoffFunction = def.payoffFunction;
-                    } else {
-                        config.payoffFunction = def.payoffFunction;
-                        config.counterpartPayoffFunction = def.counterpartPayoffFunction;
-                    }
                     config.playersInTuple = tuple.members.size();
                 }
                 for (int member : tuple.match.members) {
                     Config config = FIRE.server.getConfig(member);
-                    if (config.isCounterpart) {
-                        config.payoffFunction = def.counterpartPayoffFunction;
-                        config.counterpartPayoffFunction = def.payoffFunction;
-                    } else {
-                        config.payoffFunction = def.payoffFunction;
-                        config.counterpartPayoffFunction = def.counterpartPayoffFunction;
-                    }
                     config.playersInTuple = tuple.match.members.size();
                 }
             }
@@ -471,25 +455,24 @@ public class Population implements Serializable {
             Config config = FIRE.server.getConfig(client);
             float[] s;
             if (!Float.isNaN(config.initial)) {
-                s = new float[]{
-                            FIRE.server.getConfig().initial,};
+                s = new float[]{config.initial,};
             } else if (!Float.isNaN(config.initial0) && !Float.isNaN(config.initial1)) {
                 s = new float[3];
                 s[0] = config.initial0;
                 s[1] = config.initial1;
                 s[2] = 1 - s[1] - s[0];
-            } else if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
+            } else if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
                 s = new float[1];
-                if (FIRE.server.getConfig().mixed) {
-                    float costRange = FIRE.server.getConfig().payoffFunction.getMax() - FIRE.server.getConfig(client).marginalCost;
-                    float totalRange = FIRE.server.getConfig().payoffFunction.getMax() - FIRE.server.getConfig().payoffFunction.getMin();
-                    s[0] = (FIRE.server.getRandom().nextFloat() * costRange + FIRE.server.getConfig(client).marginalCost) / totalRange;
+                if (config.mixed) {
+                    float costRange = config.payoffFunction.getMax() - config.marginalCost;
+                    float totalRange = config.payoffFunction.getMax() - config.payoffFunction.getMin();
+                    s[0] = (FIRE.server.getRandom().nextFloat() * costRange + config.marginalCost) / totalRange;
                 } else {
                     s[0] = FIRE.server.getRandom().nextBoolean() ? 1 : 0;
                 }
-            } else if (FIRE.server.getConfig().payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
                 s = new float[3];
-                if (FIRE.server.getConfig().mixed) {
+                if (config.mixed) {
                     s[0] = FIRE.server.getRandom().nextFloat();
                     s[1] = (1 - s[0]) * FIRE.server.getRandom().nextFloat();
                     s[2] = 1 - s[0] - s[1];
@@ -500,9 +483,10 @@ public class Population implements Serializable {
                     s[FIRE.server.getRandom().nextInt(3)] = 1;
                 }
             } else {
+                System.err.println(config.payoffFunction);
                 throw new IllegalStateException("Cannot set initial strategies for given payoff function");
             }
-            FIRE.server.getConfig(client).initialStrategy = s;
+            config.initialStrategy = s;
         }
         for (Tuple tuple : tuples) {
             for (int member : tuple.members) {
