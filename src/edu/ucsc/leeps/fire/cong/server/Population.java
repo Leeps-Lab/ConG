@@ -556,16 +556,17 @@ public class Population implements Serializable {
         // does setWorlds() need to be called after a shuffle?
     }
 
-    public void newMessage(String message, int senderID) {
+    public void newMessage(int secondsLeft, String message, String html, int senderID, String alias) {
         Tuple tuple = tupleMap.get(senderID);
         for (int id : tuple.members) {
             ClientInterface client = members.get(id);
             client.newMessage(message);
         }
         mEvent.period = FIRE.server.getConfig().period;
-        mEvent.timestamp = (int) System.currentTimeMillis();
+        mEvent.secondsLeft = secondsLeft;
         mEvent.subject = senderID;
-        mEvent.tuple = tuple.population;
+        mEvent.population = tuple.population;
+        mEvent.alias = alias;
         mEvent.text = message;
         FIRE.server.commit(mEvent);
     }

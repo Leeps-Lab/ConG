@@ -25,6 +25,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     private StrategyProcessor strategyProcessor;
     private Map<Integer, String> aliases;
     private Map<Integer, Color> colors;
+    private int secondsLeft;
 
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
@@ -79,12 +80,14 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void startPeriod(long periodStartTime) {
+        secondsLeft = FIRE.server.getConfig().length;
         population.setPeriodStartTime();
         configureImpulses();
         configureSubperiods();
     }
 
     public void endPeriod() {
+        secondsLeft = 0;
         if (FIRE.server.getConfig().subperiods == 0) {
             population.endPeriod();
         } else {
@@ -104,6 +107,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void tick(int secondsLeft) {
+        this.secondsLeft = secondsLeft;
         if (FIRE.server.getConfig().subperiods == 0) {
             population.logTick(0, secondsLeft);
             population.evaluate();
@@ -165,16 +169,17 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public void newMessage(String message, int senderID) {
         if (message.equals("")) {
         } else {
+            String html;
             if (senderID == -1) {
-                message = "SERVER: " + message;
+                html = "SERVER: " + message;
             } else {
                 Color c = colors.get(senderID);
-                message = String.format("<font color=\"rgb(%d, %d, %d)\">", c.getRed(), c.getGreen(), c.getBlue())
+                html = String.format("<font color=\"rgb(%d, %d, %d)\">", c.getRed(), c.getGreen(), c.getBlue())
                         + aliases.get(senderID)
                         + "</font>" + ": "
                         + message;
             }
-            population.newMessage(message, senderID);
+            population.newMessage(secondsLeft, message, html, senderID, aliases.get(senderID));
         }
     }
 
