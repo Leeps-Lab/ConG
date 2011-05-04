@@ -568,7 +568,7 @@ public class Population implements Serializable {
         mEvent.population = tuple.population;
         mEvent.alias = alias;
         mEvent.text = message;
-        FIRE.server.commit(mEvent);
+        FIRE.server.commit(mEvent, "|");
     }
     /*
     private void setWorlds() {
