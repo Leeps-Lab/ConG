@@ -184,6 +184,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void unregister(int id) {
+        //disconnect client
         clients.remove(id);
     }
 
