@@ -70,7 +70,13 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
      */
     @Override
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        return null;
+        float[] summary = new float[]{Float.POSITIVE_INFINITY};
+        for (int match : popStrategies.keySet()) {
+            if (popStrategies.get(match)[0] < summary[0]) {
+                summary[0] = popStrategies.get(match)[0];
+            }
+        }
+        return summary;
     }
 
     /*
@@ -78,6 +84,16 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
      */
     @Override
     public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        return null;
+        float[] summary = new float[12];
+        int i = 0;
+        for (int match : popStrategies.keySet()) {
+            if (match != id) {
+                summary[i++] = popStrategies.get(match)[0];
+            }
+        }
+        for (; i < summary.length; i++) {
+            summary[i] = Float.NaN;
+        }
+        return summary;
     }
 }
