@@ -384,7 +384,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     public void configChanged(Config config) {
         this.config = config;
-        if (config.selector == Config.StrategySelector.bimatrix) {
+        if (config.selector == Config.StrategySelector.heatmap2d) {
             switch (config.matrixDisplay) {
                 case HeatmapSingle:
                     setModeHeatmapSingle();

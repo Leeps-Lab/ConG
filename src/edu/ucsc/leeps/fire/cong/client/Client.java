@@ -54,7 +54,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private Countdown countdown;
     private PointsDisplay pointsDisplay;
     //only one shown
-    private TwoStrategySelector bimatrix;
+    private TwoStrategySelector heatmap2d;
     private ThreeStrategySelector simplex;
     private PureStrategySelector pureMatrix;
     private OneStrategyStripSelector strip;
@@ -122,9 +122,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         if (simplex.visible) {
             selector = simplex;
             strategyChanger.selector = simplex;
-        } else if (bimatrix.visible) {
-            selector = bimatrix;
-            strategyChanger.selector = bimatrix;
+        } else if (heatmap2d.visible) {
+            selector = heatmap2d;
+            strategyChanger.selector = heatmap2d;
         } else if (pureMatrix.visible) {
             selector = pureMatrix;
             strategyChanger.selector = pureMatrix;
@@ -151,7 +151,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         state.setMyStrategy(FIRE.client.getConfig().initialStrategy);
         if (FIRE.client.getConfig().preLength == 0) {
             state.currentPercent = 0;
-            bimatrix.setEnabled(true);
+            heatmap2d.setEnabled(true);
             pureMatrix.setEnabled(true);
             strip.setEnabled(true);
             payoffChart.clearAll();
@@ -302,7 +302,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         int counterpartMatrixSize = 100;
         strategyChanger = new StrategyChanger();
         Client.state = new State(strategyChanger);
-        bimatrix = new TwoStrategySelector(
+        heatmap2d = new TwoStrategySelector(
                 null, leftMargin, topMargin + counterpartMatrixSize + 30,
                 matrixSize, counterpartMatrixSize,
                 this);
@@ -323,10 +323,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         bubbles = new BubblesSelector(null, leftMargin, topMargin + counterpartMatrixSize,
                 matrixSize, matrixSize, this);
         countdown = new Countdown(
-                null, bimatrix.width - 150, 20 + topMargin, this);
+                null, heatmap2d.width - 150, 20 + topMargin, this);
         pointsDisplay = new PointsDisplay(
-                null, bimatrix.width - 150, (int) (20 + textHeight) + topMargin, this);
-        int chartLeftOffset = bimatrix.width;
+                null, heatmap2d.width - 150, (int) (20 + textHeight) + topMargin, this);
+        int chartLeftOffset = heatmap2d.width;
         int chartWidth = (int) (width - chartLeftOffset - 2 * leftMargin - 80);
         int chartMargin = 30;
         int strategyChartHeight = 100;
@@ -489,10 +489,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             legend.setVisible(true);
             strategyChart.setVisible(true);
         }
-        if (config.selector == Config.StrategySelector.bimatrix) {
+        if (config.selector == Config.StrategySelector.heatmap2d) {
             payoffChart.setVisible(true);
             strategyChart.setVisible(true);
-            bimatrix.setVisible(true);
+            heatmap2d.setVisible(true);
         }
     }
 

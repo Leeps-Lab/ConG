@@ -20,12 +20,12 @@ public class Config extends BaseConfig {
 
     public enum StrategySelector {
 
-        bimatrix, simplex, bubbles, strip, pure, qwerty,
+        heatmap2d, simplex, bubbles, strip, pure, qwerty,
     }
 
     public enum MatrixDisplayType {
 
-        HeatmapSingle, HeatmapBoth, Matrix
+        HeatmapSingle, HeatmapBoth, Corners
     }
 
     public enum MatchTuple {
@@ -49,7 +49,6 @@ public class Config extends BaseConfig {
     public String rLabel, pLabel, sLabel, shortRLabel, shortPLabel, shortSLabel;
     public Color rColor, pColor, sColor;
     public boolean showRPSSliders;
-    public ShockZone shock;
     public DecisionDelay initialDelay, delay;
     public IndefiniteEnd indefiniteEnd;
     public float impulse;
@@ -77,14 +76,13 @@ public class Config extends BaseConfig {
     public boolean potential;
     public float grid;
     public int xAxisTicks;
-    public static final Class bimatrix = TwoStrategyPayoffFunction.class;
-    public static final Class rps = ThreeStrategyPayoffFunction.class;
+    public static final Class matrix2x2 = TwoStrategyPayoffFunction.class;
+    public static final Class matrix3x3 = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
     public static final Class pricing = PricingPayoffFunction.class;
     public static final Class sum = SumPayoffFunction.class;
     public static final Class line = Line.class;
     public static final Class threshold = ThresholdPayoffFunction.class;
-    public static final Class shockZone = ShockZone.class;
     public static final Class decisionDelay = DecisionDelay.class;
     public static final Class chatMenu = ChatMenu.class;
     public static final Class endUniform = IndefiniteEnd.Uniform.class;
@@ -99,7 +97,7 @@ public class Config extends BaseConfig {
     public int playersInTuple;
     public int population, match;
     public int marginalCost;
-    public int[] initiatives;
+        public int[] initiatives;
 
     public Config() {
         paid = true;
@@ -157,11 +155,6 @@ public class Config extends BaseConfig {
         pColor = new Color(0, 0, 0);
         sColor = new Color(150, 150, 150);
         showRPSSliders = false;
-        shock = new ShockZone();
-        shock.start = 0f;
-        shock.end = 0f;
-        shock.backfill = false;
-        impulse = 0f;
         showHeatmapLegend = false;
         chatroom = false;
         negativePayoffs = false;
@@ -190,10 +183,10 @@ public class Config extends BaseConfig {
         menu.m6 = aliases[1];
         menu.m7 = aliases[2];
         menu.m8 = aliases[3];
-        menu.m9 = aliases[4];
-        menu.m10 = aliases[5];
-        menu.m11 = aliases[6];
-        menu.m12 = aliases[7];
+        //menu.m9 = aliases[4];
+        //menu.m10 = aliases[5];
+        //menu.m11 = aliases[6];
+        //menu.m12 = aliases[7];
         grid = Float.NaN;
         xAxisTicks = 10;
     }

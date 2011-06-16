@@ -81,19 +81,6 @@ public class Chart extends Sprite implements Configurable<Config> {
         FIRE.client.addConfigListener(this);
     }
 
-    private void drawShockZone(Client applet) {
-        if (config.shock.showZone) {
-            applet.fill(100, 100, 100, 50);
-            applet.noStroke();
-            float x0, y0, x1, y1;
-            x0 = width * FIRE.client.getConfig().shock.start;
-            y0 = 0;
-            x1 = width * FIRE.client.getConfig().shock.end;
-            y1 = scaledHeight + scaledMargin * 2;
-            applet.rect(x0, y0, x1 - x0, y1);
-        }
-    }
-
     private void drawAxis(Client applet) {
         applet.rectMode(Client.CORNER);
         applet.noFill();
@@ -244,15 +231,14 @@ public class Chart extends Sprite implements Configurable<Config> {
         applet.rectMode(Client.CORNER);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
-        drawShockZone(applet);
         if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
             if (mode == Mode.Payoff) {
+                yourPayoff.draw(applet);
                 if (config.payoffFunction instanceof PricingPayoffFunction) {
                     drawPriceLines(applet);
                 } else {
                     matchPayoff.draw(applet);
                 }
-                yourPayoff.draw(applet);
             } else if (mode == Mode.TwoStrategy) {
                 drawTwoStrategyLines(applet);
                 if (config.payoffFunction instanceof ThresholdPayoffFunction) {
