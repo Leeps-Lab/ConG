@@ -4,9 +4,8 @@ import edu.ucsc.leeps.fire.FIREClientInterface;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.gui.TwoStrategySelector;
-import edu.ucsc.leeps.fire.cong.client.gui.Countdown;
+import edu.ucsc.leeps.fire.cong.client.gui.PeriodInfo;
 import edu.ucsc.leeps.fire.cong.client.gui.ChartLegend;
-import edu.ucsc.leeps.fire.cong.client.gui.PointsDisplay;
 import edu.ucsc.leeps.fire.cong.client.gui.ThreeStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chart;
 import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
@@ -51,8 +50,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     public static State state;
     public boolean debug;
     public int framesPerUpdate;
-    private Countdown countdown;
-    private PointsDisplay pointsDisplay;
+    private PeriodInfo periodInfo;
     //only one shown
     private TwoStrategySelector heatmap2d;
     private ThreeStrategySelector simplex;
@@ -183,7 +181,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             pChart.endSubperiod(0);
             sChart.endSubperiod(0);
         }
-        pointsDisplay.startPeriod();
+        periodInfo.startPeriod();
     }
 
     public void endPeriod() {
@@ -202,7 +200,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             pChart.updateLines();
             sChart.updateLines();
         }
-        pointsDisplay.endPeriod();
+        periodInfo.endPeriod();
 
     }
 
@@ -216,7 +214,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public void tick(int secondsLeft) {
         state.currentPercent = (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
-        countdown.setSecondsLeft(secondsLeft);
+        periodInfo.setSecondsLeft(secondsLeft);
     }
 
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies) {
@@ -322,10 +320,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 this);
         bubbles = new BubblesSelector(null, leftMargin, topMargin + counterpartMatrixSize,
                 matrixSize, matrixSize, this);
-        countdown = new Countdown(
+        periodInfo = new PeriodInfo(
                 null, heatmap2d.width - 150, 20 + topMargin, this);
-        pointsDisplay = new PointsDisplay(
-                null, heatmap2d.width - 150, (int) (20 + textHeight) + topMargin, this);
         int chartLeftOffset = heatmap2d.width;
         int chartWidth = (int) (width - chartLeftOffset - 2 * leftMargin - 80);
         int chartMargin = 30;
@@ -392,7 +388,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 }
             }
             if (FIRE.client.isRunningPeriod()) {
-                pointsDisplay.update();
+                periodInfo.update();
             }
 
             if (selector != null) {
@@ -410,10 +406,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             if (FIRE.client.getConfig().preLength > 0 && !haveInitialStrategy) {
                 float textHeight = textDescent() + textAscent() + 8;
                 fill(255, 50, 50);
-                text("Please choose an initial strategy.", Math.round(countdown.origin.x), Math.round(countdown.origin.y - textHeight));
+                text("Please choose an initial strategy.", Math.round(periodInfo.origin.x), Math.round(periodInfo.origin.y - textHeight));
             }
-            countdown.draw(this);
-            pointsDisplay.draw(this);
+            periodInfo.draw(this);
             if (debug) {
                 String frameRateString = String.format("FPS: %.2f, Agent: %s", frameRate, agent.paused ? "off" : "on");
                 if (frameRate < 8) {

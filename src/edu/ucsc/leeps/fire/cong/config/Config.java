@@ -97,7 +97,8 @@ public class Config extends BaseConfig {
     public int playersInTuple;
     public int population, match;
     public int marginalCost;
-        public int[] initiatives;
+    public int[] initiatives;
+    public boolean showPGMultiplier;
 
     public Config() {
         paid = true;
@@ -189,6 +190,7 @@ public class Config extends BaseConfig {
         //menu.m12 = aliases[7];
         grid = Float.NaN;
         xAxisTicks = 10;
+        showPGMultiplier = false;
     }
     public static String[] aliases = new String[]{
         "Green", "Red", "Blue", "Gray", "Purple", "Orange", "Aqua", "Yellow"
