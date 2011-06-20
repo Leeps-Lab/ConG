@@ -16,6 +16,8 @@ public interface PayoffFunction extends Serializable {
 
     public float getMax();
 
+    public int getNumStrategies();
+
     public float getSubperiodBonus(int subperiod, Config config);
 
     public float getPayoff(

@@ -32,6 +32,11 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
         return min;
     }
 
+    @Override
+    public int getNumStrategies() {
+        return 1;
+    }
+
     /*
      * proportional: (A * s / sum ) - C * s + D
      * linear: (A - B * sum) * s - C * s + D

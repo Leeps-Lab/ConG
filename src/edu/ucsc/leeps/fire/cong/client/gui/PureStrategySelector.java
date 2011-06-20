@@ -87,7 +87,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
             if (FIRE.client.getConfig().showMatrix) {
 
-                int numStrategies = 2;
+                int numStrategies = FIRE.client.getConfig().payoffFunction.getNumStrategies();
 
                 matrixLabel.draw(applet);
                 for (int i = 0; i < columnLabels.length; ++i) {

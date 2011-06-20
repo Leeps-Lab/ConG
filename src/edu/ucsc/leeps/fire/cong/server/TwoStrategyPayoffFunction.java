@@ -31,6 +31,10 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
         return min;
     }
 
+    public int getNumStrategies() {
+        return 2;
+    }
+
     public boolean reverseXAxis() {
         return false;
     }

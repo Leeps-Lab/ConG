@@ -30,6 +30,11 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
     }
 
     @Override
+    public int getNumStrategies() {
+        return 1;
+    }
+
+    @Override
     public float getPayoff(
             int id, float percent,
             Map<Integer, float[]> popStrategies,

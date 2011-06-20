@@ -37,6 +37,10 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
         return max;
     }
 
+    public int getNumStrategies() {
+        return 3;
+    }
+
     public float getSubperiodBonus(int subperiod, Config config) {
         return subperiodBonus;
     }
