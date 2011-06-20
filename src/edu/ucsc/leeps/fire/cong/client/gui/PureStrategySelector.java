@@ -215,9 +215,9 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
     public void configChanged(Config config) {
 
         int numStrategies = 0;
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (config.payoffFunction.getNumStrategies() <= 2) {
             numStrategies = 2;
-        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (config.payoffFunction.getNumStrategies() == 3) {
             numStrategies = 3;
         }
 

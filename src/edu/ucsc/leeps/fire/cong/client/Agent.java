@@ -62,7 +62,7 @@ public class Agent extends Thread {
             return;
         }
         Config config = FIRE.client.getConfig();
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (config.payoffFunction.getNumStrategies() <= 2) {
             float newTarget;
             if (PayoffFunction.Utilities.getPayoff() <= 3) {
                 newTarget = FIRE.client.getRandom().nextFloat();
@@ -80,7 +80,7 @@ public class Agent extends Thread {
                 }
                 newTarget = maxStrategy + (float) (0.1 * FIRE.client.getRandom().nextGaussian());
             }
-            if (config.payoffFunction instanceof PricingPayoffFunction) {
+            if (config.payoffFunction instanceof PricingPayoffFunction) { //payoff function dependent
                 float max = config.payoffFunction.getMax();
                 float min = config.payoffFunction.getMin();
                 float newPrice = min + (newTarget * (max - min));
@@ -92,7 +92,7 @@ public class Agent extends Thread {
             if (newTarget >= 0 && newTarget <= 1) {
                 state.target[0] = newTarget;
             }
-        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (config.payoffFunction.getNumStrategies() == 3) {
             float maxPayoff = Float.NEGATIVE_INFINITY;
             float[] maxStrategy = new float[3];
             float[] strategy = new float[3];

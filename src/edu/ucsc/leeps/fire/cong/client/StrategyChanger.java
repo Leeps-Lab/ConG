@@ -31,9 +31,9 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     public void configChanged(Config config) {
         this.config = config;
         int size = 0;
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (config.payoffFunction.getNumStrategies() <= 2) {
             size = 1;
-        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (config.payoffFunction.getNumStrategies() == 3) {
             size = 3;
         }
         previousStrategy = new float[size];

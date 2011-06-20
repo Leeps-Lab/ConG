@@ -50,7 +50,7 @@ public class Population implements Serializable {
             strategyUpdateProcessors.get(member).start();
         }
         // fixme: better way of doing this. config can auto-configure some parts?
-        if (FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction
+        if (FIRE.server.getConfig().payoffFunction.getNumStrategies() <= 2
                 && FIRE.server.getConfig().counterpartPayoffFunction != null) {
             ((TwoStrategyPayoffFunction) FIRE.server.getConfig().counterpartPayoffFunction).isCounterpart = true;
         }
@@ -461,7 +461,7 @@ public class Population implements Serializable {
                 s[0] = config.initial0;
                 s[1] = config.initial1;
                 s[2] = 1 - s[1] - s[0];
-            } else if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+            } else if (config.payoffFunction.getNumStrategies() <= 2) {
                 s = new float[1];
                 if (config.mixed) {
                     float costRange = config.payoffFunction.getMax() - config.marginalCost;
@@ -470,7 +470,7 @@ public class Population implements Serializable {
                 } else {
                     s[0] = FIRE.server.getRandom().nextBoolean() ? 1 : 0;
                 }
-            } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+            } else if (config.payoffFunction.getNumStrategies() == 3) {
                 s = new float[3];
                 if (config.mixed) {
                     s[0] = FIRE.server.getRandom().nextFloat();

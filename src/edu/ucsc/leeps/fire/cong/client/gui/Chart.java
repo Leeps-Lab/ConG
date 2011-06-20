@@ -231,7 +231,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         applet.rectMode(Client.CORNER);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
-        if (config.payoffFunction instanceof TwoStrategyPayoffFunction) {
+        if (config.payoffFunction.getNumStrategies() <= 2) {
             if (mode == Mode.Payoff) {
                 yourPayoff.draw(applet);
                 if (config.payoffFunction instanceof PricingPayoffFunction) {
@@ -250,7 +250,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                             height * (1 - ((ThresholdPayoffFunction) config.payoffFunction).threshold));
                 }
             }
-        } else if (config.payoffFunction instanceof ThreeStrategyPayoffFunction) {
+        } else if (config.payoffFunction.getNumStrategies() == 3) {
             if (mode == Mode.Payoff) {
                 matchPayoff.draw(applet);
                 yourPayoff.draw(applet);
