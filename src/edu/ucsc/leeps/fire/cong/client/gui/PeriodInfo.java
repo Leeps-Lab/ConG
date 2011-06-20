@@ -123,7 +123,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
 
     public void startPeriod() {
         periodStartTime = System.currentTimeMillis();
-        if (FIRE.client.getConfig().payoffFunction instanceof SumPayoffFunction){
+        if (FIRE.client.getConfig().payoffFunction instanceof SumPayoffFunction){ //payoff function dependent
             multiplier = ((SumPayoffFunction)FIRE.client.getConfig().payoffFunction).B;
         }
         update();

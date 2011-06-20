@@ -154,7 +154,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         this.config = config;
         if (config.selector == Config.StrategySelector.strip) {
             setVisible(true);
-            if (config.payoffFunction instanceof PricingPayoffFunction) {
+            if (config.payoffFunction instanceof PricingPayoffFunction) { //payoff function dependent
                 slider = new Slider(
                         applet,
                         Slider.Alignment.Vertical, height * 0.05f, height * 0.94f, width / 2f, Color.black, "", 1f);

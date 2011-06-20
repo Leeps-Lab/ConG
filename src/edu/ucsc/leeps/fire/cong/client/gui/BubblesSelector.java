@@ -226,7 +226,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
             String label = String.format("%.1f", payoff);
             applet.text(label, Math.round(labelX), Math.round(y0));
         }
-        if (config.payoffFunction instanceof SumPayoffFunction && config.showSMinMax) {
+        if (config.payoffFunction instanceof SumPayoffFunction && config.showSMinMax) { //payoff function dependent
             SumPayoffFunction pf = (SumPayoffFunction) config.payoffFunction;
             String label = String.format("%.1f", pf.smin);
             applet.text(label, Math.round(0), Math.round(height + 20));

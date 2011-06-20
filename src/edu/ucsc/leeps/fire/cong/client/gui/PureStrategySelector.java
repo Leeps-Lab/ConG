@@ -105,7 +105,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 int cpStrat = PayoffFunction.Utilities.getAverageMatchStrategy()[0] == 1 ? 0 : 1;
                 applet.rect(matrixTopLeft.origin.x + cpStrat * interval, matrixTopLeft.origin.y, interval, matrixSideLength);
                 /*
-                if (payoffFunction instanceof ThresholdPayoffFunction) {
+                if (payoffFunction instanceof ThresholdPayoffFunction) { //payoff function dependent
                 if (((ThresholdPayoffFunction) payoffFunction).thresholdMet(Client.state.currentPercent, myStrategy, averageMatch)) {
                 applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y, interval, matrixSideLength);
                 } else {

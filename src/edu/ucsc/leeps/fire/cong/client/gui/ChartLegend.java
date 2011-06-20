@@ -61,7 +61,7 @@ public class ChartLegend extends Sprite implements Configurable<Config> {
             float w2 = applet.textWidth(otherLabel);
             float w3 = applet.textWidth(threshLabel);
             width = (int) (4 + 10 + 4 + w1 + 4 + 10 + 4 + w2 + 4);
-            if (config.payoffFunction instanceof ThresholdPayoffFunction) {
+            if (config.payoffFunction instanceof ThresholdPayoffFunction) { //payoff function dependent
                 width += (int) (4 + 10 + 4 + w3);
             }
             applet.translate(-width, 0);
@@ -81,7 +81,7 @@ public class ChartLegend extends Sprite implements Configurable<Config> {
                     width + 4 + 10 + 4 + w1 + 4 + 10 + 4 - width,
                     height / 2f);
 
-            if (config.payoffFunction instanceof ThresholdPayoffFunction) {
+            if (config.payoffFunction instanceof ThresholdPayoffFunction) { //payoff function dependent
                 applet.stroke(threshold.r, threshold.g, threshold.b);
                 applet.line(4 + 10 + 4 + w1 + 4 + 10 + 4 + w2 + 4, height / 2f,
                         4 + 10 + 4 + w1 + 4 + 10 + 4 + w2 + 4 + 10, height / 2f);

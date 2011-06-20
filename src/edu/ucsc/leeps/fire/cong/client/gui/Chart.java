@@ -206,7 +206,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         float interval = 1f / (float) config.subperiods;
         if (Client.state.target != null
                 && (mode == Mode.TwoStrategy
-                || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction))
+                || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction)) //payoff function dependent
                 && config.mixed
                 && FIRE.client.isRunningPeriod()) {
             int start = Math.round(subperiod * interval * width);
@@ -234,14 +234,14 @@ public class Chart extends Sprite implements Configurable<Config> {
         if (config.payoffFunction.getNumStrategies() <= 2) {
             if (mode == Mode.Payoff) {
                 yourPayoff.draw(applet);
-                if (config.payoffFunction instanceof PricingPayoffFunction) {
+                if (config.payoffFunction instanceof PricingPayoffFunction) { //payoff function dependent
                     drawPriceLines(applet);
                 } else {
                     matchPayoff.draw(applet);
                 }
             } else if (mode == Mode.TwoStrategy) {
                 drawTwoStrategyLines(applet);
-                if (config.payoffFunction instanceof ThresholdPayoffFunction) {
+                if (config.payoffFunction instanceof ThresholdPayoffFunction) { //payoff function dependent
                     threshold.draw(applet);
                     applet.noStroke();
                     applet.fill(255, 255, 0, 75);
@@ -263,7 +263,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         if (mode == Mode.Payoff) {
             yourPayoff.drawCostArea(applet, Client.state.strategyChanger.getCost());
         }
-        if (!(config.payoffFunction instanceof PricingPayoffFunction && config.subperiods == 0)) {
+        if (!(config.payoffFunction instanceof PricingPayoffFunction && config.subperiods == 0)) { //payoff function dependent
             drawPercentLine(applet);
         }
         drawSubperiodInfo(applet);
@@ -336,7 +336,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 } else {
                     yourPayoff.addPayoffPoint(percent, PayoffFunction.Utilities.getPayoff());
                 }
-                if (FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction) {
+                if (FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction) { //payoff function dependent
                     PricingPayoffFunction pf = (PricingPayoffFunction) FIRE.client.getConfig().payoffFunction;
                     Map<Integer, float[]> currentPrices = Client.state.strategies;
                     for (int id : currentPrices.keySet()) {
@@ -374,7 +374,7 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     public void updateMarginalCostLines(float percent) {
-        if (!visible || percent > 1f || mode != Mode.Payoff || !(FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction)) {
+        if (!visible || percent > 1f || mode != Mode.Payoff || !(FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction)) { //payoff function dependent
             return;
         }
         if (!marginalCosts.containsKey(Client.state.id)) {
@@ -431,7 +431,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         matchS.configure(config, config.matchPayoff);
         matchS.mode = Line.Mode.Solid;
         threshold.configure(config, config.thresholdLine);
-        if (config.payoffFunction instanceof ThresholdPayoffFunction) {
+        if (config.payoffFunction instanceof ThresholdPayoffFunction) { //payoff function dependent
             threshold.clear();
             for (float percent = 0f; percent < 1.0f; percent += .01f) {
                 threshold.setPoint(
@@ -453,7 +453,7 @@ public class Chart extends Sprite implements Configurable<Config> {
         yourS.width = width;
         matchS.width = width;
         threshold.width = width;
-        if (config.payoffFunction instanceof PricingPayoffFunction) {
+        if (config.payoffFunction instanceof PricingPayoffFunction) { //payoff function dependent
             float ratio =
                     (config.marginalCost - config.payoffFunction.getMin())
                     / (config.payoffFunction.getMax() - config.payoffFunction.getMin());
