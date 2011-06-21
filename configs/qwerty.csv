@@ -1,7 +1,7 @@
-"period","timeConstrained","paid","length","subperiods","percentChangePerSecond","tupleSize","payoffFunction","name","counterpartPayoffFunction","name","isCounterpart","excludeSelf","mixedStrategySelection","strategySelectionDisplayType","showMatrix","initialDelay","distribution","lambda","delay","distribution","lambda"
-1,"TRUE","TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","FALSE","Matrix","FALSE",,,,,,
-2,"TRUE","TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","FALSE","Matrix","TRUE","decisionDelay","poisson",10,,,
-3,"TRUE","TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","FALSE","Matrix","TRUE","decisionDelay","poisson",10,"decisionDelay","poisson",6
-4,"TRUE","TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","FALSE","Matrix","TRUE",,,,,,
-5,"TRUE","TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","FALSE","Matrix","TRUE",,,,,,
-6,"TRUE","TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","FALSE","Matrix","TRUE",,,,,,
+"period","paid","length","subperiods","percentChangePerSecond","tupleSize","payoffFunction","name","counterpartPayoffFunction","name","isCounterpart","excludeSelf","showMatrix","initialDelay","distribution","lambda","delay","distribution","lambda","selector"
+1,"TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","FALSE",,,,,,,"qwerty"
+2,"TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","TRUE","decisionDelay","poisson",10,,,,"qwerty"
+3,"TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","TRUE","decisionDelay","poisson",10,"decisionDelay","poisson",6,"qwerty"
+4,"TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","TRUE",,,,,,,"qwerty"
+5,"TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","TRUE",,,,,,,"qwerty"
+6,"TRUE",120,"0",1,2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","TRUE",,,,,,,"qwerty"
