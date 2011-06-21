@@ -77,7 +77,6 @@ public class Line extends Sprite implements Serializable {
             } else {
                 applet.line(x - 1, ypoints.get(x - 1), x, ypoints.get(x));
                 applet.line(x - 1, ypoints.get(x - 1), x, ypoints.get(x - 1));
-                applet.line(x, ypoints.get(x - 1), x, ypoints.get(x));
             }
         }
     }
