@@ -100,19 +100,25 @@ public class Line extends Sprite implements Serializable {
         applet.stroke(r, g, b, alpha);
         applet.strokeWeight(weight);
         applet.fill(r, g, b, alpha);
-        applet.beginShape();
-        for (int x = 0; x < ypoints.size(); x++) {
-            if (x > 0 && stepFunction && Math.abs(ypoints.get(x) - ypoints.get(x - 1)) > 1) {
-                applet.vertex(x, ypoints.get(x - 1));
+        if (stepFunction) {
+            applet.beginShape();
+            for (int x = 0; x < ypoints.size(); x++) {
+                if (x > 0 && Math.abs(ypoints.get(x) - ypoints.get(x - 1)) > 1) {
+                    applet.vertex(x, ypoints.get(x - 1));
+                }
+                applet.vertex(x, ypoints.get(x));
             }
-            applet.vertex(x, ypoints.get(x));
+            if (ypoints.size() > 0) {
+                applet.vertex(ypoints.size(), ypoints.get(ypoints.size() - 1));
+            }
+            applet.vertex(ypoints.size(), height);
+            applet.vertex(0, height);
+            applet.endShape();
+        } else {
+            for (int x = 0; x < ypoints.size(); x++) {
+                applet.line(x, ypoints.get(x), x, height);
+            }
         }
-        if (ypoints.size() > 0) {
-            applet.vertex(ypoints.size(), ypoints.get(ypoints.size() - 1));
-        }
-        applet.vertex(ypoints.size(), height);
-        applet.vertex(0, height);
-        applet.endShape();
     }
 
     public synchronized void drawCostArea(Client applet, float cost) {
