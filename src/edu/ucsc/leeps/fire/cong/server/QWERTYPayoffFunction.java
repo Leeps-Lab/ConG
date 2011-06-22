@@ -9,10 +9,18 @@ import java.util.Map;
  */
 public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
 
-    public float[][] payoffs = new float[][]{
-        {5, 5},
-        {9, 6},
-        {12, 11},};
+    public float[][][] payoffs = new float[][][]{
+        { //Firm A payoffs
+            {6, 6},
+            {10, 7},
+            {13, 12},
+        },
+        { //Firm B payoffs
+            {3, 3},
+            {9, 6},
+            {12, 11},
+        }
+    };
 
     @Override
     public float getMin() {
@@ -30,7 +38,7 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
             Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies,
             Config config) {
         float[] strategy = popStrategies.get(id);
-        return payoffs[getInSame(id, strategy, matchPopStrategies)][getInSame(id, strategy, popStrategies) - 1];
+        return payoffs[(int)strategy[0]][getInSame(id, strategy, matchPopStrategies)][getInSame(id, strategy, popStrategies) - 1];
     }
 
     public int getInSame(int id, float[] myStrategy, Map<Integer, float[]> strategies) {

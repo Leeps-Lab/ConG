@@ -22,10 +22,10 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
             Client applet) {
         super(parent, x, y, size, size);
         firmButtons = new RadioButtonGroup(
-                this, 200, 200, 200, 2,
+                this, 100, 300, 200, 2,
                 RadioButtonGroup.Alignment.Horizontal, 15, applet);
         firmButtons.setLabelMode(Marker.LabelMode.Bottom);
-        firmButtons.setLabels(new String[]{"Firm 1", "Firm 2"});
+        firmButtons.setLabels(new String[]{"Firm A", "Firm B"});
         firmButtons.setEnabled(false);
         FIRE.client.addConfigListener(this);
     }
@@ -59,7 +59,7 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
     }
 
     private void drawTable(Client applet) {
-        float textWidth = applet.textWidth("00");
+        float textWidth = applet.textWidth("00, 00");
         float cellWidth = 11 + textWidth + 11;
         float cellHeight = 5 + textWidth + 5;
         applet.stroke(0);
@@ -69,7 +69,7 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         float tableWidth = cols * cellWidth;
         float tableHeight = rows * cellHeight;
         applet.pushMatrix();
-        applet.translate(200 + tableWidth / 2f, 180 - tableHeight);
+        applet.translate(50 + tableWidth / 2f, 240 - tableHeight);
         for (int col = 1; col <= cols; col++) {
             applet.line(col * cellWidth, 0, col * cellWidth, cellHeight * rows);
         }
@@ -90,16 +90,24 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
                 }
                 applet.fill(0);
                 if (col == 0) {
-                    applet.text(row, Math.round(cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
+                    applet.text(row - 1, Math.round(cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
                 } else if (row == 0) {
                     applet.text(col, Math.round(col * cellWidth + cellWidth / 2f), Math.round(cellHeight / 2f));
                 } else {
-                    float payoff = pf.payoffs[row - 1][col - 1];
-                    String s = String.format("%.0f", payoff);
+                    float[] payoffs = {pf.payoffs[0][row - 1][col - 1], pf.payoffs[1][row - 1][col - 1]};
+                    String s = String.format("%.0f, %.0f", payoffs[0], payoffs[1]);
                     applet.text(s, Math.round(col * cellWidth + cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
                 }
             }
         }
+        textWidth = applet.textWidth("AAAAA");
+        float textHeight = applet.textAscent() + applet.textDescent() + 4;
+        applet.text("Number of players", Math.round(2 * cellWidth), -2 * textHeight + 5);
+        applet.text("in your firm", Math.round(2 * cellWidth), -1 * textHeight + 5);
+        applet.text("Number of", -1 * textWidth - 5, Math.round(2.5 * cellHeight - 1.5 * textHeight));
+        applet.text("players in", -1 * textWidth - 5, Math.round(2.5 * cellHeight - .5 * textHeight));
+        applet.text("the other", -1 * textWidth - 5, Math.round(2.5 * cellHeight + .5 * textHeight));
+        applet.text("firm", -1 * textWidth - 5, Math.round(2.5 * cellHeight + 1.5 * textHeight));
         applet.popMatrix();
     }
 
