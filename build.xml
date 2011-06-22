@@ -79,6 +79,7 @@
         <jar destfile="dist/final.jar" filesetmanifest="skip">
             <zipgroupfileset dir="dist" includes="*.jar"/>
             <zipgroupfileset dir="lib" includes="*.jar"/>
+            <zipgroupfileset dir="lib/swing-layout" includes="*.jar"/>
             <zipgroupfileset dir="../../FIREv2.0/trunk/dist" includes="*.jar"/>
 
             <manifest>
@@ -97,6 +98,7 @@
         <jar destfile="dist/final.jar" filesetmanifest="skip">
             <zipgroupfileset dir="dist" includes="*.jar"/>
             <zipgroupfileset dir="lib" includes="*.jar"/>
+            <zipgroupfileset dir="lib/swing-layout" includes="*.jar"/>
             <fileset dir="lib" includes="*.dynlib"/>
             <zipgroupfileset dir="../../FIREv2.0/trunk/dist" includes="*.jar"/>
 
