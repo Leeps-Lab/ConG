@@ -72,7 +72,7 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         float tableHeight = rows * cellHeight;
         applet.pushMatrix();
         applet.translate(size / 2f - tableWidth / 2f, size / 4 - tableHeight / 2);
-        for (int platform = 0; platform < 2; platform++) {
+        for (int platform = 0; platform <= 1; platform++) {
             applet.translate(0, platform * size / 2);
             for (int col = 1; col <= cols; col++) {
                 applet.line(col * cellWidth, 0, col * cellWidth, cellHeight * rows);
@@ -98,8 +98,14 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
                     } else if (row == 0) {
                         applet.text(col - 1, Math.round(col * cellWidth + cellWidth / 2f), Math.round(cellHeight / 2f));
                     } else {
-                        if (pf.payoffs[platform][row - 1][col - 1] != 0f) {
-                            String s = String.format("%.0f", pf.payoffs[platform][row - 1][col - 1]);
+                        float[][] platformMatrix;
+                        if (platform == 0) {
+                            platformMatrix = pf.pf1;
+                        } else {
+                            platformMatrix = pf.pf2;
+                        }
+                        if (platformMatrix[row - 1][col - 1] != 0f) {
+                            String s = String.format("%.0f", platformMatrix[row - 1][col - 1]);
                             applet.text(s, Math.round(col * cellWidth + cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
                         }
                     }*/

@@ -70,4 +70,7 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
     public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
         return PayoffFunction.Utilities.getAverageMatchStrategy(id, popStrategies, matchPopStrategies);
     }
+
+    public void configure() {
+    }
 }

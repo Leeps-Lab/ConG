@@ -9,25 +9,18 @@ import java.util.Map;
  */
 public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
 
-    public float[][][] payoffs = new float[][][]{
-        { // Platform A payoffs
-            {0, 6, 6},
-            {0, 10, 7},
-            {0, 13, 12},},
-        { // Platform B payoffs
-            {0, 3, 3},
-            {0, 9, 6},
-            {0, 12, 11},}
-    };
+    public String platform1;
+    public String platform2;
+    public float[][] pf1, pf2;
 
     @Override
     public float getMin() {
-        return 3;
+        return min;
     }
 
     @Override
     public float getMax() {
-        return 13;
+        return max;
     }
 
     @Override
@@ -36,7 +29,12 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
             Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies,
             Config config) {
         float[] strategy = popStrategies.get(id);
-        float[][] platformPayoffs = payoffs[(int) strategy[0]];
+        float[][] platformPayoffs;
+        if (strategy[0] < 0.5) {
+            platformPayoffs = pf1;
+        } else {
+            platformPayoffs = pf2;
+        }
         int numSameType = getInSame(id, strategy, popStrategies);
         int numDiffType = getInSame(id, strategy, matchPopStrategies);
         return platformPayoffs[numDiffType][numSameType];
@@ -76,5 +74,55 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
             }
         }
         return count;
+    }
+
+    /*
+     * Parse platform1 and platform2 strings into the pf1 and pf2 array.
+     * This should be easier... finding a simpler way would be nice.
+     */
+    @Override
+    public void configure() {
+        if (platform1 == null || platform2 == null) {
+            System.err.println(platform1);
+            System.err.println(platform2);
+        }
+        pf1 = parseArrayString(platform1);
+        pf2 = parseArrayString(platform2);
+        min = Float.MAX_VALUE;
+        max = Float.MIN_VALUE;
+        for (float[] row : pf1) {
+            for (float p : row) {
+                if (p < min) {
+                    min = p;
+                }
+                if (p > max) {
+                    max = p;
+                }
+            }
+        }
+        for (float[] row : pf2) {
+            for (float p : row) {
+                if (p < min) {
+                    min = p;
+                }
+                if (p > max) {
+                    max = p;
+                }
+            }
+        }
+    }
+
+    private float[][] parseArrayString(String arrayString) {
+        String[] rows = arrayString.split("\\},\\{");
+        int numCols = rows[0].split(",").length;
+        float[][] array = new float[rows.length][numCols];
+        for (int row = 0; row < rows.length; row++) {
+            System.err.println(rows[row]);
+            String[] values = rows[row].replace("}", "").replace("{", "").split(",");
+            for (int col = 0; col < values.length; col++) {
+                array[row][col] = Float.parseFloat(values[col]);
+            }
+        }
+        return array;
     }
 }

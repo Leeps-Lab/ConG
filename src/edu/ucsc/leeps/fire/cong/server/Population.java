@@ -51,7 +51,8 @@ public class Population implements Serializable {
         }
         // fixme: better way of doing this. config can auto-configure some parts?
         if (FIRE.server.getConfig().payoffFunction.getNumStrategies() <= 2
-                && FIRE.server.getConfig().counterpartPayoffFunction != null) {
+                && FIRE.server.getConfig().counterpartPayoffFunction != null
+                && FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             ((TwoStrategyPayoffFunction) FIRE.server.getConfig().counterpartPayoffFunction).isCounterpart = true;
         }
         setupTuples();
@@ -82,6 +83,8 @@ public class Population implements Serializable {
         for (int id : members.keySet()) {
             FIRE.server.getConfig(id).currAliases = aliases;
             FIRE.server.getConfig(id).currColors = colors;
+            FIRE.server.getConfig(id).payoffFunction.configure();
+            FIRE.server.getConfig(id).counterpartPayoffFunction.configure();
         }
     }
 
