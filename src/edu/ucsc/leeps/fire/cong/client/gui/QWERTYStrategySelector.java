@@ -99,12 +99,10 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
                     } else if (row == 0) {
                         applet.text(col - 1, Math.round(col * cellWidth + cellWidth / 2f), Math.round(cellHeight / 2f));
                     } else {
-                        String s;
-                        if (pf.payoffs[platform][row - 1][col - 1] != 0f) 
-                            s = String.format("%.0f", pf.payoffs[platform][row - 1][col - 1]);
-                        else
-                            s = "N/A";
-                        applet.text(s, Math.round(col * cellWidth + cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
+                        if (pf.payoffs[platform][row - 1][col - 1] != 0f) {
+                            String s = String.format("%.0f", pf.payoffs[platform][row - 1][col - 1]);
+                            applet.text(s, Math.round(col * cellWidth + cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
+                        }
                     }
                 }
             }
