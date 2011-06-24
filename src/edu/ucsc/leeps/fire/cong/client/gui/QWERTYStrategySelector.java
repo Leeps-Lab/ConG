@@ -52,7 +52,6 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         drawTable(applet);
         firmButtons.draw(applet);
         applet.popMatrix();
-
         if (firmButtons.getSelection() == 0) {
             Client.state.target[0] = 1;
         } else {
@@ -63,12 +62,12 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
     private void drawTable(Client applet) {
         float textWidth = applet.textWidth("00");
         float textHeight = applet.textAscent() + applet.textDescent() + 4;
-        float cellWidth = 11 + textWidth + 11;
-        float cellHeight = 5 + textWidth + 5;
+        float cellWidth = 2 + textWidth + 2;
+        float cellHeight = 2 + textWidth + 2;
         applet.stroke(0);
         applet.strokeWeight(2);
-        int cols = 4;
-        int rows = 4;
+        int cols = 2 + FIRE.client.getConfig().tupleSize;
+        int rows = 2 + FIRE.client.getConfig().tupleSize;
         float tableWidth = cols * cellWidth;
         float tableHeight = rows * cellHeight;
         applet.pushMatrix();
@@ -94,7 +93,7 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
                         applet.rect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
                     }
                     applet.fill(0);
-                    if (col == 0) {
+                    /*if (col == 0) {
                         applet.text(row - 1, Math.round(cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
                     } else if (row == 0) {
                         applet.text(col - 1, Math.round(col * cellWidth + cellWidth / 2f), Math.round(cellHeight / 2f));
@@ -103,16 +102,16 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
                             String s = String.format("%.0f", pf.payoffs[platform][row - 1][col - 1]);
                             applet.text(s, Math.round(col * cellWidth + cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
                         }
-                    }
+                    }*/
                 }
             }
             textWidth = applet.textWidth("AAAAA");
-            applet.text("Number of your", Math.round(2.5 * cellWidth), -1.5f * textHeight - 5);
-            applet.text("type in firm " + (platform + 1), Math.round(2.5 * cellWidth), -0.5f * textHeight - 5);
-            applet.text("Cost per tick: ", Math.round(2 * cellWidth), cellHeight * rows + 0.5f * textHeight);
-            applet.text("Number of", -1 * textWidth - 5, Math.round(2.5 * cellHeight - 1 * textHeight));
-            applet.text("other type", -1 * textWidth - 5, Math.round(2.5 * cellHeight));
-            applet.text("in firm " + (platform + 1), -1 * textWidth - 5, Math.round(2.5 * cellHeight + 1 * textHeight));
+            applet.text("Number of your", Math.round((cols / 2 + 0.5) * cellWidth), -1.5f * textHeight - 5);
+            applet.text("type in firm " + (platform + 1), Math.round((cols / 2 + 0.5) * cellWidth), -0.5f * textHeight - 5);
+            applet.text("Cost per tick: ", Math.round((cols / 2 + 0.5) * cellWidth), cellHeight * rows + 0.5f * textHeight);
+            applet.text("Number of", -1 * textWidth - 5, Math.round((rows / 2 + 0.5) * cellHeight - 1 * textHeight));
+            applet.text("other type", -1 * textWidth - 5, Math.round((rows / 2 + 0.5) * cellHeight));
+            applet.text("in firm " + (platform + 1), -1 * textWidth - 5, Math.round((rows / 2 + 0.5) * cellHeight + 1 * textHeight));
         }
         applet.popMatrix();
     }

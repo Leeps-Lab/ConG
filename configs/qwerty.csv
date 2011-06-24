@@ -1,5 +1,5 @@
 "period","paid","length","subperiods","percentChangePerSecond","tupleSize","payoffFunction","name","counterpartPayoffFunction","name","isCounterpart","excludeSelf","showMatrix","initialDelay","distribution","lambda","delay","distribution","lambda","selector"
-1,"TRUE",120,"0","NaN",2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","FALSE",,,,,,,"qwerty"
+1,"TRUE",120,"0","NaN",3,"qwerty","pf","qwerty","cpf","TRUE","TRUE","FALSE",,,,,,,"qwerty"
 2,"TRUE",120,"0","NaN",2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","TRUE","decisionDelay","poisson",10,,,,"qwerty"
 3,"TRUE",120,"0","NaN",2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","TRUE","decisionDelay","poisson",10,"decisionDelay","poisson",6,"qwerty"
 4,"TRUE",120,"0","NaN",2,"qwerty","pf","qwerty","cpf","TRUE","TRUE","TRUE",,,,,,,"qwerty"
