@@ -11,14 +11,14 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
 
     public float[][][] payoffs = new float[][][]{
         { //Firm A payoffs
-            {6, 6},
-            {10, 7},
-            {13, 12},
+            {0, 6, 6},
+            {0, 10, 7},
+            {0, 13, 12},
         },
         { //Firm B payoffs
-            {3, 3},
-            {9, 6},
-            {12, 11},
+            {0, 3, 3},
+            {0, 9, 6},
+            {0, 12, 11},
         }
     };
 
