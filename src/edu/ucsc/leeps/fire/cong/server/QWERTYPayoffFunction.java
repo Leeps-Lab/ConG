@@ -10,26 +10,24 @@ import java.util.Map;
 public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
 
     public float[][][] payoffs = new float[][][]{
-        { //Firm A payoffs
+        { // Platform A payoffs
             {0, 6, 6},
             {0, 10, 7},
-            {0, 13, 12},
-        },
-        { //Firm B payoffs
+            {0, 13, 12},},
+        { // Platform B payoffs
             {0, 3, 3},
             {0, 9, 6},
-            {0, 12, 11},
-        }
+            {0, 12, 11},}
     };
 
     @Override
     public float getMin() {
-        return 5;
+        return 3;
     }
 
     @Override
     public float getMax() {
-        return 12;
+        return 13;
     }
 
     @Override
@@ -38,12 +36,14 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
             Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies,
             Config config) {
         float[] strategy = popStrategies.get(id);
-        return payoffs[(int)strategy[0]][getInSame(id, strategy, matchPopStrategies)][getInSame(id, strategy, popStrategies) - 1];
+        float[][] platformPayoffs = payoffs[(int) strategy[0]];
+        int numSameType = getInSame(id, strategy, popStrategies);
+        int numDiffType = getInSame(id, strategy, matchPopStrategies);
+        return platformPayoffs[numDiffType][numSameType];
     }
 
     public int getInSame(int id, float[] myStrategy, Map<Integer, float[]> strategies) {
-        // the number of players in your own population with strategy equal to yours
-        // includes yourself, so minimum is 1
+        // the number of players with strategy equal to yours
         int count = 0;
         for (float[] strategy : strategies.values()) {
             boolean same = true;
@@ -54,6 +54,24 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
                 }
             }
             if (same) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public int getNotInSame(int id, float[] myStrategy, Map<Integer, float[]> strategies) {
+        // the number of players with strategy not equal to yours
+        int count = 0;
+        for (float[] strategy : strategies.values()) {
+            boolean same = true;
+            for (int i = 0; i < strategy.length; i++) {
+                if (myStrategy[i] != strategy[i]) {
+                    same = false;
+                    break;
+                }
+            }
+            if (!same) {
                 count++;
             }
         }
