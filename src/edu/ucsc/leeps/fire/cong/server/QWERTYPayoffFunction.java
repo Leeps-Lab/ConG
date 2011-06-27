@@ -44,14 +44,7 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
         // the number of players with strategy equal to yours
         int count = 0;
         for (float[] strategy : strategies.values()) {
-            boolean same = true;
-            for (int i = 0; i < strategy.length; i++) {
-                if (myStrategy[i] != strategy[i]) {
-                    same = false;
-                    break;
-                }
-            }
-            if (same) {
+            if (myStrategy[0] == strategy[0]) {
                 count++;
             }
         }
@@ -62,14 +55,7 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
         // the number of players with strategy not equal to yours
         int count = 0;
         for (float[] strategy : strategies.values()) {
-            boolean same = true;
-            for (int i = 0; i < strategy.length; i++) {
-                if (myStrategy[i] != strategy[i]) {
-                    same = false;
-                    break;
-                }
-            }
-            if (!same) {
+            if (myStrategy[0] != strategy[0]) {
                 count++;
             }
         }
