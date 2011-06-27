@@ -48,7 +48,7 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
         // the number of players with strategy equal to yours
         int count = 0;
         for (float[] strategy : strategies.values()) {
-            if (myStrategy[0] == strategy[0]) {
+            if (Math.abs(myStrategy[0] - strategy[0]) < Float.MIN_NORMAL) {
                 count++;
             }
         }
@@ -59,7 +59,7 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
         // the number of players with strategy not equal to yours
         int count = 0;
         for (float[] strategy : strategies.values()) {
-            if (myStrategy[0] != strategy[0]) {
+            if (Math.abs(myStrategy[0] - strategy[0]) > Float.MIN_NORMAL) {
                 count++;
             }
         }
