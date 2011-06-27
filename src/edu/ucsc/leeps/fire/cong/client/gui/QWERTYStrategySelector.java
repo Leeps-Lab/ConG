@@ -96,34 +96,34 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
                         continue;
                     }
                     if (col == 0) {
-                        if (platform == Client.state.getMyStrategy()[0] && matchSame == row) {
+                        if (platform == Client.state.getMyStrategy()[0] && matchSame + 1 == row) {
                             applet.fill(255, 169, 68, 100);
                             applet.rect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
                             applet.fill(0);
-                        } else if (platform != Client.state.getMyStrategy()[0] && matchDiff == row) {
+                        } else if (platform != Client.state.getMyStrategy()[0] && matchDiff + 1 == row) {
                             applet.fill(255, 169, 68, 100);
                             applet.rect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
                             applet.fill(0);
                         }
                         applet.text(row - 1, Math.round(cellWidth / 2f), Math.round(row * cellHeight + cellHeight / 2f));
                     } else if (row == 0) {
-                        if (platform == Client.state.getMyStrategy()[0] && ownSame == col) {
+                        if (platform == Client.state.getMyStrategy()[0] && ownSame + 1 == col) {
                             applet.fill(255, 169, 68, 100);
                             applet.rect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
                             applet.fill(0);
-                        } else if (platform != Client.state.getMyStrategy()[0] && ownDiff == col) {
+                        } else if (platform != Client.state.getMyStrategy()[0] && ownDiff + 1 == col) {
                             applet.fill(255, 169, 68, 100);
                             applet.rect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
                             applet.fill(0);
                         }
                         applet.text(col - 1, Math.round(col * cellWidth + cellWidth / 2f), Math.round(cellHeight / 2f));
                     } else {
-                        if (platform == Client.state.getMyStrategy()[0] && ownSame == col && matchSame == row) {
+                        if (platform == Client.state.getMyStrategy()[0] && ownSame + 1 == col && matchSame + 1 == row) {
                             applet.fill(255, 169, 68, 100);
                             applet.rect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
                             applet.fill(0);
                         }
-                        if (platform != Client.state.getMyStrategy()[0] && ownDiff + 1 == col && matchDiff == row) {
+                        if (platform != Client.state.getMyStrategy()[0] && ownDiff + 2 == col && matchDiff + 1 == row) {
                             applet.fill(80, 255, 80, 100);
                             applet.rect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
                             applet.fill(0);
