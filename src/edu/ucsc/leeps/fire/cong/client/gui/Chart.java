@@ -6,9 +6,8 @@ import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
@@ -117,7 +116,9 @@ public class Chart extends Sprite implements Configurable<Config> {
             float labelX = -10 - 1.1f * applet.textWidth(maxPayoffLabel) / 2f;
             heatmapLegend.origin.x = -10 - 1.1f * applet.textWidth(maxPayoffLabel)
                     - heatmapLegend.width;
-            heatmapLegend.draw(applet);
+            if (config.payoffFunction instanceof QWERTYPayoffFunction == false) {
+                heatmapLegend.draw(applet);
+            }
             for (float y = 0.0f; y <= 1.01f; y += 0.1f) {
                 applet.noFill();
                 applet.stroke(100, 100, 100);
@@ -237,7 +238,9 @@ public class Chart extends Sprite implements Configurable<Config> {
                 if (config.payoffFunction instanceof PricingPayoffFunction) { //payoff function dependent
                     drawPriceLines(applet);
                 } else {
-                    matchPayoff.draw(applet);
+                    if (config.payoffFunction instanceof QWERTYPayoffFunction == false) {
+                        matchPayoff.draw(applet);
+                    }
                 }
             } else if (mode == Mode.TwoStrategy) {
                 drawTwoStrategyLines(applet);
