@@ -40,7 +40,7 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
         return platformPayoffs[numDiffType][numSameType];
     }
 
-    public int getInSame(int id, float[] myStrategy, Map<Integer, float[]> strategies) {
+    public static int getInSame(int id, float[] myStrategy, Map<Integer, float[]> strategies) {
         // the number of players with strategy equal to yours
         int count = 0;
         for (float[] strategy : strategies.values()) {
@@ -58,7 +58,7 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
         return count;
     }
 
-    public int getNotInSame(int id, float[] myStrategy, Map<Integer, float[]> strategies) {
+    public static int getNotInSame(int id, float[] myStrategy, Map<Integer, float[]> strategies) {
         // the number of players with strategy not equal to yours
         int count = 0;
         for (float[] strategy : strategies.values()) {
