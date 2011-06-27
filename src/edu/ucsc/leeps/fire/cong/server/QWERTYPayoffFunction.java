@@ -12,6 +12,7 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
     public String platform1;
     public String platform2;
     public float[][] pf1, pf2;
+    public float cost1, cost2;
 
     @Override
     public float getMin() {
@@ -30,14 +31,17 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
             Config config) {
         float[] strategy = popStrategies.get(id);
         float[][] platformPayoffs;
+        float platformCost;
         if (strategy[0] < 0.5) {
             platformPayoffs = pf1;
+            platformCost = cost1;
         } else {
             platformPayoffs = pf2;
+            platformCost = cost2;
         }
         int numSameType = getInSame(id, strategy, popStrategies);
         int numDiffType = getInSame(id, strategy, matchPopStrategies);
-        return platformPayoffs[numDiffType][numSameType];
+        return platformPayoffs[numDiffType][numSameType] - platformCost;
     }
 
     public static int getInSame(int id, float[] myStrategy, Map<Integer, float[]> strategies) {
