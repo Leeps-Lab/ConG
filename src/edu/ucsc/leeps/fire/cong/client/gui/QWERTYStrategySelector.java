@@ -53,9 +53,9 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         firmButtons.draw(applet);
         applet.popMatrix();
         if (firmButtons.getSelection() == 0) {
-            Client.state.target[0] = 1;
-        } else {
             Client.state.target[0] = 0;
+        } else {
+            Client.state.target[0] = 1;
         }
     }
 
