@@ -16,6 +16,7 @@ import edu.ucsc.leeps.fire.cong.client.gui.IndefiniteEndPricesChart;
 import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -443,7 +444,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
         framesPerUpdate = Math.round(frameRateTarget * (1f / FIRE.client.getConfig().updatesPerSecond));
         payoffChart.setVisible(true);
-        legend.setVisible(true);
+        if (config.payoffFunction instanceof QWERTYPayoffFunction == false) {
+            legend.setVisible(true);
+        }
         strategyChart.setVisible(false);
         rChart.setVisible(false);
         pChart.setVisible(false);

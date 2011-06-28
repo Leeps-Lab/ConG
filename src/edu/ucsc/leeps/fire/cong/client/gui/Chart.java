@@ -116,9 +116,7 @@ public class Chart extends Sprite implements Configurable<Config> {
             float labelX = -10 - 1.1f * applet.textWidth(maxPayoffLabel) / 2f;
             heatmapLegend.origin.x = -10 - 1.1f * applet.textWidth(maxPayoffLabel)
                     - heatmapLegend.width;
-            if (config.payoffFunction instanceof QWERTYPayoffFunction == false) {
-                heatmapLegend.draw(applet);
-            }
+            heatmapLegend.draw(applet);
             for (float y = 0.0f; y <= 1.01f; y += 0.1f) {
                 applet.noFill();
                 applet.stroke(100, 100, 100);

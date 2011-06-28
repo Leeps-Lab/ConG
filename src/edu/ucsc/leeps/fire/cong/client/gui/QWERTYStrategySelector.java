@@ -82,6 +82,7 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
             if (Math.round(Client.state.getMyStrategy()[0]) == platform) {
                 applet.fill(200);
                 applet.rect(0 - textWidth * 1.5f, -5 - 2.5f * textHeight, size, size / 2);
+                applet.fill(0);
             }
             for (int col = 1; col <= cols; col++) {
                 applet.line(col * cellWidth, 0, col * cellWidth, cellHeight * rows);
@@ -149,7 +150,9 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
             }
             applet.text("Number of your", Math.round((cols / 2 + 0.5) * cellWidth), -1.5f * textHeight - 5);
             applet.text("type in firm " + (platform + 1), Math.round((cols / 2 + 0.5) * cellWidth), -0.5f * textHeight - 5);
-            applet.text("Cost per tick: " + cost, Math.round((cols / 2 + 0.5) * cellWidth), cellHeight * rows + 0.5f * textHeight);
+            applet.fill(220, 0, 0);
+            applet.text("Cost rate: " + cost, Math.round((cols / 2 + 0.5) * cellWidth), cellHeight * rows + 0.5f * textHeight + 15);
+            applet.fill(0);
             applet.text("Number of", -1 * textWidth / 2 - 5, Math.round((rows / 2 + 0.5) * cellHeight - 1 * textHeight));
             applet.text("other type", -1 * textWidth / 2 - 5, Math.round((rows / 2 + 0.5) * cellHeight));
             applet.text("in firm " + (platform + 1), -1 * textWidth / 2 - 5, Math.round((rows / 2 + 0.5) * cellHeight + 1 * textHeight));
