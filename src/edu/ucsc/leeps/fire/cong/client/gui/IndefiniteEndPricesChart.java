@@ -192,8 +192,8 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
 
             // draw the axis
             a.textAlign(Client.RIGHT, Client.CENTER);
-            for (int i = 0; i <= config.xAxisTicks; i++) {
-                float p = i / (float)config.xAxisTicks;
+            for (int i = 0; i <= config.indefiniteEnd.xAxisTicks; i++) {
+                float p = i / (float)config.indefiniteEnd.xAxisTicks;
                 float u = p * (umax - umin);
                 a.fill(0);
                 a.text(String.format("%.1f", u), -5, Math.round(height - p * scaledHeight - scaledMargin));

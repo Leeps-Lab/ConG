@@ -75,7 +75,6 @@ public class Config extends BaseConfig {
     public boolean turnTaking;
     public boolean potential;
     public float grid;
-    public int xAxisTicks;
     public static final Class matrix2x2 = TwoStrategyPayoffFunction.class;
     public static final Class matrix3x3 = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -189,7 +188,6 @@ public class Config extends BaseConfig {
         //menu.m11 = aliases[6];
         //menu.m12 = aliases[7];
         grid = Float.NaN;
-        xAxisTicks = 10;
         showPGMultiplier = false;
     }
     public static String[] aliases = new String[]{
