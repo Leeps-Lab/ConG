@@ -18,8 +18,8 @@ public class Agent extends Thread {
     public volatile boolean running;
     public volatile boolean paused;
 
-    public Agent(boolean debug) {
-        paused = !debug;
+    public Agent() {
+        paused = true;
     }
 
     @Override

@@ -72,10 +72,6 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
      */
     @Override
     public void configure() {
-        if (platform1 == null || platform2 == null) {
-            System.err.println(platform1);
-            System.err.println(platform2);
-        }
         pf1 = parseArrayString(platform1);
         pf2 = parseArrayString(platform2);
         min = Float.MAX_VALUE;
@@ -107,7 +103,6 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
         int numCols = rows[0].split(",").length;
         float[][] array = new float[rows.length][numCols];
         for (int row = 0; row < rows.length; row++) {
-            System.err.println(rows[row]);
             String[] values = rows[row].replace("}", "").replace("{", "").split(",");
             for (int col = 0; col < values.length; col++) {
                 array[row][col] = Float.parseFloat(values[col]);

@@ -101,7 +101,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         loop();
         debug = ALLOW_DEBUG;
         if (ALLOW_DEBUG) {
-            agent = new Agent(debug);
+            agent = new Agent();
             agent.start();
         }
     }

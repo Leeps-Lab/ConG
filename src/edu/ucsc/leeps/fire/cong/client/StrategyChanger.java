@@ -3,8 +3,6 @@ package edu.ucsc.leeps.fire.cong.client;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 
 /**
  *
