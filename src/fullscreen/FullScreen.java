@@ -19,7 +19,7 @@ Free Software Foundation, Inc., 59 Temple Place, Suite 330,
 Boston, MA  02111-1307  USA
  */
 package fullscreen;
-
+import java.awt.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.DisplayMode;
@@ -46,6 +46,8 @@ import processing.core.PApplet;
  *    <li>It's hard to use two screens</li>
  *  </ul>
  */
+
+
 public class FullScreen extends FullScreenBase {
     // We use this frame to go to fullScreen mode...
 
@@ -159,7 +161,18 @@ public class FullScreen extends FullScreenBase {
                 fsFrame.setSize(dad.width, dad.height);
                 fsFrame.add(dad);
                 fsDevice.setFullScreenWindow(fsFrame);
-                setResolution(1280, 800);
+                
+                /*
+                 * Set screen resolution to current screen resolution
+                 */
+                Toolkit toolkit = Toolkit.getDefaultToolkit();
+                Dimension dims = toolkit.getScreenSize();
+                
+               // System.err.println(dims.width + " " + dims.height);
+                
+                setResolution(dims.width, dims.height);
+                //setResolution(1280, 800);
+                
                 fsFrame.setExtendedState(Frame.MAXIMIZED_BOTH);
 
                 dad.setLocation((fsFrame.getWidth() - dad.width) / 2, (fsFrame.getHeight() - dad.height) / 2);

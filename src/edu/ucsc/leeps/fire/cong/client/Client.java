@@ -17,6 +17,7 @@ import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
+import fullscreen.FullScreen;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -74,6 +75,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private Agent agent;
     private boolean fullscreen = false;
     private boolean resize = false;
+    //FullSreen
+    private FullScreen Fullscreen;
+    
+    
     private WindowAdapter windowListener = new WindowAdapter() {
 
         @Override
@@ -355,6 +360,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         legend = new ChartLegend(
                 null, (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
+        
+        Fullscreen = new FullScreen(this);
+        Fullscreen.setShortcutsEnabled(false);
     }
 
     @Override
@@ -500,7 +508,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             debug = !debug;
         } else if (ALLOW_DEBUG && ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
             agent.paused = !agent.paused;
-        } else if (ke.isAltDown() && ke.getKeyCode() == KeyEvent.VK_F11) {
+        } else if (ke.isAltDown() && ke.getKeyCode() == KeyEvent.VK_F11) {   
             fullscreen = !fullscreen;
             if (fullscreen) {
                 frame.removeAll();
@@ -531,8 +539,16 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         } else if (ke.isAltDown() && ke.getKeyCode() == KeyEvent.VK_R) {
             resize = true;
         }
+        else if (keyCode == KeyEvent.VK_F11) {
+            
+            System.out.println("FullScreen");
+                if (Fullscreen.isFullScreen()) {
+                    Fullscreen.leave();
+                } else {
+                    Fullscreen.enter();
+                }
+        }
     }
-
     @Override
     public void keyTyped(KeyEvent ke) {
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
