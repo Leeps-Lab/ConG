@@ -85,7 +85,7 @@ public class FullScreen extends FullScreenBase {
         fsFrame = new Frame(dad.frame == null ? "" : dad.frame.getTitle());
         fsFrame.setTitle(dad.frame.getTitle());
         fsFrame.setUndecorated(true);
-        fsFrame.setBackground(Color.black);
+        fsFrame.setBackground(Color.gray);
         fsFrame.setIgnoreRepaint(true);
         if (dad.width > 0) {
             setResolution(dad.width, dad.height);

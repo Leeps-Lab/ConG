@@ -278,6 +278,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     @Override
     public void setup() {
         textMode(MODEL);
+        //textMode(SCREEN);
+        hint(ENABLE_NATIVE_FONTS);
         if (USE_OPENGL) {
             try {
                 size(INIT_WIDTH, INIT_HEIGHT - 40, OPENGL);
@@ -295,7 +297,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             frameRate(35);
         }
         setupFonts();
-        textFont(size14);
+        textFont(size24);
         width = INIT_WIDTH;
         height = INIT_HEIGHT - 40;
 
@@ -371,7 +373,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         try {
             if (resize) {
                 setupFonts();
-                textFont(size14);
+                textFont(size14Bold);
                 resize = false;
             }
 
@@ -379,6 +381,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             if (FIRE.client.getConfig() == null) {
                 fill(0);
                 String s = "Please wait for the experiment to begin";
+                textSize(14);
                 text(s, Math.round(width / 2 - textWidth(s) / 2), Math.round(height / 2));
                 return;
             }
@@ -540,8 +543,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             resize = true;
         }
         else if (keyCode == KeyEvent.VK_F11) {
-            
-            System.out.println("FullScreen");
                 if (Fullscreen.isFullScreen()) {
                     Fullscreen.leave();
                 } else {

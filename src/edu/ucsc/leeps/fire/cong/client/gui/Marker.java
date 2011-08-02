@@ -328,6 +328,7 @@ public class Marker extends Sprite {
     }
 
     protected void drawLabels(Client applet) {
+        applet.textSize(14);
         applet.textFont(applet.size14);
         float textWidth = applet.textWidth(label1);
         if (label2 != null) {
@@ -343,7 +344,7 @@ public class Marker extends Sprite {
         applet.rectMode(Client.CENTER);
         applet.fill(255);
         applet.noStroke();
-        applet.rect(labelOrigin.x, labelOrigin.y, textWidth, textHeight);
+        applet.rect(labelOrigin.x, labelOrigin.y, textWidth + 15, textHeight);
         applet.textAlign(Client.CENTER, Client.CENTER);
         applet.fill(0);
         if (label1 != null && label2 != null) {
@@ -351,7 +352,7 @@ public class Marker extends Sprite {
             applet.textFont(applet.size14Bold);
             applet.text(label1, labelOrigin.x - label1Width / 2, labelOrigin.y);
             applet.textFont(applet.size14);
-            applet.text("," + label2, labelOrigin.x + label1Width / 2, labelOrigin.y);
+            applet.text(", " + label2, labelOrigin.x + label1Width / 2, labelOrigin.y);
         } else if (label1 != null) {
             applet.textFont(applet.size14);
             applet.text(label1, labelOrigin.x, labelOrigin.y);
