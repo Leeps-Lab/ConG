@@ -2,7 +2,6 @@ package edu.ucsc.leeps.fire.cong;
 
 import edu.ucsc.leeps.fire.testing.NumSubjectsInput;
 import edu.ucsc.leeps.fire.testing.Startup;
-import javax.swing.JOptionPane;
 
 /**
  *
