@@ -48,7 +48,7 @@ import processing.core.PFont;
 public class Client extends PApplet implements ClientInterface, FIREClientInterface, Configurable<Config> {
 
     public static boolean ALLOW_DEBUG = System.getProperty("fire.client.debug") != null;
-    public final static boolean USE_OPENGL = true;
+    public static boolean USE_OPENGL = true;
     public static State state;
     public boolean debug;
     public int framesPerUpdate;
@@ -77,8 +77,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private boolean resize = false;
     //FullSreen
     private FullScreen Fullscreen;
-    
-    
     private WindowAdapter windowListener = new WindowAdapter() {
 
         @Override
@@ -88,6 +86,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     };
 
     public Client() {
+        if (System.getProperty("useOpenGL") != null) {
+            USE_OPENGL = Boolean.parseBoolean(System.getProperty("useOpenGL"));
+        }
         FIRE.client.addConfigListener(this);
         loadLibraries();
         noLoop();
@@ -360,7 +361,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         legend = new ChartLegend(
                 null, (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
-        
+
         Fullscreen = new FullScreen(this);
         Fullscreen.setShortcutsEnabled(false);
     }
@@ -509,7 +510,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             debug = !debug;
         } else if (ALLOW_DEBUG && ke.isControlDown() && ke.getKeyCode() == KeyEvent.VK_A) {
             agent.paused = !agent.paused;
-        } else if (ke.isAltDown() && ke.getKeyCode() == KeyEvent.VK_F11) {   
+        } else if (ke.isAltDown() && ke.getKeyCode() == KeyEvent.VK_F11) {
             fullscreen = !fullscreen;
             if (fullscreen) {
                 frame.removeAll();
@@ -539,15 +540,15 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             resize = true;
         } else if (ke.isAltDown() && ke.getKeyCode() == KeyEvent.VK_R) {
             resize = true;
-        }
-        else if (keyCode == KeyEvent.VK_F11) {
-                if (Fullscreen.isFullScreen()) {
-                    Fullscreen.leave();
-                } else {
-                    Fullscreen.enter();
-                }
+        } else if (keyCode == KeyEvent.VK_F11) {
+            if (Fullscreen.isFullScreen()) {
+                Fullscreen.leave();
+            } else {
+                Fullscreen.enter();
+            }
         }
     }
+
     @Override
     public void keyTyped(KeyEvent ke) {
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);

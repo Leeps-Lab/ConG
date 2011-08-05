@@ -1,6 +1,6 @@
 package edu.ucsc.leeps.fire.cong;
 
-import edu.ucsc.leeps.fire.testing.NumSubjectsInput;
+import edu.ucsc.leeps.fire.testing.SessionTestDialog;
 import edu.ucsc.leeps.fire.testing.Startup;
 
 /**
@@ -10,18 +10,21 @@ import edu.ucsc.leeps.fire.testing.Startup;
 public class Main {
 
     public static void main(String[] args) {
-        NumSubjectsInput dialog = new NumSubjectsInput(null, true);
+        SessionTestDialog dialog = new SessionTestDialog(null, true);
         dialog.setVisible(true);
-        try {
-            int numSubjects = Integer.parseInt(dialog.numSubjectsInput.getValue().toString());
-            if (numSubjects > 0) {
-                Startup.main(args, numSubjects);
-            } else {
-                throw new NumberFormatException();
+        if (dialog.accepted) {
+            try {
+                int numSubjects = Integer.parseInt(dialog.numSubjectsInput.getValue().toString());
+                System.setProperty("useOpenGL", String.valueOf(dialog.useOpenGLCheckbox.isSelected()));
+                if (numSubjects > 0) {
+                    Startup.main(args, numSubjects);
+                } else {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException ex) {
+                System.err.println("Illegal number of subjects");
+                System.exit(1);
             }
-        } catch (NumberFormatException ex) {
-            System.err.println("Illegal number of subjects");
-            System.exit(1);
         }
     }
 }
