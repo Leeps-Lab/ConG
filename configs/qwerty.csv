@@ -1,4 +1,4 @@
-"period","paid","length","subperiods","tupleSize","payoffFunction","name","platform1","platform2","cost1","cost2","initialDelay","distribution","lambda","delay","distribution","lambda","selector"
+"period","paid","length","subperiods","groupSize","payoffFunction","name","platform1","platform2","cost1","cost2","initialDelay","distribution","lambda","delay","distribution","lambda","selector"
 1,"TRUE",120,"0",2,"qwerty","qwerty","{{0,6,6},{0,10,7},{0,13,12}}","{{0,3,3},{0,9,6},{0,12,11}}",0,0,,,,,,,"qwerty"
 2,"TRUE",120,"0",2,"qwerty","qwerty","{{0,6,6},{0,10,7},{0,13,12}}","{{0,3,3},{0,9,6},{0,12,11}}",0,0,"decisionDelay","poisson",10,,,,"qwerty"
 3,"TRUE",120,"0",2,"qwerty","qwerty","{{0,6,6},{0,10,7},{0,13,12}}","{{0,3,3},{0,9,6},{0,12,11}}",0,0,"decisionDelay","poisson",10,"decisionDelay","poisson",6,"qwerty"

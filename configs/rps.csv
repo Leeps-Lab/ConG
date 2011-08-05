@@ -1,4 +1,4 @@
-"period","paid","indefiniteEnd","max","secondsToDisplay","percentToDisplay","percentChangePerSecond","subperiods","numTuples","excludeSelf","payoffFunction","Rr","Rp","Rs","Pr","Pp","Ps","Sr","Sp","Ss","min","max","updatesPerSecond","strategyUpdateMillis","selector"
+"period","paid","indefiniteEnd","max","secondsToDisplay","percentToDisplay","percentChangePerSecond","subperiods","numGroups","excludeSelf","payoffFunction","Rr","Rp","Rs","Pr","Pp","Ps","Sr","Sp","Ss","min","max","updatesPerSecond","strategyUpdateMillis","selector"
 1,"TRUE","endUniform",120,20,0.75,0.5,0,1,"TRUE","matrix3x3",18,12,96,60,18,12,12,96,18,12,96,5,50,"simplex"
 2,"TRUE","endUniform",100,20,0.75,"NaN",4,1,"TRUE","matrix3x3",18,12,96,60,18,12,12,96,18,12,96,5,50,"simplex"
 3,"TRUE","endUniform",120,20,0.75,0.1,0,1,"TRUE","matrix3x3",18,12,96,60,18,12,12,96,18,12,96,5,50,"simplex"
