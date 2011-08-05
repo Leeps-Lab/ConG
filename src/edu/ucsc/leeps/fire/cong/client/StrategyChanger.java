@@ -3,6 +3,7 @@ package edu.ucsc.leeps.fire.cong.client;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import java.util.Map;
 
 /**
  *
@@ -189,7 +190,8 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         selector.setEnabled(false);
     }
 
-    public void strategyChanged(int whoChanged) {
+    public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies) {
+        Client.state.matchStrategies = matchStrategies;
     }
 
     public boolean isTurnTakingLocked(int subperiod) {
