@@ -80,10 +80,10 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
             applet.pushMatrix();
             applet.translate(origin.x, origin.y);
 
-            String tupleSizeString = String.format(
+            String groupSizeString = String.format(
                     "%d players are in your group",
-                    FIRE.client.getConfig().playersInTuple);
-            applet.text(tupleSizeString, 0, 0);
+                    FIRE.client.getConfig().playersInGroup);
+            applet.text(groupSizeString, 0, 0);
 
             if (FIRE.client.getConfig().showMatrix) {
 

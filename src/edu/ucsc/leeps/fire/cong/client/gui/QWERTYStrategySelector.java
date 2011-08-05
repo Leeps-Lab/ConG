@@ -67,8 +67,8 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         textWidth = applet.textWidth("AAAAAAAAAA");
         applet.stroke(0);
         applet.strokeWeight(2);
-        int cols = 2 + FIRE.client.getConfig().tupleSize;
-        int rows = 2 + FIRE.client.getConfig().tupleSize;
+        int cols = 2 + FIRE.client.getConfig().groupSize;
+        int rows = 2 + FIRE.client.getConfig().groupSize;
         float tableWidth = cols * cellWidth;
         float tableHeight = rows * cellHeight;
         applet.pushMatrix();

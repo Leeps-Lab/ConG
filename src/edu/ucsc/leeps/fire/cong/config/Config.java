@@ -28,16 +28,16 @@ public class Config extends BaseConfig {
         HeatmapSingle, HeatmapBoth, Corners
     }
 
-    public enum MatchTuple {
+    public enum MatchGroup {
 
         self, pair;
     }
     public float percentChangePerSecond;
     public PayoffFunction payoffFunction;
     public PayoffFunction counterpartPayoffFunction;
-    public int numTuples;
-    public int tupleSize;
-    public boolean assignedTuples;
+    public int numGroups;
+    public int groupSize;
+    public boolean assignedGroups;
     public boolean excludeSelf;
     public int subperiods;
     public boolean mixed;
@@ -71,7 +71,7 @@ public class Config extends BaseConfig {
     public ChatMenu menu;
     public boolean objectiveColors;
     public boolean showSMinMax;
-    public MatchTuple matchType;
+    public MatchGroup matchType;
     public boolean turnTaking;
     public boolean potential;
     public float grid;
@@ -93,7 +93,7 @@ public class Config extends BaseConfig {
     public float initial1 = Float.NaN;
     public int matchID;
     public boolean isCounterpart;
-    public int playersInTuple;
+    public int playersInGroup;
     public int population, match;
     public int marginalCost;
     public int[] initiatives;
@@ -164,8 +164,8 @@ public class Config extends BaseConfig {
         showPayoffTimeAxisLabels = false;
         showMatrix = true;
         excludeSelf = false;
-        tupleSize = -1;
-        numTuples = -1;
+        groupSize = -1;
+        numGroups = -1;
         population = -1;
         match = -1;
         marginalCost = 0;
@@ -173,7 +173,7 @@ public class Config extends BaseConfig {
         strategyUpdateMillis = 100;
         probPayoffs = false;
         trajectory = false;
-        matchType = MatchTuple.pair;
+        matchType = MatchGroup.pair;
         menu = new ChatMenu();
         menu.m1 = "go left";
         menu.m2 = "go right";

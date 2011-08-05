@@ -25,8 +25,8 @@ public class Population implements Serializable {
 
     private Map<Integer, ClientInterface> members;
     private long periodStartTime;
-    private Set<Tuple> tuples;
-    private Map<Integer, Tuple> tupleMap;
+    private Set<Tuple> groups;
+    private Map<Integer, Tuple> groupMap;
     private Map<Integer, Float> subperiodPayoffs;
     private TickEvent tick = new TickEvent();
     private Map<Integer, BlockingQueue<StrategyUpdateEvent>> strategyUpdateEvents;
@@ -35,8 +35,8 @@ public class Population implements Serializable {
     private final Object logLock = new Object();
 
     public Population() {
-        tuples = new HashSet<Tuple>();
-        tupleMap = new HashMap<Integer, Tuple>();
+        groups = new HashSet<Tuple>();
+        groupMap = new HashMap<Integer, Tuple>();
         subperiodPayoffs = new HashMap<Integer, Float>();
         strategyUpdateEvents = new HashMap<Integer, BlockingQueue<StrategyUpdateEvent>>();
         strategyUpdateProcessors = new HashMap<Integer, StrategyUpdateProcessor>();
@@ -55,21 +55,21 @@ public class Population implements Serializable {
                 && FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
             ((TwoStrategyPayoffFunction) FIRE.server.getConfig().counterpartPayoffFunction).isCounterpart = true;
         }
-        setupTuples();
+        setupGroups();
         if (FIRE.server.getConfig().preLength == 0) {
             setInitialStrategies();
         }
         if (FIRE.server.getConfig().turnTaking) {
             setInitiative();
         }
-        for (Tuple tuple : tuples) {
+        for (Tuple group : groups) {
             List<String> possible_aliases = new ArrayList<String>();
-            for (int i = 0; i < tuple.members.size(); i++) {
+            for (int i = 0; i < group.members.size(); i++) {
                 possible_aliases.add(Config.aliases[i]);
             }
             Collections.shuffle(possible_aliases, FIRE.server.getRandom());
             int i = 0;
-            for (int id : tuple.members) {
+            for (int id : group.members) {
                 aliases.put(id, possible_aliases.get(i));
                 for (int j = 0; j < Config.aliases.length; j++) {
                     if (aliases.get(id).equals(Config.aliases[j])) {
@@ -90,41 +90,41 @@ public class Population implements Serializable {
 
     public void setPeriodStartTime() {
         periodStartTime = System.nanoTime();
-        for (Tuple tuple : tuples) {
-            tuple.evalTime = periodStartTime;
-            tuple.update(-1);
+        for (Tuple group : groups) {
+            group.evalTime = periodStartTime;
+            group.update(-1);
         }
     }
 
     public void strategyChanged(int whoChanged, float[] newStrategy, float[] targetStrategy) {
-        tupleMap.get(whoChanged).update(whoChanged, newStrategy, targetStrategy);
+        groupMap.get(whoChanged).update(whoChanged, newStrategy, targetStrategy);
     }
 
     public void evaluate() {
-        for (Tuple tuple : tuples) {
-            tuple.evaluate();
+        for (Tuple group : groups) {
+            group.evaluate();
         }
     }
 
     public void endSubperiod(int subperiod) {
         if (FIRE.server.getConfig().subperiodRematch) {
-            shuffleTuples();
+            shuffleGroups();
         }
         if (FIRE.server.getConfig().probPayoffs) {
-            for (Tuple tuple : tuples) {
+            for (Tuple tuple : groups) {
                 tuple.realizeStrategies();
             }
         }
-        for (Tuple tuple : tuples) {
+        for (Tuple tuple : groups) {
             tuple.evaluateSubperiod(subperiod);
         }
-        for (Tuple tuple : tuples) {
+        for (Tuple tuple : groups) {
             tuple.endSubperiod(subperiod);
         }
     }
 
     public void endPeriod() {
-        for (Tuple tuple : tuples) {
+        for (Tuple tuple : groups) {
             tuple.endPeriod();
         }
     }
@@ -141,7 +141,7 @@ public class Population implements Serializable {
                 tick.config = FIRE.server.getConfig(member);
                 tick.subperiod = subperiod;
                 tick.secondsLeft = secondsLeft;
-                Tuple tuple = tupleMap.get(member);
+                Tuple tuple = groupMap.get(member);
                 tick.population = tuple.population;
                 tick.world = tuple.world;
                 tick.strategy = tuple.strategies.get(member);
@@ -183,12 +183,12 @@ public class Population implements Serializable {
         public Tuple match;
 
         public Tuple() {
-            this(tuples.size());
+            this(groups.size());
         }
 
         public Tuple(int population) {
             this.population = population;
-            tuples.add(this);
+            groups.add(this);
             members = new HashSet<Integer>();
             strategies = new HashMap<Integer, float[]>();
             targets = new HashMap<Integer, float[]>();
@@ -306,17 +306,17 @@ public class Population implements Serializable {
         }
     }
 
-    public void setupTuples() {
-        tuples.clear();
-        tupleMap.clear();
-        if (FIRE.server.getConfig().numTuples == 1
-                || (members.size() / FIRE.server.getConfig().tupleSize) == 1) {
-            setupSinglePopTuples();
+    public void setupGroups() {
+        groups.clear();
+        groupMap.clear();
+        if (FIRE.server.getConfig().numGroups == 1
+                || (members.size() / FIRE.server.getConfig().groupSize) == 1) {
+            setupSinglePopGroups();
         } else {
-            if (FIRE.server.getConfig().assignedTuples) {
-                setupAssignedTuples();
+            if (FIRE.server.getConfig().assignedGroups) {
+                setupAssignedGroups();
             } else {
-                setupRandomTuples();
+                setupRandomGroups();
             }
         }
         //setWorlds();
@@ -326,22 +326,22 @@ public class Population implements Serializable {
      * Constructs a single tuple comprising all subjects
      * Tuple is linked to itself
      */
-    private void setupSinglePopTuples() {
-        Tuple tuple = new Tuple();
-        tuple.members = members.keySet();
-        tuple.match = tuple;
+    private void setupSinglePopGroups() {
+        Tuple group = new Tuple();
+        group.members = members.keySet();
+        group.match = group;
         for (int member : members.keySet()) {
             Config def = FIRE.server.getConfig();
             Config config = FIRE.server.getConfig(member);
             config.isCounterpart = false;
             config.payoffFunction = def.payoffFunction;
             config.counterpartPayoffFunction = def.payoffFunction;
-            tupleMap.put(member, tuple);
-            config.playersInTuple = members.size();
+            groupMap.put(member, group);
+            config.playersInGroup = members.size();
         }
     }
 
-    private void setupAssignedTuples() {
+    private void setupAssignedGroups() {
         Map<Integer, Tuple> populations = new HashMap<Integer, Tuple>();
         for (int member : members.keySet()) {
             Config config = FIRE.server.getConfig(member);
@@ -353,104 +353,104 @@ public class Population implements Serializable {
             }
             populations.get(config.population).members.add(member);
             populations.get(config.population).match = populations.get(config.match);
-            tupleMap.put(member, populations.get(config.population));
-            tuples.add(populations.get(config.population));
-            tuples.add(populations.get(config.match));
+            groupMap.put(member, populations.get(config.population));
+            groups.add(populations.get(config.population));
+            groups.add(populations.get(config.match));
         }
         Set<Tuple> assignedMatches = new HashSet<Tuple>();
-        for (Tuple tuple : tuples) {
-            if (assignedMatches.contains(tuple)) {
+        for (Tuple group : groups) {
+            if (assignedMatches.contains(group)) {
                 continue;
             }
-            if (tuple.population == tuple.match.population) {
-                for (int member : tuple.members) {
+            if (group.population == group.match.population) {
+                for (int member : group.members) {
                     Config config = FIRE.server.getConfig(member);
-                    config.playersInTuple = tuple.members.size();
+                    config.playersInGroup = group.members.size();
                 }
             } else {
-                if (tuple.population > tuple.match.population) {
-                    tuple = tuple.match;
+                if (group.population > group.match.population) {
+                    group = group.match;
                 }
-                for (int member : tuple.members) {
+                for (int member : group.members) {
                     Config config = FIRE.server.getConfig(member);
-                    config.playersInTuple = tuple.members.size();
+                    config.playersInGroup = group.members.size();
                 }
-                for (int member : tuple.match.members) {
+                for (int member : group.match.members) {
                     Config config = FIRE.server.getConfig(member);
-                    config.playersInTuple = tuple.match.members.size();
+                    config.playersInGroup = group.match.members.size();
                 }
             }
-            assignedMatches.add(tuple);
-            assignedMatches.add(tuple.match);
+            assignedMatches.add(group);
+            assignedMatches.add(group.match);
         }
     }
 
-    private void setupRandomTuples() {
+    private void setupRandomGroups() {
         Config config = FIRE.server.getConfig();
         ArrayList<Integer> randomMembers = new ArrayList<Integer>();
         randomMembers.addAll(members.keySet());
         Collections.shuffle(randomMembers, FIRE.server.getRandom());
-        if (config.tupleSize == -1) {
-            config.tupleSize = members.size() / config.numTuples;
+        if (config.groupSize == -1) {
+            config.groupSize = members.size() / config.numGroups;
         }
         Tuple current = null;
-        ArrayList<Tuple> randomTuples = new ArrayList<Tuple>();
+        ArrayList<Tuple> randomGroups = new ArrayList<Tuple>();
         while (randomMembers.size() > 0) {
-            if (current == null || current.members.size() == config.tupleSize) {
+            if (current == null || current.members.size() == config.groupSize) {
                 current = new Tuple();
-                randomTuples.add(current);
+                randomGroups.add(current);
             }
             int member = randomMembers.remove(0);
             current.members.add(member);
-            tupleMap.put(member, current);
+            groupMap.put(member, current);
         }
-        if (config.matchType == Config.MatchTuple.pair) {
-            Collections.shuffle(randomTuples, FIRE.server.getRandom());
-            while (randomTuples.size() > 0) {
-                Tuple tuple = randomTuples.remove(0);
-                if (tuples.size() == 1) {
-                    tuple.match = tuple;
+        if (config.matchType == Config.MatchGroup.pair) {
+            Collections.shuffle(randomGroups, FIRE.server.getRandom());
+            while (randomGroups.size() > 0) {
+                Tuple group = randomGroups.remove(0);
+                if (groups.size() == 1) {
+                    group.match = group;
                 } else {
-                    tuple.match = randomTuples.remove(0);
+                    group.match = randomGroups.remove(0);
                 }
-                tuple.match.match = tuple;
-                Tuple tuple1;
+                group.match.match = group;
+                Tuple group1;
                 if (FIRE.server.getRandom().nextBoolean()) {
-                    tuple1 = tuple;
+                    group1 = group;
                 } else {
-                    tuple1 = tuple.match;
+                    group1 = group.match;
                 }
                 PayoffFunction payoffFunction = config.payoffFunction;
                 PayoffFunction counterpartPayoffFunction = config.counterpartPayoffFunction == null ? config.payoffFunction : config.counterpartPayoffFunction;
-                for (int member : tuple1.members) {
+                for (int member : group1.members) {
                     Config c = FIRE.server.getConfig(member);
                     c.isCounterpart = false;
                     c.payoffFunction = payoffFunction;
                     c.counterpartPayoffFunction = counterpartPayoffFunction;
-                    c.playersInTuple = tuple1.members.size();
+                    c.playersInGroup = group1.members.size();
                 }
-                for (int member : tuple1.match.members) {
+                for (int member : group1.match.members) {
                     Config c = FIRE.server.getConfig(member);
                     c.isCounterpart = true;
                     c.payoffFunction = counterpartPayoffFunction;
                     c.counterpartPayoffFunction = payoffFunction;
-                    c.playersInTuple = tuple1.match.members.size();
+                    c.playersInGroup = group1.match.members.size();
                 }
             }
         } else {
-            for (Tuple tuple : tuples) {
-                tuple.match = tuple;
-                for (int member : tuple.members) {
+            for (Tuple group : groups) {
+                group.match = group;
+                for (int member : group.members) {
                     Config c = FIRE.server.getConfig(member);
                     c.isCounterpart = false;
                     c.payoffFunction = config.payoffFunction;
                     c.counterpartPayoffFunction = config.payoffFunction;
-                    c.playersInTuple = tuple.members.size();
+                    c.playersInGroup = group.members.size();
                 }
             }
         }
         assert (randomMembers.isEmpty());
-        assert (randomTuples.isEmpty());
+        assert (randomGroups.isEmpty());
     }
 
     private void setInitialStrategies() {
@@ -491,54 +491,54 @@ public class Population implements Serializable {
             }
             config.initialStrategy = s;
         }
-        for (Tuple tuple : tuples) {
-            for (int member : tuple.members) {
-                tuple.strategies.put(member, FIRE.server.getConfig(member).initialStrategy);
-                tuple.targets.put(member, FIRE.server.getConfig(member).initialStrategy);
+        for (Tuple group : groups) {
+            for (int member : group.members) {
+                group.strategies.put(member, FIRE.server.getConfig(member).initialStrategy);
+                group.targets.put(member, FIRE.server.getConfig(member).initialStrategy);
             }
         }
-        for (Tuple tuple : tuples) {
-            tuple.update(-1);
+        for (Tuple group : groups) {
+            group.update(-1);
         }
     }
 
     private void setInitiative() {
-        for (Tuple tuple : tuples) {
+        for (Tuple group : groups) {
             List<Integer> l = new ArrayList<Integer>();
-            for (Integer member : tuple.members) {
+            for (Integer member : group.members) {
                 l.add(member);
             }
             Collections.shuffle(l);
-            int[] initiatives = new int[tuple.members.size()];
+            int[] initiatives = new int[group.members.size()];
             int i = 0;
             for (Integer m : l) {
                 initiatives[i++] = m;
             }
-            for (Integer member : tuple.members) {
+            for (Integer member : group.members) {
                 FIRE.server.getConfig(member).initiatives = initiatives;
             }
         }
     }
 
-    private void shuffleTuples() {
-        ArrayList<Tuple> randomTuples = new ArrayList<Tuple>();
-        for (Tuple tuple : tuples) {
-            randomTuples.add(tuple);
+    private void shuffleGroups() {
+        ArrayList<Tuple> randomGroups = new ArrayList<Tuple>();
+        for (Tuple tuple : groups) {
+            randomGroups.add(tuple);
             tuple.match = null;
         }
-        Collections.shuffle(randomTuples, FIRE.server.getRandom());
-        for (Tuple tuple : tuples) {
-            if (tuple.match != null) {
+        Collections.shuffle(randomGroups, FIRE.server.getRandom());
+        for (Tuple group : groups) {
+            if (group.match != null) {
                 continue;
             }
             int index = 0;
             boolean legal = false;
             Tuple match = null;
             while (!legal) {
-                match = randomTuples.get(index++);
+                match = randomGroups.get(index++);
                 boolean cp1 = false;
                 for (int client : members.keySet()) {
-                    if (tuple.members.contains(client)) {
+                    if (group.members.contains(client)) {
                         cp1 = FIRE.server.getConfig(client).isCounterpart;
                     }
                 }
@@ -548,27 +548,27 @@ public class Population implements Serializable {
                         cp2 = FIRE.server.getConfig(client).isCounterpart;
                     }
                 }
-                legal = (tuple != match) && !(cp1 == cp2);
+                legal = (group != match) && !(cp1 == cp2);
             }
             assert match != null;
-            randomTuples.remove(tuple);
-            randomTuples.remove(match);
-            tuple.match = match;
-            match.match = tuple;
+            randomGroups.remove(group);
+            randomGroups.remove(match);
+            group.match = match;
+            match.match = group;
         }
         // does setWorlds() need to be called after a shuffle?
     }
 
     public void newMessage(int secondsLeft, String message, String html, int senderID, String alias) {
-        Tuple tuple = tupleMap.get(senderID);
-        for (int id : tuple.members) {
+        Tuple group = groupMap.get(senderID);
+        for (int id : group.members) {
             ClientInterface client = members.get(id);
             client.newMessage(html);
         }
         mEvent.period = FIRE.server.getConfig().period;
         mEvent.secondsLeft = secondsLeft;
         mEvent.subject = senderID;
-        mEvent.population = tuple.population;
+        mEvent.population = group.population;
         mEvent.alias = alias;
         mEvent.text = message;
         FIRE.server.commit(mEvent, "|");
