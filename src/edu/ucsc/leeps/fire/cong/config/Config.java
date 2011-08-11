@@ -102,7 +102,7 @@ public class Config extends BaseConfig {
     public Config() {
         paid = true;
         length = 120;
-        percentChangePerSecond = 0.1f;
+        percentChangePerSecond = Float.NaN;
         changeCost = 0;
         subperiods = 0;
         preLength = 0;
