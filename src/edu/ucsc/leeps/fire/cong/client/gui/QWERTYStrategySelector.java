@@ -73,17 +73,27 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         float tableHeight = rows * cellHeight;
         applet.pushMatrix();
         applet.translate(size / 2f - tableWidth / 2f, size / 4 - tableHeight / 2);
+        
         int ownSame = QWERTYPayoffFunction.getInSame(Client.state.id, Client.state.getMyStrategy(), Client.state.strategies);
         int ownDiff = QWERTYPayoffFunction.getNotInSame(Client.state.id, Client.state.getMyStrategy(), Client.state.strategies);
         int matchSame = QWERTYPayoffFunction.getInSame(Client.state.id, Client.state.getMyStrategy(), Client.state.matchStrategies);
         int matchDiff = QWERTYPayoffFunction.getNotInSame(Client.state.id, Client.state.getMyStrategy(), Client.state.matchStrategies);
+        
         for (int platform = 0; platform <= 1; platform++) {
             applet.translate(0, platform * size / 2);
-            if (Math.round(Client.state.getMyStrategy()[0]) == platform) {
+            
+            //Selection box location
+             if (firmButtons.getSelection() == platform) {
                 applet.fill(200);
                 applet.rect(0 - textWidth * 1.5f, -5 - 2.5f * textHeight, size, size / 2);
                 applet.fill(0);
             }
+            
+//            if (Math.round(Client.state.getMyStrategy()[0]) == platform) {
+//                applet.fill(200);
+//                applet.rect(0 - textWidth * 1.5f, -5 - 2.5f * textHeight, size, size / 2);
+//                applet.fill(0);
+//            }
             for (int col = 1; col <= cols; col++) {
                 applet.line(col * cellWidth, 0, col * cellWidth, cellHeight * rows);
             }

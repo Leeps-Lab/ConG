@@ -122,12 +122,12 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
                 } catch (InterruptedException ex) {
                 }
             }
+            
             long nanoWait = config.strategyUpdateMillis * 1000000;
             long start = System.nanoTime();
-            if (shouldUpdate) {
+            
+            if(shouldUpdate){
                 selector.setEnabled(!isLocked());
-            }
-            if (!isLocked() && shouldUpdate) {
                 update();
             }
             long elapsed = System.nanoTime() - start;
