@@ -12,7 +12,6 @@ public abstract class IndefiniteEnd implements Serializable {
     public int secondsToDisplay = 60;
     public float percentToDisplay = 0.5f;
     public int subperiodLength;
-    public int xAxisTicks = 10;
 
     public abstract int length(Random random);
 

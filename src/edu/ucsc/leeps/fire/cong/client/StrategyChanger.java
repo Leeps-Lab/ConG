@@ -4,11 +4,18 @@ import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import java.util.Map;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
+import java.util.concurrent.TimeUnit;
+
 
 /**
  *
  * @author jpettit
  */
+
+
+
 public class StrategyChanger extends Thread implements Configurable<Config>, Runnable {
 
     private Config config;
@@ -21,6 +28,36 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     private boolean initialLock;
     private boolean turnTakingLock;
     public Selector selector;
+    private DelayQueue infoDelay;
+    
+    
+    public class DelayWrapper implements Delayed {
+        private Map<Integer, float[]> map;
+        private long endOfDelay;
+        DelayWrapper(Map <Integer,float[]> mapIn, long endIn) {
+            this.map=mapIn;
+            this.endOfDelay=endIn;
+        }
+        
+        
+        public long getDelay(TimeUnit timeUnit) {
+            return timeUnit.convert(endOfDelay - System.currentTimeMillis(),
+                              TimeUnit.MILLISECONDS);
+        }
+
+        public int compareTo(Delayed delayed) {
+            DelayWrapper request = (DelayWrapper)delayed;
+                if (this.endOfDelay <= request.endOfDelay)
+                    return -1;
+                if (this.endOfDelay > request.endOfDelay)
+                    return 1;
+                else return 0;
+        }
+   
+    }
+    
+    
+    
 
     public StrategyChanger() {
         FIRE.client.addConfigListener(this);
@@ -191,7 +228,10 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies) {
-        Client.state.matchStrategies = matchStrategies;
+        DelayWrapper node = new DelayWrapper(matchStrategies, config.displayDelay);
+        infoDelay.offer(node,config.displayDelay,TimeUnit.MILLISECONDS);
+        //infoDelay.offer(matchStrategies, (long)config.displayDelay, TimeUnit.MILLISECONDS);
+        //Client.state.matchStrategies = matchStrategies;
     }
 
     public boolean isTurnTakingLocked(int subperiod) {
