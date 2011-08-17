@@ -6,16 +6,19 @@ import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 /**
  *
  * @author jpettit
  */
-public class QWERTYStrategySelector extends Sprite implements Configurable<Config>, Selector {
+public class QWERTYStrategySelector extends Sprite implements Configurable<Config>, KeyListener, Selector {
 
     private RadioButtonGroup firmButtons;
     private QWERTYPayoffFunction pf;
     private int size;
+    private boolean isKeyListenerSet = false;
 
     public QWERTYStrategySelector(
             Sprite parent, int x, int y,
@@ -36,10 +39,20 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         firmButtons.setEnabled(enabled);
     }
 
+    public void setKeyListener(Client applet) {
+        if (!isKeyListenerSet) {
+            applet.addKeyListener(this);
+            isKeyListenerSet = true;
+        } else {
+            return;
+        }
+    }
+    
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         firmButtons.setVisible(visible);
+        
     }
 
     @Override
@@ -47,6 +60,7 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         if (!visible) {
             return;
         }
+        setKeyListener(applet);
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
         drawTable(applet);
@@ -89,11 +103,6 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
                 applet.fill(0);
             }
             
-//            if (Math.round(Client.state.getMyStrategy()[0]) == platform) {
-//                applet.fill(200);
-//                applet.rect(0 - textWidth * 1.5f, -5 - 2.5f * textHeight, size, size / 2);
-//                applet.fill(0);
-//            }
             for (int col = 1; col <= cols; col++) {
                 applet.line(col * cellWidth, 0, col * cellWidth, cellHeight * rows);
             }
@@ -178,7 +187,7 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
             setVisible(false);
         }
     }
-
+    
     public void startPrePeriod() {
     }
 
@@ -191,5 +200,22 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
     }
 
     public void endSubperiod(int subperiod) {
+    }
+    
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_UP) {
+            if (firmButtons.getSelection() != 0 && firmButtons.isEnabled()) {
+                firmButtons.setSelection(0);
+            }
+        } else if (e.getKeyCode() == KeyEvent.VK_DOWN && firmButtons.isEnabled()) {
+            if (firmButtons.getSelection() != 1) {
+                firmButtons.setSelection(1);
+            }
+        }
+    }
+    public void keyTyped(KeyEvent e) {
+    }
+
+    public void keyReleased(KeyEvent e) {
     }
 }
