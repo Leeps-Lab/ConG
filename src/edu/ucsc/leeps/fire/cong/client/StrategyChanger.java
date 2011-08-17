@@ -8,14 +8,10 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-
 /**
  *
  * @author jpettit
  */
-
-
-
 public class StrategyChanger extends Thread implements Configurable<Config>, Runnable {
 
     private Config config;
@@ -28,36 +24,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     private boolean initialLock;
     private boolean turnTakingLock;
     public Selector selector;
-    private DelayQueue infoDelay;
-    
-    
-    public class DelayWrapper implements Delayed {
-        private Map<Integer, float[]> map;
-        private long endOfDelay;
-        DelayWrapper(Map <Integer,float[]> mapIn, long endIn) {
-            this.map=mapIn;
-            this.endOfDelay=endIn;
-        }
-        
-        
-        public long getDelay(TimeUnit timeUnit) {
-            return timeUnit.convert(endOfDelay - System.currentTimeMillis(),
-                              TimeUnit.MILLISECONDS);
-        }
-
-        public int compareTo(Delayed delayed) {
-            DelayWrapper request = (DelayWrapper)delayed;
-                if (this.endOfDelay <= request.endOfDelay)
-                    return -1;
-                if (this.endOfDelay > request.endOfDelay)
-                    return 1;
-                else return 0;
-        }
-   
-    }
-    
-    
-    
+    private DelayQueue<DelayWrapper> infoDelay;
 
     public StrategyChanger() {
         FIRE.client.addConfigListener(this);
@@ -159,13 +126,18 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
                 } catch (InterruptedException ex) {
                 }
             }
-            
+
             long nanoWait = config.strategyUpdateMillis * 1000000;
             long start = System.nanoTime();
-            
-            if(shouldUpdate){
+
+            if (shouldUpdate) {
                 selector.setEnabled(!isLocked());
                 update();
+            }
+            DelayWrapper delayedUpdate = infoDelay.poll();
+            while (delayedUpdate != null) {
+                Client.state.matchStrategies = delayedUpdate.map;
+                delayedUpdate = infoDelay.poll();
             }
             long elapsed = System.nanoTime() - start;
             long sleepNanos = nanoWait - elapsed;
@@ -229,9 +201,14 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
 
     public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies) {
         DelayWrapper node = new DelayWrapper(matchStrategies, config.displayDelay);
-        infoDelay.offer(node,config.displayDelay,TimeUnit.MILLISECONDS);
+        if (!infoDelay.offer(node, config.displayDelay, TimeUnit.MILLISECONDS)) {
+            System.out.println("Failed to update match strat.");
+
+        }
+
         //infoDelay.offer(matchStrategies, (long)config.displayDelay, TimeUnit.MILLISECONDS);
         //Client.state.matchStrategies = matchStrategies;
+
     }
 
     public boolean isTurnTakingLocked(int subperiod) {
@@ -270,5 +247,33 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         public void endSubperiod(int subperiod);
 
         public void setEnabled(boolean enabled);
+    }
+
+    public class DelayWrapper implements Delayed {
+
+        private Map<Integer, float[]> map;
+        private long endOfDelay;
+
+        DelayWrapper(Map<Integer, float[]> mapIn, long endIn) {
+            this.map = mapIn;
+            this.endOfDelay = endIn;
+        }
+
+        public long getDelay(TimeUnit timeUnit) {
+            return timeUnit.convert(endOfDelay - System.currentTimeMillis(),
+                    TimeUnit.MILLISECONDS);
+        }
+
+        public int compareTo(Delayed delayed) {
+            DelayWrapper request = (DelayWrapper) delayed;
+            if (this.endOfDelay <= request.endOfDelay) {
+                return -1;
+            }
+            if (this.endOfDelay > request.endOfDelay) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
     }
 }
