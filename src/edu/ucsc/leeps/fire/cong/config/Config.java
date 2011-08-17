@@ -76,7 +76,7 @@ public class Config extends BaseConfig {
     public boolean potential;
     public float grid;
     public int xAxisTicks; 
-    public int displayDelay;
+    public int infoDelay;
     public static final Class matrix2x2 = TwoStrategyPayoffFunction.class;
     public static final Class matrix3x3 = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -102,7 +102,6 @@ public class Config extends BaseConfig {
     public boolean showPGMultiplier;
 
     public Config() {
-        displayDelay = 0;
         paid = true;
         length = 120;
         percentChangePerSecond = Float.NaN;
@@ -192,6 +191,7 @@ public class Config extends BaseConfig {
         //menu.m12 = aliases[7];
         grid = Float.NaN;
         showPGMultiplier = false;
+        infoDelay = 0;
     }
     public static String[] aliases = new String[]{
         "Green", "Red", "Blue", "Gray", "Purple", "Orange", "Aqua", "Yellow"

@@ -27,6 +27,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     private DelayQueue<DelayWrapper> infoDelay;
 
     public StrategyChanger() {
+        infoDelay = new DelayQueue<DelayWrapper>();
         FIRE.client.addConfigListener(this);
         start();
     }
@@ -136,7 +137,14 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             }
             DelayWrapper delayedUpdate = infoDelay.poll();
             while (delayedUpdate != null) {
-                Client.state.matchStrategies = delayedUpdate.map;
+                switch (delayedUpdate.type) {
+                    case STRATEGIES:
+                        Client.state.strategies = delayedUpdate.map;
+                        break;
+                    case MATCH_STRATEGIES:
+                        Client.state.matchStrategies = delayedUpdate.map;
+                        break;
+                }
                 delayedUpdate = infoDelay.poll();
             }
             long elapsed = System.nanoTime() - start;
@@ -199,16 +207,22 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         selector.setEnabled(false);
     }
 
-    public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies) {
-        DelayWrapper node = new DelayWrapper(matchStrategies, config.displayDelay);
-        if (!infoDelay.offer(node, config.displayDelay, TimeUnit.MILLISECONDS)) {
-            System.out.println("Failed to update match strat.");
-
+    public void setStrategies(int whoChanged, Map<Integer, float[]> strategies) {
+        if (config == null || config.infoDelay == 0 || Client.state.id == whoChanged) {
+            Client.state.strategies = strategies;
+        } else {
+            DelayWrapper node = new DelayWrapper(strategies, config.infoDelay, DelayWrapper.InfoType.STRATEGIES);
+            infoDelay.offer(node);
         }
+    }
 
-        //infoDelay.offer(matchStrategies, (long)config.displayDelay, TimeUnit.MILLISECONDS);
-        //Client.state.matchStrategies = matchStrategies;
-
+    public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies) {
+        if (config == null || config.infoDelay == 0) {
+            Client.state.matchStrategies = matchStrategies;
+        } else {
+            DelayWrapper node = new DelayWrapper(matchStrategies, config.infoDelay, DelayWrapper.InfoType.MATCH_STRATEGIES);
+            infoDelay.offer(node);
+        }
     }
 
     public boolean isTurnTakingLocked(int subperiod) {
@@ -249,27 +263,32 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         public void setEnabled(boolean enabled);
     }
 
-    public class DelayWrapper implements Delayed {
+    public static class DelayWrapper implements Delayed {
 
+        public static enum InfoType {
+
+            STRATEGIES, MATCH_STRATEGIES
+        };
         private Map<Integer, float[]> map;
-        private long endOfDelay;
+        private long expiry;
+        private InfoType type;
 
-        DelayWrapper(Map<Integer, float[]> mapIn, long endIn) {
+        DelayWrapper(Map<Integer, float[]> mapIn, long delay, InfoType type) {
             this.map = mapIn;
-            this.endOfDelay = endIn;
+            this.expiry = System.currentTimeMillis() + delay;
+            this.type = type;
         }
 
         public long getDelay(TimeUnit timeUnit) {
-            return timeUnit.convert(endOfDelay - System.currentTimeMillis(),
+            return timeUnit.convert(expiry - System.currentTimeMillis(),
                     TimeUnit.MILLISECONDS);
         }
 
         public int compareTo(Delayed delayed) {
-            DelayWrapper request = (DelayWrapper) delayed;
-            if (this.endOfDelay <= request.endOfDelay) {
+            DelayWrapper other = (DelayWrapper) delayed;
+            if (this.expiry < other.expiry) {
                 return -1;
-            }
-            if (this.endOfDelay > request.endOfDelay) {
+            } else if (this.expiry > other.expiry) {
                 return 1;
             } else {
                 return 0;

@@ -1,5 +1,5 @@
-"period","paid","turnTaking","indefiniteEnd","max","subperiodLength","secondsToDisplay","percentToDisplay","percentChangePerSecond","groupSize","xAxisTicks","grid","payoffFunction","name","subperiodBonus","mixed","selector","marginalCost"
-1,"TRUE","TRUE","endUniform",10,5,16,0.8,"NaN",2,10,0.01,"pricing","pf",10,"TRUE","strip",10
-2,"TRUE","TRUE","endUniform",10,5,16,0.8,"NaN",2,20,0.01,"pricing","pf",10,"TRUE","strip",10
-3,"TRUE","TRUE","endUniform",10,5,16,0.8,"NaN",2,30,0.01,"pricing","pf",10,"TRUE","strip",10
-4,"TRUE","TRUE","endUniform",10,5,16,0.8,"NaN",2,5,0.01,"pricing","pf",10,"TRUE","strip",10
+"period","paid","length","percentChangePerSecond","groupSize","xAxisTicks","grid","payoffFunction","name","mixed","selector","marginalCost","infoDelay"
+1,"TRUE","30","NaN",2,10,0.01,"pricing","pf","TRUE","strip",10,5000
+2,"TRUE","30","NaN",2,20,0.01,"pricing","pf","TRUE","strip",10,5000
+3,"TRUE","30","NaN",2,30,0.01,"pricing","pf","TRUE","strip",10,5000
+4,"TRUE","30","NaN",2,5,0.01,"pricing","pf","TRUE","strip",10,5000
