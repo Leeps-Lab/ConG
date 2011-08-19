@@ -159,7 +159,7 @@ public class Config extends BaseConfig {
         pColor = new Color(0, 0, 0);
         sColor = new Color(150, 150, 150);
         showRPSSliders = false;
-        showHeatmapLegend = false;
+        showHeatmapLegend = false;matchType
         chatroom = false;
         negativePayoffs = false;
         sigmoidHeatmap = false;
