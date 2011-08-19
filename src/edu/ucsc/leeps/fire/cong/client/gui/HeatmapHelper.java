@@ -5,6 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,9 +138,9 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
                         you[0] = A;
                         other[0] = a;
                         if (mine) {
-                            value = PayoffFunction.Utilities.getPayoff(new float[]{A}, new float[]{a}) / max;
+                            value = PayoffUtils.getPayoff(new float[]{A}, new float[]{a}) / max;
                         } else {
-                            value = PayoffFunction.Utilities.getMatchPayoff(new float[]{A}, new float[]{a}) / max;
+                            value = PayoffUtils.getMatchPayoff(new float[]{A}, new float[]{a}) / max;
                         }
                         backBuffer.pixels[y * size + x] = getRGB(value);
                     }
@@ -190,7 +191,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
                     for (int y = 0; y < height; y++) {
                         float[] RPS = RPSCache[x][y];
                         if (RPS[0] >= 0 && RPS[1] >= 0 && RPS[2] >= 0) {
-                            float u = PayoffFunction.Utilities.getPayoff(RPS, rps);
+                            float u = PayoffUtils.getPayoff(RPS, rps);
                             backBuffer.pixels[y * width + x] = getRGB(u / max);
                         } else {
                             backBuffer.pixels[y * width + x] = applet.color(255, 0, 0, 0);
@@ -216,7 +217,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
                 int y = i / width;
 
                 float myStrat = 1f - ((float) y / (float) height);
-                u = PayoffFunction.Utilities.getPayoff(new float[]{myStrat});
+                u = PayoffUtils.getPayoff(new float[]{myStrat});
 
                 backBuffer.pixels[i] = getRGB(u / max);
             }
@@ -229,7 +230,7 @@ public class HeatmapHelper extends Sprite implements Configurable<Config> {
         } else {
             for (int i = 0; i / width == 0; ++i) {
                 float myStrat = (float) i / (float) width;
-                u = PayoffFunction.Utilities.getPayoff(new float[]{myStrat});
+                u = PayoffUtils.getPayoff(new float[]{myStrat});
 
                 backBuffer.pixels[i] = getRGB(u / max);
             }

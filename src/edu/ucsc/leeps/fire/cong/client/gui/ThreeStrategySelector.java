@@ -5,7 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
@@ -130,7 +130,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public void updateHeatmap() {
         if (visible) {
-            float[] average = PayoffFunction.Utilities.getAverageMatchStrategy();
+            float[] average = PayoffUtils.getAverageMatchStrategy();
             heatmap.updateThreeStrategyHeatmap(
                     average[0], average[1], average[2],
                     this);
@@ -222,7 +222,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             applet.line(hover.origin.x, hover.origin.y, hoverPDrop.origin.x, hoverPDrop.origin.y);
             applet.line(hover.origin.x, hover.origin.y, hoverSDrop.origin.x, hoverSDrop.origin.y);
 
-            hover.setLabel(PayoffFunction.Utilities.getPayoff(hoverStrat));
+            hover.setLabel(PayoffUtils.getPayoff(hoverStrat));
 
             hoverRDrop.setLabel(hoverStrat[R]);
             hoverPDrop.setLabel(hoverStrat[P]);
@@ -236,7 +236,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         }
 
         if (target.visible && Client.state.target != null) {
-            target.setLabel(PayoffFunction.Utilities.getPayoff(Client.state.target));
+            target.setLabel(PayoffUtils.getPayoff(Client.state.target));
             adjustLabels(Client.state.target, target, null, null);
         }
 
@@ -254,7 +254,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             applet.line(current.origin.x, current.origin.y, sDrop.origin.x, sDrop.origin.y);
         }
 
-        current.setLabel(PayoffFunction.Utilities.getPayoff());
+        current.setLabel(PayoffUtils.getPayoff());
 
         adjustLabels(Client.state.getMyStrategy(), current, pDrop, rDrop);
 
@@ -262,7 +262,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         pDrop.setLabel(myStrategy[P]);
         sDrop.setLabel(myStrategy[S]);
 
-        float[] average = PayoffFunction.Utilities.getAverageMatchStrategy();
+        float[] average = PayoffUtils.getAverageMatchStrategy();
         coords = calculateStratCoords(average[R], average[P], average[S]);
         opponent.update(coords[0], coords[1]);
 

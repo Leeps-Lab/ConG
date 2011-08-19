@@ -2,10 +2,8 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 
 /**
  *
@@ -64,7 +62,7 @@ public class Agent extends Thread {
         Config config = FIRE.client.getConfig();
         if (config.payoffFunction.getNumStrategies() <= 2) {
             float newTarget;
-            if (PayoffFunction.Utilities.getPayoff() <= 3) {
+            if (PayoffUtils.getPayoff() <= 3) {
                 newTarget = FIRE.client.getRandom().nextFloat();
             } else {
                 float maxPayoff = Float.NEGATIVE_INFINITY;
@@ -72,7 +70,7 @@ public class Agent extends Thread {
                 float[] strategy = new float[]{maxStrategy};
                 for (float s = 0; s <= 1; s += 0.01) {
                     strategy[0] = s;
-                    float payoff = PayoffFunction.Utilities.getPayoff(strategy);
+                    float payoff = PayoffUtils.getPayoff(strategy);
                     if (payoff > maxPayoff) {
                         maxPayoff = payoff;
                         maxStrategy = s;
@@ -101,7 +99,7 @@ public class Agent extends Thread {
                     strategy[0] = s0;
                     strategy[1] = s1;
                     strategy[2] = 1 - s0 - s1;
-                    float payoff = PayoffFunction.Utilities.getPayoff(strategy);
+                    float payoff = PayoffUtils.getPayoff(strategy);
                     if (payoff > maxPayoff) {
                         maxPayoff = payoff;
                         maxStrategy[0] = strategy[0];

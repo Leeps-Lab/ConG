@@ -5,7 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
@@ -114,7 +114,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         a.stroke(50);
         for (float x = 0; x < width; x++) {
             s[0] = x / width;
-            float u = PayoffFunction.Utilities.getPayoff(s);
+            float u = PayoffUtils.getPayoff(s);
             float y = u / max;
             a.point(x, height * (1 - y));
         }
@@ -140,7 +140,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
                 strategy = Client.state.strategies.get(id)[0];
             }
         } else {
-            payoff = PayoffFunction.Utilities.getPayoff(id, Client.state.strategies.get(id));
+            payoff = PayoffUtils.getPayoff(id, Client.state.strategies.get(id));
             strategy = Client.state.strategies.get(id)[0];
         }
         x = width * strategy;

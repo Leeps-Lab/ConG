@@ -6,6 +6,7 @@ import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -114,14 +115,14 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     private void updateLabels() {
         float myAa, counterAa, myAb, counterAb, myBa, counterBa, myBb, counterBb;
-        myAa = PayoffFunction.Utilities.getPayoff(new float[]{1}, new float[]{1});
-        counterAa = PayoffFunction.Utilities.getMatchPayoff(new float[]{1}, new float[]{1});
-        myAb = PayoffFunction.Utilities.getPayoff(new float[]{1}, new float[]{0});
-        counterAb = PayoffFunction.Utilities.getMatchPayoff(new float[]{1}, new float[]{0});
-        myBa = PayoffFunction.Utilities.getPayoff(new float[]{0}, new float[]{1});
-        counterBa = PayoffFunction.Utilities.getMatchPayoff(new float[]{0}, new float[]{1});
-        myBb = PayoffFunction.Utilities.getPayoff(new float[]{0}, new float[]{0});
-        counterBb = PayoffFunction.Utilities.getMatchPayoff(new float[]{0}, new float[]{0});
+        myAa = PayoffUtils.getPayoff(new float[]{1}, new float[]{1});
+        counterAa = PayoffUtils.getMatchPayoff(new float[]{1}, new float[]{1});
+        myAb = PayoffUtils.getPayoff(new float[]{1}, new float[]{0});
+        counterAb = PayoffUtils.getMatchPayoff(new float[]{1}, new float[]{0});
+        myBa = PayoffUtils.getPayoff(new float[]{0}, new float[]{1});
+        counterBa = PayoffUtils.getMatchPayoff(new float[]{0}, new float[]{1});
+        myBb = PayoffUtils.getPayoff(new float[]{0}, new float[]{0});
+        counterBb = PayoffUtils.getMatchPayoff(new float[]{0}, new float[]{0});
 
         if (((TwoStrategyPayoffFunction) config.payoffFunction).reverseXAxis()) {
             myHeatmapAa.setLabel(myAb);
@@ -174,7 +175,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
     private void drawStrategyInfo() {
         float percent_A = Client.state.getMyStrategy()[0];
-        float percent_a = PayoffFunction.Utilities.getAverageMatchStrategy()[0];
+        float percent_a = PayoffUtils.getAverageMatchStrategy()[0];
         if (((TwoStrategyPayoffFunction) config.payoffFunction).reverseXAxis()) {
             percent_a = 1 - percent_a;
         }
@@ -186,7 +187,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
         current.update((1 - percent_a) * width, (1 - percent_A) * height);
         if (config.showHeatmap) {
-            current.setLabel(PayoffFunction.Utilities.getPayoff());
+            current.setLabel(PayoffUtils.getPayoff());
         }
 
         if (applet.mousePressed) {
@@ -202,7 +203,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
             dragged.update((1 - percent_a) * width, (1 - target) * height);
             float hoverPercent_A = 1 - ((applet.mouseY - origin.y) / height);
             if (config.showHeatmap) {
-                dragged.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}));
+                dragged.setLabel(PayoffUtils.getPayoff(new float[]{hoverPercent_A}));
             }
         } else {
             dragged.setVisible(false);
@@ -215,7 +216,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
                     (1 - percent_a) * width,
                     (1 - Client.state.target[0]) * height);
             if (config.showHeatmap) {
-                planned.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{Client.state.target[0]}));
+                planned.setLabel(PayoffUtils.getPayoff(new float[]{Client.state.target[0]}));
             }
         } else {
             planned.setVisible(false);
@@ -231,9 +232,9 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
                     && hoverPercent_a >= 0 && hoverPercent_a <= 1.0) {
                 if (config.showHeatmap) {
                     if (((TwoStrategyPayoffFunction) config.payoffFunction).reverseXAxis()) {
-                        hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}, new float[]{1 - hoverPercent_a}));
+                        hover.setLabel(PayoffUtils.getPayoff(new float[]{hoverPercent_A}, new float[]{1 - hoverPercent_a}));
                     } else {
-                        hover.setLabel(PayoffFunction.Utilities.getPayoff(new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
+                        hover.setLabel(PayoffUtils.getPayoff(new float[]{hoverPercent_A}, new float[]{hoverPercent_a}));
                     }
                 }
                 hover.update((1 - hoverPercent_a) * width, (1 - hoverPercent_A) * height);
@@ -255,7 +256,7 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
 
             counterpart.setVisible(true);
             if (config.showHeatmap) {
-                counterpart.setLabel(PayoffFunction.Utilities.getMatchPayoff());
+                counterpart.setLabel(PayoffUtils.getMatchPayoff());
             }
             counterpart.update(
                     counterpartHeatmap.origin.x + (1 - percent_a) * counterpartHeatmap.width,

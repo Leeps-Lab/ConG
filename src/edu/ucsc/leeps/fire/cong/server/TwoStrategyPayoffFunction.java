@@ -50,7 +50,7 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
         float A, B, a, b;
         A = popStrategies.get(id)[0];
         B = 1 - A;
-        a = PayoffFunction.Utilities.getAverageMatchStrategy(id, popStrategies, matchPopStrategies)[0];
+        a = PayoffUtils.getAverageMatchStrategy(id, popStrategies, matchPopStrategies)[0];
         b = 1 - a;
         if (isCounterpart) {
             return A * (a * Aa + b * Ba) + B * (a * Ab + b * Bb);
@@ -68,7 +68,7 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
     }
 
     public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        return PayoffFunction.Utilities.getAverageMatchStrategy(id, popStrategies, matchPopStrategies);
+        return PayoffUtils.getAverageMatchStrategy(id, popStrategies, matchPopStrategies);
     }
 
     public void configure() {

@@ -5,9 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger.Selector;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import processing.core.PApplet;
@@ -102,7 +100,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
                 int playedStrat = buttons.getSelection();
                 applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y + playedStrat * interval, matrixSideLength, interval);
-                int cpStrat = PayoffFunction.Utilities.getAverageMatchStrategy()[0] == 1 ? 0 : 1;
+                int cpStrat = PayoffUtils.getAverageMatchStrategy()[0] == 1 ? 0 : 1;
                 applet.rect(matrixTopLeft.origin.x + cpStrat * interval, matrixTopLeft.origin.y, interval, matrixSideLength);
                 /*
                 if (payoffFunction instanceof ThresholdPayoffFunction) { //payoff function dependent
@@ -290,8 +288,8 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
                 myStrategy[i] = 1f;
                 opponentStrategy[j] = 1f;
 
-                float myPayoff = PayoffFunction.Utilities.getPayoff(myStrategy, opponentStrategy);
-                float opponentPayoff = PayoffFunction.Utilities.getMatchPayoff(myStrategy, opponentStrategy);
+                float myPayoff = PayoffUtils.getPayoff(myStrategy, opponentStrategy);
+                float opponentPayoff = PayoffUtils.getMatchPayoff(myStrategy, opponentStrategy);
 
                 cellMarkers[i][j].setLabel(myPayoff, opponentPayoff);
             }

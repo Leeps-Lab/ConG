@@ -4,7 +4,7 @@ import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
@@ -335,7 +335,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 if (config.subperiods != 0) {
                     yourPayoff.addPayoffPoint(percent, Client.state.subperiodPayoff);
                 } else {
-                    yourPayoff.addPayoffPoint(percent, PayoffFunction.Utilities.getPayoff());
+                    yourPayoff.addPayoffPoint(percent, PayoffUtils.getPayoff());
                 }
                 if (FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction) { //payoff function dependent
                     PricingPayoffFunction pf = (PricingPayoffFunction) FIRE.client.getConfig().payoffFunction;
@@ -351,12 +351,12 @@ public class Chart extends Sprite implements Configurable<Config> {
                     if (config.subperiods != 0) {
                         matchPayoff.addPayoffPoint(percent, Client.state.subperiodMatchPayoff);
                     } else {
-                        matchPayoff.addPayoffPoint(percent, PayoffFunction.Utilities.getMatchPayoff());
+                        matchPayoff.addPayoffPoint(percent, PayoffUtils.getMatchPayoff());
                     }
                 }
             } else {
                 float[] you = Client.state.getMyStrategy();
-                float[] match = PayoffFunction.Utilities.getAverageMatchStrategy();
+                float[] match = PayoffUtils.getAverageMatchStrategy();
                 if (mode == Mode.TwoStrategy) {
                     yourStrategy.addStrategyPoint(percent, you[0]);
                     matchStrategy.addStrategyPoint(percent, match[0]);

@@ -4,7 +4,7 @@ import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 
 /**
@@ -115,7 +115,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
             if (elapsed > 1000) {
                 float millisInPeriod = FIRE.client.getConfig().length * 1000f;
                 float percentInStrategy = elapsed / millisInPeriod;
-                float payoff = PayoffFunction.Utilities.getPayoff();
+                float payoff = PayoffUtils.getPayoff();
                 periodPoints += percentInStrategy * payoff;
             }
         }
