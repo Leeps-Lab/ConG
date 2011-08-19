@@ -8,6 +8,7 @@ import edu.ucsc.leeps.fire.config.BaseConfig;
 import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import java.awt.Color;
 import java.util.Map;
@@ -82,6 +83,7 @@ public class Config extends BaseConfig {
     public static final Class qwerty = QWERTYPayoffFunction.class;
     public static final Class pricing = PricingPayoffFunction.class;
     public static final Class sum = SumPayoffFunction.class;
+    public static final Class script = ScriptedPayoffFunction.class;
     public static final Class line = Line.class;
     public static final Class threshold = ThresholdPayoffFunction.class;
     public static final Class decisionDelay = DecisionDelay.class;

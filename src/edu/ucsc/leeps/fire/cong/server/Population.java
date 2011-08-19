@@ -49,6 +49,10 @@ public class Population implements Serializable {
             strategyUpdateProcessors.put(member, new StrategyUpdateProcessor(strategyUpdateEvents.get(member)));
             strategyUpdateProcessors.get(member).start();
         }
+        FIRE.server.getConfig().payoffFunction.configure();
+        if (FIRE.server.getConfig().counterpartPayoffFunction != null ) {
+            FIRE.server.getConfig().counterpartPayoffFunction.configure();
+        }
         // fixme: better way of doing this. config can auto-configure some parts?
         if (FIRE.server.getConfig().payoffFunction.getNumStrategies() <= 2
                 && FIRE.server.getConfig().counterpartPayoffFunction != null
