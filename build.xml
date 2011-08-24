@@ -133,11 +133,14 @@
                 excludes="META-INF/*.SF, META-INF/*.DSA, META-INF/*.RSA"/>
         </zip>
 
-        <delete file="dist/final.jar"/>
+        <chmod dir="dist" includes="*.jar" perm="u+x"/>
 
+        <delete file="dist/final.jar"/>
         <delete file="dist/CONG.jar"/>
-        <delete dir="dist/lib/"/>
         <delete file="dist/README.TXT"/>
+        <delete dir="dist/lib"/>
+
+        <copydir src="lib" dest="dist/lib"/>
 
     </target>
 
