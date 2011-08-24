@@ -61,7 +61,7 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
                 u = ((A - B * sum) * s - C * s) + D;
                 break;
             case public_goods:
-                u = A - s + B * sum;
+                u = (smax - s) + (A / popStrategies.size()) * sum;
                 break;
         }
         return u;

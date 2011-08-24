@@ -105,7 +105,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
     public void setSecondsLeft(int secondsLeft) {
         this.secondsLeft = secondsLeft;
     }
-    
+
     public void update() {
         totalPoints = FIRE.client.getTotalPoints();
         periodPoints = FIRE.client.getPeriodPoints();
@@ -123,8 +123,9 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
 
     public void startPeriod() {
         periodStartTime = System.currentTimeMillis();
-        if (FIRE.client.getConfig().payoffFunction instanceof SumPayoffFunction){ //payoff function dependent
-            multiplier = ((SumPayoffFunction)FIRE.client.getConfig().payoffFunction).B;
+        if (FIRE.client.getConfig().payoffFunction instanceof SumPayoffFunction) { //payoff function dependent
+            multiplier = ((SumPayoffFunction) FIRE.client.getConfig().payoffFunction).A;
+            multiplier /= Client.state.strategies.size();
         }
         update();
     }
