@@ -2,6 +2,7 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.logging.Dialogs;
+import edu.ucsc.leeps.fire.logging.Logger;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -55,7 +56,12 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         if (scriptedPayoffFunction == null) {
             configure();
         }
-        return scriptedPayoffFunction.getPayoff(id, percent, popStrategies, matchPopStrategies, config);
+        try {
+            return scriptedPayoffFunction.getPayoff(id, percent, popStrategies, matchPopStrategies, config);
+        } catch (Exception ex) {
+            Dialogs.popUpAndExit(ex);
+            return 0;
+        }
     }
 
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {

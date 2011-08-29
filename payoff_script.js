@@ -15,7 +15,12 @@ function getSubperiodBonus(subperiod, config) {
 }
 
 function getPayoff(id, percent, popStrategies, matchPopStrategies, config) {
-    return 5;
+    var total = 0;
+    for (key in popStrategies) {
+        total += popStrategies[key][0];
+    }
+    var mean = total / popStrategies.size();
+    return 100 * mean;
 }
 
 function getPopStrategySummary(id, percent, popStrategies, matchPopStrategies) {
