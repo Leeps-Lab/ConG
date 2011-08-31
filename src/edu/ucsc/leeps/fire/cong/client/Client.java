@@ -152,10 +152,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void startPeriod() {
-        state.subperiod = 0;
-        state.setMyStrategy(FIRE.client.getConfig().initialStrategy);
+        state.startPeriod();
         if (FIRE.client.getConfig().preLength == 0) {
-            state.currentPercent = 0;
             heatmap2d.setEnabled(true);
             pureMatrix.setEnabled(true);
             strip.setEnabled(true);
@@ -174,7 +172,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.startPeriod();
         strategyChanger.selector.startPeriod();
 
-        state.currentPercent = 0f;
         if (FIRE.client.getConfig().subperiods == 0) {
             payoffChart.updateLines();
             strategyChart.updateLines();
@@ -193,8 +190,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public void endPeriod() {
         strategyChanger.endPeriod();
-
-        state.currentPercent = 1f;
+        state.endPeriod();
 
         if (chatroom != null) {
             chatroom.endPeriod();
