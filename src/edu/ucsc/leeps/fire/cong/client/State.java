@@ -83,26 +83,9 @@ public class State {
         public final long timestamp;
         public final Map<Integer, float[]> strategies;
         
-        public Strategy(Map<Integer, float[]> strategies) {
-            this.timestamp = System.currentTimeMillis();
+        public Strategy(long timestamp, Map<Integer, float[]> strategies) {
+            this.timestamp = timestamp;
             this.strategies = strategies;
-        }
-        
-        @Override
-        public Strategy clone() {
-            Map<Integer, float[]> newStrategies = new HashMap<Integer, float[]>();
-            for (Integer i : strategies.keySet()) {
-                int length = strategies.get(i).length;
-                newStrategies.put(i, new float[length]);
-                System.arraycopy(strategies.get(i), 0, newStrategies.get(i), 0, length);
-            }
-            return new Strategy(newStrategies);
-        }
-        
-        public Strategy update(Integer i, float[] strategy) {
-            Strategy updated = clone();
-            updated.strategies.put(i, strategy);
-            return updated;
         }
     }
 }

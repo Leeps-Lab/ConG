@@ -221,11 +221,11 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies) {
-        strategyChanger.setStrategies(whoChanged, strategies);
+        state.strategies.put(whoChanged, strategies.get(whoChanged));
     }
 
     public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies) {
-        strategyChanger.setMatchStrategies(whoChanged, matchStrategies);
+        state.matchStrategies.put(whoChanged, matchStrategies.get(whoChanged));
     }
 
     public void endSubperiod(

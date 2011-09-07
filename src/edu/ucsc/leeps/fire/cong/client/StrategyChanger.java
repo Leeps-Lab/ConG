@@ -24,10 +24,8 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     private boolean initialLock;
     private boolean turnTakingLock;
     public Selector selector;
-    private DelayQueue<DelayWrapper> infoDelay;
 
     public StrategyChanger() {
-        infoDelay = new DelayQueue<DelayWrapper>();
         FIRE.client.addConfigListener(this);
         start();
     }
@@ -135,18 +133,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
                 selector.setEnabled(!isLocked());
                 update();
             }
-            DelayWrapper delayedUpdate = infoDelay.poll();
-            while (delayedUpdate != null) {
-                switch (delayedUpdate.type) {
-                    case STRATEGIES:
-                        Client.state.strategies = delayedUpdate.map;
-                        break;
-                    case MATCH_STRATEGIES:
-                        Client.state.matchStrategies = delayedUpdate.map;
-                        break;
-                }
-                delayedUpdate = infoDelay.poll();
-            }
+            
             long elapsed = System.nanoTime() - start;
             long sleepNanos = nanoWait - elapsed;
             if (sleepNanos > 0) {
@@ -205,24 +192,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         shouldUpdate = false;
         initialLock = true;
         selector.setEnabled(false);
-    }
-
-    public void setStrategies(int whoChanged, Map<Integer, float[]> strategies) {
-        if (config == null || config.infoDelay == 0 || Client.state.id == whoChanged) {
-            Client.state.strategies = strategies;
-        } else {
-            DelayWrapper node = new DelayWrapper(strategies, config.infoDelay, DelayWrapper.InfoType.STRATEGIES);
-            infoDelay.offer(node);
-        }
-    }
-
-    public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies) {
-        if (config == null || config.infoDelay == 0) {
-            Client.state.matchStrategies = matchStrategies;
-        } else {
-            DelayWrapper node = new DelayWrapper(matchStrategies, config.infoDelay, DelayWrapper.InfoType.MATCH_STRATEGIES);
-            infoDelay.offer(node);
-        }
     }
 
     public boolean isTurnTakingLocked(int subperiod) {
