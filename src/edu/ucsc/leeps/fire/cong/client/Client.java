@@ -220,12 +220,14 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         periodInfo.setSecondsLeft(secondsLeft);
     }
 
-    public void setStrategies(int whoChanged, Map<Integer, float[]> strategies) {
-        state.strategies.put(whoChanged, strategies.get(whoChanged));
+    public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp) {
+        state.strategies = strategies;
+        state.strategiesTime.add(new State.Strategy(timestamp, strategies));
     }
 
-    public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies) {
-        state.matchStrategies.put(whoChanged, matchStrategies.get(whoChanged));
+    public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies, long timestamp) {
+        state.matchStrategies = matchStrategies;
+        state.matchStrategiesTime.add(new State.Strategy(timestamp, matchStrategies));
     }
 
     public void endSubperiod(

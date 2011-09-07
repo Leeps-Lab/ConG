@@ -2,6 +2,7 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,11 +23,15 @@ public class State {
     
     public State(StrategyChanger changer) {
         this.strategyChanger = changer;
+        strategiesTime = new LinkedList<Strategy>();
+        matchStrategiesTime = new LinkedList<Strategy>();
     }
     
     public void startPeriod() {
         subperiod = 0;
         currentPercent = 0;
+        strategiesTime.clear();
+        matchStrategiesTime.clear();
         setMyStrategy(FIRE.client.getConfig().initialStrategy);
     }
     

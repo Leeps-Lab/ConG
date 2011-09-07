@@ -110,7 +110,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         this.secondsLeft = secondsLeft;
         if (FIRE.server.getConfig().subperiods == 0) {
             population.logTick(0, secondsLeft);
-            population.evaluate();
+            population.evaluate(System.nanoTime());
         }
     }
 

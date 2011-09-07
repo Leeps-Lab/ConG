@@ -50,7 +50,7 @@ public class Population implements Serializable {
             strategyUpdateProcessors.get(member).start();
         }
         FIRE.server.getConfig().payoffFunction.configure();
-        if (FIRE.server.getConfig().counterpartPayoffFunction != null ) {
+        if (FIRE.server.getConfig().counterpartPayoffFunction != null) {
             FIRE.server.getConfig().counterpartPayoffFunction.configure();
         }
         // fixme: better way of doing this. config can auto-configure some parts?
@@ -96,7 +96,7 @@ public class Population implements Serializable {
         periodStartTime = System.nanoTime();
         for (Tuple group : groups) {
             group.evalTime = periodStartTime;
-            group.update(-1);
+            group.update(-1, periodStartTime);
         }
     }
 
@@ -104,9 +104,9 @@ public class Population implements Serializable {
         groupMap.get(whoChanged).update(whoChanged, newStrategy, targetStrategy);
     }
 
-    public void evaluate() {
+    public void evaluate(long timestamp) {
         for (Tuple group : groups) {
-            group.evaluate();
+            group.evaluate(timestamp);
         }
     }
 
@@ -200,32 +200,32 @@ public class Population implements Serializable {
         }
 
         public void update(int whoChanged, float[] strategy, float[] target) {
+            long timestamp = System.nanoTime();
             if (FIRE.server.getConfig().subperiods == 0) {
-                evaluate();
+                evaluate(timestamp);
                 if (this != match) {
-                    match.evaluate();
+                    match.evaluate(timestamp);
                 }
             }
             strategies.put(whoChanged, strategy);
             targets.put(whoChanged, target);
             if (FIRE.server.getConfig().subperiods == 0) {
-                update(whoChanged);
+                update(whoChanged, timestamp);
             }
         }
 
-        public void update(int whoChanged) {
+        public void update(int whoChanged, long timestamp) {
             for (int member : members) {
                 strategyUpdateEvents.get(member).add(
-                        new StrategyUpdateEvent(member, whoChanged, strategies, null));
+                        new StrategyUpdateEvent(member, whoChanged, strategies, null, timestamp - periodStartTime));
             }
             for (int member : match.members) {
                 strategyUpdateEvents.get(member).add(
-                        new StrategyUpdateEvent(member, whoChanged, null, strategies));
+                        new StrategyUpdateEvent(member, whoChanged, null, strategies, timestamp - periodStartTime));
             }
         }
 
-        public void evaluate() {
-            long timestamp = System.nanoTime();
+        public void evaluate(long timestamp) {
             float percent = (timestamp - periodStartTime) / (FIRE.server.getConfig().length * 1000000000f);
             float percentElapsed = (timestamp - evalTime) / (FIRE.server.getConfig().length * 1000000000f);
             if (percentElapsed > 0.01) {
@@ -302,11 +302,11 @@ public class Population implements Serializable {
                     }
                 }.start();
             }
-            update(-1);
+            update(-1, subperiod);
         }
 
         public void endPeriod() {
-            evaluate();
+            evaluate(System.nanoTime());
         }
     }
 
@@ -502,7 +502,11 @@ public class Population implements Serializable {
             }
         }
         for (Tuple group : groups) {
-            group.update(-1);
+            if (FIRE.server.getConfig().subperiods == 0) {
+                group.update(-1, periodStartTime);
+            } else {
+                group.update(-1, 0);
+            }
         }
     }
 
@@ -615,12 +619,14 @@ public class Population implements Serializable {
         public int changedId;
         public Map<Integer, float[]> strategies;
         public Map<Integer, float[]> matchStrategies;
+        public long timestamp;
 
-        public StrategyUpdateEvent(int id, int changedId, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies) {
+        public StrategyUpdateEvent(int id, int changedId, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies, long timestamp) {
             this.id = id;
             this.changedId = changedId;
             this.strategies = strategies;
             this.matchStrategies = matchStrategies;
+            this.timestamp = timestamp;
         }
     }
 
@@ -639,9 +645,9 @@ public class Population implements Serializable {
                     StrategyUpdateEvent event = queue.take();
                     synchronized (logLock) {
                         if (event.strategies != null) {
-                            members.get(event.id).setStrategies(event.changedId, event.strategies);
+                            members.get(event.id).setStrategies(event.changedId, event.strategies, event.timestamp);
                         } else {
-                            members.get(event.id).setMatchStrategies(event.changedId, event.matchStrategies);
+                            members.get(event.id).setMatchStrategies(event.changedId, event.matchStrategies, event.timestamp);
                         }
                     }
                 } catch (InterruptedException ex) {
