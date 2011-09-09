@@ -242,9 +242,9 @@ public class Slider {
         ghostValue = ghostVal;
 
         if (align == Alignment.Horizontal) {
-            ghostPos = sliderStart + length * ghostValue / maxValue;
+            ghostPos = sliderStart + ((length * ghostValue) / maxValue);
         } else {
-            ghostPos = sliderEnd - length * ghostValue / maxValue;
+            ghostPos = sliderEnd - ((length * ghostValue) / maxValue);
         }
     }
 

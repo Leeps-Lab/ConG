@@ -15,6 +15,7 @@ import edu.ucsc.leeps.fire.cong.client.gui.BubblesSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.IndefiniteEndPricesChart;
 import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
+import edu.ucsc.leeps.fire.cong.client.gui.charting.C_D_SF;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import fullscreen.FullScreen;
@@ -61,6 +62,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private QWERTYStrategySelector qwerty;
     private BubblesSelector bubbles;
     private Sprite selector;
+    private Sprite chart;
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
     private IndefiniteEndPricesChart indefiniteEndPricesChart;
@@ -222,12 +224,16 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp) {
         state.strategies = strategies;
-        state.strategiesTime.add(new State.Strategy(timestamp, strategies));
+        synchronized (state.strategiesTime) {
+            state.strategiesTime.add(new State.Strategy(timestamp, strategies));
+        }
     }
 
     public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies, long timestamp) {
         state.matchStrategies = matchStrategies;
-        state.matchStrategiesTime.add(new State.Strategy(timestamp, matchStrategies));
+        synchronized (state.matchStrategiesTime) {
+            state.matchStrategiesTime.add(new State.Strategy(timestamp, matchStrategies));
+        }
     }
 
     public void endSubperiod(
@@ -333,6 +339,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         int strategyChartHeight = 100;
         int threeStrategyChartHeight = 30;
         int payoffChartHeight = (int) (height - strategyChartHeight - 2 * topMargin - chartMargin - 10);
+        chart = new C_D_SF(null, chartLeftOffset + 80 + leftMargin, strategyChartHeight + topMargin + chartMargin,
+                chartWidth, matrixSize, (int) (chartWidth + (7f * matrixSize) / 8f));
         strategyChart = new Chart(
                 null, chartLeftOffset + 80 + leftMargin, topMargin,
                 chartWidth, strategyChartHeight,
@@ -388,12 +396,15 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
 
                 if (FIRE.client.getConfig().subperiods == 0) {
+                    /*
                     payoffChart.updateLines();
                     strategyChart.updateLines();
                     rChart.updateLines();
                     pChart.updateLines();
                     sChart.updateLines();
                     indefiniteEndPricesChart.update();
+                     * 
+                     */
                 }
             }
             if (FIRE.client.isRunningPeriod()) {
@@ -404,12 +415,16 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 selector.draw(this);
             }
             if (FIRE.client.getConfig() != null) {
+                /*
                 payoffChart.draw(this);
                 strategyChart.draw(this);
                 rChart.draw(this);
                 pChart.draw(this);
                 sChart.draw(this);
                 indefiniteEndPricesChart.draw(this);
+                 *
+                 */
+                chart.draw(this);
             }
             legend.draw(this);
             if (FIRE.client.getConfig().preLength > 0 && !haveInitialStrategy) {
