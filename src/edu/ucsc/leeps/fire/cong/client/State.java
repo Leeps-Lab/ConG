@@ -16,7 +16,7 @@ public class State {
     public int subperiod;
     public volatile float currentPercent;
     public Map<Integer, float[]> strategies, matchStrategies;
-    public final List<Strategy> strategiesTime, matchStrategiesTime;
+    public final List<Strategy> strategiesTime;
     public volatile float subperiodPayoff, subperiodMatchPayoff;
     public float[] target;
     public StrategyChanger strategyChanger;
@@ -24,7 +24,8 @@ public class State {
     public State(StrategyChanger changer) {
         this.strategyChanger = changer;
         strategiesTime = new LinkedList<Strategy>();
-        matchStrategiesTime = new LinkedList<Strategy>();
+        strategies = new HashMap<Integer, float[]>();
+        matchStrategies = new HashMap<Integer, float[]>();
     }
 
     public void startPeriod() {
@@ -33,10 +34,8 @@ public class State {
         synchronized (strategiesTime) {
             strategiesTime.clear();
         }
-        synchronized (matchStrategiesTime) {
-            matchStrategiesTime.clear();
-        }
-        strategies = new HashMap<Integer, float[]>();
+        strategies.clear();
+        matchStrategies.clear();
         setMyStrategy(FIRE.client.getConfig().initialStrategy);
     }
 
@@ -54,6 +53,20 @@ public class State {
 
     public float[] getMyStrategy() {
         return strategies.get(id);
+    }
+
+    public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp) {
+        synchronized (strategiesTime) {
+            strategiesTime.add(new Strategy(timestamp, copyMap(strategies), copyMap(matchStrategies)));
+        }
+        this.strategies = strategies;
+    }
+
+    public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies, long timestamp) {
+        synchronized (strategiesTime) {
+            strategiesTime.add(new Strategy(timestamp, copyMap(strategies), copyMap(matchStrategies)));
+        }
+        this.matchStrategies = matchStrategies;
     }
 
     public Map<Integer, float[]> getFictitiousStrategies(int id, float[] strategy) {
@@ -92,10 +105,22 @@ public class State {
 
         public final long timestamp;
         public final Map<Integer, float[]> strategies;
+        public final Map<Integer, float[]> matchStrategies;
 
-        public Strategy(long timestamp, Map<Integer, float[]> strategies) {
+        public Strategy(long timestamp, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies) {
             this.timestamp = timestamp;
             this.strategies = strategies;
+            this.matchStrategies = matchStrategies;
         }
+    }
+
+    public static Map<Integer, float[]> copyMap(Map<Integer, float[]> m) {
+        Map<Integer, float[]> copy = new HashMap<Integer, float[]>();
+        for (int id : m.keySet()) {
+            float[] f = new float[m.get(id).length];
+            System.arraycopy(m.get(id), 0, f, 0, f.length);
+            copy.put(id, f);
+        }
+        return copy;
     }
 }

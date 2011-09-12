@@ -223,17 +223,11 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp) {
-        state.strategies = strategies;
-        synchronized (state.strategiesTime) {
-            state.strategiesTime.add(new State.Strategy(timestamp, strategies));
-        }
+        state.setStrategies(whoChanged, strategies, timestamp);
     }
 
     public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies, long timestamp) {
-        state.matchStrategies = matchStrategies;
-        synchronized (state.matchStrategiesTime) {
-            state.matchStrategiesTime.add(new State.Strategy(timestamp, matchStrategies));
-        }
+        state.setMatchStrategies(whoChanged, matchStrategies, timestamp);
     }
 
     public void endSubperiod(
