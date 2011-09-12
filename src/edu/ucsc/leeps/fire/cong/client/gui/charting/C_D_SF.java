@@ -52,7 +52,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
     }
 
     private boolean delayed(long timestamp) {
-        return ((1e9 * (Client.state.currentPercent * config.length)) - timestamp) < 1e9 * config.infoDelay;
+        return Client.state.currentPercent < 1 && ((1e9 * (Client.state.currentPercent * config.length)) - timestamp) < 1e9 * config.infoDelay;
     }
 
     private void drawStrategyLines(Client a) {
