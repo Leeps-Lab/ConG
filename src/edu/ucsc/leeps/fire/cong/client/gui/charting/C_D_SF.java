@@ -86,6 +86,8 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                         continue;
                     }
                     lastNonDelayedX = x;
+                } else if (id >= lastY.length) {
+                    continue;
                 }
                 float[] f = s.strategies.get(id);
                 float y = scaledHeight * (1 - f[0]) + scaledMargin;
@@ -103,9 +105,9 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                     a.line(lastNonDelayedX, lastY[id], delayX, lastY[id]);
                 }
             }
+            a.stroke(config.currColors.get(Client.state.id).getRGB());
+            a.line(lastX, lastY[Client.state.id], currX, lastY[Client.state.id]);
         }
-        a.stroke(config.currColors.get(Client.state.id).getRGB());
-        a.line(lastX, lastY[Client.state.id], currX, lastY[Client.state.id]);
     }
 
     private void drawPayoffArea(Client a) {

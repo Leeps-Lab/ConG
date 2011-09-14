@@ -3,9 +3,10 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.client.State.Strategy;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
+import java.util.Map;
 
 /**
  *
@@ -15,10 +16,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
 
     private Config config;
     private int secondsLeft;
-    private boolean displaySwitchCosts;
-    private float totalPoints, periodPoints, periodCost, multiplier;
-    private float[] myStrategy, counterStrategy;
-    private long lastChangeTime, periodStartTime;
+    private float totalPoints, periodPoints, multiplier;
     private int lineNumber;
 
     public PeriodInfo(Sprite parent, int x, int y, Client embed) {
@@ -27,9 +25,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
         FIRE.client.addConfigListener(this);
         totalPoints = 0;
         periodPoints = 0;
-        periodCost = 0;
         multiplier = 1;
-        displaySwitchCosts = false;
     }
 
     public void configChanged(Config config) {
@@ -108,21 +104,38 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
 
     public void update() {
         totalPoints = FIRE.client.getTotalPoints();
-        periodPoints = FIRE.client.getPeriodPoints();
-        periodCost = FIRE.client.getClient().getCost();
-        if (lastChangeTime > 0) {
-            long elapsed = System.currentTimeMillis() - lastChangeTime;
-            if (elapsed > 1000) {
-                float millisInPeriod = FIRE.client.getConfig().length * 1000f;
-                float percentInStrategy = elapsed / millisInPeriod;
-                float payoff = PayoffUtils.getPayoff();
-                periodPoints += percentInStrategy * payoff;
+        synchronized (Client.state.strategiesTime) {
+            periodPoints = 0;
+            float lastPercent = 0;
+            Map<Integer, float[]> lastStrategies = null;
+            Map<Integer, float[]> lastMatchStrategies = null;
+            for (Strategy s : Client.state.strategiesTime) {
+                float percent = s.timestamp / (float) (config.length * 1e9);
+                if (lastPercent > 0) {
+                    float flowPayoff = config.payoffFunction.getPayoff(
+                            Client.state.id, percent, lastStrategies, lastMatchStrategies, config);
+                    if (flowPayoff > 0) {
+                        flowPayoff += config.marginalCost;
+                    }
+                    float points = flowPayoff * (percent - lastPercent);
+                    periodPoints += points;
+                }
+                lastPercent = percent;
+                lastStrategies = s.strategies;
+                lastMatchStrategies = s.matchStrategies;
+            }
+            if (lastStrategies != null && lastMatchStrategies != null) {
+                float flowPayoff = config.payoffFunction.getPayoff(
+                        Client.state.id, Client.state.currentPercent, lastStrategies, lastMatchStrategies, config);
+                if (flowPayoff > 0) {
+                    flowPayoff += config.marginalCost;
+                }
+                periodPoints += flowPayoff * (Client.state.currentPercent - lastPercent);
             }
         }
     }
 
     public void startPeriod() {
-        periodStartTime = System.currentTimeMillis();
         if (FIRE.client.getConfig().payoffFunction instanceof SumPayoffFunction) { //payoff function dependent
             multiplier = ((SumPayoffFunction) FIRE.client.getConfig().payoffFunction).A;
             multiplier /= Client.state.strategies.size();
@@ -131,17 +144,6 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
     }
 
     public void endPeriod() {
-        lastChangeTime = -1;
         update();
-    }
-
-    public void setMyStrategy(float[] s) {
-        lastChangeTime = System.currentTimeMillis();
-        myStrategy = s;
-    }
-
-    public void setCounterpartStrategy(float[] s) {
-        lastChangeTime = System.currentTimeMillis();
-        counterStrategy = s;
     }
 }
