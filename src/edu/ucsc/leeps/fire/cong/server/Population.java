@@ -209,19 +209,19 @@ public class Population implements Serializable {
             }
             strategies.put(whoChanged, strategy);
             targets.put(whoChanged, target);
-            if (FIRE.server.getConfig().subperiods == 0) {
-                update(whoChanged, timestamp);
-            }
+            update(whoChanged, timestamp);
         }
 
         public void update(int whoChanged, long timestamp) {
-            for (int member : members) {
-                strategyUpdateEvents.get(member).add(
-                        new StrategyUpdateEvent(member, whoChanged, strategies, null, timestamp - periodStartTime));
-            }
-            for (int member : match.members) {
-                strategyUpdateEvents.get(member).add(
-                        new StrategyUpdateEvent(member, whoChanged, null, strategies, timestamp - periodStartTime));
+            if (FIRE.server.getConfig().subperiods == 0) {
+                for (int member : members) {
+                    strategyUpdateEvents.get(member).add(
+                            new StrategyUpdateEvent(member, whoChanged, strategies, null, timestamp - periodStartTime));
+                }
+                for (int member : match.members) {
+                    strategyUpdateEvents.get(member).add(
+                            new StrategyUpdateEvent(member, whoChanged, null, strategies, timestamp - periodStartTime));
+                }
             }
         }
 
@@ -502,11 +502,7 @@ public class Population implements Serializable {
             }
         }
         for (Tuple group : groups) {
-            if (FIRE.server.getConfig().subperiods == 0) {
-                group.update(-1, periodStartTime);
-            } else {
-                group.update(-1, 0);
-            }
+            group.update(-1, periodStartTime);
         }
     }
 
@@ -581,37 +577,6 @@ public class Population implements Serializable {
         mEvent.text = message;
         FIRE.server.commit(mEvent, "|");
     }
-    /*
-    private void setWorlds() {
-    int curWorld = 1;
-    for (Tuple tuple : tuples) {
-    if (tuple.discovered == false) {
-    tuple.discovered = true;
-    tuple.pathDist = 0;
-    int inWorld = discoverNext(tupleMap.get(tuple.match), curWorld, 1);
-    if (inWorld > 0)
-    tuple.world = curWorld;
-    curWorld++;
-    System.err.println("world " + curWorld + " contains member " + tuple.members.toArray()[0]);
-    }
-    }
-    }
-
-    private int discoverNext(Tuple tuple, int curWorld, int pathLength) {
-    if (tuple.discovered == false) {
-    tuple.pathDist = pathLength;
-    tuple.discovered = true;
-    int inWorld = discoverNext(tupleMap.get(tuple.match), curWorld, pathLength + 1);
-    if (inWorld > 0)
-    tuple.world = curWorld;
-    System.err.println("world " + curWorld + " contains member " + tuple.members.toArray()[0]);
-    return --inWorld;
-    }
-    else {
-    return pathLength - tuple.pathDist;
-    }
-    }
-     */
 
     private class StrategyUpdateEvent {
 

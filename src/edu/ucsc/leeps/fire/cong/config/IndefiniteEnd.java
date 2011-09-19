@@ -9,8 +9,8 @@ import java.util.Random;
  */
 public abstract class IndefiniteEnd implements Serializable {
 
-    public int secondsToDisplay = 60;
-    public float percentToDisplay = 0.5f;
+    public int displayLength;
+    public float percentToDisplay;
     public int subperiodLength;
 
     public abstract int length(Random random);

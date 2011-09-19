@@ -39,7 +39,7 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
         try {
             a.rectMode(Client.CORNERS);
             a.translate(origin.x, origin.y);
-            int maxSubperiodToDisplay = Math.round((config.indefiniteEnd.secondsToDisplay * config.indefiniteEnd.percentToDisplay) / config.indefiniteEnd.subperiodLength);
+            int maxSubperiodToDisplay = Math.round((config.indefiniteEnd.displayLength * config.indefiniteEnd.percentToDisplay) / config.indefiniteEnd.subperiodLength);
             int offset = Client.state.subperiod - maxSubperiodToDisplay;
             if (offset < 0) {
                 offset = 0;
@@ -53,8 +53,8 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
             }
             for (int i = 1; i <= maxSubperiodToDisplay; i++) {
                 int subperiod = i + offset - 1;
-                int x1 = Math.round(width * (i - 1) * ((float) config.indefiniteEnd.subperiodLength / config.indefiniteEnd.secondsToDisplay));
-                int x2 = Math.round(width * i * ((float) config.indefiniteEnd.subperiodLength / config.indefiniteEnd.secondsToDisplay));
+                int x1 = Math.round(width * (i - 1) * ((float) config.indefiniteEnd.subperiodLength / config.indefiniteEnd.displayLength));
+                int x2 = Math.round(width * i * ((float) config.indefiniteEnd.subperiodLength / config.indefiniteEnd.displayLength));
                 int xoff1 = 0;
                 int xoff2 = 0;
                 if (Client.state.subperiod >= maxSubperiodToDisplay) {

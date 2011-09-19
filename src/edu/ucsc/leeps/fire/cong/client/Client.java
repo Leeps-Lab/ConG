@@ -235,24 +235,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             final Map<Integer, float[]> strategies,
             final Map<Integer, float[]> matchStrategies,
             final float payoff, final float matchPayoff) {
-        new Thread() {
-
-            @Override
-            public void run() {
-                state.subperiod = subperiod;
-                state.strategies = strategies;
-                state.matchStrategies = matchStrategies;
-                state.subperiodPayoff = payoff;
-                state.subperiodMatchPayoff = matchPayoff;
-                payoffChart.endSubperiod(subperiod);
-                strategyChart.endSubperiod(subperiod);
-                indefiniteEndPricesChart.endSubperiod(subperiod);
-                rChart.endSubperiod(subperiod);
-                pChart.endSubperiod(subperiod);
-                sChart.endSubperiod(subperiod);
-                strategyChanger.endSubperiod(subperiod);
-            }
-        }.start();
+        state.endSubperiod(subperiod, strategies, matchStrategies);
     }
 
     public void newMessage(String message) {
@@ -361,7 +344,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         legend = new ChartLegend(
                 null, (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
-
+        smooth();
         Fullscreen = new FullScreen(this);
         Fullscreen.setShortcutsEnabled(false);
     }

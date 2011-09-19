@@ -69,6 +69,15 @@ public class State {
         this.matchStrategies = matchStrategies;
     }
 
+    public void endSubperiod(int subperiod, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies) {
+        this.subperiod = subperiod;
+        this.strategies = strategies;
+        this.matchStrategies = matchStrategies;
+        synchronized (strategiesTime) {
+            strategiesTime.add(new Strategy(subperiod, copyMap(strategies), copyMap(matchStrategies)));
+        }
+    }
+
     public Map<Integer, float[]> getFictitiousStrategies(int id, float[] strategy) {
         Map<Integer, float[]> fake = new HashMap<Integer, float[]>();
         for (int i : strategies.keySet()) {

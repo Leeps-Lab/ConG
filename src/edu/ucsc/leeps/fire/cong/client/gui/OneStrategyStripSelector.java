@@ -103,7 +103,9 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             return;
         }
 
-        slider.setStratValue(Client.state.getMyStrategy()[0]);
+        if (Client.state.getMyStrategy() != null) {
+            slider.setStratValue(Client.state.getMyStrategy()[0]);
+        }
         if (Client.state.target != null) {
             slider.setGhostValue(Client.state.target[0]);
         }
@@ -210,10 +212,14 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         }
         if (e.isActionKey()) {
             float newTarget = slider.getGhostValue();
+            float grid = config.grid;
+            if (Float.isNaN(grid)) {
+                grid = 0.01f;
+            }
             if (e.getKeyCode() == KeyEvent.VK_UP) {
-                newTarget += .01f;
+                newTarget += grid;
             } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                newTarget -= .01f;
+                newTarget -= grid;
             }
             newTarget = Client.constrain(newTarget, 0, 1);
             float max = FIRE.client.getConfig().payoffFunction.getMax();

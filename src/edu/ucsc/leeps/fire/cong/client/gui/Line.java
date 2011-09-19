@@ -159,7 +159,7 @@ public class Line extends Sprite implements Serializable {
     public synchronized void addPayoffPoint(float x, float y) {
         if (FIRE.client.getConfig().indefiniteEnd != null) {
             x = (x * FIRE.client.getConfig().length)
-                    / (FIRE.client.getConfig().indefiniteEnd.secondsToDisplay / FIRE.client.getConfig().indefiniteEnd.percentToDisplay);
+                    / (FIRE.client.getConfig().indefiniteEnd.displayLength / FIRE.client.getConfig().indefiniteEnd.percentToDisplay);
         }
         setPoint(
                 Math.round(width * x),
@@ -169,7 +169,7 @@ public class Line extends Sprite implements Serializable {
     public synchronized void addStrategyPoint(float x, float y) {
         if (FIRE.client.getConfig().indefiniteEnd != null) {
             x = (x * FIRE.client.getConfig().length)
-                    / (FIRE.client.getConfig().indefiniteEnd.secondsToDisplay / FIRE.client.getConfig().indefiniteEnd.percentToDisplay);
+                    / (FIRE.client.getConfig().indefiniteEnd.displayLength / FIRE.client.getConfig().indefiniteEnd.percentToDisplay);
         }
         setPoint(
                 Math.round(width * x),

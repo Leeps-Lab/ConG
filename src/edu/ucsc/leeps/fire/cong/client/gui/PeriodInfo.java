@@ -110,13 +110,15 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
             Map<Integer, float[]> lastStrategies = null;
             Map<Integer, float[]> lastMatchStrategies = null;
             for (Strategy s : Client.state.strategiesTime) {
-                float percent = s.timestamp / (float) (config.length * 1e9);
+                float percent;
+                if (config.subperiods == 0) {
+                    percent = s.timestamp / (float) (config.length * 1e9);
+                } else {
+                    percent = s.timestamp / (float) config.subperiods;
+                }
                 if (lastPercent > 0) {
                     float flowPayoff = config.payoffFunction.getPayoff(
                             Client.state.id, percent, lastStrategies, lastMatchStrategies, config);
-                    if (flowPayoff > 0) {
-                        flowPayoff += config.marginalCost;
-                    }
                     float points = flowPayoff * (percent - lastPercent);
                     periodPoints += points;
                 }
@@ -124,7 +126,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
                 lastStrategies = s.strategies;
                 lastMatchStrategies = s.matchStrategies;
             }
-            if (lastStrategies != null && lastMatchStrategies != null) {
+            if (config.subperiods == 0 && lastStrategies != null && lastMatchStrategies != null) {
                 float flowPayoff = config.payoffFunction.getPayoff(
                         Client.state.id, Client.state.currentPercent, lastStrategies, lastMatchStrategies, config);
                 if (flowPayoff > 0) {

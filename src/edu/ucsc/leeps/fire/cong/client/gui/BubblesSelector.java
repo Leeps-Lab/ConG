@@ -303,13 +303,21 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
                 if (config.trajectory) {
                     newTarget = 1f;
                 } else {
-                    newTarget += .01f;
+                    float grid = config.grid;
+                    if (Float.isNaN(grid)) {
+                        grid = 0.01f;
+                    }
+                    newTarget += grid;
                 }
             } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                 if (config.trajectory) {
                     newTarget = 0f;
                 } else {
-                    newTarget -= .01f;
+                    float grid = config.grid;
+                    if (Float.isNaN(grid)) {
+                        grid = 0.01f;
+                    }
+                    newTarget -= grid;
                 }
             }
             newTarget = Client.constrain(newTarget, 0, 1);

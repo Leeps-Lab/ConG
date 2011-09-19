@@ -88,7 +88,7 @@ public class Config extends BaseConfig {
     public static final Class threshold = ThresholdPayoffFunction.class;
     public static final Class decisionDelay = DecisionDelay.class;
     public static final Class chatMenu = ChatMenu.class;
-    public static final Class endUniform = IndefiniteEnd.Uniform.class;
+    public static final Class uniform = IndefiniteEnd.Uniform.class;
     public static final Class assigned = IndefiniteEnd.Assigned.class;
     // per-client
     public float[] initialStrategy;
