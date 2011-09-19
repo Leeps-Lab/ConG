@@ -337,51 +337,41 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         }
         // strategy lines, 1 per player in strategies, scaled from smin to smax
         float lastT = config.length * Client.state.currentPercent * 1e9f;
-        float scaledWidth = width;
+        float scaledWidth = width * config.indefiniteEnd.percentToDisplay;
         float timeOffset = 0;
-        scaledWidth *= config.indefiniteEnd.percentToDisplay;
         if (lastT - config.indefiniteEnd.displayLength * 1e9 > 0) {
             timeOffset = lastT - config.indefiniteEnd.displayLength * 1e9f;
         }
-        a.stroke(0);
-        a.fill(0);
-        a.strokeWeight(2);
+        a.noStroke();
+        a.fill(164, 218, 148, 200);
         float lastX = 0;
-        float[] lastY = null;
-        float lastNonDelayedX = 0;
+        float lastY = 0;
+        float payoffMin = config.payoffFunction.getMin();
+        float payoffMax = config.payoffFunction.getMax();
+        float scaledMarginalCost = Client.map(config.marginalCost, payoffMin, payoffMax, 0, 1);
+        float payoffFloor = scaledHeight * (1 - scaledMarginalCost) + scaledMargin;
         a.beginShape();
+        a.vertex(0, payoffFloor);
         for (Strategy s : Client.state.strategiesTime) {
             float x = scaledWidth * ((s.timestamp - timeOffset) / (float) (1e9 * config.indefiniteEnd.displayLength));
-            if (lastY == null) {
-                lastY = new float[s.strategies.size() + 1];
-                for (int i = 0; i < lastY.length; i++) {
-                    float initial = 0;
-                    lastY[i] = scaledHeight * (1 - initial) + scaledMargin;
-                }
+            if (delayed(s.timestamp)) {
+                continue;
             }
-            for (int id : s.strategies.keySet()) {
-                if (id != Client.state.id) {
-                    if (delayed(s.timestamp)) {
-                        continue;
-                    }
-                    lastNonDelayedX = x;
-                }
-                if (id >= lastY.length) {
-                    continue;
-                }
-                float[] f = s.strategies.get(id);
-                float y = scaledHeight * (1 - f[0]) + scaledMargin;
-                a.stroke(config.currColors.get(id).getRGB());
-                if (lastX >= 0 && x >= 0) {
-                    a.line(lastX, lastY[id], x, lastY[id]);
-                } else if (x >= 0) {
-                    a.line(0, lastY[id], x, lastY[id]);
-                }
-                if (x >= 0) {
-                    a.line(x, lastY[id], x, y);
-                }
-                lastY[id] = y;
+            float payoff = config.payoffFunction.getPayoff(Client.state.id, s.timestamp / (float) config.subperiods, s.strategies, s.matchStrategies, config);
+            float scaledPayoff = Client.map(payoff + config.marginalCost, payoffMin, payoffMax, 0, 1);
+            float y = scaledHeight * (1 - scaledPayoff) + scaledMargin;
+            if (lastX >= 0 && x >= 0) {
+                a.vertex(lastX, lastY);
+                a.vertex(x, lastY);
+            } else if (x >= 0) {
+                a.vertex(0, lastY);
+                a.vertex(x, lastY);
             }
+            if (x >= 0) {
+                a.vertex(x, lastY);
+                a.vertex(x, y);
+            }
+            lastY = y;
             lastX = x;
         }
         float currX = scaledWidth;
@@ -392,21 +382,109 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         if (Client.state.currentPercent >= 1) {
             delayX = currX;
         }
-        // draw from my last played strategy to the current point
-        if (lastY != null && config.currColors.get(Client.state.id) != null && lastX >= 0) {
-            a.stroke(config.currColors.get(Client.state.id).getRGB());
-            a.line(lastX, lastY[Client.state.id], delayX, lastY[Client.state.id]);
+        if (lastX >= 0 && delayX >= 0) {
+            a.vertex(lastX, lastY);
+            a.vertex(delayX, lastY);
+        }
+        if (delayX >= 0) {
+            a.vertex(delayX, payoffFloor);
         }
         a.endShape(Client.CLOSE);
     }
 
     private void drawSubperiodIndefiniteEndStrategyLines(Client a) {
+        // strategy lines, 1 per player in strategies, scaled from smin to smax
+        float timeOffset = Client.state.subperiod - ((float) config.indefiniteEnd.percentToDisplay * config.indefiniteEnd.displayLength);
+        if (timeOffset < 0) {
+            timeOffset = 0;
+        }
+        a.stroke(0);
+        a.fill(0);
+        a.strokeWeight(2);
+        int i = 0;
+        for (Strategy s : Client.state.strategiesTime) {
+            float x0 = width * ((s.timestamp - 1 - timeOffset) / (float) config.indefiniteEnd.displayLength);
+            float x1 = width * ((s.timestamp - timeOffset) / (float) config.indefiniteEnd.displayLength);
+            for (int id : s.strategies.keySet()) {
+                if (id != Client.state.id) {
+                    if (delayed(s.timestamp)) {
+                        continue;
+                    }
+                }
+                float[] f = s.strategies.get(id);
+                float y = scaledHeight * (1 - f[0]) + scaledMargin;
+                a.stroke(config.currColors.get(id).getRGB());
+                if (x0 >= 0 && x1 >= 0) {
+                    a.line(x0, y, x1, y);
+                }
+                if (i > 0) {
+                    float lastY = scaledHeight * (1 - Client.state.strategiesTime.get(i - 1).strategies.get(id)[0]) + scaledMargin;
+                    if (x0 >= 0) {
+                        a.line(x0, y, x0, lastY);
+                    }
+                }
+            }
+            i++;
+        }
     }
 
     private void drawSubperiodIndefiniteEndPayoffArea(Client a) {
+        float timeOffset = Client.state.subperiod - ((float) config.indefiniteEnd.percentToDisplay * config.indefiniteEnd.displayLength);
+        if (timeOffset < 0) {
+            timeOffset = 0;
+        }
+        a.noStroke();
+        a.fill(164, 218, 148, 200);
+        float payoffMin = config.payoffFunction.getMin();
+        float payoffMax = config.payoffFunction.getMax();
+        float scaledMarginalCost = Client.map(config.marginalCost, payoffMin, payoffMax, 0, 1);
+        float payoffFloor = scaledHeight * (1 - scaledMarginalCost) + scaledMargin;
+        a.beginShape();
+        a.vertex(0, payoffFloor);
+        int i = 0;
+        float lastX = 0;
+        float lastY = 0;
+        for (Strategy s : Client.state.strategiesTime) {
+            float x0 = width * ((s.timestamp - 1 - timeOffset) / (float) config.indefiniteEnd.displayLength);
+            float x1 = width * ((s.timestamp - timeOffset) / (float) config.indefiniteEnd.displayLength);
+            if (delayed(s.timestamp)) {
+                break;
+            }
+            lastX = x1;
+            float payoff = config.payoffFunction.getPayoff(Client.state.id, s.timestamp / (float) config.subperiods, s.strategies, s.matchStrategies, config);
+            float scaledPayoff = Client.map(payoff + config.marginalCost, payoffMin, payoffMax, 0, 1);
+            float y = scaledHeight * (1 - scaledPayoff) + scaledMargin;
+            if (x0 >= 0) {
+                a.vertex(x0, y);
+            }
+            if (x1 >= 0) {
+                a.vertex(x1, y);
+            }
+            if (i > 0) {
+                if (x0 >= 0) {
+                    a.vertex(x0, lastY);
+                }
+            }
+            lastY = y;
+            i++;
+        }
+        a.vertex(lastX, payoffFloor);
+        a.endShape(a.CLOSE);
     }
 
     private void drawIndefiniteEndStrategyPreview(Client a) {
+        if (Client.state.subperiod < config.subperiods && Client.state.getMyStrategy() != null) {
+            float f = Client.state.getMyStrategy()[0];
+            float y = scaledHeight * (1 - f) + scaledMargin;
+            int subperiod = Client.state.subperiod;
+            if (subperiod > (int) (config.indefiniteEnd.displayLength * config.indefiniteEnd.percentToDisplay)) {
+                subperiod = (int) (config.indefiniteEnd.displayLength * config.indefiniteEnd.percentToDisplay);
+            }
+            float x0 = Client.map(subperiod, 0, config.indefiniteEnd.displayLength, 0, width);
+            float x1 = Client.map(subperiod + 1, 0, config.indefiniteEnd.displayLength, 0, width);
+            a.stroke(114, 163, 219);
+            a.line(x0, y, x1, y);
+        }
     }
 
     private void drawSubperiodIndefiniteEndGrid(Client a) {
