@@ -104,12 +104,18 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
 
     public void update() {
         totalPoints = FIRE.client.getTotalPoints();
+        if (Client.state.currentPercent >= 1) {
+            periodPoints = FIRE.client.getPeriodPoints();
+        }
         synchronized (Client.state.strategiesTime) {
             periodPoints = 0;
             float lastPercent = 0;
             Map<Integer, float[]> lastStrategies = null;
             Map<Integer, float[]> lastMatchStrategies = null;
             for (Strategy s : Client.state.strategiesTime) {
+                if (config.subperiods == 0 && s.delayed()) {
+                    break;
+                }
                 float percent;
                 if (config.subperiods == 0) {
                     percent = s.timestamp / (float) (config.length * 1e9);
@@ -119,13 +125,18 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
                 if (lastPercent > 0) {
                     float flowPayoff = config.payoffFunction.getPayoff(
                             Client.state.id, percent, lastStrategies, lastMatchStrategies, config);
-                    float points = flowPayoff * (percent - lastPercent);
+                    float points = flowPayoff;
+                    if (config.indefiniteEnd == null) {
+                        points *= (percent - lastPercent);
+                    } else {
+                        points *= (percent - lastPercent) * config.length;
+                    }
                     periodPoints += points;
                 }
                 lastPercent = percent;
                 lastStrategies = s.strategies;
                 lastMatchStrategies = s.matchStrategies;
-                if (s.delayed()) {
+                if (config.subperiods != 0 && s.delayed()) {
                     break;
                 }
             }
