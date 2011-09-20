@@ -1,6 +1,7 @@
 package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -120,6 +121,15 @@ public class State {
             this.timestamp = timestamp;
             this.strategies = strategies;
             this.matchStrategies = matchStrategies;
+        }
+
+        public boolean delayed() {
+            Config config = FIRE.client.getConfig();
+            if (config.subperiods == 0) {
+                return Client.state.currentPercent < 1 && ((1e9 * (Client.state.currentPercent * config.length)) - timestamp) < 1e9 * config.infoDelay;
+            } else {
+                return Client.state.subperiod < config.subperiods && Client.state.subperiod - timestamp < config.infoDelay;
+            }
         }
     }
 

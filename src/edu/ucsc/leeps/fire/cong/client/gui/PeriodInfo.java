@@ -125,6 +125,9 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
                 lastPercent = percent;
                 lastStrategies = s.strategies;
                 lastMatchStrategies = s.matchStrategies;
+                if (s.delayed()) {
+                    break;
+                }
             }
             if (config.subperiods == 0 && lastStrategies != null && lastMatchStrategies != null) {
                 float flowPayoff = config.payoffFunction.getPayoff(
