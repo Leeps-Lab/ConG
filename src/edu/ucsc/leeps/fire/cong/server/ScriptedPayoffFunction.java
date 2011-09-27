@@ -24,6 +24,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
     private String scriptText, scriptExtension;
     private transient PayoffFunction scriptedPayoffFunction;
     private transient boolean error = false;
+    private transient boolean throwError = true;
 
     public float getMin() {
         if (scriptedPayoffFunction == null) {
@@ -57,15 +58,19 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         if (scriptedPayoffFunction == null) {
             configure();
         }
-        if (error) {
+        if (!throwError && error) {
             return 0;
         }
         try {
             return scriptedPayoffFunction.getPayoff(id, percent, popStrategies, matchPopStrategies, config);
         } catch (Exception ex) {
-            ex.printStackTrace();
-            error = true;
-            return 0;
+            if (throwError) {
+                throw new RuntimeException(ex);
+            } else {
+                ex.printStackTrace();
+                error = true;
+                return 0;
+            }
         }
     }
 
@@ -125,5 +130,12 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
             }
             scriptedPayoffFunction = ((Invocable) engine).getInterface(PayoffFunction.class);
         }
+    }
+
+    public void setScript(String scriptText, String scriptExtension) {
+        this.scriptText = scriptText;
+        this.scriptExtension = scriptExtension;
+        throwError = true;
+        configure();
     }
 }
