@@ -196,15 +196,15 @@ public class Config extends BaseConfig {
         infoDelay = 0;
     }
     public static String[] aliases = new String[]{
-        "Green", "Red", "Blue", "Gray", "Purple", "Orange", "Aqua", "Yellow"
+        "Green", "Red", "Blue", "Orange", "Purple", "Gray", "Aqua", "Yellow"
     };
     public static Color[] colors = new Color[]{
         new Color(0x1FCB1A), // green
         new Color(0xF74018), // red
         new Color(0x587CFF), // blue
-        new Color(0xA8A8A8), // gray
-        new Color(0xA646E0), // purple
         new Color(0xFF8B00), // orange
+        new Color(0xA646E0), // purple
+        new Color(0xA8A8A8), // gray
         new Color(0x5DE6D7), // aqua
         new Color(0xF6FF00), // yellow
     };
