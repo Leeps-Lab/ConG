@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.logging.Dialogs;
 import java.io.File;
@@ -22,6 +23,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
     public String script;
     private String scriptText, scriptExtension;
     private transient PayoffFunction scriptedPayoffFunction;
+    private transient boolean error = false;
 
     public float getMin() {
         if (scriptedPayoffFunction == null) {
@@ -55,10 +57,14 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         if (scriptedPayoffFunction == null) {
             configure();
         }
+        if (error) {
+            return 0;
+        }
         try {
             return scriptedPayoffFunction.getPayoff(id, percent, popStrategies, matchPopStrategies, config);
         } catch (Exception ex) {
-            Dialogs.popUpAndExit(ex);
+            ex.printStackTrace();
+            error = true;
             return 0;
         }
     }
@@ -79,7 +85,9 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
 
     public void configure() {
         if (scriptText == null) {
-            File scriptFile = new File(script);
+            String source = FIRE.server.getConfigSource();
+            File baseDir = new File(source).getParentFile();
+            File scriptFile = new File(baseDir, script);
             if (!scriptFile.exists()) {
                 Dialogs.popUpErr("Error: Payoff script referenced in config does not exist.\n" + scriptFile.getAbsolutePath());
                 return;

@@ -5,6 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
+import edu.ucsc.leeps.fire.logging.Dialogs;
 import edu.ucsc.leeps.fire.server.ServerController.State;
 import java.awt.Color;
 import java.util.HashMap;
@@ -49,6 +50,10 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         members.clear();
         members.putAll(clients);
         Config config = FIRE.server.getConfig();
+        config.payoffFunction.configure();
+        if (config.counterpartPayoffFunction != null) {
+            config.counterpartPayoffFunction.configure();
+        }
         if (config.indefiniteEnd != null) {
             if (config.indefiniteEnd.subperiodLength != 0) {
                 config.subperiods = config.indefiniteEnd.length(FIRE.server.getRandom());
@@ -198,15 +203,15 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     private class StrategyProcessor extends Thread {
+
         @Override
         public void run() {
             while (true) {
                 try {
                     StrategyChangeEvent event = strategyChangeEvents.take();
                     population.strategyChanged(event.id, event.newStrategy, event.targetStrategy);
-                    
                 } catch (InterruptedException ex) {
-                    ex.printStackTrace();
+                    Dialogs.popUpAndExit(ex);
                 }
                 if (strategyChangeEvents.size() > 10) {
                     System.err.println("WARNING: Queue depth = " + strategyChangeEvents.size());
