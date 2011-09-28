@@ -10,6 +10,7 @@ import edu.ucsc.leeps.fire.logging.Dialogs;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -25,6 +26,7 @@ import javax.swing.table.AbstractTableModel;
  */
 public class ScriptTest extends javax.swing.JFrame {
 
+    private File loaded;
     private StrategyTableModel strategyTableModel;
 
     /** Creates new form ScriptTest */
@@ -119,6 +121,7 @@ public class ScriptTest extends javax.swing.JFrame {
         });
 
         logTextArea.setColumns(20);
+        logTextArea.setEditable(false);
         logTextArea.setRows(5);
         jScrollPane3.setViewportView(logTextArea);
 
@@ -230,7 +233,7 @@ public class ScriptTest extends javax.swing.JFrame {
         ScriptedPayoffFunction p = new ScriptedPayoffFunction();
         p.setScript(scriptEditor.getText(), "js");
         try {
-            p.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null);
+            System.err.println("payoff = " + p.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null));
         } catch (Exception ex) {
             Throwable rootCause = ex;
             while (rootCause.getCause() != null) {
@@ -258,6 +261,7 @@ public class ScriptTest extends javax.swing.JFrame {
         if (r == JFileChooser.APPROVE_OPTION) {
             try {
                 scriptEditor.setText(readAll(fc.getSelectedFile()));
+                loaded = fc.getSelectedFile();
             } catch (IOException ex) {
                 Dialogs.popUpErr("Error reading script file");
             }
@@ -265,7 +269,30 @@ public class ScriptTest extends javax.swing.JFrame {
     }//GEN-LAST:event_loadMenuItemActionPerformed
 
     private void saveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuItemActionPerformed
-        // TODO add your handling code here:
+        JFileChooser fc = new JFileChooser(loaded);
+        fc.setFileFilter(new FileFilter() {
+
+            @Override
+            public boolean accept(File file) {
+                return file.isDirectory() || file.getName().endsWith("js");
+            }
+
+            @Override
+            public String getDescription() {
+                return "Javascript";
+            }
+        });
+        int r = fc.showSaveDialog(this);
+        if (r == JFileChooser.APPROVE_OPTION) {
+            File selected = fc.getSelectedFile();
+            try {
+                FileWriter f = new FileWriter(selected);
+                f.write(scriptEditor.getText());
+                f.close();
+            } catch (IOException ex) {
+                Dialogs.popUpErr("Error writing script file");
+            }
+        }
     }//GEN-LAST:event_saveMenuItemActionPerformed
 
     private class StrategyTableModel extends AbstractTableModel {
