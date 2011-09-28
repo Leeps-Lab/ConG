@@ -6,6 +6,7 @@
 package edu.ucsc.leeps.fire.cong.testing;
 
 import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 import edu.ucsc.leeps.fire.logging.Dialogs;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -231,9 +232,25 @@ public class ScriptTest extends javax.swing.JFrame {
 
     private void reloadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reloadButtonActionPerformed
         ScriptedPayoffFunction p = new ScriptedPayoffFunction();
+        SumPayoffFunction p2 = new SumPayoffFunction();
+        p2.type = SumPayoffFunction.Type.linear;
         p.setScript(scriptEditor.getText(), "js");
         try {
             System.err.println("payoff = " + p.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null));
+            long start = System.nanoTime();
+            for (int i = 0; i < 10000; i++) {
+                p.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null);
+            }
+            double seconds = (System.nanoTime() - start) / 1e9;
+            double msPerEx = ((System.nanoTime() - start) / 1e6) / 10000;
+            System.err.printf("10000 executions in %.0f seconds, %.2f ms each\n", seconds, msPerEx);
+            start = System.nanoTime();
+            for (int i = 0; i < 10000; i++) {
+                p2.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null);
+            }
+            seconds = (System.nanoTime() - start) / 1e9;
+            msPerEx = ((System.nanoTime() - start) / 1e6) / 10000;
+            System.err.printf("10000 executions in %.0f seconds, %.2f ms each\n", seconds, msPerEx);
         } catch (Exception ex) {
             Throwable rootCause = ex;
             while (rootCause.getCause() != null) {
