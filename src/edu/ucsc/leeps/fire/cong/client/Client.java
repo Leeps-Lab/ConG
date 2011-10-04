@@ -351,7 +351,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     @Override
     public void draw() {
-        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         try {
             if (resize) {
                 setupFonts();
@@ -420,7 +419,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 text(frameRateString, 10, height - 10);
             }
         } catch (NullPointerException ex) {
-            ex.printStackTrace();
+            System.err.println("Caught null pointer in draw thread");
         }
     }
 

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -16,7 +17,7 @@ public class State {
     public int id;
     public int subperiod;
     public volatile float currentPercent;
-    public Map<Integer, float[]> strategies, matchStrategies;
+    public ConcurrentHashMap<Integer, float[]> strategies, matchStrategies;
     public final List<Strategy> strategiesTime;
     public volatile float subperiodPayoff, subperiodMatchPayoff;
     public float[] target;
@@ -25,8 +26,8 @@ public class State {
     public State(StrategyChanger changer) {
         this.strategyChanger = changer;
         strategiesTime = new LinkedList<Strategy>();
-        strategies = new HashMap<Integer, float[]>();
-        matchStrategies = new HashMap<Integer, float[]>();
+        strategies = new ConcurrentHashMap<Integer, float[]>();
+        matchStrategies = new ConcurrentHashMap<Integer, float[]>();
     }
 
     public void startPeriod() {
@@ -60,20 +61,20 @@ public class State {
         synchronized (strategiesTime) {
             strategiesTime.add(new Strategy(timestamp, copyMap(strategies), copyMap(matchStrategies)));
         }
-        this.strategies = strategies;
+        this.strategies = new ConcurrentHashMap<Integer, float[]>(strategies);
     }
 
     public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies, long timestamp) {
         synchronized (strategiesTime) {
             strategiesTime.add(new Strategy(timestamp, copyMap(strategies), copyMap(matchStrategies)));
         }
-        this.matchStrategies = matchStrategies;
+        this.matchStrategies = new ConcurrentHashMap<Integer, float[]>(matchStrategies);
     }
 
     public void endSubperiod(int subperiod, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies) {
         this.subperiod = subperiod;
-        this.strategies = strategies;
-        this.matchStrategies = matchStrategies;
+        this.strategies = new ConcurrentHashMap<Integer, float[]>(strategies);
+        this.matchStrategies = new ConcurrentHashMap<Integer, float[]>(matchStrategies);
         synchronized (strategiesTime) {
             strategiesTime.add(new Strategy(subperiod, copyMap(strategies), copyMap(matchStrategies)));
         }
