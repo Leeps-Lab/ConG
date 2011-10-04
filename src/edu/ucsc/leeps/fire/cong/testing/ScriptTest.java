@@ -5,6 +5,8 @@
  */
 package edu.ucsc.leeps.fire.cong.testing;
 
+import compiler.CharSequenceCompiler;
+import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 import edu.ucsc.leeps.fire.logging.Dialogs;
@@ -15,11 +17,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
+import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
 
 /**
  *
@@ -29,9 +35,12 @@ public class ScriptTest extends javax.swing.JFrame {
 
     private File loaded;
     private StrategyTableModel strategyTableModel;
+    private CharSequenceCompiler<PayoffFunction> compiler;
 
     /** Creates new form ScriptTest */
     public ScriptTest() {
+        compiler = new CharSequenceCompiler<PayoffFunction>(
+                getClass().getClassLoader(), Arrays.asList(new String[]{"-target", "1.5"}));
         initComponents();
         strategyTableModel = new StrategyTableModel();
         strategyTable.setModel(strategyTableModel);
@@ -44,6 +53,7 @@ public class ScriptTest extends javax.swing.JFrame {
                 logTextArea.setText(logTextArea.getText() + (char) i);
             }
         }));
+        scriptEditor.setContentType("text/x-java-source");
     }
 
     /** This method is called from within the constructor to
@@ -231,33 +241,31 @@ public class ScriptTest extends javax.swing.JFrame {
     }//GEN-LAST:event_strategyCountStateChanged
 
     private void reloadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reloadButtonActionPerformed
-        ScriptedPayoffFunction p = new ScriptedPayoffFunction();
+        ScriptedPayoffFunction p1 = new ScriptedPayoffFunction();
+        List<Diagnostic<? extends JavaFileObject>> errs = p1.setScript(scriptEditor.getText());
+        if (!errs.isEmpty()) {
+            for (Diagnostic<? extends JavaFileObject> d : errs) {
+                System.err.println(d.toString());
+            }
+            return;
+        }
         SumPayoffFunction p2 = new SumPayoffFunction();
         p2.type = SumPayoffFunction.Type.linear;
-        p.setScript(scriptEditor.getText(), "js");
-        try {
-            System.err.println("payoff = " + p.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null));
-            long start = System.nanoTime();
-            for (int i = 0; i < 10000; i++) {
-                p.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null);
-            }
-            double seconds = (System.nanoTime() - start) / 1e9;
-            double msPerEx = ((System.nanoTime() - start) / 1e6) / 10000;
-            System.err.printf("10000 executions in %.0f seconds, %.2f ms each\n", seconds, msPerEx);
-            start = System.nanoTime();
-            for (int i = 0; i < 10000; i++) {
-                p2.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null);
-            }
-            seconds = (System.nanoTime() - start) / 1e9;
-            msPerEx = ((System.nanoTime() - start) / 1e6) / 10000;
-            System.err.printf("10000 executions in %.0f seconds, %.2f ms each\n", seconds, msPerEx);
-        } catch (Exception ex) {
-            Throwable rootCause = ex;
-            while (rootCause.getCause() != null) {
-                rootCause = rootCause.getCause();
-            }
-            System.err.println(rootCause.getMessage());
+        System.err.println("payoff = " + p1.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null));
+        long start = System.nanoTime();
+        for (int i = 0; i < 10000; i++) {
+            p1.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null);
         }
+        double seconds = (System.nanoTime() - start) / 1e9;
+        double msPerEx = ((System.nanoTime() - start) / 1e6) / 10000;
+        System.err.printf("10000 executions in %.0f seconds, %.2f ms each\n", seconds, msPerEx);
+        start = System.nanoTime();
+        for (int i = 0; i < 10000; i++) {
+            p2.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null);
+        }
+        seconds = (System.nanoTime() - start) / 1e9;
+        msPerEx = ((System.nanoTime() - start) / 1e6) / 10000;
+        System.err.printf("10000 executions in %.0f seconds, %.2f ms each\n", seconds, msPerEx);
     }//GEN-LAST:event_reloadButtonActionPerformed
 
     private void loadMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadMenuItemActionPerformed
@@ -266,12 +274,12 @@ public class ScriptTest extends javax.swing.JFrame {
 
             @Override
             public boolean accept(File file) {
-                return file.isDirectory() || file.getName().endsWith("js");
+                return file.isDirectory() || file.getName().endsWith("java");
             }
 
             @Override
             public String getDescription() {
-                return "Javascript";
+                return "Java Source";
             }
         });
         int r = fc.showOpenDialog(this);
@@ -291,12 +299,12 @@ public class ScriptTest extends javax.swing.JFrame {
 
             @Override
             public boolean accept(File file) {
-                return file.isDirectory() || file.getName().endsWith("js");
+                return file.isDirectory() || file.getName().endsWith("java");
             }
 
             @Override
             public String getDescription() {
-                return "Javascript";
+                return "Java Source";
             }
         });
         int r = fc.showSaveDialog(this);

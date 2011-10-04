@@ -1,3 +1,3 @@
-"period","paid","length","subperiods","percentChangePerSecond","numGroups","payoffFunction","script","mixed","selector","potential"
-1,"TRUE",60,0,0.1,1,"script","hotelling.js","TRUE","bubbles",TRUE
-2,"TRUE",60,0,0.1,1,"script","hotelling.js","TRUE","bubbles",TRUE
+"period","paid","length","subperiods","percentChangePerSecond","numGroups","payoffFunction","source","min","max","strategies","mixed","selector","potential"
+1,"TRUE",60,0,0.1,1,"script","hotelling.java",0,100,1,"TRUE","bubbles","TRUE"
+2,"TRUE",60,0,0.1,1,"script","hotelling.java",0,100,1,"TRUE","bubbles","TRUE"
