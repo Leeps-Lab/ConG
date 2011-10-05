@@ -75,6 +75,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                 }
             }
         }
+        drawCurrentTimeLine(a);
         // outline
         drawOutline(a);
         a.popMatrix();
@@ -570,6 +571,23 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         a.vertex(currX, 0);
         a.vertex(delayX, 0);
         a.endShape(Client.CLOSE);
+    }
+
+    private void drawCurrentTimeLine(Client a) {
+        a.stroke(72, 178, 255);
+        a.strokeWeight(2);
+        a.noFill();
+        float x = 0;
+        if (config.subperiods == 0 && config.indefiniteEnd == null) {
+            x = Client.state.currentPercent * width;
+        } else if (config.subperiods == 0 && config.indefiniteEnd != null) {
+            x = config.indefiniteEnd.percentToDisplay * width * (Math.min(Client.state.currentPercent * config.length, config.indefiniteEnd.displayLength) / config.indefiniteEnd.displayLength);
+        } else if (config.subperiods != 0 && config.indefiniteEnd == null) {
+            x = 0;
+        } else if (config.subperiods != 0 && config.indefiniteEnd != null) {
+            x = 0;
+        }
+        a.line(x, 0, x, height);
     }
 
     private void drawOutline(Client a) {
