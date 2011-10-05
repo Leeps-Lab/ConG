@@ -587,7 +587,13 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         } else if (config.subperiods == 0) {
             x = config.indefiniteEnd.percentToDisplay * width * (Math.min(Client.state.currentPercent * config.length, config.indefiniteEnd.displayLength) / config.indefiniteEnd.displayLength);
         } else if (config.subperiods != 0) {
-            x = 0;//config.indefiniteEnd.percentToDisplay * width * (Math.min(Client.state.subperiod, config.indefiniteEnd.displayLength) / config.indefiniteEnd.displayLength);
+            float elapsedSeconds = Client.state.currentPercent * config.length;
+            float offset = (Client.state.subperiod - (config.indefiniteEnd.percentToDisplay * config.indefiniteEnd.displayLength)) * config.indefiniteEnd.subperiodLength;
+            if (offset > 0) {
+                elapsedSeconds -= offset;
+            }
+            float secondsDisplayed = config.indefiniteEnd.subperiodLength * config.indefiniteEnd.percentToDisplay * config.indefiniteEnd.displayLength;
+            x = (elapsedSeconds / secondsDisplayed) * config.indefiniteEnd.percentToDisplay * width;
         }
         a.line(x, 0, x, height);
     }
