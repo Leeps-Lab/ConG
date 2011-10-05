@@ -209,10 +209,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     }
 
-    public float getCost() {
-        return strategyChanger.getCost();
-    }
-
     public void setIsPaused(boolean isPaused) {
         strategyChanger.setPause(isPaused);
     }
@@ -236,6 +232,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             final Map<Integer, float[]> matchStrategies,
             final float payoff, final float matchPayoff) {
         state.endSubperiod(subperiod, strategies, matchStrategies);
+        strategyChanger.endSubperiod(subperiod);
     }
 
     public void newMessage(String message) {

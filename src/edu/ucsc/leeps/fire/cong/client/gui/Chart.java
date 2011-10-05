@@ -261,9 +261,6 @@ public class Chart extends Sprite implements Configurable<Config> {
                 drawThreeStrategyLines(applet);
             }
         }
-        if (mode == Mode.Payoff) {
-            yourPayoff.drawCostArea(applet, Client.state.strategyChanger.getCost());
-        }
         if (!(config.payoffFunction instanceof PricingPayoffFunction && config.subperiods == 0)) { //payoff function dependent
             drawPercentLine(applet);
         }

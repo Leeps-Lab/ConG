@@ -4,6 +4,7 @@ import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.State.Strategy;
+import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
 
@@ -76,6 +77,9 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             }
         }
         drawCurrentTimeLine(a);
+        if (config.turnTaking) {
+            drawTurnTakingLocks(a);
+        }
         // outline
         drawOutline(a);
         a.popMatrix();
@@ -578,16 +582,27 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         a.strokeWeight(2);
         a.noFill();
         float x = 0;
-        if (config.subperiods == 0 && config.indefiniteEnd == null) {
+        if (config.indefiniteEnd == null) {
             x = Client.state.currentPercent * width;
-        } else if (config.subperiods == 0 && config.indefiniteEnd != null) {
+        } else if (config.subperiods == 0) {
             x = config.indefiniteEnd.percentToDisplay * width * (Math.min(Client.state.currentPercent * config.length, config.indefiniteEnd.displayLength) / config.indefiniteEnd.displayLength);
-        } else if (config.subperiods != 0 && config.indefiniteEnd == null) {
-            x = 0;
-        } else if (config.subperiods != 0 && config.indefiniteEnd != null) {
-            x = 0;
+        } else if (config.subperiods != 0) {
+            x = 0;//config.indefiniteEnd.percentToDisplay * width * (Math.min(Client.state.subperiod, config.indefiniteEnd.displayLength) / config.indefiniteEnd.displayLength);
         }
         a.line(x, 0, x, height);
+    }
+
+    private void drawTurnTakingLocks(Client a) {
+        a.fill(100, 100, 100, 50);
+        a.noStroke();
+        a.rectMode(Client.CORNERS);
+        for (int subperiod = 0; subperiod < config.subperiods; subperiod++) {
+            float x1 = Client.map(subperiod, 0, config.subperiods, 0, width);
+            float x2 = Client.map(subperiod + 1, 0, config.subperiods, 0, width);
+            if (StrategyChanger.isTurnTakingLocked(Client.state.id, subperiod, config)) {
+                a.rect(x1, 0, x2, height);
+            }
+        }
     }
 
     private void drawOutline(Client a) {

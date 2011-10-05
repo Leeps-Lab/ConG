@@ -10,8 +10,6 @@ public interface ClientInterface {
 
     public boolean haveInitialStrategy();
 
-    public float getCost();
-
     public void newMessage(String s);
 
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp);

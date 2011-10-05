@@ -53,8 +53,6 @@ public class Config extends BaseConfig {
     public boolean showRPSSliders;
     public DecisionDelay initialDelay, delay;
     public IndefiniteEnd indefiniteEnd;
-    public float impulse;
-    public float changeCost;
     public boolean showHeatmapLegend;
     public boolean chatroom;
     public boolean freeChat;
@@ -110,7 +108,6 @@ public class Config extends BaseConfig {
         paid = true;
         length = 120;
         percentChangePerSecond = Float.NaN;
-        changeCost = 0;
         subperiods = 0;
         preLength = 0;
         yourPayoff = new Line();

@@ -3,6 +3,7 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -117,7 +118,7 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
                 } else if (subperiod - 1 >= 0 && subperiod - 1 < subperiodPrices.size()) {
                     Map<Integer, Float> prices = subperiodPrices.get(subperiod - 1);
                     for (int id : prices.keySet()) {
-                        if (Client.state.strategyChanger.isTurnTakingLocked(id, subperiod)) {
+                        if (StrategyChanger.isTurnTakingLocked(id, subperiod, config)) {
                             float price = prices.get(id);
                             if (id == Client.state.id) {
                                 a.stroke(0);
