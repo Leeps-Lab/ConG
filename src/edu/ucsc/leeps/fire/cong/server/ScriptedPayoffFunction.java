@@ -12,6 +12,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
@@ -83,11 +85,15 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         CharSequenceCompiler<PayoffScriptInterface> compiler = new CharSequenceCompiler<PayoffScriptInterface>(
                 getClass().getClassLoader(), Arrays.asList(new String[]{"-target", "1.5"}));
         errs = new DiagnosticCollector<JavaFileObject>();
-        String qualifiedName = "edu.ucsc.leeps.fire.cong.server.PayoffScript";
-        String code = scriptTemplate.replace("$function", scriptText);
         Class<PayoffScriptInterface> clazz = null;
+        Pattern classNamePattern = Pattern.compile("public class (.*?) implements PayoffScriptInterface");
+        Matcher m = classNamePattern.matcher(scriptText);
+        if (!m.find() || m.groupCount() != 1) {
+            Dialogs.popUpErr("Failed to find class name");
+            return;
+        }
         try {
-            clazz = compiler.compile(qualifiedName, code, errs, new Class<?>[]{PayoffScriptInterface.class});
+            clazz = compiler.compile(m.group(1), scriptText, errs, new Class<?>[]{PayoffScriptInterface.class});
         } catch (ClassCastException ex1) {
             Dialogs.popUpErr(ex1);
         } catch (CharSequenceCompilerException ex2) {
@@ -109,14 +115,6 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         configure();
         return errs.getDiagnostics();
     }
-    private static String scriptTemplate = ""
-            + "package edu.ucsc.leeps.fire.cong.server;\n"
-            + "import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction.PayoffScriptInterface;\n"
-            + "import edu.ucsc.leeps.fire.cong.config.Config;\n"
-            + "import java.util.*;\n"
-            + "public class PayoffScript implements PayoffScriptInterface {\n"
-            + "$function\n"
-            + "}";
 
     public static interface PayoffScriptInterface {
 
