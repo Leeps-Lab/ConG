@@ -29,6 +29,6 @@ public class Hotelling implements PayoffScriptInterface {
         } else {
             u = 0.5f * (s - sorted.get(i - 1)) + 0.5f * (sorted.get(i + 1) - s);
         }
-        return 100 * u;
+        return config.get("Alpha") * 100 * u;
     }
 }

@@ -11,6 +11,7 @@ import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
 import java.awt.Color;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -76,8 +77,9 @@ public class Config extends BaseConfig {
     public boolean turnTaking;
     public boolean potential;
     public float grid;
-    public int xAxisTicks; 
+    public int xAxisTicks;
     public int infoDelay;
+    public String params;
     public static final Class matrix2x2 = TwoStrategyPayoffFunction.class;
     public static final Class matrix3x3 = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -102,6 +104,7 @@ public class Config extends BaseConfig {
     public int marginalCost;
     public int[] initiatives;
     public boolean showPGMultiplier;
+    public Map<String, Float> paramMap;
 
     public Config() {
         paid = true;
@@ -194,6 +197,28 @@ public class Config extends BaseConfig {
         grid = Float.NaN;
         showPGMultiplier = false;
         infoDelay = 0;
+    }
+
+    public float get(String key) {
+        if (paramMap == null) {
+            paramMap = new HashMap<String, Float>();
+            for (String mapping : params.split(",")) {
+                String[] pair = mapping.split("=");
+                if (pair.length != 2) {
+                    System.err.println("Invalid param mapping: " + mapping);
+                    continue;
+                }
+                String k = pair[0];
+                float v;
+                try {
+                    v = Float.parseFloat(pair[1]);
+                } catch (NumberFormatException ex) {
+                    v = Float.NaN;
+                }
+                paramMap.put(k, v);
+            }
+        }
+        return paramMap.get(key);
     }
     public static String[] aliases = new String[]{
         "Green", "Red", "Blue", "Orange", "Purple", "Gray", "Aqua", "Yellow"
