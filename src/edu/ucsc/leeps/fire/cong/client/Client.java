@@ -349,74 +349,79 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     @Override
     public void draw() {
         try {
-            if (resize) {
-                setupFonts();
-                textFont(size14Bold);
-                resize = false;
-            }
+            doDraw();
+        } catch (RuntimeException ex) {
+            System.err.println("Runtime exception in draw function");
+            ex.printStackTrace();
+        }
+    }
 
-            background(255);
-            if (FIRE.client.getConfig() == null) {
-                fill(0);
-                String s = "Please wait for the experiment to begin";
-                textSize(14);
-                text(s, Math.round(width / 2 - textWidth(s) / 2), Math.round(height / 2));
-                return;
-            }
+    private void doDraw() {
+        if (resize) {
+            setupFonts();
+            textFont(size14Bold);
+            resize = false;
+        }
 
-            if (FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
-                long length = FIRE.client.getConfig().length * 1000l;
-                state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
+        background(255);
+        if (FIRE.client.getConfig() == null) {
+            fill(0);
+            String s = "Please wait for the experiment to begin";
+            textSize(14);
+            text(s, Math.round(width / 2 - textWidth(s) / 2), Math.round(height / 2));
+            return;
+        }
 
-                if (FIRE.client.getConfig().subperiods == 0) {
-                    /*
-                    payoffChart.updateLines();
-                    strategyChart.updateLines();
-                    rChart.updateLines();
-                    pChart.updateLines();
-                    sChart.updateLines();
-                    indefiniteEndPricesChart.update();
-                     * 
-                     */
-                }
-            }
-            if (FIRE.client.isRunningPeriod()) {
-                periodInfo.update();
-            }
+        if (FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
+            long length = FIRE.client.getConfig().length * 1000l;
+            state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
 
-            if (selector != null) {
-                selector.draw(this);
-            }
-            if (FIRE.client.getConfig() != null) {
+            if (FIRE.client.getConfig().subperiods == 0) {
                 /*
-                payoffChart.draw(this);
-                strategyChart.draw(this);
-                rChart.draw(this);
-                pChart.draw(this);
-                sChart.draw(this);
-                indefiniteEndPricesChart.draw(this);
-                 *
+                payoffChart.updateLines();
+                strategyChart.updateLines();
+                rChart.updateLines();
+                pChart.updateLines();
+                sChart.updateLines();
+                indefiniteEndPricesChart.update();
+                 * 
                  */
-                chart.draw(this);
             }
-            legend.draw(this);
-            if (FIRE.client.getConfig().preLength > 0 && !haveInitialStrategy) {
-                float textHeight = textDescent() + textAscent() + 8;
-                fill(255, 50, 50);
-                text("Please choose an initial strategy.", Math.round(periodInfo.origin.x), Math.round(periodInfo.origin.y - textHeight));
+        }
+        if (FIRE.client.isRunningPeriod()) {
+            periodInfo.update();
+        }
+
+        if (selector != null) {
+            selector.draw(this);
+        }
+        if (FIRE.client.getConfig() != null) {
+            /*
+            payoffChart.draw(this);
+            strategyChart.draw(this);
+            rChart.draw(this);
+            pChart.draw(this);
+            sChart.draw(this);
+            indefiniteEndPricesChart.draw(this);
+             *
+             */
+            chart.draw(this);
+        }
+        legend.draw(this);
+        if (FIRE.client.getConfig().preLength > 0 && !haveInitialStrategy) {
+            float textHeight = textDescent() + textAscent() + 8;
+            fill(255, 50, 50);
+            text("Please choose an initial strategy.", Math.round(periodInfo.origin.x), Math.round(periodInfo.origin.y - textHeight));
+        }
+        periodInfo.draw(this);
+        if (debug) {
+            String frameRateString = String.format("FPS: %.2f, Agent: %s", frameRate, agent.paused ? "off" : "on");
+            if (frameRate < 8) {
+                fill(255, 0, 0);
+            } else {
+                fill(0);
             }
-            periodInfo.draw(this);
-            if (debug) {
-                String frameRateString = String.format("FPS: %.2f, Agent: %s", frameRate, agent.paused ? "off" : "on");
-                if (frameRate < 8) {
-                    fill(255, 0, 0);
-                } else {
-                    fill(0);
-                }
-                text(frameRateString, 10, height - 10);
-            }
-        } catch (NullPointerException ex) {
-            System.err.println("Caught null pointer in draw thread");
+            text(frameRateString, 10, height - 10);
         }
     }
 

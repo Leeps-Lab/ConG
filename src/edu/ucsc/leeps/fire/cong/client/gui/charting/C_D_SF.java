@@ -77,7 +77,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             }
         }
         drawCurrentTimeLine(a);
-        if (config.turnTaking) {
+        if (config.subperiods != 0 && config.turnTaking) {
             drawTurnTakingLocks(a);
         }
         // outline
@@ -602,11 +602,26 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         a.fill(100, 100, 100, 50);
         a.noStroke();
         a.rectMode(Client.CORNERS);
-        for (int subperiod = 0; subperiod < config.subperiods; subperiod++) {
-            float x1 = Client.map(subperiod, 0, config.subperiods, 0, width);
-            float x2 = Client.map(subperiod + 1, 0, config.subperiods, 0, width);
-            if (StrategyChanger.isTurnTakingLocked(Client.state.id, subperiod, config)) {
-                a.rect(x1, 0, x2, height);
+        if (config.indefiniteEnd == null) {
+            for (int subperiod = 0; subperiod < config.subperiods; subperiod++) {
+                float x1 = Client.map(subperiod, 0, config.subperiods, 0, width);
+                float x2 = Client.map(subperiod + 1, 0, config.subperiods, 0, width);
+                if (StrategyChanger.isTurnTakingLocked(Client.state.id, subperiod, config)) {
+                    a.rect(x1, 0, x2, height);
+                }
+            }
+        } else {
+            int displayed = (int) (config.indefiniteEnd.percentToDisplay * config.indefiniteEnd.displayLength);
+            for (int subperiod = 0; subperiod < config.indefiniteEnd.displayLength; subperiod++) {
+                float x1 = Client.map(subperiod, 0, config.indefiniteEnd.displayLength, 0, width);
+                float x2 = Client.map(subperiod + 1, 0, config.indefiniteEnd.displayLength, 0, width);
+                int sub = subperiod;
+                if (Client.state.subperiod > displayed) {
+                    sub = Client.state.subperiod - displayed + subperiod;
+                }
+                if (StrategyChanger.isTurnTakingLocked(Client.state.id, sub, config)) {
+                    a.rect(x1, 0, x2, height);
+                }
             }
         }
     }

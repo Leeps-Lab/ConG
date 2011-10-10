@@ -20,7 +20,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
     private int lineNumber;
 
     public PeriodInfo(Sprite parent, int x, int y, Client embed) {
-        super(parent, x, y, (int) embed.textWidth("Current Earnings: 000"), (int) (embed.textAscent() + embed.textDescent()));
+        super(parent, x, y, (int) embed.textWidth("Current Points: 000"), (int) (embed.textAscent() + embed.textDescent()));
         secondsLeft = 0;
         FIRE.client.addConfigListener(this);
         totalPoints = 0;
@@ -81,13 +81,13 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
         lineNumber = 0;
         float textHeight = applet.textAscent() + applet.textDescent();
         applet.text(s, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
-        String totalEarningsString = "";
-        String periodEarningsString = "";
+        String totalPointsString = "";
+        String periodPointsString = "";
         String multiplierString = "";
-        totalEarningsString = String.format("Previous Earnings: %.2f", totalPoints);
-        periodEarningsString = String.format("Current Earnings: %.2f", periodPoints);
-        applet.text(totalEarningsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
-        applet.text(periodEarningsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
+        totalPointsString = String.format("Cumulative Points: %.2f", totalPoints);
+        periodPointsString = String.format("Current Points: %.2f", periodPoints);
+        applet.text(totalPointsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
+        applet.text(periodPointsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
         if (FIRE.client.getConfig().showPGMultiplier) {
             multiplierString = String.format("Multipler: %.2f", multiplier);
             applet.fill(0);
