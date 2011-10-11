@@ -12,10 +12,9 @@ import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
 import edu.ucsc.leeps.fire.cong.client.gui.BubblesSelector;
-import edu.ucsc.leeps.fire.cong.client.gui.IndefiniteEndPricesChart;
+import edu.ucsc.leeps.fire.cong.client.gui.IndefiniteEndChart;
 import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
-import edu.ucsc.leeps.fire.cong.client.gui.charting.C_D_SF;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import fullscreen.FullScreen;
@@ -62,10 +61,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private QWERTYStrategySelector qwerty;
     private BubblesSelector bubbles;
     private Sprite selector;
-    private Sprite chart;
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
-    private IndefiniteEndPricesChart indefiniteEndPricesChart;
+    private IndefiniteEndChart indefiniteEndChart;
     // heatmap legend off/on
     private ChartLegend legend;
     private StrategyChanger strategyChanger;
@@ -161,7 +159,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             strip.setEnabled(true);
             payoffChart.clearAll();
             strategyChart.clearAll();
-            indefiniteEndPricesChart.clearAll();
+            indefiniteEndChart.clearAll();
             rChart.clearAll();
             pChart.clearAll();
             sChart.clearAll();
@@ -224,16 +222,12 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp) {
         state.strategies = strategies;
-        synchronized (state.strategiesTime) {
-            state.strategiesTime.add(new State.Strategy(timestamp, strategies));
-        }
+        state.strategiesTime.add(new State.Strategy(timestamp, strategies));
     }
 
     public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies, long timestamp) {
         state.matchStrategies = matchStrategies;
-        synchronized (state.matchStrategiesTime) {
-            state.matchStrategiesTime.add(new State.Strategy(timestamp, matchStrategies));
-        }
+        state.matchStrategiesTime.add(new State.Strategy(timestamp, matchStrategies));
     }
 
     public void endSubperiod(
@@ -252,7 +246,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 state.subperiodMatchPayoff = matchPayoff;
                 payoffChart.endSubperiod(subperiod);
                 strategyChart.endSubperiod(subperiod);
-                indefiniteEndPricesChart.endSubperiod(subperiod);
+                indefiniteEndChart.endSubperiod(subperiod);
                 rChart.endSubperiod(subperiod);
                 pChart.endSubperiod(subperiod);
                 sChart.endSubperiod(subperiod);
@@ -339,8 +333,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         int strategyChartHeight = 100;
         int threeStrategyChartHeight = 30;
         int payoffChartHeight = (int) (height - strategyChartHeight - 2 * topMargin - chartMargin - 10);
-        chart = new C_D_SF(null, chartLeftOffset + 80 + leftMargin, strategyChartHeight + topMargin + chartMargin,
-                chartWidth, matrixSize, (int) (chartWidth + (7f * matrixSize) / 8f));
         strategyChart = new Chart(
                 null, chartLeftOffset + 80 + leftMargin, topMargin,
                 chartWidth, strategyChartHeight,
@@ -349,7 +341,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 null, chartLeftOffset + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight,
                 simplex, Chart.Mode.Payoff);
-        indefiniteEndPricesChart = new IndefiniteEndPricesChart(
+        indefiniteEndChart = new IndefiniteEndChart(
                 null, chartLeftOffset + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight);
         rChart = new Chart(
@@ -396,15 +388,12 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
 
                 if (FIRE.client.getConfig().subperiods == 0) {
-                    /*
                     payoffChart.updateLines();
                     strategyChart.updateLines();
                     rChart.updateLines();
                     pChart.updateLines();
                     sChart.updateLines();
-                    indefiniteEndPricesChart.update();
-                     * 
-                     */
+                    indefiniteEndChart.update();
                 }
             }
             if (FIRE.client.isRunningPeriod()) {
@@ -415,16 +404,12 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 selector.draw(this);
             }
             if (FIRE.client.getConfig() != null) {
-                /*
                 payoffChart.draw(this);
                 strategyChart.draw(this);
                 rChart.draw(this);
                 pChart.draw(this);
                 sChart.draw(this);
-                indefiniteEndPricesChart.draw(this);
-                 *
-                 */
-                chart.draw(this);
+                indefiniteEndChart.draw(this);
             }
             legend.draw(this);
             if (FIRE.client.getConfig().preLength > 0 && !haveInitialStrategy) {
@@ -474,17 +459,17 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         rChart.setVisible(false);
         pChart.setVisible(false);
         sChart.setVisible(false);
-        indefiniteEndPricesChart.setVisible(false);
+        indefiniteEndChart.setVisible(false);
         if (config.selector == Config.StrategySelector.strip) {
             if (config.indefiniteEnd != null && config.subperiods != 0) {
                 payoffChart.setVisible(false);
                 legend.setVisible(false);
                 strategyChart.setVisible(false);
-                indefiniteEndPricesChart.setVisible(true);
-                indefiniteEndPricesChart.width = width - 110;
-                indefiniteEndPricesChart.origin.x = 100;
+                indefiniteEndChart.setVisible(true);
+                indefiniteEndChart.width = width - 110;
+                indefiniteEndChart.origin.x = 100;
                 strip.origin.x = 10;
-                indefiniteEndPricesChart.configChanged(config);
+                indefiniteEndChart.configChanged(config);
             } else {
                 payoffChart.setVisible(true);
                 legend.setVisible(false);
@@ -498,7 +483,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         if (config.selector == Config.StrategySelector.bubbles) {
             strategyChart.setVisible(false);
             payoffChart.setVisible(false);
-            indefiniteEndPricesChart.setVisible(false);
+            indefiniteEndChart.setVisible(false);
             legend.setVisible(false);
             bubbles.width = Math.round(0.7f * width);
             bubbles.origin.x = 0.15f * width;

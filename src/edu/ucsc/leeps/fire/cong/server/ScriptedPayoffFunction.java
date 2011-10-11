@@ -2,6 +2,7 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.logging.Dialogs;
+import edu.ucsc.leeps.fire.logging.Logger;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;

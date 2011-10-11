@@ -481,8 +481,12 @@ public class Population implements Serializable {
                 s = new float[3];
                 if (config.mixed) {
                     s[0] = FIRE.server.getRandom().nextFloat();
-                    s[1] = (1 - s[0]) * FIRE.server.getRandom().nextFloat();
-                    s[2] = 1 - s[0] - s[1];
+                    s[1] = FIRE.server.getRandom().nextFloat();
+                    s[2] = FIRE.server.getRandom().nextFloat();
+										float sum = s[0] + s[1] + s[2];
+										s[0] /= sum;
+										s[1] /= sum;
+										s[2] /= sum;
                 } else {
                     s[0] = 0;
                     s[1] = 0;

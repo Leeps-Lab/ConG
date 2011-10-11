@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author jpettit
  */
-public class IndefiniteEndPricesChart extends Sprite implements Configurable<Config> {
+public class IndefiniteEndChart extends Sprite implements Configurable<Config> {
 
     private Config config;
     private float umax, umin;
@@ -23,7 +23,8 @@ public class IndefiniteEndPricesChart extends Sprite implements Configurable<Con
     private List<Float> subperiodProfits;
     private Map<Integer, Integer> colors;
 
-    public IndefiniteEndPricesChart(Sprite parent, int x, int y, int width, int height) {
+    @SuppressWarnings("LeakingThisInConstructor")
+    public IndefiniteEndChart(Sprite parent, int x, int y, int width, int height) {
         super(parent, x, y, width, height);
         FIRE.client.addConfigListener(this);
         scaledHeight = Math.round(0.9f * height);
