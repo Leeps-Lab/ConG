@@ -129,21 +129,15 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         float x, y, min, max;
         min = config.payoffFunction.getMin();
         max = config.payoffFunction.getMax();
-        float payoff, strategy;
+        float payoff;
+        float[] strategy = Client.state.strategies.get(id);
         if (config.subperiods != 0) {
-            if (id == FIRE.client.getID()) {
-                payoff = Client.state.subperiodPayoff;
-                strategy = subperiodStrategy[0];
-            } else {
-                payoff = config.payoffFunction.getPayoff(
-                        id, 0, Client.state.getFictitiousStrategies(FIRE.client.getID(), subperiodStrategy), null, config);
-                strategy = Client.state.strategies.get(id)[0];
-            }
+            payoff = config.payoffFunction.getPayoff(
+                    id, 0, Client.state.getFictitiousStrategies(FIRE.client.getID(), subperiodStrategy), null, config);
         } else {
-            payoff = PayoffUtils.getPayoff(id, Client.state.strategies.get(id));
-            strategy = Client.state.strategies.get(id)[0];
+            payoff = PayoffUtils.getPayoff(id, strategy);
         }
-        x = width * strategy;
+        x = width * strategy[0];
         y = height * (1 - (payoff - min) / (max - min));
         if (y > height) {
             y = height;
