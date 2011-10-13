@@ -88,7 +88,9 @@ public class Population implements Serializable {
             FIRE.server.getConfig(id).currAliases = aliases;
             FIRE.server.getConfig(id).currColors = colors;
             FIRE.server.getConfig(id).payoffFunction.configure();
-            FIRE.server.getConfig(id).counterpartPayoffFunction.configure();
+            if (FIRE.server.getConfig(id).counterpartPayoffFunction != null) {
+                FIRE.server.getConfig(id).counterpartPayoffFunction.configure();
+            }
         }
     }
 

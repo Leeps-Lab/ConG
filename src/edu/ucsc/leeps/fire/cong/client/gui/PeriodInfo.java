@@ -106,47 +106,48 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
         totalPoints = FIRE.client.getTotalPoints();
         if (Client.state.currentPercent >= 1) {
             periodPoints = FIRE.client.getPeriodPoints();
-        }
-        synchronized (Client.state.strategiesTime) {
-            periodPoints = 0;
-            float lastPercent = 0;
-            Map<Integer, float[]> lastStrategies = null;
-            Map<Integer, float[]> lastMatchStrategies = null;
-            for (Strategy s : Client.state.strategiesTime) {
-                if (config.subperiods == 0 && s.delayed()) {
-                    break;
-                }
-                float percent;
-                if (config.subperiods == 0) {
-                    percent = s.timestamp / (float) (config.length * 1e9);
-                } else {
-                    percent = s.timestamp / (float) config.subperiods;
-                }
-                if (lastPercent > 0) {
-                    float flowPayoff = config.payoffFunction.getPayoff(
-                            Client.state.id, percent, lastStrategies, lastMatchStrategies, config);
-                    float points = flowPayoff;
-                    if (config.indefiniteEnd == null) {
-                        points *= (percent - lastPercent);
-                    } else {
-                        points *= (percent - lastPercent) * config.length;
+        } else {
+            synchronized (Client.state.strategiesTime) {
+                periodPoints = 0;
+                float lastPercent = 0;
+                Map<Integer, float[]> lastStrategies = null;
+                Map<Integer, float[]> lastMatchStrategies = null;
+                for (Strategy s : Client.state.strategiesTime) {
+                    if (s.delayed()) {
+                        break;
                     }
-                    periodPoints += points;
+                    float percent;
+                    if (config.subperiods == 0) {
+                        percent = s.timestamp / (float) (config.length * 1e9);
+                    } else {
+                        percent = s.timestamp / (float) config.subperiods;
+                    }
+                    if (lastPercent > 0) {
+                        float flowPayoff = config.payoffFunction.getPayoff(
+                                Client.state.id, percent, lastStrategies, lastMatchStrategies, config);
+                        float points = flowPayoff;
+                        if (config.indefiniteEnd == null) {
+                            points *= (percent - lastPercent);
+                        } else {
+                            points *= (percent - lastPercent) * config.length;
+                        }
+                        periodPoints += points;
+                    }
+                    lastPercent = percent;
+                    lastStrategies = s.strategies;
+                    lastMatchStrategies = s.matchStrategies;
                 }
-                lastPercent = percent;
-                lastStrategies = s.strategies;
-                lastMatchStrategies = s.matchStrategies;
-                if (config.subperiods != 0 && s.delayed()) {
-                    break;
+                if (config.subperiods == 0 && lastStrategies != null && lastMatchStrategies != null) {
+                    float flowPayoff = config.payoffFunction.getPayoff(
+                            Client.state.id, Client.state.currentPercent, lastStrategies, lastMatchStrategies, config);
+                    if (flowPayoff > 0) {
+                        flowPayoff += config.marginalCost;
+                    }
+                    float delayPercent = config.infoDelay / (float) config.length;
+                    if (Client.state.currentPercent - delayPercent - lastPercent > 0) {
+                        periodPoints += flowPayoff * (Client.state.currentPercent - delayPercent - lastPercent);
+                    }
                 }
-            }
-            if (config.subperiods == 0 && lastStrategies != null && lastMatchStrategies != null) {
-                float flowPayoff = config.payoffFunction.getPayoff(
-                        Client.state.id, Client.state.currentPercent, lastStrategies, lastMatchStrategies, config);
-                if (flowPayoff > 0) {
-                    flowPayoff += config.marginalCost;
-                }
-                periodPoints += flowPayoff * (Client.state.currentPercent - lastPercent);
             }
         }
     }
