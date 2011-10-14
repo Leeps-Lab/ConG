@@ -17,7 +17,7 @@ public class Agent extends Thread {
     public volatile boolean paused;
 
     public Agent() {
-        paused = true;
+        paused = false;
     }
 
     @Override

@@ -180,7 +180,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
                     Dialogs.popUpAndExit(ex);
                 }
                 if (strategyChangeEvents.size() > 10) {
-                    System.err.println("WARNING: Queue depth = " + strategyChangeEvents.size());
+                    System.err.println("WARNING: Input queue depth = " + strategyChangeEvents.size());
                 }
             }
         }

@@ -62,8 +62,6 @@ public class Config extends BaseConfig {
     public float sigmoidBeta;
     public boolean showMatrix;
     public boolean showPayoffTimeAxisLabels;
-    public float updatesPerSecond;
-    public int strategyUpdateMillis;
     public boolean subperiodRematch;
     public boolean probPayoffs;
     public boolean showHeatmap;
@@ -173,8 +171,6 @@ public class Config extends BaseConfig {
         population = -1;
         match = -1;
         marginalCost = 0;
-        updatesPerSecond = 1;
-        strategyUpdateMillis = 100;
         probPayoffs = false;
         trajectory = false;
         matchType = MatchGroup.pair;

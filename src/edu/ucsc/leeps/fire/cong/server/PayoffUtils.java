@@ -2,6 +2,7 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.config.Config;
 import java.util.Map;
 
 /**
@@ -10,41 +11,36 @@ import java.util.Map;
  */
 public class PayoffUtils {
 
-    public static float[] getAverageMatchStrategy(
-            int id,
-            Map<Integer, float[]> popStrategies,
-            Map<Integer, float[]> matchPopStrategies) {
-        boolean excludeSelf;
+    public static float[] getAverageStrategy(int id, Map<Integer, float[]> strategies) {
+        Config config;
         if (FIRE.client != null) {
-            excludeSelf = FIRE.client.getConfig().excludeSelf;
+            config = FIRE.client.getConfig();
         } else {
-            excludeSelf = FIRE.server.getConfig().excludeSelf;
+            config = FIRE.server.getConfig();
         }
         float[] average = null;
-        for (int match : matchPopStrategies.keySet()) {
+        if (strategies.isEmpty()) {
+            throw new IllegalArgumentException("no strategies given");
+        }
+        for (int match : strategies.keySet()) {
             if (average == null) {
-                average = new float[matchPopStrategies.get(match).length];
+                average = new float[strategies.get(match).length];
             }
-            if (!(excludeSelf && id == match)) {
-                float[] s = matchPopStrategies.get(match);
+            if (!(config.excludeSelf && id == match)) {
+                float[] s = strategies.get(match);
                 for (int i = 0; i < average.length; i++) {
                     average[i] += s[i];
                 }
             }
         }
         for (int i = 0; i < average.length; i++) {
-            if (excludeSelf) {
-                average[i] /= (matchPopStrategies.size() - 1);
+            if (config.excludeSelf) {
+                average[i] /= (strategies.size() - 1);
             } else {
-                average[i] /= matchPopStrategies.size();
+                average[i] /= strategies.size();
             }
         }
         return average;
-    }
-
-    public static float[] getAverageMatchStrategy() {
-        return getAverageMatchStrategy(Client.state.id,
-                Client.state.strategies, Client.state.matchStrategies);
     }
 
     /**

@@ -222,11 +222,9 @@ public class Population implements Serializable {
                     strategyUpdateEvents.get(member).add(
                             new StrategyUpdateEvent(member, whoChanged, strategies, null, timestamp - periodStartTime));
                 }
-                if (this != match) {
-                    for (int member : match.members) {
-                        strategyUpdateEvents.get(member).add(
-                                new StrategyUpdateEvent(member, whoChanged, null, strategies, timestamp - periodStartTime));
-                    }
+                for (int member : match.members) {
+                    strategyUpdateEvents.get(member).add(
+                            new StrategyUpdateEvent(member, whoChanged, null, strategies, timestamp - periodStartTime));
                 }
             }
         }
@@ -316,6 +314,10 @@ public class Population implements Serializable {
 
         public void endPeriod() {
             evaluate(System.nanoTime());
+            for (StrategyUpdateProcessor updater : strategyUpdateProcessors.values()) {
+                System.err.println("WARNING: Flushing queue, updates left = " + updater.queue.size());
+                updater.queue.clear();
+            }
         }
     }
 
@@ -490,8 +492,12 @@ public class Population implements Serializable {
                 s = new float[3];
                 if (config.mixed) {
                     s[0] = FIRE.server.getRandom().nextFloat();
-                    s[1] = (1 - s[0]) * FIRE.server.getRandom().nextFloat();
-                    s[2] = 1 - s[0] - s[1];
+                    s[1] = FIRE.server.getRandom().nextFloat();
+                    s[2] = FIRE.server.getRandom().nextFloat();
+                    float sum = s[0] + s[1] + s[2];
+                    s[0] /= sum;
+                    s[1] /= sum;
+                    s[2] /= sum;
                 } else {
                     s[0] = 0;
                     s[1] = 0;
@@ -617,6 +623,9 @@ public class Population implements Serializable {
             while (true) {
                 try {
                     StrategyUpdateEvent event = queue.take();
+                    if (queue.size() >= 10) {
+                        queue.clear();
+                    }
                     synchronized (logLock) {
                         if (event.strategies != null) {
                             members.get(event.id).setStrategies(event.changedId, event.strategies, event.timestamp);

@@ -51,12 +51,14 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
             Map<Integer, float[]> popStrategies,
             Map<Integer, float[]> matchPopStrategies,
             Config config) {
+        if (matchPopStrategies.isEmpty()) {
+            return 0;
+        }
         float A, B, C, a, b, c;
         A = popStrategies.get(id)[0];
         B = popStrategies.get(id)[1];
         C = popStrategies.get(id)[2];
-        float[] match = PayoffUtils.getAverageMatchStrategy(
-                id, popStrategies, matchPopStrategies);
+        float[] match = PayoffUtils.getAverageStrategy(id, matchPopStrategies);
         a = match[0];
         b = match[1];
         c = match[2];
@@ -66,13 +68,11 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
     }
 
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        return PayoffUtils.getAverageMatchStrategy(
-                id, popStrategies, matchPopStrategies);
+        return PayoffUtils.getAverageStrategy(id, popStrategies);
     }
 
     public float[] getMatchStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
-        return PayoffUtils.getAverageMatchStrategy(
-                id, popStrategies, matchPopStrategies);
+        return PayoffUtils.getAverageStrategy(id, matchPopStrategies);
     }
 
     public void configure() {

@@ -291,6 +291,9 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     public void updateLines() {
+        if (Client.state.strategies.isEmpty() || Client.state.matchStrategies.isEmpty()) {
+            return;
+        }
         synchronized (lock) {
             updateLines(Client.state.currentPercent);
             updateMarginalCostLines(Client.state.currentPercent);
@@ -353,7 +356,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                 }
             } else {
                 float[] you = Client.state.getMyStrategy();
-                float[] match = PayoffUtils.getAverageMatchStrategy();
+                float[] match = PayoffUtils.getAverageStrategy(Client.state.id, Client.state.matchStrategies);
                 if (mode == Mode.TwoStrategy) {
                     yourStrategy.addStrategyPoint(percent, you[0]);
                     matchStrategy.addStrategyPoint(percent, match[0]);

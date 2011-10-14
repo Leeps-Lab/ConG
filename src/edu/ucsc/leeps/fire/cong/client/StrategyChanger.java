@@ -16,6 +16,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     private long nextAllowedChangeTime;
     private boolean initialLock;
     private float[] current;
+    private long updateMillis = 100;
     public Selector selector;
 
     @SuppressWarnings({"CallToThreadStartDuringObjectConstruction", "LeakingThisInConstructor"})
@@ -39,18 +40,9 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         if (Client.state.target == null) {
             return;
         }
-        float tickDelta = config.percentChangePerSecond / (1000f / config.strategyUpdateMillis) * 2f;
+        float tickDelta = config.percentChangePerSecond / (1000f / updateMillis) * 2f;
         if (current == null) {
             current = Client.state.getMyStrategy();
-        }
-        float[] actual = Client.state.getMyStrategy();
-        float avgDiff = 0;
-        for (int i = 0; i < current.length; i++) {
-            avgDiff += Math.abs(current[i] - actual[i]);
-        }
-        avgDiff /= current.length;
-        if (avgDiff > 0.01f) {
-            System.err.println(String.format("Average Strategy Diff: %s.", avgDiff));
         }
         if (current.length == 1) {
             tickDelta /= 2f;
@@ -116,7 +108,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
                 }
             }
 
-            long nanoWait = config.strategyUpdateMillis * 1000000;
+            long nanoWait = updateMillis * 1000000;
             long start = System.nanoTime();
 
             if (shouldUpdate) {
@@ -147,7 +139,9 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
             initialLock = false;
         }
-        current = null;
+        current = new float[config.initialStrategy.length];
+        System.arraycopy(config.initialStrategy, 0, current, 0, current.length);
+        FIRE.client.getServer().strategyChanged(current, current, FIRE.client.getID());
     }
 
     public void setPause(boolean paused) {

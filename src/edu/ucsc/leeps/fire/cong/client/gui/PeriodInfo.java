@@ -157,7 +157,6 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
             multiplier = ((SumPayoffFunction) FIRE.client.getConfig().payoffFunction).A;
             multiplier /= Client.state.strategies.size();
         }
-        update();
     }
 
     public void endPeriod() {
