@@ -48,7 +48,7 @@ import processing.core.PFont;
  */
 public class Client extends PApplet implements ClientInterface, FIREClientInterface, Configurable<Config> {
 
-    public static boolean ALLOW_DEBUG = System.getProperty("fire.client.debug") != null;
+    public static boolean ALLOW_DEBUG = System.getProperty("fire.debug") != null;
     public static boolean USE_OPENGL = true;
     public static State state;
     public boolean debug;

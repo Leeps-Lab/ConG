@@ -15,6 +15,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     private float[] deltaStrategy;
     private long nextAllowedChangeTime;
     private boolean initialLock;
+    private float[] current;
     public Selector selector;
 
     @SuppressWarnings({"CallToThreadStartDuringObjectConstruction", "LeakingThisInConstructor"})
@@ -39,7 +40,18 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             return;
         }
         float tickDelta = config.percentChangePerSecond / (1000f / config.strategyUpdateMillis) * 2f;
-        float[] current = Client.state.getMyStrategy();
+        if (current == null) {
+            current = Client.state.getMyStrategy();
+        }
+        float[] actual = Client.state.getMyStrategy();
+        float avgDiff = 0;
+        for (int i = 0; i < current.length; i++) {
+            avgDiff += Math.abs(current[i] - actual[i]);
+        }
+        avgDiff /= current.length;
+        if (avgDiff > 0.01f) {
+            System.err.println(String.format("Average Strategy Diff: %s.", avgDiff));
+        }
         if (current.length == 1) {
             tickDelta /= 2f;
         }
@@ -54,13 +66,13 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
                 }
             }
         }
-        boolean same = true;
+        boolean almostSame = true;
         for (int i = 0; i < Client.state.target.length; i++) {
             if (Math.abs(Client.state.target[i] - current[i]) > Float.MIN_NORMAL) {
-                same = false;
+                almostSame = false;
             }
         }
-        if (same) {
+        if (almostSame) {
             System.arraycopy(current, 0, Client.state.target, 0, Client.state.target.length);
             return;
         }
@@ -86,9 +98,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     private void sendUpdate() {
-        float[] c = Client.state.getMyStrategy();
-        float[] current = new float[c.length];
-        System.arraycopy(c, 0, current, 0, c.length);
         FIRE.client.getServer().strategyChanged(
                 current,
                 Client.state.target,
@@ -138,6 +147,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
             initialLock = false;
         }
+        current = null;
     }
 
     public void setPause(boolean paused) {
@@ -147,6 +157,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
 
     public void endSubperiod(int subperiod) {
         selector.endSubperiod(subperiod);
+        current = null;
     }
 
     public void endPeriod() {

@@ -222,9 +222,11 @@ public class Population implements Serializable {
                     strategyUpdateEvents.get(member).add(
                             new StrategyUpdateEvent(member, whoChanged, strategies, null, timestamp - periodStartTime));
                 }
-                for (int member : match.members) {
-                    strategyUpdateEvents.get(member).add(
-                            new StrategyUpdateEvent(member, whoChanged, null, strategies, timestamp - periodStartTime));
+                if (this != match) {
+                    for (int member : match.members) {
+                        strategyUpdateEvents.get(member).add(
+                                new StrategyUpdateEvent(member, whoChanged, null, strategies, timestamp - periodStartTime));
+                    }
                 }
             }
         }
