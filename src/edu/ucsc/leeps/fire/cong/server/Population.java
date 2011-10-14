@@ -67,21 +67,23 @@ public class Population implements Serializable {
             setInitiative();
         }
         for (Tuple group : groups) {
-            List<String> possible_aliases = new ArrayList<String>();
-            for (int i = 0; i < group.members.size(); i++) {
-                possible_aliases.add(Config.aliases[i]);
-            }
-            Collections.shuffle(possible_aliases, FIRE.server.getRandom());
-            int i = 0;
-            for (int id : group.members) {
-                aliases.put(id, possible_aliases.get(i));
-                for (int j = 0; j < Config.aliases.length; j++) {
-                    if (aliases.get(id).equals(Config.aliases[j])) {
-                        colors.put(id, Config.colors[j]);
-                        break;
-                    }
+            if (FIRE.server.getConfig().chatroom || group.members.size() <= 8) {
+                List<String> possible_aliases = new ArrayList<String>();
+                for (int i = 0; i < group.members.size(); i++) {
+                    possible_aliases.add(Config.aliases[i]);
                 }
-                i++;
+                Collections.shuffle(possible_aliases, FIRE.server.getRandom());
+                int i = 0;
+                for (int id : group.members) {
+                    aliases.put(id, possible_aliases.get(i));
+                    for (int j = 0; j < Config.aliases.length; j++) {
+                        if (aliases.get(id).equals(Config.aliases[j])) {
+                            colors.put(id, Config.colors[j]);
+                            break;
+                        }
+                    }
+                    i++;
+                }
             }
         }
         for (int id : members.keySet()) {
