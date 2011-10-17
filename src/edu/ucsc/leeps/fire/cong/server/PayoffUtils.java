@@ -148,13 +148,11 @@ public class PayoffUtils {
             if (lastPercent > 0) {
                 float flowPayoff = config.payoffFunction.getPayoff(
                         id, percent, lastStrategies, lastMatchStrategies, config);
-                float points = flowPayoff;
                 if (config.indefiniteEnd == null) {
-                    points *= (percent - lastPercent);
+                    periodPoints += flowPayoff * (percent - lastPercent);
                 } else {
-                    points *= (percent - lastPercent) * config.length;
+                    periodPoints += flowPayoff * (percent - lastPercent) * config.length;
                 }
-                periodPoints += points;
             }
             lastPercent = percent;
             lastStrategies = s.strategies;
@@ -163,12 +161,9 @@ public class PayoffUtils {
         if (config.subperiods == 0 && lastStrategies != null && lastMatchStrategies != null) {
             float flowPayoff = config.payoffFunction.getPayoff(
                     id, currentPercent, lastStrategies, lastMatchStrategies, config);
-            if (flowPayoff > 0) {
-                flowPayoff += config.marginalCost;
-            }
             float delayPercent = config.infoDelay / (float) config.length;
             if (currentPercent - delayPercent - lastPercent > 0) {
-                //periodPoints += flowPayoff * (currentPercent - delayPercent - lastPercent);
+                periodPoints += flowPayoff * (currentPercent - delayPercent - lastPercent);
             }
         }
         return periodPoints;

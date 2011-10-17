@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -29,7 +30,6 @@ public class Population implements Serializable {
     private Map<Integer, Tuple> groupMap;
     private Map<Integer, Float> subperiodPayoffs;
     private TickEvent tick = new TickEvent();
-    private Map<Integer, BlockingQueue<StrategyUpdateEvent>> strategyUpdateEvents;
     private Map<Integer, StrategyUpdateProcessor> strategyUpdateProcessors;
     private MessageEvent mEvent = new MessageEvent();
     private final Object logLock = new Object();
@@ -38,16 +38,13 @@ public class Population implements Serializable {
         groups = new HashSet<Tuple>();
         groupMap = new HashMap<Integer, Tuple>();
         subperiodPayoffs = new HashMap<Integer, Float>();
-        strategyUpdateEvents = new HashMap<Integer, BlockingQueue<StrategyUpdateEvent>>();
         strategyUpdateProcessors = new HashMap<Integer, StrategyUpdateProcessor>();
     }
 
     public void configure(Map<Integer, ClientInterface> members, Map<Integer, String> aliases, Map<Integer, Color> colors) {
         this.members = members;
         for (int member : members.keySet()) {
-            strategyUpdateEvents.put(member, new LinkedBlockingQueue<StrategyUpdateEvent>());
-            strategyUpdateProcessors.put(member, new StrategyUpdateProcessor(strategyUpdateEvents.get(member)));
-            strategyUpdateProcessors.get(member).start();
+            strategyUpdateProcessors.put(member, new StrategyUpdateProcessor(members.get(member)));
         }
         FIRE.server.getConfig().payoffFunction.configure();
         if (FIRE.server.getConfig().counterpartPayoffFunction != null) {
@@ -219,12 +216,18 @@ public class Population implements Serializable {
         public void update(int whoChanged, long timestamp) {
             if (FIRE.server.getConfig().subperiods == 0) {
                 for (int member : members) {
-                    strategyUpdateEvents.get(member).add(
-                            new StrategyUpdateEvent(member, whoChanged, strategies, null, timestamp - periodStartTime));
+                    strategyUpdateProcessors.get(member).add(
+                            new StrategyUpdateEvent(
+                            whoChanged,
+                            strategies, null,
+                            timestamp - periodStartTime));
                 }
                 for (int member : match.members) {
-                    strategyUpdateEvents.get(member).add(
-                            new StrategyUpdateEvent(member, whoChanged, null, strategies, timestamp - periodStartTime));
+                    strategyUpdateProcessors.get(member).add(
+                            new StrategyUpdateEvent(
+                            whoChanged,
+                            null, strategies,
+                            timestamp - periodStartTime));
                 }
             }
         }
@@ -242,26 +245,26 @@ public class Population implements Serializable {
             for (int member : members) {
                 Config config = FIRE.server.getConfig(member);
                 PayoffFunction u = config.payoffFunction;
-                float payoff;
+                float flowPayoff;
                 if (config.probPayoffs) {
-                    payoff = u.getPayoff(
+                    flowPayoff = u.getPayoff(
                             member, percent,
                             realizedStrategies, match.realizedStrategies,
                             config);
                 } else {
-                    payoff = u.getPayoff(
+                    flowPayoff = u.getPayoff(
                             member, percent,
                             strategies, match.strategies,
                             config);
                 }
-                subperiodPayoffs.put(member, payoff);
+                subperiodPayoffs.put(member, flowPayoff);
                 if (config.indefiniteEnd == null) {
-                    payoff *= percentElapsed;
+                    flowPayoff *= percentElapsed;
                 } else {
                     float secondsElapsed = config.length * percentElapsed;
-                    payoff *= secondsElapsed;
+                    flowPayoff *= secondsElapsed;
                 }
-                FIRE.server.addToPeriodPoints(member, payoff);
+                FIRE.server.addToPeriodPoints(member, flowPayoff);
             }
         }
 
@@ -315,8 +318,7 @@ public class Population implements Serializable {
         public void endPeriod() {
             evaluate(System.nanoTime());
             for (StrategyUpdateProcessor updater : strategyUpdateProcessors.values()) {
-                System.err.println("WARNING: Flushing queue, updates left = " + updater.queue.size());
-                updater.queue.clear();
+                updater.endPeriod();
             }
         }
     }
@@ -595,14 +597,12 @@ public class Population implements Serializable {
 
     private class StrategyUpdateEvent {
 
-        public int id;
         public int changedId;
         public Map<Integer, float[]> strategies;
         public Map<Integer, float[]> matchStrategies;
         public long timestamp;
 
-        public StrategyUpdateEvent(int id, int changedId, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies, long timestamp) {
-            this.id = id;
+        public StrategyUpdateEvent(int changedId, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies, long timestamp) {
             this.changedId = changedId;
             this.strategies = strategies;
             this.matchStrategies = matchStrategies;
@@ -612,27 +612,40 @@ public class Population implements Serializable {
 
     private class StrategyUpdateProcessor extends Thread {
 
-        private BlockingQueue<StrategyUpdateEvent> queue;
+        private ClientInterface client;
+        private LinkedBlockingDeque<StrategyUpdateEvent> queue;
+        private long dropped = 0;
 
-        public StrategyUpdateProcessor(BlockingQueue<StrategyUpdateEvent> queue) {
-            this.queue = queue;
+        public StrategyUpdateProcessor(ClientInterface client) {
+            this.client = client;
+            this.queue = new LinkedBlockingDeque<StrategyUpdateEvent>();
+            this.start();
+        }
+
+        public synchronized void add(StrategyUpdateEvent event) {
+            queue.addLast(event);
+        }
+        
+        public void endPeriod() {
+            System.err.println(String.format("WARNING: dropped %s updates", dropped));
+            dropped = 0;
         }
 
         @Override
         public void run() {
             while (true) {
                 try {
-                    StrategyUpdateEvent event = queue.take();
-                    if (queue.size() >= 10) {
+                    StrategyUpdateEvent event = queue.takeFirst();
+                    if (queue.size() > 10) {
+                        dropped += queue.size();
                         queue.clear();
                     }
-                    synchronized (logLock) {
-                        if (event.strategies != null) {
-                            members.get(event.id).setStrategies(event.changedId, event.strategies, event.timestamp);
-                        } else {
-                            members.get(event.id).setMatchStrategies(event.changedId, event.matchStrategies, event.timestamp);
-                        }
+                    if (event.strategies != null) {
+                        client.setStrategies(event.changedId, event.strategies, event.timestamp);
+                    } else {
+                        client.setMatchStrategies(event.changedId, event.matchStrategies, event.timestamp);
                     }
+                    event = null;
                 } catch (InterruptedException ex) {
                     ex.printStackTrace();
                 }
