@@ -392,16 +392,18 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             float payoff = config.payoffFunction.getPayoff(Client.state.id, s.timestamp / (float) config.subperiods, s.strategies, s.matchStrategies, config);
             float scaledPayoff = Client.map(payoff + config.marginalCost, payoffMin, payoffMax, 0, 1);
             float y = scaledHeight * (1 - scaledPayoff) + scaledMargin;
-            if (lastX >= 0 && x >= 0) {
-                a.vertex(lastX, lastY);
-                a.vertex(x, lastY);
-            } else if (x >= 0) {
-                a.vertex(0, lastY);
-                a.vertex(x, lastY);
-            }
-            if (x >= 0) {
-                a.vertex(x, lastY);
-                a.vertex(x, y);
+            if (lastX != x) {
+                if (lastX >= 0 && x >= 0) {
+                    a.vertex(lastX, lastY);
+                    a.vertex(x, lastY);
+                } else if (x >= 0) {
+                    a.vertex(0, lastY);
+                    a.vertex(x, lastY);
+                }
+                if (x >= 0) {
+                    a.vertex(x, lastY);
+                    a.vertex(x, y);
+                }
             }
             lastY = y;
             lastX = x;
