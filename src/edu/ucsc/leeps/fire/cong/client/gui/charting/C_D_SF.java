@@ -7,6 +7,8 @@ import edu.ucsc.leeps.fire.cong.client.State.Strategy;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -93,7 +95,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         float currX = width * Client.state.currentPercent;
         float lastX = 0;
         float lastNonDelayedX = 0;
-        float[] lastY = null;
+        Map<Integer, Float> lastY = new HashMap<Integer, Float>();
         float delayX;
         if (Client.state.currentPercent < 1) {
             delayX = width * (Client.state.currentPercent - ((float) config.infoDelay / config.length));
@@ -102,13 +104,6 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         }
         for (Strategy s : Client.state.strategiesTime) {
             float x = width * (s.timestamp / (float) (1e9 * config.length));
-            if (lastY == null) {
-                lastY = new float[s.strategies.size() + 1];
-                for (int i = 0; i < lastY.length; i++) {
-                    float initial = 0;
-                    lastY[i] = scaledHeight * (1 - initial) + scaledMargin;
-                }
-            }
             for (int id : s.strategies.keySet()) {
                 if (id != Client.state.id) {
                     if (s.delayed()) {
@@ -116,29 +111,28 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                     }
                     lastNonDelayedX = x;
                 }
-                if (id >= lastY.length) {
-                    continue;
-                }
                 float[] f = s.strategies.get(id);
                 float y = scaledHeight * (1 - f[0]) + scaledMargin;
-                a.stroke(config.currColors.get(id).getRGB());
-                a.line(lastX, lastY[id], x, lastY[id]);
-                a.line(x, lastY[id], x, y);
-                lastY[id] = y;
+                if (lastY.containsKey(id)) {
+                    a.stroke(config.currColors.get(id).getRGB());
+                    a.line(lastX, lastY.get(id), x, lastY.get(id));
+                    a.line(x, lastY.get(id), x, y);
+                }
+                lastY.put(id, y);
             }
             lastX = x;
         }
         if (delayX >= 0 && lastY != null) {
-            for (int id = 1; id < lastY.length; id++) {
+            for (int id : lastY.keySet()) {
                 if (id != Client.state.id) {
                     a.stroke(config.currColors.get(id).getRGB());
-                    a.line(lastNonDelayedX, lastY[id], delayX, lastY[id]);
+                    a.line(lastNonDelayedX, lastY.get(id), delayX, lastY.get(id));
                 }
             }
         }
         if (lastY != null && config.currColors.get(Client.state.id) != null) {
             a.stroke(config.currColors.get(Client.state.id).getRGB());
-            a.line(lastX, lastY[Client.state.id], currX, lastY[Client.state.id]);
+            a.line(lastX, lastY.get(Client.state.id), currX, lastY.get(Client.state.id));
         }
     }
 
@@ -162,6 +156,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         a.beginShape();
         a.vertex(0, payoffFloor);
         float lastY1 = 0;
+        float lastX = 0;
         for (Strategy s : Client.state.strategiesTime) {
             float percent = s.timestamp / (float) (1e9 * config.length);
             float x = width * percent;
@@ -171,9 +166,12 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             float payoff = config.payoffFunction.getPayoff(Client.state.id, percent, s.strategies, s.matchStrategies, config);
             float scaledPayoff = Client.map(payoff + config.marginalCost, payoffMin, payoffMax, 0, 1);
             float y = scaledHeight * (1 - scaledPayoff) + scaledMargin;
-            a.vertex(x, lastY1);
-            a.vertex(x, y);
+            if (lastX != x) {
+                a.vertex(x, lastY1);
+                a.vertex(x, y);
+            }
             lastY1 = y;
+            lastX = x;
         }
         a.vertex(delayX, lastY1);
         a.vertex(delayX, payoffFloor);
@@ -313,17 +311,10 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         a.fill(0);
         a.strokeWeight(2);
         float lastX = 0;
-        float[] lastY = null;
+        Map<Integer, Float> lastY = new HashMap<Integer, Float>();
         float lastNonDelayedX = 0;
         for (Strategy s : Client.state.strategiesTime) {
             float x = scaledWidth * ((s.timestamp - timeOffset) / (float) (1e9 * config.indefiniteEnd.displayLength));
-            if (lastY == null) {
-                lastY = new float[s.strategies.size() + 1];
-                for (int i = 0; i < lastY.length; i++) {
-                    float initial = 0;
-                    lastY[i] = scaledHeight * (1 - initial) + scaledMargin;
-                }
-            }
             for (int id : s.strategies.keySet()) {
                 if (id != Client.state.id) {
                     if (s.delayed()) {
@@ -331,21 +322,20 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                     }
                     lastNonDelayedX = x;
                 }
-                if (id >= lastY.length) {
-                    continue;
-                }
                 float[] f = s.strategies.get(id);
                 float y = scaledHeight * (1 - f[0]) + scaledMargin;
-                a.stroke(config.currColors.get(id).getRGB());
-                if (lastX >= 0 && x >= 0) {
-                    a.line(lastX, lastY[id], x, lastY[id]);
-                } else if (x >= 0) {
-                    a.line(0, lastY[id], x, lastY[id]);
+                if (lastY.containsKey(id)) {
+                    a.stroke(config.currColors.get(id).getRGB());
+                    if (lastX >= 0 && x >= 0) {
+                        a.line(lastX, lastY.get(id), x, lastY.get(id));
+                    } else if (x >= 0) {
+                        a.line(0, lastY.get(id), x, lastY.get(id));
+                    }
+                    if (x >= 0) {
+                        a.line(x, lastY.get(id), x, y);
+                    }
                 }
-                if (x >= 0) {
-                    a.line(x, lastY[id], x, y);
-                }
-                lastY[id] = y;
+                lastY.put(id, y);
             }
             lastX = x;
         }
@@ -359,17 +349,17 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         }
         // draw opponents from their last played strategy to the current delay point
         if (lastNonDelayedX >= 0 && delayX >= 0 && lastY != null) {
-            for (int id = 1; id < lastY.length; id++) {
+            for (int id : lastY.keySet()) {
                 if (id != Client.state.id) {
                     a.stroke(config.currColors.get(id).getRGB());
-                    a.line(lastNonDelayedX, lastY[id], delayX, lastY[id]);
+                    a.line(lastNonDelayedX, lastY.get(id), delayX, lastY.get(id));
                 }
             }
         }
         // draw from my last played strategy to the current point
         if (lastY != null && config.currColors.get(Client.state.id) != null && lastX >= 0) {
             a.stroke(config.currColors.get(Client.state.id).getRGB());
-            a.line(lastX, lastY[Client.state.id], currX, lastY[Client.state.id]);
+            a.line(lastX, lastY.get(Client.state.id), currX, lastY.get(Client.state.id));
         }
     }
 

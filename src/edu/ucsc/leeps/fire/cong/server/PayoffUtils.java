@@ -2,7 +2,9 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.client.State.Strategy;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -126,5 +128,49 @@ public class PayoffUtils {
                 Client.state.getFictitiousMatchStrategies(matchStrategy),
                 Client.state.getFictitiousStrategies(strategy),
                 FIRE.client.getConfig());
+    }
+
+    public static float getTotalPayoff(int id, float currentPercent, List<Strategy> strategiesTime, Config config) {
+        float periodPoints = 0;
+        float lastPercent = 0;
+        Map<Integer, float[]> lastStrategies = null;
+        Map<Integer, float[]> lastMatchStrategies = null;
+        for (Strategy s : strategiesTime) {
+            if (s.delayed()) {
+                break;
+            }
+            float percent;
+            if (config.subperiods == 0) {
+                percent = s.timestamp / (float) (config.length * 1e9);
+            } else {
+                percent = s.timestamp / (float) config.subperiods;
+            }
+            if (lastPercent > 0) {
+                float flowPayoff = config.payoffFunction.getPayoff(
+                        id, percent, lastStrategies, lastMatchStrategies, config);
+                float points = flowPayoff;
+                if (config.indefiniteEnd == null) {
+                    points *= (percent - lastPercent);
+                } else {
+                    points *= (percent - lastPercent) * config.length;
+                }
+                periodPoints += points;
+            }
+            lastPercent = percent;
+            lastStrategies = s.strategies;
+            lastMatchStrategies = s.matchStrategies;
+        }
+        if (config.subperiods == 0 && lastStrategies != null && lastMatchStrategies != null) {
+            float flowPayoff = config.payoffFunction.getPayoff(
+                    id, currentPercent, lastStrategies, lastMatchStrategies, config);
+            if (flowPayoff > 0) {
+                flowPayoff += config.marginalCost;
+            }
+            float delayPercent = config.infoDelay / (float) config.length;
+            if (currentPercent - delayPercent - lastPercent > 0) {
+                //periodPoints += flowPayoff * (currentPercent - delayPercent - lastPercent);
+            }
+        }
+        return periodPoints;
     }
 }

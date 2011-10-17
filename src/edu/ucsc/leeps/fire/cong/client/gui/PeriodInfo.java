@@ -5,6 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.State.Strategy;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 import java.util.Map;
 
@@ -108,46 +109,8 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
             periodPoints = FIRE.client.getPeriodPoints();
         } else {
             synchronized (Client.state.strategiesTime) {
-                periodPoints = 0;
-                float lastPercent = 0;
-                Map<Integer, float[]> lastStrategies = null;
-                Map<Integer, float[]> lastMatchStrategies = null;
-                for (Strategy s : Client.state.strategiesTime) {
-                    if (s.delayed()) {
-                        break;
-                    }
-                    float percent;
-                    if (config.subperiods == 0) {
-                        percent = s.timestamp / (float) (config.length * 1e9);
-                    } else {
-                        percent = s.timestamp / (float) config.subperiods;
-                    }
-                    if (lastPercent > 0) {
-                        float flowPayoff = config.payoffFunction.getPayoff(
-                                Client.state.id, percent, lastStrategies, lastMatchStrategies, config);
-                        float points = flowPayoff;
-                        if (config.indefiniteEnd == null) {
-                            points *= (percent - lastPercent);
-                        } else {
-                            points *= (percent - lastPercent) * config.length;
-                        }
-                        periodPoints += points;
-                    }
-                    lastPercent = percent;
-                    lastStrategies = s.strategies;
-                    lastMatchStrategies = s.matchStrategies;
-                }
-                if (config.subperiods == 0 && lastStrategies != null && lastMatchStrategies != null) {
-                    float flowPayoff = config.payoffFunction.getPayoff(
-                            Client.state.id, Client.state.currentPercent, lastStrategies, lastMatchStrategies, config);
-                    if (flowPayoff > 0) {
-                        flowPayoff += config.marginalCost;
-                    }
-                    float delayPercent = config.infoDelay / (float) config.length;
-                    if (Client.state.currentPercent - delayPercent - lastPercent > 0) {
-                        periodPoints += flowPayoff * (Client.state.currentPercent - delayPercent - lastPercent);
-                    }
-                }
+                periodPoints = PayoffUtils.getTotalPayoff(
+                        Client.state.id, Client.state.currentPercent, Client.state.strategiesTime, config);
             }
         }
     }
