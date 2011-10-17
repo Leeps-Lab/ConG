@@ -136,7 +136,7 @@ public class PayoffUtils {
         Map<Integer, float[]> lastStrategies = null;
         Map<Integer, float[]> lastMatchStrategies = null;
         for (Strategy s : strategiesTime) {
-            if (s.delayed()) {
+            if (config.subperiods == 0 && s.delayed()) {
                 break;
             }
             float percent;
@@ -157,6 +157,9 @@ public class PayoffUtils {
             lastPercent = percent;
             lastStrategies = s.strategies;
             lastMatchStrategies = s.matchStrategies;
+            if (config.subperiods != 0 && s.delayed()) {
+                break;
+            }
         }
         if (config.subperiods == 0 && lastStrategies != null && lastMatchStrategies != null) {
             float flowPayoff = config.payoffFunction.getPayoff(
