@@ -137,9 +137,12 @@ public class State {
     public static Map<Integer, float[]> copyMap(Map<Integer, float[]> m) {
         Map<Integer, float[]> copy = new HashMap<Integer, float[]>();
         for (int id : m.keySet()) {
-            float[] f = new float[m.get(id).length];
-            System.arraycopy(m.get(id), 0, f, 0, f.length);
-            copy.put(id, f);
+            float[] a = m.get(id);
+            if (a != null) {
+                float[] f = new float[a.length];
+                System.arraycopy(a, 0, f, 0, f.length);
+                copy.put(id, f);
+            }
         }
         return copy;
     }

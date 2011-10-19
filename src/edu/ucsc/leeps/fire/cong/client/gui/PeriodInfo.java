@@ -3,11 +3,9 @@ package edu.ucsc.leeps.fire.cong.client.gui;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
-import edu.ucsc.leeps.fire.cong.client.State.Strategy;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
-import java.util.Map;
 
 /**
  *
@@ -108,9 +106,12 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
         if (Client.state.currentPercent >= 1) {
             periodPoints = FIRE.client.getPeriodPoints();
         } else {
-            synchronized (Client.state.strategiesTime) {
-                periodPoints = PayoffUtils.getTotalPayoff(
-                        Client.state.id, Client.state.currentPercent, Client.state.strategiesTime, config);
+            try {
+                synchronized (Client.state.strategiesTime) {
+                    periodPoints = PayoffUtils.getTotalPayoff(
+                            Client.state.id, Client.state.currentPercent, Client.state.strategiesTime, config);
+                }
+            } catch (NullPointerException ex) {
             }
         }
     }
