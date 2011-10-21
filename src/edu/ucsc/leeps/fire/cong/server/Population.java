@@ -592,7 +592,7 @@ public class Population implements Serializable {
         mEvent.population = group.population;
         mEvent.alias = alias;
         mEvent.text = message;
-        FIRE.server.commit(mEvent, "|");
+        FIRE.server.commit(mEvent);
     }
 
     private class StrategyUpdateEvent {

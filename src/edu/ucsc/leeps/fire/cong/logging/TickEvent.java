@@ -25,4 +25,8 @@ public class TickEvent implements LogEvent {
     public float[] realizedMatchStrategy;
     public float payoff;
     public Config config;
+
+    public String getDelimiter() {
+        return ",";
+    }
 }
