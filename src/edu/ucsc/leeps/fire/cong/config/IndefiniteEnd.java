@@ -26,10 +26,10 @@ public abstract class IndefiniteEnd implements Serializable {
 
     public static class Assigned extends IndefiniteEnd {
 
-        public int subperiods;
+        public int length;
 
         public int length(Random random) {
-            return subperiods;
+            return length;
         }
     }
 }
