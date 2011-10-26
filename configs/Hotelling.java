@@ -11,24 +11,46 @@ public class Hotelling implements PayoffScriptInterface {
             Map<Integer, float[]> popStrategies,
             Map<Integer, float[]> matchPopStrategies,
             Config config) {
-        if (popStrategies.size() < 2) {
+        if (popStrategies.size() < 2) { // if only 1 person is playing, they get zero
             return 0;
         }
-        List<Float> sorted = new ArrayList<Float>();
+        
+        SortedSet<Float> sorted = new TreeSet<Float>();
         for (float[] s : popStrategies.values()) {
             sorted.add(s[0]);
         }
-        Collections.sort(sorted);
-        int i = sorted.indexOf(popStrategies.get(id)[0]);
-        float s = sorted.get(i);
-        float u;
-        if (i == 0) {
-            u = s + 0.5f * (sorted.get(i + 1) - s);
-        } else if (i == sorted.size() - 1) {
-            u = 0.5f * (s - sorted.get(i - 1)) + (1 - s);
+        
+        float s = popStrategies.get(id)[0];
+        SortedSet<Float> leftSide = sorted.headSet(s);
+        SortedSet<Float> rightSide = sorted.tailSet(s);
+        rightSide.remove(s); // remove s from right side because tailSet is inclusive
+        float left, right;
+        if (leftSide.isEmpty()) {
+            left = 0;
         } else {
-            u = 0.5f * (s - sorted.get(i - 1)) + 0.5f * (sorted.get(i + 1) - s);
+            left = leftSide.last();
         }
-        return config.get("Alpha") * 100 * u;
+        if (rightSide.isEmpty()) {
+            right = 1f;
+        } else {
+            right = rightSide.first();
+        }
+        float u;
+        if (left == 0) {
+            u = s + 0.5f * (right - s);   
+        } else if (right == 1f) {
+            u = 0.5f * (s - left) + (1 - s); 
+        } else {
+            u = 0.5f * (s - left) + 0.5f * (right - s); 
+        }
+        
+        int shared = 0; // shared must be at least 1 after the loop, as you have to share your own strategy
+        for (int otherId : popStrategies.keySet()) {
+            if (popStrategies.get(otherId)[0] == s) {
+                shared++;
+            }
+        }
+        assert shared >= 1;
+        return config.get("Alpha") * 100 * (u / shared);
     }
 }
