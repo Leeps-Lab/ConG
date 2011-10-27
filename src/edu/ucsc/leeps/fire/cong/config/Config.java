@@ -5,6 +5,7 @@ import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.config.BaseConfig;
+import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
@@ -213,8 +214,18 @@ public class Config extends BaseConfig {
         }
         return paramMap.get(key);
     }
+    
+    public Color getColor(int id) {
+        if (chatroom) {
+            return currColors.get(id);
+        }
+        if (id == FIRE.client.getID()) {
+            return colors[0];
+        }
+        return colors[1];
+    }
     public static String[] aliases = new String[]{
-        "Green", "Red", "Blue", "Orange", "Purple", "Gray", "Aqua", "Yellow"
+       "Green", "Red", "Blue", "Orange", "Purple", "Gray", "Aqua", "Yellow"
     };
     public static Color[] colors = new Color[]{
         new Color(0x1FCB1A), // green
