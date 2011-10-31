@@ -57,6 +57,21 @@ public class State {
         return strategies.get(id);
     }
 
+    public void setTarget(float[] target, Config config) {
+        Client.state.target = target;
+        if (!Float.isNaN(config.grid)) {
+            for (int i = 0; i < Client.state.target.length; i++) {
+                float r = Client.state.target[i] % config.grid;
+                if (r > config.grid / 2f) {
+                    Client.state.target[i] -= r;
+                    Client.state.target[i] += config.grid;
+                } else {
+                    Client.state.target[i] -= r;
+                }
+            }
+        }
+    }
+
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp) {
         synchronized (strategiesTime) {
             strategiesTime.add(new Strategy(timestamp, copyMap(strategies), copyMap(matchStrategies)));

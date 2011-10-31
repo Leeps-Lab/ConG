@@ -131,20 +131,24 @@ public class PayoffUtils {
     }
 
     public static float getTotalPayoff(int id, float currentPercent, List<Strategy> strategiesTime, Config config) {
+        if (config.subperiods == 0) {
+            return getContinuousTotalPayoff(id, currentPercent, strategiesTime, config);
+        } else {
+            return getSubperiodTotalPayoff(id, currentPercent, strategiesTime, config);
+        }
+    }
+
+    public static float getContinuousTotalPayoff(int id, float currentPercent, List<Strategy> strategiesTime, Config config) {
         float periodPoints = 0;
         float lastPercent = 0;
         Map<Integer, float[]> lastStrategies = null;
         Map<Integer, float[]> lastMatchStrategies = null;
         for (Strategy s : strategiesTime) {
-            if (config.subperiods == 0 && s.delayed()) {
+            if (s.delayed()) {
                 break;
             }
             float percent;
-            if (config.subperiods == 0) {
-                percent = s.timestamp / (float) (config.length * 1e9);
-            } else {
-                percent = s.timestamp / (float) config.subperiods;
-            }
+            percent = s.timestamp / (float) (config.length * 1e9);
             if (lastPercent > 0) {
                 float flowPayoff = config.payoffFunction.getPayoff(
                         id, percent, lastStrategies, lastMatchStrategies, config);
@@ -157,16 +161,35 @@ public class PayoffUtils {
             lastPercent = percent;
             lastStrategies = s.strategies;
             lastMatchStrategies = s.matchStrategies;
-            if (config.subperiods != 0 && s.delayed()) {
-                break;
-            }
         }
-        if (config.subperiods == 0 && lastStrategies != null && lastMatchStrategies != null) {
+        if (lastStrategies != null && lastMatchStrategies != null) {
             float flowPayoff = config.payoffFunction.getPayoff(
                     id, currentPercent, lastStrategies, lastMatchStrategies, config);
             float delayPercent = config.infoDelay / (float) config.length;
             if (currentPercent - delayPercent - lastPercent > 0) {
-                periodPoints += flowPayoff * (currentPercent - delayPercent - lastPercent);
+                if (config.indefiniteEnd == null) {
+                    periodPoints += flowPayoff * (currentPercent - delayPercent - lastPercent);
+                } else {
+                    periodPoints += flowPayoff * (currentPercent - delayPercent - lastPercent) * config.length;
+                }
+            }
+        }
+        return periodPoints;
+    }
+
+    public static float getSubperiodTotalPayoff(int id, float currentPercent, List<Strategy> strategiesTime, Config config) {
+        float periodPoints = 0;
+        for (Strategy s : strategiesTime) {
+            if (s.delayed()) {
+                break;
+            }
+            float percent = s.timestamp / (float) config.subperiods;
+            float flowPayoff = config.payoffFunction.getPayoff(
+                    id, percent, s.strategies, s.matchStrategies, config);
+            if (config.indefiniteEnd == null) {
+                periodPoints += percent * flowPayoff;
+            } else {
+                periodPoints += flowPayoff;
             }
         }
         return periodPoints;

@@ -104,10 +104,22 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         }
 
         if (Client.state.getMyStrategy() != null) {
-            slider.setStratValue(Client.state.getMyStrategy()[0]);
+            if (config.subperiods == 0) {
+                slider.setStratValue(Client.state.getMyStrategy()[0]);
+            } else {
+                slider.setStratValue(Client.state.target[0]);
+            }
         }
-        if (Client.state.target != null) {
-            slider.setGhostValue(Client.state.target[0]);
+
+        float newTarget = slider.getGhostValue();
+        float newPrice =
+                (newTarget * FIRE.client.getConfig().payoffFunction.getMax()) - FIRE.client.getConfig().payoffFunction.getMin();
+        if (newPrice < FIRE.client.getConfig().marginalCost) {
+            float marginalCostTarget = FIRE.client.getConfig().marginalCost / (FIRE.client.getConfig().payoffFunction.getMax() - FIRE.client.getConfig().payoffFunction.getMin());
+            slider.setGhostValue(marginalCostTarget);
+            Client.state.setTarget(new float[]{marginalCostTarget}, config);
+        } else {
+            Client.state.setTarget(new float[]{newTarget}, config);
         }
 
         if (enabled && slider.isGhostGrabbed()) {
@@ -130,17 +142,6 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
                 slider.moveGhost(mouseX);
             } else {
                 slider.moveGhost(mouseY);
-            }
-
-            float newTarget = slider.getGhostValue();
-            float newPrice =
-                    (newTarget * FIRE.client.getConfig().payoffFunction.getMax()) - FIRE.client.getConfig().payoffFunction.getMin();
-            if (newPrice < FIRE.client.getConfig().marginalCost) {
-                float marginalCostTarget = FIRE.client.getConfig().marginalCost / (FIRE.client.getConfig().payoffFunction.getMax() - FIRE.client.getConfig().payoffFunction.getMin());
-                slider.setGhostValue(marginalCostTarget);
-                Client.state.target[0] = marginalCostTarget;
-            } else {
-                Client.state.target[0] = newTarget;
             }
         }
 
@@ -230,6 +231,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
                 newTarget = mc / (max - min);
             }
             Client.state.target[0] = newTarget;
+            slider.setGhostValue(Client.state.target[0]);
         }
     }
 

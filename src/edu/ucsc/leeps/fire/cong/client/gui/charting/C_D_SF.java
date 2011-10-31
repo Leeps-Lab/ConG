@@ -256,8 +256,8 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
     }
 
     private void drawStrategyPreview(Client a) {
-        if (Client.state.subperiod < config.subperiods && Client.state.getMyStrategy() != null) {
-            float f = Client.state.getMyStrategy()[0];
+        if (Client.state.subperiod < config.subperiods && Client.state.target != null) {
+            float f = Client.state.target[0];
             float y = scaledHeight * (1 - f) + scaledMargin;
             a.stroke(114, 163, 219);
             float x0 = Client.map(Client.state.subperiod, 0, config.subperiods, 0, width);
@@ -519,8 +519,8 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
     }
 
     private void drawIndefiniteEndStrategyPreview(Client a) {
-        if (Client.state.subperiod < config.subperiods && Client.state.getMyStrategy() != null) {
-            float f = Client.state.getMyStrategy()[0];
+        if (Client.state.subperiod < config.subperiods && Client.state.target != null) {
+            float f = Client.state.target[0];
             float y = scaledHeight * (1 - f) + scaledMargin;
             int subperiod = Client.state.subperiod;
             if (subperiod > (int) (config.indefiniteEnd.displayLength * config.indefiniteEnd.percentToDisplay)) {
