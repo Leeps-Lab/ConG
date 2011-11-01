@@ -260,7 +260,7 @@ public class Population implements Serializable {
                 subperiodPayoffs.put(member, flowPayoff);
                 if (config.indefiniteEnd == null) {
                     flowPayoff *= percentElapsed;
-                } else {
+                } else if (config.subperiods == 0) {
                     float secondsElapsed = config.length * percentElapsed;
                     flowPayoff *= secondsElapsed;
                 }
