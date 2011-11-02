@@ -357,7 +357,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             }
         }
         // draw from my last played strategy to the current point
-        if (lastY != null && config.getColor(Client.state.id) != null && lastX >= 0) {
+        if (lastY != null && lastY.get(Client.state.id) != null && config.getColor(Client.state.id) != null && lastX >= 0) {
             a.stroke(config.getColor(Client.state.id).getRGB());
             a.line(lastX, lastY.get(Client.state.id), currX, lastY.get(Client.state.id));
         }
