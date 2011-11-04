@@ -133,12 +133,12 @@ public class Population implements Serializable {
 
     public void logTick(int subperiod, int secondsLeft) {
         synchronized (logLock) {
-            TickEvent tick = new TickEvent();
             // Log the tick information
             String period = FIRE.server.getConfig().period;
             float length = FIRE.server.getConfig().length;
             float percent = (float) (length * secondsLeft) / (float) length;
             for (int member : members.keySet()) {
+                TickEvent tick = new TickEvent();
                 tick.period = period;
                 tick.subject = member;
                 tick.config = FIRE.server.getConfig(member);
