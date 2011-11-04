@@ -14,9 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  *
@@ -29,7 +27,6 @@ public class Population implements Serializable {
     private Set<Tuple> groups;
     private Map<Integer, Tuple> groupMap;
     private Map<Integer, Float> subperiodPayoffs;
-    private TickEvent tick = new TickEvent();
     private Map<Integer, StrategyUpdateProcessor> strategyUpdateProcessors;
     private MessageEvent mEvent = new MessageEvent();
     private final Object logLock = new Object();
@@ -136,6 +133,7 @@ public class Population implements Serializable {
 
     public void logTick(int subperiod, int secondsLeft) {
         synchronized (logLock) {
+            TickEvent tick = new TickEvent();
             // Log the tick information
             String period = FIRE.server.getConfig().period;
             float length = FIRE.server.getConfig().length;
