@@ -83,8 +83,8 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
         String totalPointsString = "";
         String periodPointsString = "";
         String multiplierString = "";
-        totalPointsString = String.format("Cumulative Points: %.2f", totalPoints);
-        periodPointsString = String.format("Current Points: %.2f", periodPoints);
+        totalPointsString = String.format(config.totalPointsString + " %.2f", totalPoints);
+        periodPointsString = String.format(config.periodPointsString + " %.2f", periodPoints);
         applet.text(totalPointsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
         applet.text(periodPointsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
         if (FIRE.client.getConfig().showPGMultiplier) {

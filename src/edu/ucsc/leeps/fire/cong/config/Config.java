@@ -76,6 +76,8 @@ public class Config extends BaseConfig {
     public float grid;
     public int xAxisTicks;
     public int infoDelay;
+    public String periodPointsString = "Current Points:";
+    public String totalPointsString = "Previous Points:";
     public String params;
     public static final Class matrix2x2 = TwoStrategyPayoffFunction.class;
     public static final Class matrix3x3 = ThreeStrategyPayoffFunction.class;
