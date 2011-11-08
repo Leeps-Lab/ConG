@@ -212,9 +212,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.setPause(isPaused);
     }
 
-    public void tick(int secondsLeft) {
-        state.currentPercent = (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
-        periodInfo.setSecondsLeft(secondsLeft);
+    public void tick(int millisLeft) {
+        periodInfo.setSecondsLeft(millisLeft / 1000);
     }
 
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp) {
@@ -369,7 +368,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
 
         if (FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
             long length = FIRE.client.getConfig().length * 1000l;
-            state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
+            state.currentPercent = (float) (length - FIRE.client.getMillisLeft()) / (float) length;
 
             if (FIRE.client.getConfig().subperiods == 0) {
                 if (!(FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction)) {

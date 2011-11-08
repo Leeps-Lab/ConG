@@ -72,7 +72,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
                     s = String.format("Subperiod: %d", Client.state.subperiod);
                 }
             } else {
-                s = String.format("Seconds Elapsed: %.0f", FIRE.client.getElapsedMillis() / 1000f);
+                s = String.format("Seconds Elapsed: %.0f", ((config.length * 1000) - FIRE.client.getMillisLeft()) / 1000f);
             }
         }
         applet.fill(0);
