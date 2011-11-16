@@ -183,11 +183,10 @@ public class PayoffUtils {
             if (s.delayed()) {
                 break;
             }
-            float percent = s.timestamp / (float) config.subperiods;
             float flowPayoff = config.payoffFunction.getPayoff(
-                    id, percent, s.strategies, s.matchStrategies, config);
+                    id, s.timestamp / (float) config.subperiods, s.strategies, s.matchStrategies, config);
             if (config.indefiniteEnd == null) {
-                periodPoints += percent * flowPayoff;
+                periodPoints += (1 / (float) config.subperiods) * flowPayoff;
             } else {
                 periodPoints += flowPayoff;
             }
