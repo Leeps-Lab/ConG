@@ -57,9 +57,14 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         slider.sliderEnd = width;
         slider.length = width;
 
-        slider.setStratValue(Client.state.getMyStrategy()[0]);
+        if (Client.state.getMyStrategy() != null) {
+            slider.setStratValue(Client.state.getMyStrategy()[0]);
+        }
         if (Client.state.target != null) {
             slider.setGhostValue(Client.state.target[0]);
+        }
+        if (config.subperiods != 0 && Client.state.target != null) {
+            slider.setStratValue(Client.state.target[0]);
         }
 
         if (enabled && !config.trajectory && slider.isGhostGrabbed()) {
@@ -122,19 +127,19 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
 
     private void drawPlannedStrategy(Client a) {
         a.stroke(0, 0, 0, 20);
-        a.line(width * Client.state.getMyStrategy()[0], 0, width * Client.state.getMyStrategy()[0], height);
+        a.line(width * Client.state.target[0], 0, width * Client.state.target[0], height);
     }
 
     private void drawStrategy(Client applet, Color color, int id) {
+        if (Client.state.strategiesTime.size() < 1) {
+            return;
+        }
         float x, y, min, max;
         min = config.payoffFunction.getMin();
         max = config.payoffFunction.getMax();
         float payoff;
         float[] strategy;
         if (config.subperiods != 0) {
-            if (Client.state.strategiesTime.isEmpty()) {
-                return;
-            }
             payoff = config.payoffFunction.getPayoff(
                     id, 0, Client.state.getFictitiousStrategies(FIRE.client.getID(), subperiodStrategy), null, config);
             strategy = Client.state.strategiesTime.get(Client.state.strategiesTime.size() - 1).strategies.get(id);
@@ -247,8 +252,10 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
     }
 
     public void startPeriod() {
-        slider.setStratValue(Client.state.getMyStrategy()[0]);
-        slider.setGhostValue(slider.getStratValue());
+        if (Client.state.getMyStrategy() != null) {
+            slider.setStratValue(Client.state.getMyStrategy()[0]);
+            slider.setGhostValue(slider.getStratValue());
+        }
     }
 
     private void setTarget(float newTarget) {
