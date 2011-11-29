@@ -24,6 +24,7 @@ import javax.tools.JavaFileObject;
  */
 public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
 
+    public String name;
     public String source;
     public float min, max;
     public int strategies;
