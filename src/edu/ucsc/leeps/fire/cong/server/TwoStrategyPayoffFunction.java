@@ -50,7 +50,7 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
         B = 1 - A;
         a = PayoffUtils.getAverageStrategy(id, matchPopStrategies)[0];
         b = 1 - a;
-        return A * (a * Aa + b * Ba) + B * (a * Ab + b * Bb);
+        return A * (a * Aa + b * Ab) + B * (a * Ba + b * Bb);
     }
 
     public float getSubperiodBonus(int subperiod, Config config) {
