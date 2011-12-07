@@ -50,10 +50,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         members.clear();
         members.putAll(clients);
         Config config = FIRE.server.getConfig();
-        config.payoffFunction.configure();
-        if (config.counterpartPayoffFunction != null) {
-            config.counterpartPayoffFunction.configure();
-        }
         if (config.indefiniteEnd != null) {
             if (config.indefiniteEnd.subperiodLength != 0) {
                 config.subperiods = config.indefiniteEnd.length(FIRE.server.getRandom());

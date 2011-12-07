@@ -22,7 +22,7 @@ public class PayoffUtils {
         }
         float[] average = null;
         if (strategies.isEmpty()) {
-            throw new IllegalArgumentException("no strategies given");
+            return new float[]{0};
         }
         for (int match : strategies.keySet()) {
             if (average == null) {

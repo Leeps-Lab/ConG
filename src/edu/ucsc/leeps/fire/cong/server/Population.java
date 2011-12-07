@@ -43,15 +43,17 @@ public class Population implements Serializable {
         for (int member : members.keySet()) {
             strategyUpdateProcessors.put(member, new StrategyUpdateProcessor(members.get(member)));
         }
-        FIRE.server.getConfig().payoffFunction.configure();
-        if (FIRE.server.getConfig().counterpartPayoffFunction != null) {
-            FIRE.server.getConfig().counterpartPayoffFunction.configure();
-        }
-        // fixme: better way of doing this. config can auto-configure some parts?
-        if (FIRE.server.getConfig().payoffFunction.getNumStrategies() <= 2
-                && FIRE.server.getConfig().counterpartPayoffFunction != null
-                && FIRE.server.getConfig().payoffFunction instanceof TwoStrategyPayoffFunction) {
-            ((TwoStrategyPayoffFunction) FIRE.server.getConfig().counterpartPayoffFunction).isCounterpart = true;
+        for (int id : members.keySet()) {
+            FIRE.server.getConfig(id).payoffFunction.configure();
+            if (FIRE.server.getConfig(id).counterpartPayoffFunction != null) {
+                FIRE.server.getConfig(id).counterpartPayoffFunction.configure();
+            }
+            // fixme: better way of doing this. config can auto-configure some parts?
+            if (FIRE.server.getConfig(id).payoffFunction.getNumStrategies() <= 2
+                    && FIRE.server.getConfig(id).counterpartPayoffFunction != null
+                    && FIRE.server.getConfig(id).payoffFunction instanceof TwoStrategyPayoffFunction) {
+                ((TwoStrategyPayoffFunction) FIRE.server.getConfig(id).counterpartPayoffFunction).isCounterpart = true;
+            }
         }
         setupGroups();
         if (FIRE.server.getConfig().preLength == 0) {
@@ -623,7 +625,7 @@ public class Population implements Serializable {
         public synchronized void add(StrategyUpdateEvent event) {
             queue.addLast(event);
         }
-        
+
         public void endPeriod() {
             System.err.println(String.format("WARNING: dropped %s updates", dropped));
             dropped = 0;
