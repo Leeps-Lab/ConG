@@ -34,5 +34,5 @@ public interface PayoffFunction extends Serializable {
             Map<Integer, float[]> popStrategies,
             Map<Integer, float[]> matchPopStrategies);
 
-    public void configure();
+    public void configure(Config config);
 }

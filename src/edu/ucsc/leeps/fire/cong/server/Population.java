@@ -43,18 +43,6 @@ public class Population implements Serializable {
         for (int member : members.keySet()) {
             strategyUpdateProcessors.put(member, new StrategyUpdateProcessor(members.get(member)));
         }
-        for (int id : members.keySet()) {
-            FIRE.server.getConfig(id).payoffFunction.configure();
-            if (FIRE.server.getConfig(id).counterpartPayoffFunction != null) {
-                FIRE.server.getConfig(id).counterpartPayoffFunction.configure();
-            }
-            // fixme: better way of doing this. config can auto-configure some parts?
-            if (FIRE.server.getConfig(id).payoffFunction.getNumStrategies() <= 2
-                    && FIRE.server.getConfig(id).counterpartPayoffFunction != null
-                    && FIRE.server.getConfig(id).payoffFunction instanceof TwoStrategyPayoffFunction) {
-                ((TwoStrategyPayoffFunction) FIRE.server.getConfig(id).counterpartPayoffFunction).isCounterpart = true;
-            }
-        }
         setupGroups();
         if (FIRE.server.getConfig().preLength == 0) {
             setInitialStrategies();
@@ -85,9 +73,9 @@ public class Population implements Serializable {
         for (int id : members.keySet()) {
             FIRE.server.getConfig(id).currAliases = aliases;
             FIRE.server.getConfig(id).currColors = colors;
-            FIRE.server.getConfig(id).payoffFunction.configure();
+            FIRE.server.getConfig(id).payoffFunction.configure(FIRE.server.getConfig(id));
             if (FIRE.server.getConfig(id).counterpartPayoffFunction != null) {
-                FIRE.server.getConfig(id).counterpartPayoffFunction.configure();
+                FIRE.server.getConfig(id).counterpartPayoffFunction.configure(FIRE.server.getConfig(id));
             }
         }
     }

@@ -75,6 +75,6 @@ public class ThreeStrategyPayoffFunction implements PayoffFunction {
         return PayoffUtils.getAverageStrategy(id, matchPopStrategies);
     }
 
-    public void configure() {
+    public void configure(Config config) {
     }
 }

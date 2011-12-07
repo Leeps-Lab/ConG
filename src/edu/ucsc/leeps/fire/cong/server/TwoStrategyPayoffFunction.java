@@ -13,14 +13,12 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
     public float Aa;
     public float AaStart, AaEnd;
     public float Ab, Ba, Bb;
-    public boolean isCounterpart;
     public float min, max;
     public float subperiodBonus;
 
     public TwoStrategyPayoffFunction() {
         AaStart = Float.NaN;
         AaEnd = Float.NaN;
-        isCounterpart = false;
     }
 
     public float getMax() {
@@ -52,11 +50,7 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
         B = 1 - A;
         a = PayoffUtils.getAverageStrategy(id, matchPopStrategies)[0];
         b = 1 - a;
-        if (isCounterpart) {
-            return A * (a * Aa + b * Ba) + B * (a * Ab + b * Bb);
-        } else {
-            return A * (a * Aa + b * Ab) + B * (a * Ba + b * Bb);
-        }
+        return A * (a * Aa + b * Ba) + B * (a * Ab + b * Bb);
     }
 
     public float getSubperiodBonus(int subperiod, Config config) {
@@ -71,6 +65,6 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
         return PayoffUtils.getAverageStrategy(id, matchPopStrategies);
     }
 
-    public void configure() {
+    public void configure(Config config) {
     }
 }

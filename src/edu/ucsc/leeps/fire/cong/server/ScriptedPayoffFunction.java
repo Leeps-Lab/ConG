@@ -50,7 +50,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
 
     public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies, Config config) {
         if (function == null) {
-            configure();
+            configure(config);
         }
         return function.getPayoff(id, percent, popStrategies, matchPopStrategies, config);
     }
@@ -63,7 +63,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         return null;
     }
 
-    public void configure() {
+    public void configure(Config config) {
         if (scriptText == null) {
             File baseDir = new File(FIRE.server.getConfigSource()).getParentFile();
             File scriptFile = new File(baseDir, source);
@@ -113,7 +113,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
 
     public List<Diagnostic<? extends JavaFileObject>> setScript(String scriptText) {
         this.scriptText = scriptText;
-        configure();
+        configure(null);
         return errs.getDiagnostics();
     }
 
