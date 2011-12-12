@@ -12,10 +12,11 @@ import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
 import edu.ucsc.leeps.fire.cong.client.gui.BubblesSelector;
-import edu.ucsc.leeps.fire.cong.client.gui.IndefiniteEndChart;
 import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
+import edu.ucsc.leeps.fire.cong.client.gui.charting.C_D_SF;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import fullscreen.FullScreen;
 import java.awt.GraphicsEnvironment;
@@ -33,6 +34,8 @@ import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
@@ -47,7 +50,7 @@ import processing.core.PFont;
  */
 public class Client extends PApplet implements ClientInterface, FIREClientInterface, Configurable<Config> {
 
-    public static boolean ALLOW_DEBUG = System.getProperty("fire.client.debug") != null;
+    public static boolean ALLOW_DEBUG = System.getProperty("fire.debug") != null;
     public static boolean USE_OPENGL = true;
     public static State state;
     public boolean debug;
@@ -61,9 +64,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private QWERTYStrategySelector qwerty;
     private BubblesSelector bubbles;
     private Sprite selector;
+    private Sprite chart;
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
-    private IndefiniteEndChart indefiniteEndChart;
     // heatmap legend off/on
     private ChartLegend legend;
     private StrategyChanger strategyChanger;
@@ -75,6 +78,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private Agent agent;
     private boolean fullscreen = false;
     private boolean resize = false;
+    // strategy updates
+    private StrategyUpdater updater;
     //FullSreen
     private FullScreen Fullscreen;
     private WindowAdapter windowListener = new WindowAdapter() {
@@ -110,6 +115,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             agent = new Agent();
             agent.start();
         }
+        updater = new StrategyUpdater();
+        updater.start();
     }
 
     public boolean haveInitialStrategy() {
@@ -159,7 +166,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             strip.setEnabled(true);
             payoffChart.clearAll();
             strategyChart.clearAll();
-            indefiniteEndChart.clearAll();
             rChart.clearAll();
             pChart.clearAll();
             sChart.clearAll();
@@ -172,13 +178,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.startPeriod();
         strategyChanger.selector.startPeriod();
 
-        if (FIRE.client.getConfig().subperiods == 0) {
-            payoffChart.updateLines();
-            strategyChart.updateLines();
-            rChart.updateLines();
-            pChart.updateLines();
-            sChart.updateLines();
-        } else {
+        if (FIRE.client.getConfig().subperiods != 0) {
             payoffChart.endSubperiod(0);
             strategyChart.endSubperiod(0);
             rChart.endSubperiod(0);
@@ -204,30 +204,24 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             sChart.updateLines();
         }
         periodInfo.endPeriod();
-
-    }
-
-    public float getCost() {
-        return strategyChanger.getCost();
+        System.err.println("Flushing updates: " + updater.queue.size());
+        updater.queue.clear();
     }
 
     public void setIsPaused(boolean isPaused) {
         strategyChanger.setPause(isPaused);
     }
 
-    public void tick(int secondsLeft) {
-        state.currentPercent = (1 - (secondsLeft / (float) FIRE.client.getConfig().length));
-        periodInfo.setSecondsLeft(secondsLeft);
+    public void tick(int millisLeft) {
+        periodInfo.setSecondsLeft(millisLeft / 1000);
     }
 
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp) {
-        state.strategies = strategies;
-        state.strategiesTime.add(new State.Strategy(timestamp, strategies));
+        updater.queue.add(new StrategyUpdateEvent(whoChanged, strategies, null, timestamp));
     }
 
     public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies, long timestamp) {
-        state.matchStrategies = matchStrategies;
-        state.matchStrategiesTime.add(new State.Strategy(timestamp, matchStrategies));
+        updater.queue.add(new StrategyUpdateEvent(whoChanged, null, matchStrategies, timestamp));
     }
 
     public void endSubperiod(
@@ -235,24 +229,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             final Map<Integer, float[]> strategies,
             final Map<Integer, float[]> matchStrategies,
             final float payoff, final float matchPayoff) {
-        new Thread() {
-
-            @Override
-            public void run() {
-                state.subperiod = subperiod;
-                state.strategies = strategies;
-                state.matchStrategies = matchStrategies;
-                state.subperiodPayoff = payoff;
-                state.subperiodMatchPayoff = matchPayoff;
-                payoffChart.endSubperiod(subperiod);
-                strategyChart.endSubperiod(subperiod);
-                indefiniteEndChart.endSubperiod(subperiod);
-                rChart.endSubperiod(subperiod);
-                pChart.endSubperiod(subperiod);
-                sChart.endSubperiod(subperiod);
-                strategyChanger.endSubperiod(subperiod);
-            }
-        }.start();
+        state.endSubperiod(subperiod, strategies, matchStrategies);
+        strategyChanger.endSubperiod(subperiod);
     }
 
     public void newMessage(String message) {
@@ -333,6 +311,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         int strategyChartHeight = 100;
         int threeStrategyChartHeight = 30;
         int payoffChartHeight = (int) (height - strategyChartHeight - 2 * topMargin - chartMargin - 10);
+        chart = new C_D_SF(null, chartLeftOffset + 80 + leftMargin, strategyChartHeight + topMargin + chartMargin,
+                chartWidth, matrixSize, (int) (chartWidth + (7f * matrixSize) / 8f));
         strategyChart = new Chart(
                 null, chartLeftOffset + 80 + leftMargin, topMargin,
                 chartWidth, strategyChartHeight,
@@ -341,9 +321,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 null, chartLeftOffset + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
                 chartWidth, payoffChartHeight,
                 simplex, Chart.Mode.Payoff);
-        indefiniteEndChart = new IndefiniteEndChart(
-                null, chartLeftOffset + 80 + leftMargin, strategyChart.height + topMargin + chartMargin,
-                chartWidth, payoffChartHeight);
         rChart = new Chart(
                 null, chartLeftOffset + 80 + leftMargin, topMargin,
                 chartWidth, threeStrategyChartHeight,
@@ -359,76 +336,83 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         legend = new ChartLegend(
                 null, (int) (strategyChart.origin.x + strategyChart.width), (int) strategyChart.origin.y + strategyChartHeight + 3,
                 0, 0);
-
+        smooth();
         Fullscreen = new FullScreen(this);
         Fullscreen.setShortcutsEnabled(false);
     }
 
     @Override
     public void draw() {
-        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         try {
-            if (resize) {
-                setupFonts();
-                textFont(size14Bold);
-                resize = false;
-            }
+            doDraw();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
-            background(255);
-            if (FIRE.client.getConfig() == null) {
-                fill(0);
-                String s = "Please wait for the experiment to begin";
-                textSize(14);
-                text(s, Math.round(width / 2 - textWidth(s) / 2), Math.round(height / 2));
-                return;
-            }
+    private void doDraw() {
+        if (resize) {
+            setupFonts();
+            textFont(size14Bold);
+            resize = false;
+        }
 
-            if (FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
-                long length = FIRE.client.getConfig().length * 1000l;
-                state.currentPercent = (float) FIRE.client.getElapsedMillis() / (float) length;
+        background(255);
+        if (FIRE.client.getConfig() == null) {
+            fill(0);
+            String s = "Please wait for the experiment to begin";
+            textSize(14);
+            text(s, Math.round(width / 2 - textWidth(s) / 2), Math.round(height / 2));
+            return;
+        }
 
-                if (FIRE.client.getConfig().subperiods == 0) {
+        if (FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
+            long length = FIRE.client.getConfig().length * 1000l;
+            state.currentPercent = (float) (length - FIRE.client.getMillisLeft()) / (float) length;
+
+            if (FIRE.client.getConfig().subperiods == 0) {
+                if (!(FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction)) {
                     payoffChart.updateLines();
                     strategyChart.updateLines();
                     rChart.updateLines();
                     pChart.updateLines();
                     sChart.updateLines();
-                    indefiniteEndChart.update();
                 }
             }
-            if (FIRE.client.isRunningPeriod()) {
-                periodInfo.update();
-            }
+        }
+        if (FIRE.client.isRunningPeriod()) {
+            periodInfo.update();
+        }
 
-            if (selector != null) {
-                selector.draw(this);
-            }
-            if (FIRE.client.getConfig() != null) {
+        if (selector != null) {
+            selector.draw(this);
+        }
+        if (FIRE.client.getConfig() != null) {
+            if (!(FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction)) {
                 payoffChart.draw(this);
                 strategyChart.draw(this);
                 rChart.draw(this);
                 pChart.draw(this);
                 sChart.draw(this);
-                indefiniteEndChart.draw(this);
+            } else {
+                chart.draw(this);
             }
-            legend.draw(this);
-            if (FIRE.client.getConfig().preLength > 0 && !haveInitialStrategy) {
-                float textHeight = textDescent() + textAscent() + 8;
-                fill(255, 50, 50);
-                text("Please choose an initial strategy.", Math.round(periodInfo.origin.x), Math.round(periodInfo.origin.y - textHeight));
+        }
+        legend.draw(this);
+        if (FIRE.client.getConfig().preLength > 0 && !haveInitialStrategy) {
+            float textHeight = textDescent() + textAscent() + 8;
+            fill(255, 50, 50);
+            text("Please choose an initial strategy.", Math.round(periodInfo.origin.x), Math.round(periodInfo.origin.y - textHeight));
+        }
+        periodInfo.draw(this);
+        if (debug) {
+            String frameRateString = String.format("FPS: %.2f, Agent: %s", frameRate, agent.paused ? "off" : "on");
+            if (frameRate < 8) {
+                fill(255, 0, 0);
+            } else {
+                fill(0);
             }
-            periodInfo.draw(this);
-            if (debug) {
-                String frameRateString = String.format("FPS: %.2f, Agent: %s", frameRate, agent.paused ? "off" : "on");
-                if (frameRate < 8) {
-                    fill(255, 0, 0);
-                } else {
-                    fill(0);
-                }
-                text(frameRateString, 10, height - 10);
-            }
-        } catch (NullPointerException ex) {
-            ex.printStackTrace();
+            text(frameRateString, 10, height - 10);
         }
     }
 
@@ -450,7 +434,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             chatroom.configure(config);
         }
 
-        framesPerUpdate = Math.round(frameRateTarget * (1f / FIRE.client.getConfig().updatesPerSecond));
+        framesPerUpdate = Math.round(frameRateTarget * 0.5f);
         payoffChart.setVisible(true);
         if (config.payoffFunction instanceof QWERTYPayoffFunction == false) {
             legend.setVisible(true);
@@ -459,17 +443,12 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         rChart.setVisible(false);
         pChart.setVisible(false);
         sChart.setVisible(false);
-        indefiniteEndChart.setVisible(false);
         if (config.selector == Config.StrategySelector.strip) {
             if (config.indefiniteEnd != null && config.subperiods != 0) {
                 payoffChart.setVisible(false);
                 legend.setVisible(false);
                 strategyChart.setVisible(false);
-                indefiniteEndChart.setVisible(true);
-                indefiniteEndChart.width = width - 110;
-                indefiniteEndChart.origin.x = 100;
                 strip.origin.x = 10;
-                indefiniteEndChart.configChanged(config);
             } else {
                 payoffChart.setVisible(true);
                 legend.setVisible(false);
@@ -483,7 +462,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         if (config.selector == Config.StrategySelector.bubbles) {
             strategyChart.setVisible(false);
             payoffChart.setVisible(false);
-            indefiniteEndChart.setVisible(false);
             legend.setVisible(false);
             bubbles.width = Math.round(0.7f * width);
             bubbles.origin.x = 0.15f * width;
@@ -552,6 +530,52 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
         if (chatroom != null) {
             chatroom.addCharacter(ke.getKeyChar());
+        }
+    }
+
+    private class StrategyUpdateEvent {
+
+        public int changedId;
+        public Map<Integer, float[]> strategies;
+        public Map<Integer, float[]> matchStrategies;
+        public long timestamp;
+
+        public StrategyUpdateEvent(int changedId, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies, long timestamp) {
+            this.changedId = changedId;
+            this.strategies = strategies;
+            this.matchStrategies = matchStrategies;
+            this.timestamp = timestamp;
+        }
+    }
+
+    private class StrategyUpdater extends Thread {
+
+        private BlockingQueue<StrategyUpdateEvent> queue;
+
+        public StrategyUpdater() {
+            this.queue = new LinkedBlockingQueue<StrategyUpdateEvent>();
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    StrategyUpdateEvent event = queue.take();
+                    if (queue.size() >= 100) {
+                        System.err.println("WARNING: Input queue depth = " + queue.size());
+                        queue.clear();
+                    }
+                    if (event.strategies != null) {
+                        state.setStrategies(event.changedId, event.strategies, event.timestamp);
+                    } else if (event.matchStrategies != null) {
+                        state.setMatchStrategies(event.changedId, event.matchStrategies, event.timestamp);
+                    } else {
+                        throw new IllegalArgumentException("null strategy in update event");
+                    }
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
+            }
         }
     }
 
