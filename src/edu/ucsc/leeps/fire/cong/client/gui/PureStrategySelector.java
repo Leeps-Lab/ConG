@@ -100,7 +100,7 @@ public class PureStrategySelector extends Sprite implements Configurable<Config>
 
                 int playedStrat = buttons.getSelection();
                 applet.rect(matrixTopLeft.origin.x, matrixTopLeft.origin.y + playedStrat * interval, matrixSideLength, interval);
-                int cpStrat = PayoffUtils.getAverageMatchStrategy()[0] == 1 ? 0 : 1;
+                int cpStrat = PayoffUtils.getAverageStrategy(Client.state.id, Client.state.matchStrategies)[0] == 1 ? 0 : 1;
                 applet.rect(matrixTopLeft.origin.x + cpStrat * interval, matrixTopLeft.origin.y, interval, matrixSideLength);
                 /*
                 if (payoffFunction instanceof ThresholdPayoffFunction) { //payoff function dependent

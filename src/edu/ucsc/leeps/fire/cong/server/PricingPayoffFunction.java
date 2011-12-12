@@ -57,7 +57,7 @@ public class PricingPayoffFunction extends TwoStrategyPayoffFunction {
             if (Float.isNaN(E)) {
                 profit = (minPrice - config.marginalCost) / minIDs.size();
             } else {
-                profit = (((1 - (float) Math.pow(minPrice, E)) / minIDs.size()) - config.marginalCost) * minPrice;
+                profit = ((1 - E * minPrice) / minIDs.size()) * (minPrice - config.marginalCost);
             }
             if (profit < 0) {
                 profit = 0;

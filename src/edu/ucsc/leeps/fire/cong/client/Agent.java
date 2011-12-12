@@ -17,7 +17,7 @@ public class Agent extends Thread {
     public volatile boolean paused;
 
     public Agent() {
-        paused = true;
+        paused = false;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class Agent extends Thread {
         while (running) {
             if (!paused && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()
                     && Client.state != null && Client.state.target != null && FIRE.client.getConfig() != null) {
-                act(Client.state);
+                act();
             }
             try {
                 Thread.sleep(100);
@@ -36,7 +36,7 @@ public class Agent extends Thread {
         }
     }
 
-    private void act(edu.ucsc.leeps.fire.cong.client.State state) {
+    private void act() {
         if (FIRE.client.getConfig().chatroom && FIRE.client.getConfig().freeChat && FIRE.client.getRandom().nextFloat() < 0.05) {
             int n = FIRE.client.getRandom().nextInt(3);
             String s;
@@ -54,9 +54,9 @@ public class Agent extends Thread {
                     s = "def";
                     break;
             }
-            FIRE.client.getServer().newMessage(s, state.id);
+            FIRE.client.getServer().newMessage(s, Client.state.id);
         }
-        if (state.strategyChanger.isLocked()) {
+        if (Client.state.strategyChanger.isLocked()) {
             return;
         }
         Config config = FIRE.client.getConfig();
@@ -88,7 +88,7 @@ public class Agent extends Thread {
                 }
             }
             if (newTarget >= 0 && newTarget <= 1) {
-                state.target[0] = newTarget;
+                Client.state.setTarget(new float[]{newTarget}, config);
             }
         } else if (config.payoffFunction.getNumStrategies() == 3) {
             float maxPayoff = Float.NEGATIVE_INFINITY;
@@ -116,9 +116,7 @@ public class Agent extends Thread {
                     && newTarget[1] >= 0 && newTarget[1] <= 1
                     && newTarget[2] >= 0 && newTarget[2] <= 1
                     && Math.abs(1 - (newTarget[0] + newTarget[1] + newTarget[2])) <= Float.MIN_NORMAL) {
-                state.target[0] = newTarget[0];
-                state.target[1] = newTarget[1];
-                state.target[2] = newTarget[2];
+                Client.state.setTarget(newTarget, config);
             }
         }
         try {

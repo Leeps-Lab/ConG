@@ -5,6 +5,7 @@ import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
+import edu.ucsc.leeps.fire.logging.Dialogs;
 import edu.ucsc.leeps.fire.server.ServerController.State;
 import java.awt.Color;
 import java.util.HashMap;
@@ -82,7 +83,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     public void startPeriod(long periodStartTime) {
         secondsLeft = FIRE.server.getConfig().length;
         population.setPeriodStartTime();
-        configureImpulses();
         configureSubperiods();
     }
 
@@ -97,12 +97,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
         for (int id : clients.keySet()) {
             float points = FIRE.server.getPeriodPoints(id);
-            float cost = clients.get(id).getCost();
-
-            if (cost > points && !FIRE.server.getConfig().negativePayoffs) {
-                cost = points;
-            }
-            FIRE.server.setPeriodPoints(id, points - cost);
+            FIRE.server.setPeriodPoints(id, points);
         }
     }
 
@@ -138,34 +133,6 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         }, millisPerSubperiod, millisPerSubperiod);
     }
 
-    private void configureImpulses() {
-        if (FIRE.server.getConfig().impulse != 0f) {
-            long impulseTimeMillis = Math.round(
-                    (FIRE.server.getConfig().length * 1000f) * FIRE.server.getConfig().impulse);
-            FIRE.server.getTimer().schedule(new TimerTask() {
-
-                @Override
-                public void run() {
-                    doImpulse();
-                }
-            }, impulseTimeMillis);
-        }
-    }
-
-    private void doImpulse() {
-        /*
-        for (Map.Entry<Integer, ClientInterface> entry : clients.entrySet()) {
-        int id = entry.getKey();
-        ClientInterface client = entry.getValue();
-        float r = FIRE.server.getRandom().nextFloat();
-        float[] newStrategy = new float[]{r, 1 - r};
-        client.setStrategy(newStrategy);
-        strategyChanged(newStrategy, newStrategy, id);
-        }
-         * 
-         */
-    }
-
     public void newMessage(String message, int senderID) {
         if (message.equals("")) {
         } else {
@@ -198,18 +165,18 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     private class StrategyProcessor extends Thread {
+
         @Override
         public void run() {
             while (true) {
                 try {
                     StrategyChangeEvent event = strategyChangeEvents.take();
                     population.strategyChanged(event.id, event.newStrategy, event.targetStrategy);
-                    
                 } catch (InterruptedException ex) {
-                    ex.printStackTrace();
+                    Dialogs.popUpAndExit(ex);
                 }
                 if (strategyChangeEvents.size() > 10) {
-                    System.err.println("WARNING: Queue depth = " + strategyChangeEvents.size());
+                    System.err.println("WARNING: Input queue depth = " + strategyChangeEvents.size());
                 }
             }
         }

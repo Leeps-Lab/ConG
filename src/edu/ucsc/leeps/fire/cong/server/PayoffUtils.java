@@ -2,6 +2,9 @@ package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.client.State.Strategy;
+import edu.ucsc.leeps.fire.cong.config.Config;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,41 +13,36 @@ import java.util.Map;
  */
 public class PayoffUtils {
 
-    public static float[] getAverageMatchStrategy(
-            int id,
-            Map<Integer, float[]> popStrategies,
-            Map<Integer, float[]> matchPopStrategies) {
-        boolean excludeSelf;
+    public static float[] getAverageStrategy(int id, Map<Integer, float[]> strategies) {
+        Config config;
         if (FIRE.client != null) {
-            excludeSelf = FIRE.client.getConfig().excludeSelf;
+            config = FIRE.client.getConfig();
         } else {
-            excludeSelf = FIRE.server.getConfig().excludeSelf;
+            config = FIRE.server.getConfig();
         }
         float[] average = null;
-        for (int match : matchPopStrategies.keySet()) {
+        if (strategies.isEmpty()) {
+            return new float[]{0};
+        }
+        for (int match : strategies.keySet()) {
             if (average == null) {
-                average = new float[matchPopStrategies.get(match).length];
+                average = new float[strategies.get(match).length];
             }
-            if (!(excludeSelf && id == match)) {
-                float[] s = matchPopStrategies.get(match);
+            if (!(config.excludeSelf && id == match)) {
+                float[] s = strategies.get(match);
                 for (int i = 0; i < average.length; i++) {
                     average[i] += s[i];
                 }
             }
         }
         for (int i = 0; i < average.length; i++) {
-            if (excludeSelf) {
-                average[i] /= (matchPopStrategies.size() - 1);
+            if (config.excludeSelf) {
+                average[i] /= (strategies.size() - 1);
             } else {
-                average[i] /= matchPopStrategies.size();
+                average[i] /= strategies.size();
             }
         }
         return average;
-    }
-
-    public static float[] getAverageMatchStrategy() {
-        return getAverageMatchStrategy(Client.state.id,
-                Client.state.strategies, Client.state.matchStrategies);
     }
 
     /**
@@ -130,5 +128,69 @@ public class PayoffUtils {
                 Client.state.getFictitiousMatchStrategies(matchStrategy),
                 Client.state.getFictitiousStrategies(strategy),
                 FIRE.client.getConfig());
+    }
+
+    public static float getTotalPayoff(int id, float currentPercent, List<Strategy> strategiesTime, Config config) {
+        if (config.subperiods == 0) {
+            return getContinuousTotalPayoff(id, currentPercent, strategiesTime, config);
+        } else {
+            return getSubperiodTotalPayoff(id, currentPercent, strategiesTime, config);
+        }
+    }
+
+    public static float getContinuousTotalPayoff(int id, float currentPercent, List<Strategy> strategiesTime, Config config) {
+        float periodPoints = 0;
+        float lastPercent = 0;
+        Map<Integer, float[]> lastStrategies = null;
+        Map<Integer, float[]> lastMatchStrategies = null;
+        for (Strategy s : strategiesTime) {
+            if (s.delayed()) {
+                break;
+            }
+            float percent;
+            percent = s.timestamp / (float) (config.length * 1e9);
+            if (lastPercent > 0) {
+                float flowPayoff = config.payoffFunction.getPayoff(
+                        id, percent, lastStrategies, lastMatchStrategies, config);
+                if (config.indefiniteEnd == null) {
+                    periodPoints += flowPayoff * (percent - lastPercent);
+                } else {
+                    periodPoints += flowPayoff * (percent - lastPercent) * config.length;
+                }
+            }
+            lastPercent = percent;
+            lastStrategies = s.strategies;
+            lastMatchStrategies = s.matchStrategies;
+        }
+        if (lastStrategies != null && lastMatchStrategies != null) {
+            float flowPayoff = config.payoffFunction.getPayoff(
+                    id, currentPercent, lastStrategies, lastMatchStrategies, config);
+            float delayPercent = config.infoDelay / (float) config.length;
+            if (currentPercent - delayPercent - lastPercent > 0) {
+                if (config.indefiniteEnd == null) {
+                    periodPoints += flowPayoff * (currentPercent - delayPercent - lastPercent);
+                } else {
+                    periodPoints += flowPayoff * (currentPercent - delayPercent - lastPercent) * config.length;
+                }
+            }
+        }
+        return periodPoints;
+    }
+
+    public static float getSubperiodTotalPayoff(int id, float currentPercent, List<Strategy> strategiesTime, Config config) {
+        float periodPoints = 0;
+        for (Strategy s : strategiesTime) {
+            if (s.delayed()) {
+                break;
+            }
+            float flowPayoff = config.payoffFunction.getPayoff(
+                    id, s.timestamp / (float) config.subperiods, s.strategies, s.matchStrategies, config);
+            if (config.indefiniteEnd == null) {
+                periodPoints += (1 / (float) config.subperiods) * flowPayoff;
+            } else {
+                periodPoints += flowPayoff;
+            }
+        }
+        return periodPoints;
     }
 }

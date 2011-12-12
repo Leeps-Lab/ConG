@@ -3,10 +3,6 @@ package edu.ucsc.leeps.fire.cong.client;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import java.util.Map;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Delayed;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -16,15 +12,14 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
 
     private Config config;
     private volatile boolean shouldUpdate;
-    private float[] previousStrategy;
     private float[] deltaStrategy;
-    private float[] lastStrategy;
-    private float strategyDelta;
     private long nextAllowedChangeTime;
     private boolean initialLock;
-    private boolean turnTakingLock;
+    private float[] current;
+    private long updateMillis = 100;
     public Selector selector;
 
+    @SuppressWarnings({"CallToThreadStartDuringObjectConstruction", "LeakingThisInConstructor"})
     public StrategyChanger() {
         FIRE.client.addConfigListener(this);
         start();
@@ -38,17 +33,17 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         } else if (config.payoffFunction.getNumStrategies() == 3) {
             size = 3;
         }
-        previousStrategy = new float[size];
         deltaStrategy = new float[size];
-        lastStrategy = new float[size];
     }
 
     private void update() {
         if (Client.state.target == null) {
             return;
         }
-        float tickDelta = config.percentChangePerSecond / (1000f / config.strategyUpdateMillis) * 2f;
-        float[] current = Client.state.getMyStrategy();
+        float tickDelta = config.percentChangePerSecond / (1000f / updateMillis) * 2f;
+        if (current == null) {
+            current = Client.state.getMyStrategy();
+        }
         if (current.length == 1) {
             tickDelta /= 2f;
         }
@@ -63,16 +58,14 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
                 }
             }
         }
-        boolean same = true;
+        boolean almostSame = true;
         for (int i = 0; i < Client.state.target.length; i++) {
             if (Math.abs(Client.state.target[i] - current[i]) > Float.MIN_NORMAL) {
-                same = false;
+                almostSame = false;
             }
         }
-        if (same) {
-            for (int i = 0; i < Client.state.target.length; i++) {
-                Client.state.target[i] = current[i];
-            }
+        if (almostSame) {
+            System.arraycopy(current, 0, Client.state.target, 0, Client.state.target.length);
             return;
         }
         float totalDelta = 0f;
@@ -86,9 +79,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
                 current[i] += deltaStrategy[i];
             }
         } else {
-            for (int i = 0; i < current.length; i++) {
-                current[i] = Client.state.target[i];
-            }
+            System.arraycopy(Client.state.target, 0, current, 0, current.length);
         }
 
         sendUpdate();
@@ -99,16 +90,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     private void sendUpdate() {
-        float[] c = Client.state.getMyStrategy();
-        float[] current = new float[c.length];
-        System.arraycopy(c, 0, current, 0, c.length);
-        if (config.subperiods == 0) {
-            float total = 0;
-            for (int i = 0; i < previousStrategy.length; i++) {
-                total += Math.abs(previousStrategy[i] - current[i]);
-            }
-            strategyDelta += total / 2;
-        }
         FIRE.client.getServer().strategyChanged(
                 current,
                 Client.state.target,
@@ -116,6 +97,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     @Override
+    @SuppressWarnings("SleepWhileInLoop")
     public void run() {
         while (true) {
             if (config == null) {
@@ -126,14 +108,14 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
                 }
             }
 
-            long nanoWait = config.strategyUpdateMillis * 1000000;
+            long nanoWait = updateMillis * 1000000;
             long start = System.nanoTime();
 
             if (shouldUpdate) {
                 selector.setEnabled(!isLocked());
                 update();
             }
-            
+
             long elapsed = System.nanoTime() - start;
             long sleepNanos = nanoWait - elapsed;
             if (sleepNanos > 0) {
@@ -146,26 +128,20 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     public boolean isLocked() {
-        return System.currentTimeMillis() < nextAllowedChangeTime || turnTakingLock;
-    }
-
-    public float getCost() {
-        if (config == null) {
-            return 0f;
-        }
-        return strategyDelta * config.changeCost;
+        return System.currentTimeMillis() < nextAllowedChangeTime || isTurnTakingLocked(Client.state.subperiod);
     }
 
     public void startPeriod() {
         shouldUpdate = true;
-        strategyDelta = 0;
         nextAllowedChangeTime = System.currentTimeMillis();
         if (config.initialDelay != null && initialLock) {
             int delay = config.initialDelay.getDelay();
             nextAllowedChangeTime = System.currentTimeMillis() + Math.round(1000 * delay);
             initialLock = false;
         }
-        turnTakingLock = false;
+        current = new float[config.initialStrategy.length];
+        System.arraycopy(config.initialStrategy, 0, current, 0, current.length);
+        FIRE.client.getServer().strategyChanged(current, current, FIRE.client.getID());
     }
 
     public void setPause(boolean paused) {
@@ -174,18 +150,8 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     public void endSubperiod(int subperiod) {
-        if (subperiod == 1) {
-            System.arraycopy(config.initialStrategy, 0, lastStrategy, 0, lastStrategy.length);
-        }
-        float[] subperiodStrategy = Client.state.getMyStrategy();
-        float total = 0;
-        for (int i = 0; i < subperiodStrategy.length; i++) {
-            total += Math.abs(subperiodStrategy[i] - lastStrategy[i]);
-        }
-        strategyDelta += total / 2;
-        System.arraycopy(subperiodStrategy, 0, lastStrategy, 0, lastStrategy.length);
         selector.endSubperiod(subperiod);
-        turnTakingLock = isTurnTakingLocked(subperiod);
+        current = null;
     }
 
     public void endPeriod() {
@@ -195,10 +161,10 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
     }
 
     public boolean isTurnTakingLocked(int subperiod) {
-        return isTurnTakingLocked(Client.state.id, subperiod);
+        return isTurnTakingLocked(Client.state.id, subperiod, config);
     }
 
-    public boolean isTurnTakingLocked(int id, int subperiod) {
+    public static boolean isTurnTakingLocked(int id, int subperiod, Config config) {
         if (config != null && config.turnTaking) {
             if (subperiod == 0) {
                 return false;
@@ -230,38 +196,5 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         public void endSubperiod(int subperiod);
 
         public void setEnabled(boolean enabled);
-    }
-
-    public static class DelayWrapper implements Delayed {
-
-        public static enum InfoType {
-
-            STRATEGIES, MATCH_STRATEGIES
-        };
-        private Map<Integer, float[]> map;
-        private long expiry;
-        private InfoType type;
-
-        DelayWrapper(Map<Integer, float[]> mapIn, long delay, InfoType type) {
-            this.map = mapIn;
-            this.expiry = System.currentTimeMillis() + delay;
-            this.type = type;
-        }
-
-        public long getDelay(TimeUnit timeUnit) {
-            return timeUnit.convert(expiry - System.currentTimeMillis(),
-                    TimeUnit.MILLISECONDS);
-        }
-
-        public int compareTo(Delayed delayed) {
-            DelayWrapper other = (DelayWrapper) delayed;
-            if (this.expiry < other.expiry) {
-                return -1;
-            } else if (this.expiry > other.expiry) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
     }
 }

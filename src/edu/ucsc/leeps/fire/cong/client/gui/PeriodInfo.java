@@ -15,21 +15,16 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
 
     private Config config;
     private int secondsLeft;
-    private boolean displaySwitchCosts;
-    private float totalPoints, periodPoints, periodCost, multiplier;
-    private float[] myStrategy, counterStrategy;
-    private long lastChangeTime, periodStartTime;
+    private float totalPoints, periodPoints, multiplier;
     private int lineNumber;
 
     public PeriodInfo(Sprite parent, int x, int y, Client embed) {
-        super(parent, x, y, (int) embed.textWidth("Current Earnings: 000"), (int) (embed.textAscent() + embed.textDescent()));
+        super(parent, x, y, (int) embed.textWidth("Current Points: 000"), (int) (embed.textAscent() + embed.textDescent()));
         secondsLeft = 0;
         FIRE.client.addConfigListener(this);
         totalPoints = 0;
         periodPoints = 0;
-        periodCost = 0;
         multiplier = 1;
-        displaySwitchCosts = false;
     }
 
     public void configChanged(Config config) {
@@ -77,7 +72,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
                     s = String.format("Subperiod: %d", Client.state.subperiod);
                 }
             } else {
-                s = String.format("Seconds Elapsed: %.0f", FIRE.client.getElapsedMillis() / 1000f);
+                s = String.format("Seconds Elapsed: %.0f", ((config.length * 1000) - FIRE.client.getMillisLeft()) / 1000f);
             }
         }
         applet.fill(0);
@@ -85,13 +80,13 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
         lineNumber = 0;
         float textHeight = applet.textAscent() + applet.textDescent();
         applet.text(s, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
-        String totalEarningsString = "";
-        String periodEarningsString = "";
+        String totalPointsString = "";
+        String periodPointsString = "";
         String multiplierString = "";
-        totalEarningsString = String.format("Previous Earnings: %.2f", totalPoints);
-        periodEarningsString = String.format("Current Earnings: %.2f", periodPoints);
-        applet.text(totalEarningsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
-        applet.text(periodEarningsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
+        totalPointsString = String.format(config.totalPointsString + " %.2f", totalPoints);
+        periodPointsString = String.format(config.periodPointsString + " %.2f", periodPoints);
+        applet.text(totalPointsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
+        applet.text(periodPointsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
         if (FIRE.client.getConfig().showPGMultiplier) {
             multiplierString = String.format("Multipler: %.2f", multiplier);
             applet.fill(0);
@@ -108,40 +103,27 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
 
     public void update() {
         totalPoints = FIRE.client.getTotalPoints();
-        periodPoints = FIRE.client.getPeriodPoints();
-        periodCost = FIRE.client.getClient().getCost();
-        if (lastChangeTime > 0) {
-            long elapsed = System.currentTimeMillis() - lastChangeTime;
-            if (elapsed > 1000) {
-                float millisInPeriod = FIRE.client.getConfig().length * 1000f;
-                float percentInStrategy = elapsed / millisInPeriod;
-                float payoff = PayoffUtils.getPayoff();
-                periodPoints += percentInStrategy * payoff;
+        if (Client.state.currentPercent >= 1) {
+            periodPoints = FIRE.client.getPeriodPoints();
+        } else {
+            try {
+                synchronized (Client.state.strategiesTime) {
+                    periodPoints = PayoffUtils.getTotalPayoff(
+                            Client.state.id, Client.state.currentPercent, Client.state.strategiesTime, config);
+                }
+            } catch (NullPointerException ex) {
             }
         }
     }
 
     public void startPeriod() {
-        periodStartTime = System.currentTimeMillis();
         if (FIRE.client.getConfig().payoffFunction instanceof SumPayoffFunction) { //payoff function dependent
             multiplier = ((SumPayoffFunction) FIRE.client.getConfig().payoffFunction).A;
             multiplier /= Client.state.strategies.size();
         }
-        update();
     }
 
     public void endPeriod() {
-        lastChangeTime = -1;
         update();
-    }
-
-    public void setMyStrategy(float[] s) {
-        lastChangeTime = System.currentTimeMillis();
-        myStrategy = s;
-    }
-
-    public void setCounterpartStrategy(float[] s) {
-        lastChangeTime = System.currentTimeMillis();
-        counterStrategy = s;
     }
 }

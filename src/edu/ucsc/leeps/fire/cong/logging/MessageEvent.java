@@ -11,4 +11,8 @@ public class MessageEvent implements LogEvent {
     public int population;
     public String alias;
     public String text;
+
+    public String getDelimiter() {
+        return "|";
+    }
 }

@@ -103,9 +103,23 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
             return;
         }
 
-        slider.setStratValue(Client.state.getMyStrategy()[0]);
-        if (Client.state.target != null) {
-            slider.setGhostValue(Client.state.target[0]);
+        if (Client.state.getMyStrategy() != null) {
+            if (config.subperiods == 0) {
+                slider.setStratValue(Client.state.getMyStrategy()[0]);
+            } else {
+                slider.setStratValue(Client.state.target[0]);
+            }
+        }
+
+        float newTarget = slider.getGhostValue();
+        float newPrice =
+                (newTarget * FIRE.client.getConfig().payoffFunction.getMax()) - FIRE.client.getConfig().payoffFunction.getMin();
+        if (newPrice < FIRE.client.getConfig().marginalCost) {
+            float marginalCostTarget = FIRE.client.getConfig().marginalCost / (FIRE.client.getConfig().payoffFunction.getMax() - FIRE.client.getConfig().payoffFunction.getMin());
+            slider.setGhostValue(marginalCostTarget);
+            Client.state.setTarget(new float[]{marginalCostTarget}, config);
+        } else {
+            Client.state.setTarget(new float[]{newTarget}, config);
         }
 
         if (enabled && slider.isGhostGrabbed()) {
@@ -128,17 +142,6 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
                 slider.moveGhost(mouseX);
             } else {
                 slider.moveGhost(mouseY);
-            }
-
-            float newTarget = slider.getGhostValue();
-            float newPrice =
-                    (newTarget * FIRE.client.getConfig().payoffFunction.getMax()) - FIRE.client.getConfig().payoffFunction.getMin();
-            if (newPrice < FIRE.client.getConfig().marginalCost) {
-                float marginalCostTarget = FIRE.client.getConfig().marginalCost / (FIRE.client.getConfig().payoffFunction.getMax() - FIRE.client.getConfig().payoffFunction.getMin());
-                slider.setGhostValue(marginalCostTarget);
-                Client.state.target[0] = marginalCostTarget;
-            } else {
-                Client.state.target[0] = newTarget;
             }
         }
 
@@ -210,10 +213,14 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
         }
         if (e.isActionKey()) {
             float newTarget = slider.getGhostValue();
+            float grid = config.grid;
+            if (Float.isNaN(grid)) {
+                grid = 0.01f;
+            }
             if (e.getKeyCode() == KeyEvent.VK_UP) {
-                newTarget += .01f;
+                newTarget += grid;
             } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                newTarget -= .01f;
+                newTarget -= grid;
             }
             newTarget = Client.constrain(newTarget, 0, 1);
             float max = FIRE.client.getConfig().payoffFunction.getMax();
@@ -224,6 +231,7 @@ public class OneStrategyStripSelector extends Sprite implements Configurable<Con
                 newTarget = mc / (max - min);
             }
             Client.state.target[0] = newTarget;
+            slider.setGhostValue(Client.state.target[0]);
         }
     }
 

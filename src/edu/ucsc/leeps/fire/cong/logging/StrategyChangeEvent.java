@@ -15,4 +15,8 @@ public class StrategyChangeEvent implements LogEvent {
         this.newStrategy = newStrategy;
         this.targetStrategy = targetStrategy;
     }
+
+    public String getDelimiter() {
+        return ",";
+    }
 }

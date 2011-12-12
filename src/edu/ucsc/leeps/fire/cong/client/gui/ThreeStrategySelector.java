@@ -130,7 +130,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public void updateHeatmap() {
         if (visible) {
-            float[] average = PayoffUtils.getAverageMatchStrategy();
+            float[] average = PayoffUtils.getAverageStrategy(Client.state.id, Client.state.matchStrategies);
             heatmap.updateThreeStrategyHeatmap(
                     average[0], average[1], average[2],
                     this);
@@ -139,7 +139,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     @Override
     public void draw(Client applet) {
-        if (!visible) {
+        if (!visible || Client.state.matchStrategies.isEmpty()) {
             return;
         }
 
@@ -262,7 +262,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         pDrop.setLabel(myStrategy[P]);
         sDrop.setLabel(myStrategy[S]);
 
-        float[] average = PayoffUtils.getAverageMatchStrategy();
+        float[] average = PayoffUtils.getAverageStrategy(Client.state.id, Client.state.matchStrategies);;
         coords = calculateStratCoords(average[R], average[P], average[S]);
         opponent.update(coords[0], coords[1]);
 

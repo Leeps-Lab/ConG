@@ -71,7 +71,7 @@ public class QWERTYPayoffFunction extends TwoStrategyPayoffFunction {
      * This should be easier... finding a simpler way would be nice.
      */
     @Override
-    public void configure() {
+    public void configure(Config config) {
         pf1 = parseArrayString(platform1);
         pf2 = parseArrayString(platform2);
         min = Float.MAX_VALUE;
