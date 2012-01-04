@@ -101,7 +101,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         INIT_HEIGHT = 600;
         frame = new JFrame();
         frame.setTitle("CONG - " + FIRE.client.getName());
-        ((JFrame) frame).setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        ((JFrame) frame).setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(this);
         frame.setSize(INIT_WIDTH, INIT_HEIGHT);
         frame.setResizable(false);

@@ -6,7 +6,6 @@ import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.logging.StrategyChangeEvent;
 import edu.ucsc.leeps.fire.logging.Dialogs;
-import edu.ucsc.leeps.fire.server.ServerController.State;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,10 +38,8 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             final float[] newStrategy,
             final float[] targetStrategy,
             final Integer id) {
-        if (FIRE.server.getState() == State.RUNNING_PERIOD) {
-            StrategyChangeEvent newEvent = new StrategyChangeEvent(System.nanoTime(), id, newStrategy, targetStrategy);
-            strategyChangeEvents.add(newEvent);
-        }
+        StrategyChangeEvent newEvent = new StrategyChangeEvent(System.nanoTime(), id, newStrategy, targetStrategy);
+        strategyChangeEvents.add(newEvent);
     }
 
     public void configurePeriod() {
