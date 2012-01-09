@@ -24,8 +24,7 @@ public class Agent extends Thread {
     public void run() {
         running = true;
         while (running) {
-            if (!paused && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()
-                    && Client.state != null && Client.state.target != null && FIRE.client.getConfig() != null) {
+            if (!paused && FIRE.client.isRunningPeriod() && Client.state != null && Client.state.target != null && FIRE.client.getConfig() != null) {
                 act();
             }
             try {

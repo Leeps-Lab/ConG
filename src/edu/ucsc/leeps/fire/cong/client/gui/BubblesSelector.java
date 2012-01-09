@@ -100,7 +100,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
                 }
                 drawStrategy(a, color, id);
             }
-            if (config.subperiods != 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
+            if (config.subperiods != 0 && FIRE.client.isRunningPeriod()) {
                 drawPlannedStrategy(a);
             }
             if (config.objectiveColors) {

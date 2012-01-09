@@ -366,7 +366,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             return;
         }
 
-        if (FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
+        if (FIRE.client.isRunningPeriod()) {
             long length = FIRE.client.getConfig().length * 1000l;
             state.currentPercent = (float) (length - FIRE.client.getMillisLeft()) / (float) length;
 

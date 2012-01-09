@@ -92,7 +92,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
             applet.fill(0);
             applet.text(multiplierString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
         }
-        if (config.subperiods != 0 && FIRE.client.isRunningPeriod() && !FIRE.client.isPaused()) {
+        if (config.subperiods != 0 && FIRE.client.isRunningPeriod()) {
             drawSubperiodTicker(applet);
         }
     }
