@@ -147,18 +147,12 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         }
     }
 
-    public void unregister(int id) {
-        //disconnect client
-        clients.remove(id);
+    public void setClients(Map<Integer, ClientInterface> clients) {
+        this.clients = clients;
     }
 
     public static void main(String[] args) {
         FIRE.startServer();
-    }
-
-    public boolean register(int id, ClientInterface client) {
-        clients.put(id, client);
-        return true;
     }
 
     private class StrategyProcessor extends Thread {
