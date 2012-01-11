@@ -454,8 +454,6 @@ public class Population implements Serializable {
                 }
             }
         }
-        assert (randomMembers.isEmpty());
-        assert (randomGroups.isEmpty());
     }
 
     private void setInitialStrategies() {

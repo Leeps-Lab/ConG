@@ -176,7 +176,7 @@ public class Config extends BaseConfig {
         marginalCost = 0;
         probPayoffs = false;
         trajectory = false;
-        matchType = MatchGroup.pair;
+        matchType = MatchGroup.self;
         menu = new ChatMenu();
         menu.m1 = "go left";
         menu.m2 = "go right";
