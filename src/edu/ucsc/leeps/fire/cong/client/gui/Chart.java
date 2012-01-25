@@ -45,8 +45,7 @@ public class Chart extends Sprite implements Configurable<Config> {
 
     public enum Mode {
 
-        Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy,
-    };
+        Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy,};
     private Mode mode;
 
     public Chart(Sprite parent, int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode) {
@@ -348,11 +347,7 @@ public class Chart extends Sprite implements Configurable<Config> {
                         priceLine.addPayoffPoint(percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
                     }
                 } else {
-                    if (config.subperiods != 0) {
-                        matchPayoff.addPayoffPoint(percent, Client.state.subperiodMatchPayoff);
-                    } else {
-                        matchPayoff.addPayoffPoint(percent, PayoffUtils.getMatchPayoff());
-                    }
+                    matchPayoff.addPayoffPoint(percent, PayoffUtils.getMatchPayoff());
                 }
             } else {
                 float[] you = Client.state.getMyStrategy();

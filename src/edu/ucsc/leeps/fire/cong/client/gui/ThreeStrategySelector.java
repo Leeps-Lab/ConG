@@ -139,15 +139,12 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     @Override
     public void draw(Client applet) {
-        if (!visible || Client.state.matchStrategies.isEmpty()) {
-            return;
-        }
-
         if (applet.frameCount % applet.framesPerUpdate == 0 && config.subperiods == 0) {
             updateHeatmap();
         }
-
-        heatmap.draw(applet);
+        if (visible || !Client.state.matchStrategies.isEmpty()) {
+            heatmap.draw(applet);
+        }
 
         applet.pushMatrix();
         applet.translate(origin.x, origin.y);
@@ -241,9 +238,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         }
 
         float[] myStrategy = Client.state.getMyStrategy();
-
-        float[] coords = calculateStratCoords(myStrategy[R], myStrategy[P], myStrategy[S]);
-        current.update(coords[0], coords[1]);
+        if (myStrategy != null) {
+            float[] coords = calculateStratCoords(myStrategy[R], myStrategy[P], myStrategy[S]);
+            current.update(coords[0], coords[1]);
+        }
 
         if (current.visible) {
             updateDropLines(current, myStrategy, rDrop, pDrop, sDrop);
@@ -262,9 +260,13 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
         pDrop.setLabel(myStrategy[P]);
         sDrop.setLabel(myStrategy[S]);
 
-        float[] average = PayoffUtils.getAverageStrategy(Client.state.id, Client.state.matchStrategies);;
-        coords = calculateStratCoords(average[R], average[P], average[S]);
-        opponent.update(coords[0], coords[1]);
+        if (config.subperiods == 0) {
+            float[] average = PayoffUtils.getAverageStrategy(Client.state.id, Client.state.matchStrategies);
+            if (average.length == 3) {
+                float[] coords = calculateStratCoords(average[R], average[P], average[S]);
+                opponent.update(coords[0], coords[1]);
+            }
+        }
 
         rDrop.draw(applet);
         pDrop.draw(applet);
@@ -593,5 +595,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     public void endSubperiod(int subperiod) {
         updateHeatmap();
+        float[] average = PayoffUtils.getAverageStrategy(Client.state.id, Client.state.matchStrategies);
+        if (average.length == 3) {
+            float[] coords = calculateStratCoords(average[R], average[P], average[S]);
+            opponent.update(coords[0], coords[1]);
+        }
     }
 }

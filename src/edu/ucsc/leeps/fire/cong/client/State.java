@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author jpettit
  */
 public class State {
-    
+
     public int id;
     public int subperiod;
     public volatile float currentPercent;
@@ -22,14 +22,14 @@ public class State {
     public volatile float subperiodPayoff, subperiodMatchPayoff;
     public float[] target;
     public StrategyChanger strategyChanger;
-    
+
     public State(StrategyChanger changer) {
         this.strategyChanger = changer;
         strategiesTime = new LinkedList<Strategy>();
         strategies = new ConcurrentHashMap<Integer, float[]>();
         matchStrategies = new ConcurrentHashMap<Integer, float[]>();
     }
-    
+
     public void startPeriod() {
         subperiod = 0;
         currentPercent = 0;
@@ -40,11 +40,11 @@ public class State {
         matchStrategies.clear();
         setMyStrategy(FIRE.client.getConfig().initialStrategy);
     }
-    
+
     public void endPeriod() {
         currentPercent = 1f;
     }
-    
+
     public void setMyStrategy(float[] strategy) {
         float[] s = new float[strategy.length];
         System.arraycopy(strategy, 0, s, 0, s.length);
@@ -52,11 +52,11 @@ public class State {
         target = new float[strategy.length];
         System.arraycopy(strategy, 0, target, 0, target.length);
     }
-    
+
     public float[] getMyStrategy() {
         return strategies.get(id);
     }
-    
+
     public void setTarget(float[] target, Config config) {
         Client.state.target = target;
         if (!Float.isNaN(config.grid)) {
@@ -93,6 +93,8 @@ public class State {
         synchronized (strategiesTime) {
             strategiesTime.add(new Strategy(subperiod, copyMap(strategies), copyMap(matchStrategies)));
         }
+        Config config = FIRE.client.getConfig();
+        this.subperiodPayoff = config.payoffFunction.getPayoff(id, subperiod, strategies, matchStrategies, config);
     }
 
     public Map<Integer, float[]> getFictitiousStrategies(int id, float[] strategy) {
@@ -106,7 +108,7 @@ public class State {
         }
         return fake;
     }
-    
+
     public Map<Integer, float[]> getFictitiousStrategies(float[] strategy) {
         Map<Integer, float[]> fake = new HashMap<Integer, float[]>();
         for (int i : strategies.keySet()) {
@@ -118,7 +120,7 @@ public class State {
         }
         return fake;
     }
-    
+
     public Map<Integer, float[]> getFictitiousMatchStrategies(float[] matchStrategy) {
         Map<Integer, float[]> fake = new HashMap<Integer, float[]>();
         for (int i : strategies.keySet()) {
@@ -126,7 +128,7 @@ public class State {
         }
         return fake;
     }
-    
+
     public static class Strategy {
 
         public final long timestamp;

@@ -231,6 +231,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             final float payoff, final float matchPayoff) {
         state.endSubperiod(subperiod, strategies, matchStrategies);
         strategyChanger.endSubperiod(subperiod);
+        if (!(FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction)) {
+            payoffChart.updateLines();
+            strategyChart.updateLines();
+            rChart.updateLines();
+            pChart.updateLines();
+            sChart.updateLines();
+        }
     }
 
     public void newMessage(String message) {
