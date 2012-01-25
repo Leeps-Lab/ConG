@@ -142,7 +142,11 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         if (config.subperiods != 0) {
             payoff = config.payoffFunction.getPayoff(
                     id, 0, Client.state.getFictitiousStrategies(FIRE.client.getID(), subperiodStrategy), null, config);
-            strategy = Client.state.strategiesTime.get(Client.state.strategiesTime.size() - 1).strategies.get(id);
+            if (!Client.state.strategiesTime.isEmpty()) {
+                strategy = Client.state.strategiesTime.get(Client.state.strategiesTime.size() - 1).strategies.get(id);
+            } else {
+                strategy = config.initialStrategy;
+            }
         } else {
             strategy = Client.state.strategies.get(id);
             payoff = PayoffUtils.getPayoff(id, strategy);
