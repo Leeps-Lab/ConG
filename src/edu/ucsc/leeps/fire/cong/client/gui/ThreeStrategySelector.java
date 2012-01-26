@@ -274,10 +274,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
         if (config.subperiods != 0 && Client.state.subperiod == 0) {
             target.setLabel("");
-            current.setLabel("");
+            //current.setLabel("");
             hover.setLabel("");
             target.draw(applet);
-            current.draw(applet);
+            //current.draw(applet);
             hover.draw(applet);
         } else {
             target.draw(applet);
