@@ -237,7 +237,12 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             adjustLabels(Client.state.target, target, null, null);
         }
 
-        float[] myStrategy = Client.state.getMyStrategy();
+        float[] myStrategy;
+        if (config.subperiods != 0 && Client.state.subperiod == 0) {
+            myStrategy = Client.state.target;
+        } else {
+            myStrategy = Client.state.getMyStrategy();
+        }
         if (myStrategy != null) {
             float[] coords = calculateStratCoords(myStrategy[R], myStrategy[P], myStrategy[S]);
             current.update(coords[0], coords[1]);
@@ -254,7 +259,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
         current.setLabel(PayoffUtils.getPayoff());
 
-        adjustLabels(Client.state.getMyStrategy(), current, pDrop, rDrop);
+        adjustLabels(myStrategy, current, pDrop, rDrop);
 
         rDrop.setLabel(myStrategy[R]);
         pDrop.setLabel(myStrategy[P]);
@@ -274,10 +279,10 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
         if (config.subperiods != 0 && Client.state.subperiod == 0) {
             target.setLabel("");
-            //current.setLabel("");
+            current.setLabel("");
             hover.setLabel("");
             target.draw(applet);
-            //current.draw(applet);
+            current.draw(applet);
             hover.draw(applet);
         } else {
             target.draw(applet);
@@ -494,8 +499,8 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
     // calculate axisDistance entries
     /*
-     * Modifies axisDistance array. Array is invalid if any of the entries
-     * are -1.
+     * Modifies axisDistance array. Array is invalid if any of the entries are
+     * -1.
      */
     private void calculateAxisDistance(float x, float y) {
         axisDistance[S] = y;
@@ -548,9 +553,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
     }
 
     private void setTargetRPS(float targetR, float targetP, float targetS) {
-        Client.state.target[R] = targetR;
-        Client.state.target[P] = targetP;
-        Client.state.target[S] = targetS;
+        Client.state.setTarget(new float[]{targetR, targetP, targetS}, config);
         float[] coords = calculateStratCoords(Client.state.target[R], Client.state.target[P], Client.state.target[S]);
         target.update(coords[0], coords[1]);
     }
