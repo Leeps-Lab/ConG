@@ -113,7 +113,12 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
 
             if (shouldUpdate) {
                 selector.setEnabled(!isLocked());
-                update();
+                try {
+                    update();
+                } catch (Exception ex) {
+                    System.err.println("Unhandled exception updating strategy");
+                    System.err.println(ex);
+                }
             }
 
             long elapsed = System.nanoTime() - start;
