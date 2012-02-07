@@ -121,7 +121,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
             @Override
             public void run() {
-                if (subperiod <= FIRE.server.getConfig().subperiods) {
+                if (subperiod < FIRE.server.getConfig().subperiods) {
                     population.endSubperiod(subperiod);
                     population.logTick(subperiod, 0);
                     subperiod++;
