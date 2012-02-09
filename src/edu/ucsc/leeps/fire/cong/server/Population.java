@@ -71,11 +71,13 @@ public class Population implements Serializable {
             }
         }
         for (int id : members.keySet()) {
-            FIRE.server.getConfig(id).currAliases = aliases;
-            FIRE.server.getConfig(id).currColors = colors;
-            FIRE.server.getConfig(id).payoffFunction.configure(FIRE.server.getConfig(id));
-            if (FIRE.server.getConfig(id).counterpartPayoffFunction != null) {
-                FIRE.server.getConfig(id).counterpartPayoffFunction.configure(FIRE.server.getConfig(id));
+            Config config = FIRE.server.getConfig(id);
+            config.currAliases = aliases;
+            config.currColors = colors;
+            config.payoffFunction.configure(config);
+            config.agent.configure(config);
+            if (config.counterpartPayoffFunction != null) {
+                config.counterpartPayoffFunction.configure(config);
             }
         }
     }

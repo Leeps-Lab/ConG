@@ -1,16 +1,10 @@
 package edu.ucsc.leeps.fire.cong.config;
 
-import edu.ucsc.leeps.fire.cong.client.gui.Line;
-import edu.ucsc.leeps.fire.cong.server.PayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.ThreeStrategyPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.TwoStrategyPayoffFunction;
 import edu.ucsc.leeps.fire.config.BaseConfig;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.ThresholdPayoffFunction;
+import edu.ucsc.leeps.fire.cong.client.Agent;
+import edu.ucsc.leeps.fire.cong.client.gui.Line;
+import edu.ucsc.leeps.fire.cong.server.*;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,6 +73,7 @@ public class Config extends BaseConfig {
     public String periodPointsString = "Current Points:";
     public String totalPointsString = "Previous Points:";
     public String params;
+    public String agentSource;
     public static final Class matrix2x2 = TwoStrategyPayoffFunction.class;
     public static final Class matrix3x3 = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;
@@ -104,6 +99,7 @@ public class Config extends BaseConfig {
     public int[] initiatives;
     public boolean showPGMultiplier;
     public Map<String, Float> paramMap;
+    public Agent agent;
 
     public Config() {
         paid = true;
@@ -193,6 +189,7 @@ public class Config extends BaseConfig {
         grid = Float.NaN;
         showPGMultiplier = false;
         infoDelay = 0;
+        agent = new Agent();
     }
 
     public float get(String key) {

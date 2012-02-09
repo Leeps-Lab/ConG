@@ -424,6 +424,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void configChanged(final Config config) {
+        agent.agentText = config.agent.agentText;
+        agent.configure(config);
         if (config.chatroom && chatFrame == null) {
             new Thread() {
 

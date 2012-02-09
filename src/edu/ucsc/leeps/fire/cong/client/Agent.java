@@ -1,20 +1,32 @@
 package edu.ucsc.leeps.fire.cong.client;
 
+import compiler.CharSequenceCompiler;
+import compiler.CharSequenceCompilerException;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
+import edu.ucsc.leeps.fire.logging.Dialogs;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaFileObject;
 
 /**
  *
  * @author jpettit
  */
-public class Agent extends Thread {
+public class Agent extends Thread implements Serializable {
 
-    private final static int MIN_SLEEP = 250;
-    private final static int AVG_SLEEP = 250;
-    public volatile boolean running;
-    public volatile boolean paused;
+    public transient volatile boolean running;
+    public transient volatile boolean paused;
+    public String agentText;
+    private transient AgentScriptInterface function;
 
     public Agent() {
         paused = false;
@@ -24,8 +36,15 @@ public class Agent extends Thread {
     public void run() {
         running = true;
         while (running) {
-            if (!paused && FIRE.client.isRunningPeriod() && Client.state != null && Client.state.target != null && FIRE.client.getConfig() != null) {
-                act();
+            Config config = FIRE.client.getConfig();
+            if (!paused && FIRE.client.isRunningPeriod() && Client.state != null && Client.state.target != null && config != null) {
+                if (function != null) {
+                    Client.state.setTarget(function.act(config), config);
+                } else if (config.agentSource != null) {
+                    configure(config);
+                } else {
+                    test();
+                }
             }
             try {
                 Thread.sleep(100);
@@ -35,7 +54,8 @@ public class Agent extends Thread {
         }
     }
 
-    private void act() {
+    private void test() {
+        // send random chat messages
         if (FIRE.client.getConfig().chatroom && FIRE.client.getConfig().freeChat && FIRE.client.getRandom().nextFloat() < 0.05) {
             int n = FIRE.client.getRandom().nextInt(3);
             String s;
@@ -58,6 +78,7 @@ public class Agent extends Thread {
         if (Client.state.strategyChanger.isLocked()) {
             return;
         }
+        // change to a random strategy
         Config config = FIRE.client.getConfig();
         if (config.payoffFunction.getNumStrategies() <= 2) {
             float newTarget;
@@ -118,10 +139,61 @@ public class Agent extends Thread {
                 Client.state.setTarget(newTarget, config);
             }
         }
-        try {
-            Thread.sleep(MIN_SLEEP + FIRE.client.getRandom().nextInt(AVG_SLEEP));
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
+    }
+
+    public DiagnosticCollector<JavaFileObject> configure(Config config) {
+        DiagnosticCollector<JavaFileObject> errs = null;
+        if (agentText == null) {
+            File baseDir = new File(FIRE.server.getConfigSource()).getParentFile();
+            File scriptFile = new File(baseDir, config.agentSource);
+            if (!scriptFile.exists()) {
+                Dialogs.popUpErr("Error: Payoff script referenced in config does not exist.\n" + scriptFile.getAbsolutePath());
+                return errs;
+            }
+            agentText = "";
+            try {
+                FileReader reader = new FileReader(scriptFile);
+                int c = reader.read();
+                while (c != -1) {
+                    agentText += (char) c;
+                    c = reader.read();
+                }
+            } catch (IOException ex) {
+                Dialogs.popUpErr("Error reading payoff script.", ex);
+            }
         }
+
+        CharSequenceCompiler<AgentScriptInterface> compiler = new CharSequenceCompiler<AgentScriptInterface>(
+                System.class.getClassLoader(), Arrays.asList(new String[]{"-target", "1.5"}));
+        errs = new DiagnosticCollector<JavaFileObject>();
+        Class<AgentScriptInterface> clazz = null;
+        Pattern classNamePattern = Pattern.compile("public class (.*?) implements AgentScriptInterface");
+        Matcher m = classNamePattern.matcher(agentText);
+        if (!m.find() || m.groupCount() != 1) {
+            Dialogs.popUpErr("Failed to find class name");
+            return errs;
+        }
+        try {
+            clazz = compiler.compile(m.group(1), agentText, errs, new Class<?>[]{AgentScriptInterface.class});
+        } catch (ClassCastException ex1) {
+            Dialogs.popUpErr(ex1);
+        } catch (CharSequenceCompilerException ex2) {
+            Dialogs.popUpErr(ex2);
+        }
+        if (clazz != null) {
+            try {
+                function = clazz.newInstance();
+            } catch (InstantiationException ex1) {
+                Dialogs.popUpErr(ex1);
+            } catch (IllegalAccessException ex2) {
+                Dialogs.popUpErr(ex2);
+            }
+        }
+        return errs;
+    }
+
+    public static interface AgentScriptInterface {
+
+        public float[] act(Config config);
     }
 }

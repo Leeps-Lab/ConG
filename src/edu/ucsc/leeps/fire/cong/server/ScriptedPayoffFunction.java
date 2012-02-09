@@ -5,7 +5,6 @@ import compiler.CharSequenceCompilerException;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.logging.Dialogs;
-import edu.ucsc.leeps.fire.logging.Logger;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
