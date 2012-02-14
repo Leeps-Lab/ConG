@@ -75,7 +75,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private boolean haveInitialStrategy;
     private int INIT_WIDTH, INIT_HEIGHT;
     public PFont size14, size14Bold, size16, size16Bold, size18, size18Bold, size24, size24Bold;
-    private Agent agent;
+    private Agent agent = new Agent();
     private boolean fullscreen = false;
     private boolean resize = false;
     // strategy updates
@@ -112,7 +112,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         loop();
         debug = ALLOW_DEBUG;
         if (ALLOW_DEBUG) {
-            agent = new Agent();
             agent.start();
         }
         updater = new StrategyUpdater();
