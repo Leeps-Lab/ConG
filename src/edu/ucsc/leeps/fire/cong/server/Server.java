@@ -43,9 +43,17 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void configurePeriod() {
+        
+        for (Config config : FIRE.server.getDefinedConfigs()) {
+            System.err.println(config.subject);
+            // start agents
+        }
+        
         Map<Integer, ClientInterface> members = new HashMap<Integer, ClientInterface>();
-        members.clear();
         members.putAll(clients);
+        
+        // add agents to members
+        
         Config config = FIRE.server.getConfig();
         if (config.indefiniteEnd != null) {
             if (config.indefiniteEnd.subperiodLength != 0) {
@@ -96,6 +104,8 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             float points = FIRE.server.getPeriodPoints(id);
             FIRE.server.setPeriodPoints(id, points);
         }
+        
+        // stop agents
     }
 
     public void tick(int secondsLeft) {

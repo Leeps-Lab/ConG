@@ -32,11 +32,22 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
     private transient PayoffScriptInterface function;
     private transient DiagnosticCollector<JavaFileObject> errs;
 
+    public ScriptedPayoffFunction() {
+        min = Float.NaN;
+        max = Float.NaN;
+    }
+
     public float getMin() {
+        if (Float.isNaN(min) && function != null) {
+            return function.getMin();
+        }
         return min;
     }
 
     public float getMax() {
+        if (Float.isNaN(max) && function != null) {
+            return function.getMax();
+        }
         return max;
     }
 
@@ -120,5 +131,9 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
     public static interface PayoffScriptInterface {
 
         public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies, Config config);
+
+        public float getMin();
+
+        public float getMax();
     }
 }
