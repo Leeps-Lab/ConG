@@ -174,7 +174,16 @@ public class TwoStrategySelector extends Sprite implements Configurable<Config>,
     }
 
     private void drawStrategyInfo() {
-        float percent_A = Client.state.getMyStrategy()[0];
+        float percent_A;
+        if (config.subperiods != 0) {
+            percent_A = Client.state.target[0];
+        } else if (Client.state.getMyStrategy() != null) {
+            percent_A = Client.state.getMyStrategy()[0];
+        } else if (config.initialStrategy != null) {
+            percent_A = config.initialStrategy[0];
+        } else {
+            percent_A = config.initial;
+        }
         float percent_a = PayoffUtils.getAverageStrategy(Client.state.id, Client.state.matchStrategies)[0];
         if (((TwoStrategyPayoffFunction) config.payoffFunction).reverseXAxis()) {
             percent_a = 1 - percent_a;

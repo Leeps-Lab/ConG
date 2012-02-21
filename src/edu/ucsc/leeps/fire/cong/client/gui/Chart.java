@@ -40,7 +40,6 @@ public class Chart extends Sprite implements Configurable<Config> {
     // threshold
     private Line threshold;
     private HeatmapLegend heatmapLegend;
-    private int subperiod;
     private final Object lock = new Object();
 
     public enum Mode {
@@ -207,8 +206,8 @@ public class Chart extends Sprite implements Configurable<Config> {
                 || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction)) //payoff function dependent
                 && config.mixed
                 && FIRE.client.isRunningPeriod()) {
-            int start = Math.round(subperiod * interval * width);
-            int end = Math.round((subperiod + 1) * interval * width);
+            int start = Math.round(Client.state.subperiod * interval * width);
+            int end = Math.round((Client.state.subperiod + 1) * interval * width);
             int y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
             for (int x = start; x < end; x++) {
                 applet.point(x, y);
@@ -382,8 +381,8 @@ public class Chart extends Sprite implements Configurable<Config> {
         marginalCosts.get(Client.state.id).addPayoffPoint(percent, config.marginalCost);
     }
 
-    public void endSubperiod(int subperiod) {
-        this.subperiod = subperiod;
+    public void endSubperiod() {
+        int subperiod = Client.state.subperiod;
         float percentStart = (float) (subperiod - 1) / FIRE.client.getConfig().subperiods;
         float percentEnd = (float) subperiod / FIRE.client.getConfig().subperiods;
         float marginalCostStart = (float) (subperiod) / FIRE.client.getConfig().subperiods;

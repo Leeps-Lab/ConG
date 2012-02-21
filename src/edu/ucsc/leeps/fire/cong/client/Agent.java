@@ -143,6 +143,9 @@ public class Agent extends Thread implements Serializable {
 
     public DiagnosticCollector<JavaFileObject> configure(Config config) {
         DiagnosticCollector<JavaFileObject> errs = null;
+        if (config.agentSource == null) {
+            return errs;
+        }
         if (agentText == null) {
             File baseDir = new File(FIRE.server.getConfigSource()).getParentFile();
             File scriptFile = new File(baseDir, config.agentSource);

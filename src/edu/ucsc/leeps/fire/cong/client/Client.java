@@ -178,11 +178,11 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         strategyChanger.selector.startPeriod();
 
         if (FIRE.client.getConfig().subperiods != 0) {
-            payoffChart.endSubperiod(0);
-            strategyChart.endSubperiod(0);
-            rChart.endSubperiod(0);
-            pChart.endSubperiod(0);
-            sChart.endSubperiod(0);
+            payoffChart.endSubperiod();
+            strategyChart.endSubperiod();
+            rChart.endSubperiod();
+            pChart.endSubperiod();
+            sChart.endSubperiod();
         }
         periodInfo.startPeriod();
     }
