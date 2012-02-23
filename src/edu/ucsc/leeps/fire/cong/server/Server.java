@@ -43,17 +43,17 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     }
 
     public void configurePeriod() {
-        
+
         for (Config config : FIRE.server.getDefinedConfigs()) {
             System.err.println(config.subject);
             // start agents
         }
-        
+
         Map<Integer, ClientInterface> members = new HashMap<Integer, ClientInterface>();
         members.putAll(clients);
-        
+
         // add agents to members
-        
+
         Config config = FIRE.server.getConfig();
         if (config.indefiniteEnd != null) {
             if (config.indefiniteEnd.subperiodLength != 0) {
@@ -104,7 +104,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             float points = FIRE.server.getPeriodPoints(id);
             FIRE.server.setPeriodPoints(id, points);
         }
-        
+
         // stop agents
     }
 
@@ -123,7 +123,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         if (FIRE.server.getConfig().subperiods == 0) {
             return;
         }
-        long millisPerSubperiod = Math.round(
+        final long millisPerSubperiod = Math.round(
                 (FIRE.server.getConfig().length / (float) FIRE.server.getConfig().subperiods) * 1000);
         FIRE.server.getTimer().scheduleAtFixedRate(new TimerTask() {
 
@@ -133,7 +133,8 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             public void run() {
                 if (subperiod < FIRE.server.getConfig().subperiods) {
                     population.endSubperiod(subperiod);
-                    population.logTick(subperiod, 0);
+                    int secondsLeft = FIRE.server.getConfig().length - (subperiod * (int) (millisPerSubperiod / 1000));
+                    population.logTick(subperiod, secondsLeft);
                     subperiod++;
                 }
             }

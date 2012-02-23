@@ -44,7 +44,8 @@ public class Chart extends Sprite implements Configurable<Config> {
 
     public enum Mode {
 
-        Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy,};
+        Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy,
+    };
     private Mode mode;
 
     public Chart(Sprite parent, int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode) {
@@ -202,13 +203,23 @@ public class Chart extends Sprite implements Configurable<Config> {
         // live strategy preview
         float interval = 1f / (float) config.subperiods;
         if (Client.state.target != null
-                && (mode == Mode.TwoStrategy
+                && (mode == Mode.TwoStrategy || mode == Mode.RStrategy || mode == Mode.PStrategy || mode == Mode.SStrategy
                 || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction)) //payoff function dependent
-                && config.mixed
                 && FIRE.client.isRunningPeriod()) {
             int start = Math.round(Client.state.subperiod * interval * width);
             int end = Math.round((Client.state.subperiod + 1) * interval * width);
-            int y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
+            int y;
+            if (mode == Mode.TwoStrategy || (mode == Mode.Payoff && config.payoffFunction instanceof PricingPayoffFunction)) {
+                y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
+            } else if (mode == Mode.RStrategy) {
+                y = height - Math.round(Client.state.target[0] * scaledHeight) - scaledMargin;
+            } else if (mode == Mode.PStrategy) {
+                y = height - Math.round(Client.state.target[1] * scaledHeight) - scaledMargin;
+            } else if (mode == Mode.SStrategy) {
+                y = height - Math.round(Client.state.target[2] * scaledHeight) - scaledMargin;
+            } else {
+                y = 0;
+            }
             for (int x = start; x < end; x++) {
                 applet.point(x, y);
                 applet.point(x, y + 1);
@@ -268,8 +279,9 @@ public class Chart extends Sprite implements Configurable<Config> {
     }
 
     /**
-     * Clear actual payoff for you, your counterpart,and strategies over time for
-     * combinations of strategies for two or three strategy payoff functions.
+     * Clear actual payoff for you, your counterpart,and strategies over time
+     * for combinations of strategies for two or three strategy payoff
+     * functions.
      */
     public void clearAll() {
         synchronized (lock) {
