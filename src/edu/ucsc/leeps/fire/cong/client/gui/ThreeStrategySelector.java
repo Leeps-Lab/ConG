@@ -172,10 +172,25 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
 
             if (rock.circularIsHit(applet.mouseX, applet.mouseY)) {
                 rock.enlarge();
+                if (target.isGrabbed() && !config.mixed) {
+                    Client.state.target[R] = 1;
+                    Client.state.target[P] = 0;
+                    Client.state.target[S] = 0;
+                }
             } else if (paper.circularIsHit(applet.mouseX, applet.mouseY)) {
                 paper.enlarge();
+                if (target.isGrabbed() && !config.mixed) {
+                    Client.state.target[R] = 0;
+                    Client.state.target[P] = 1;
+                    Client.state.target[S] = 0;
+                }
             } else if (scissors.circularIsHit(applet.mouseX, applet.mouseY)) {
                 scissors.enlarge();
+                if (target.isGrabbed() && !config.mixed) {
+                    Client.state.target[R] = 0;
+                    Client.state.target[P] = 0;
+                    Client.state.target[S] = 1;
+                }
             }
 
             calculateAxisDistance(mouseX - rock.origin.x, rock.origin.y - mouseY);
@@ -187,7 +202,7 @@ public class ThreeStrategySelector extends Sprite implements Configurable<Config
             }
 
             if (mouseInTriangle) {
-                if (target.isGrabbed()) {
+                if (target.isGrabbed() && config.mixed) {
                     Client.state.target[S] = axisDistance[S] / maxDist;
                     Client.state.target[P] = axisDistance[P] / maxDist;
                     Client.state.target[R] = 1 - Client.state.target[S] - Client.state.target[P];
