@@ -26,7 +26,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     private Map<Integer, String> aliases;
     private Map<Integer, Color> colors;
     private int secondsLeft;
-
+    
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
         strategyChangeEvents = new LinkedBlockingQueue<StrategyChangeEvent>();

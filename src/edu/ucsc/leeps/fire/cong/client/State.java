@@ -22,6 +22,7 @@ public class State {
     public volatile float subperiodPayoff, subperiodMatchPayoff;
     public float[] target;
     public StrategyChanger strategyChanger;
+    public long periodStartTime;
 
     public State(StrategyChanger changer) {
         this.strategyChanger = changer;
@@ -31,6 +32,7 @@ public class State {
     }
 
     public void startPeriod() {
+        periodStartTime = System.currentTimeMillis();
         subperiod = 0;
         currentPercent = 0;
         synchronized (strategiesTime) {

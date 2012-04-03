@@ -7,19 +7,38 @@ import edu.ucsc.leeps.fire.cong.client.State.Strategy;
 import edu.ucsc.leeps.fire.cong.client.StrategyChanger;
 import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
  * @author leeps
  */
+class Point{
+  public int color;
+  public float x, y;
+  
+  Point(float x, float y, int color){
+      this.x = x;
+      this.y = y;
+      this.color = color;
+  }
+}
 public class C_D_SF extends Sprite implements Configurable<Config> {
 
     private int NORMAL_ORIGIN_X, EXTENDED_ORIGIN_X, NORMAL_WIDTH, EXTENDED_WIDTH;
     private final float scaledHeight, scaledMargin;
     private float yVal, yMin, yMax;
     private Config config;
+    private Queue<Integer> revealTimes = new LinkedList<Integer>();
+    private long timeFromPeriodStart;
+    private List<Point> points = new ArrayList<Point>();
+
 
     @SuppressWarnings("LeakingThisInConstructor")
     public C_D_SF(Sprite parent, int x, int y, int width, int height, int extended_width) {
@@ -31,10 +50,20 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         this.EXTENDED_ORIGIN_X = x - (extended_width - width);
         scaledHeight = 0.9f * height;
         scaledMargin = (height - scaledHeight) / 2;
+        
+        timeFromPeriodStart = 0;
+        for(int i = 0; i < 30; i+= 1)
+            revealTimes.add(i);
+        
+        for(Integer k : revealTimes){
+            System.err.println("Reveal time: " + k);
+        }
+       
     }
-
     @Override
     public void draw(Client a) {
+        timeFromPeriodStart = TimeUnit.MILLISECONDS.toSeconds((System.currentTimeMillis() - Client.state.periodStartTime));
+        
         if (!visible) {
             return;
         }
@@ -50,7 +79,8 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                 drawContinuousInfoDelayArea(a);
                 synchronized (Client.state.strategiesTime) {
                     drawContinuousPayoffArea(a);
-                    drawContinuousStrategyLines(a);
+                   // drawContinuousStrategyLines(a);
+                    drawContinuousStrategyPoints(a);
                 }
             } else {
                 drawSubperiodInfoDelayArea(a);
@@ -87,7 +117,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         a.popMatrix();
     }
 
-    private void drawContinuousStrategyLines(Client a) {
+      private void drawContinuousStrategyLines(Client a) { 
         // strategy lines, 1 per player in strategies, scaled from smin to smax
         a.stroke(0);
         a.fill(0);
@@ -135,7 +165,86 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             a.line(lastX, lastY.get(Client.state.id), currX, lastY.get(Client.state.id));
         }
     }
-
+    
+    private void drawContinuousStrategyPoints(Client a) {
+        Map<Integer, Float> lastY = new HashMap<Integer, Float>();
+        float currX = width * Client.state.currentPercent;
+        float delayX;
+        if (Client.state.currentPercent < 1) {
+            delayX = width * (Client.state.currentPercent - ((float) config.infoDelay / config.length));
+        } else {
+            delayX = currX;
+        }
+        
+        // draw opponets strategy points
+        for(Point p : points){
+            a.fill(p.color);
+            a.ellipse(p.x, p.y, 7, 7);
+        }
+        
+        // strategy lines, 1 per player in strategies, scaled from smin to smax
+        a.stroke(0);
+        a.fill(0);
+        a.strokeWeight(2);
+        
+        float lastX = 0;
+        float lastNonDelayedX = 0;
+       
+        for (Strategy s : Client.state.strategiesTime) {
+            float x = width * (s.timestamp / (float) (1e9 * config.length));
+            for (int id : s.strategies.keySet()) {
+                if (id != Client.state.id) {
+                    if (s.delayed()) {
+                        continue;
+                    }
+                    lastNonDelayedX = x;
+                }
+                float[] f = s.strategies.get(id);
+                float y = scaledHeight * (1 - f[0]) + scaledMargin;
+                if (lastY.containsKey(id)) {
+                    if(id  == Client.state.id){
+                        a.stroke(config.getColor(id).getRGB());
+                        a.line(lastX, lastY.get(id), x, lastY.get(id));
+                        a.line(x, lastY.get(id), x, y);
+                    }
+                }
+                lastY.put(id, y);
+            }
+            lastX = x;
+        }
+        if (delayX >= 0 && lastY != null) {
+            for (int id : lastY.keySet()) {
+                if (id != Client.state.id) {
+                    a.stroke(config.getColor(id).getRGB());
+                    //a.line(lastNonDelayedX, lastY.get(id), delayX, lastY.get(id));
+                   }
+                }
+            }
+        
+        if (lastY != null && config.getColor(Client.state.id) != null) {
+            a.stroke(config.getColor(Client.state.id).getRGB());
+            a.line(lastX, lastY.get(Client.state.id), currX, lastY.get(Client.state.id));
+        }
+        
+        
+         if(revealTimes.size() > 0){
+            if(timeFromPeriodStart >= revealTimes.peek()){
+                Strategy currStrategy = Client.state.strategiesTime.get(Client.state.strategies.size() - 1);
+                for(int id: currStrategy.strategies.keySet()){
+                    if(id != Client.state.id){ // get oponents strategy
+                         if (currStrategy.delayed()) {
+                            continue;
+                         }
+                         else{
+                           points.add(new Point(delayX, lastY.get(id), config.getColor(id).getRGB()));
+                           revealTimes.poll();
+                         }
+                    }
+                }
+            }
+        }
+}
+    
     private void drawContinuousPayoffArea(Client a) {
         // for all time, draw flow payoff area for this player
         float delayX;

@@ -89,7 +89,6 @@ public class Population implements Serializable {
             group.update(-1, periodStartTime);
         }
     }
-
     public void strategyChanged(int whoChanged, float[] newStrategy, float[] targetStrategy) {
         groupMap.get(whoChanged).update(whoChanged, newStrategy, targetStrategy);
     }
