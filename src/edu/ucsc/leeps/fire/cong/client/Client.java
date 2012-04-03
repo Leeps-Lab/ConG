@@ -3,17 +3,7 @@ package edu.ucsc.leeps.fire.cong.client;
 import edu.ucsc.leeps.fire.FIREClientInterface;
 import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
-import edu.ucsc.leeps.fire.cong.client.gui.TwoStrategySelector;
-import edu.ucsc.leeps.fire.cong.client.gui.PeriodInfo;
-import edu.ucsc.leeps.fire.cong.client.gui.ChartLegend;
-import edu.ucsc.leeps.fire.cong.client.gui.ThreeStrategySelector;
-import edu.ucsc.leeps.fire.cong.client.gui.Chart;
-import edu.ucsc.leeps.fire.cong.client.gui.PureStrategySelector;
-import edu.ucsc.leeps.fire.cong.client.gui.OneStrategyStripSelector;
-import edu.ucsc.leeps.fire.cong.client.gui.Chatroom;
-import edu.ucsc.leeps.fire.cong.client.gui.BubblesSelector;
-import edu.ucsc.leeps.fire.cong.client.gui.QWERTYStrategySelector;
-import edu.ucsc.leeps.fire.cong.client.gui.Sprite;
+import edu.ucsc.leeps.fire.cong.client.gui.*;
 import edu.ucsc.leeps.fire.cong.client.gui.charting.C_D_SF;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
@@ -23,12 +13,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
@@ -64,7 +49,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     private QWERTYStrategySelector qwerty;
     private BubblesSelector bubbles;
     private Sprite selector;
-    private Sprite chart;
+    private C_D_SF chart;
     private Chart payoffChart, strategyChart;
     private Chart rChart, pChart, sChart;
     // heatmap legend off/on
@@ -168,6 +153,7 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             rChart.clearAll();
             pChart.clearAll();
             sChart.clearAll();
+            chart.clearAll();
         }
         simplex.setEnabled(true);
         if (chatroom != null) {
