@@ -1,8 +1,8 @@
 package edu.ucsc.leeps.fire.cong.server;
 
 import compiler.CharSequenceCompiler;
-import compiler.CharSequenceCompilerException;
 import edu.ucsc.leeps.fire.cong.FIRE;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.logging.Dialogs;
 import java.io.File;
@@ -65,6 +65,12 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         }
         return function.getPayoff(id, percent, popStrategies, matchPopStrategies, config);
     }
+    
+    public void draw(Client a) {
+        if (function != null) {
+            function.draw(a);
+        }
+    }
 
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
         return null;
@@ -106,10 +112,8 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         }
         try {
             clazz = compiler.compile(m.group(1), scriptText, errs, new Class<?>[]{PayoffScriptInterface.class});
-        } catch (ClassCastException ex1) {
-            Dialogs.popUpErr(ex1);
-        } catch (CharSequenceCompilerException ex2) {
-            Dialogs.popUpErr(ex2);
+        } catch (Exception ex) {
+            Dialogs.popUpErr(ex);
         }
         if (clazz != null) {
             try {
@@ -135,5 +139,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         public float getMin();
 
         public float getMax();
+        
+        public void draw(Client a);
     }
 }

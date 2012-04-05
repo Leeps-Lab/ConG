@@ -9,6 +9,10 @@ public abstract class Sprite implements Serializable {
     public transient int width, height;
     public transient Sprite parent;
     public boolean visible;
+    
+    public Sprite() {
+        origin = new FPoint(0, 0);
+    }
 
     public Sprite(Sprite parent, float x, float y, int width, int height) {
         origin = new FPoint(x, y);

@@ -8,6 +8,8 @@ import edu.ucsc.leeps.fire.cong.client.gui.charting.C_D_SF;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction;
+import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction.PayoffScriptInterface;
 import fullscreen.FullScreen;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
@@ -355,6 +357,10 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             String s = "Please wait for the experiment to begin";
             textSize(14);
             text(s, Math.round(width / 2 - textWidth(s) / 2), Math.round(height / 2));
+            return;
+        } else if (FIRE.client.getConfig().payoffFunction instanceof ScriptedPayoffFunction) {
+            ScriptedPayoffFunction payoffFunction = (ScriptedPayoffFunction) FIRE.client.getConfig().payoffFunction;
+            payoffFunction.draw(this);
             return;
         }
 
