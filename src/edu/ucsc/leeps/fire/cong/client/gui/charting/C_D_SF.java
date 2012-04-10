@@ -25,6 +25,11 @@ class Point {
         this.y = y;
         this.color = color;
     }
+
+    @Override
+    public String toString(){
+        return("x: " + x + " y: " + y);
+    }
 }
 
 public class C_D_SF extends Sprite implements Configurable<Config> {
@@ -37,6 +42,10 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
     private long timeFromPeriodStart;
     private List<Point> revealedPoints;
     private List<Point> revealedAverages;
+    private boolean addedLastPoint;
+    private boolean isFirstPoint;
+    private int avgY;
+    private int indxOflastStrategy;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public C_D_SF(Sprite parent, int x, int y, int width, int height, int extended_width) {
@@ -48,7 +57,10 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         this.EXTENDED_ORIGIN_X = x - (extended_width - width);
         scaledHeight = 0.9f * height;
         scaledMargin = (height - scaledHeight) / 2;
-
+        addedLastPoint = false;
+        isFirstPoint = true;
+        avgY = 0;
+        indxOflastStrategy = 0;
         timeFromPeriodStart = 0;
         for (int i = 0; i < 30; i += 1) {
             revealTimes.add(i);
@@ -62,6 +74,8 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
     public void clearAll() {
        revealedPoints = new ArrayList<Point>();
        revealedAverages = new ArrayList<Point>();
+       addedLastPoint = false;
+       isFirstPoint = true;
     }
 
     @Override
@@ -175,6 +189,12 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         Map<Integer, Float> lastY = new HashMap<Integer, Float>();
         float currX = width * Client.state.currentPercent;
         float delayX;
+        
+        float payoffMin = config.payoffFunction.getMin();//added
+        float payoffMax = config.payoffFunction.getMax();//added
+        float scaledMarginalCost = Client.map(config.marginalCost, payoffMin, payoffMax, 0, 1);//added
+        float payoffFloor = scaledHeight * (1 - scaledMarginalCost) + scaledMargin;//added
+        
         if (Client.state.currentPercent < 1) {
             delayX = width * (Client.state.currentPercent - ((float) config.infoDelay / config.length));
         } else {
@@ -193,8 +213,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         a.strokeWeight(2);
 
         float lastX = 0;
-        float lastNonDelayedX = 0;
-
+        
         for (Strategy s : Client.state.strategiesTime) {
             float x = width * (s.timestamp / (float) (1e9 * config.length));
             for (int id : s.strategies.keySet()) {
@@ -202,7 +221,6 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                     if (s.delayed()) {
                         continue;
                     }
-                    lastNonDelayedX = x;
                 }
                 float[] f = s.strategies.get(id);
                 float y = scaledHeight * (1 - f[0]) + scaledMargin;
@@ -217,23 +235,16 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             }
             lastX = x;
         }
-        if (delayX >= 0 && lastY != null) {
-            for (int id : lastY.keySet()) {
-                if (id != Client.state.id) {
-                    a.stroke(config.getColor(id).getRGB());
-                    //a.line(lastNonDelayedX, lastY.get(id), delayX, lastY.get(id));
-                }
-            }
-        }
-
         if (lastY != null && config.getColor(Client.state.id) != null) {
             a.stroke(config.getColor(Client.state.id).getRGB());
             a.line(lastX, lastY.get(Client.state.id), currX, lastY.get(Client.state.id));
         }
-
-
         if (revealTimes.size() > 0) {
             if (timeFromPeriodStart >= revealTimes.peek()) {
+                if(isFirstPoint){
+                    indxOflastStrategy = 0;
+                    isFirstPoint = false;
+                }
                 Strategy currStrategy = Client.state.strategiesTime.get(Client.state.strategies.size() - 1);
                 for (int id : currStrategy.strategies.keySet()) {
                     if (id != Client.state.id) { // get oponents strategy
@@ -241,16 +252,33 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                             continue;
                         } else {
                             revealedPoints.add(new Point(delayX, lastY.get(id), config.getColor(id).getRGB()));
-                            revealedAverages.add(new Point(delayX, lastY.get(id), new Color(164, 218, 148, 200).getRGB()));
                             revealTimes.poll();
                         }
                     }
                 }
+                calculateAverageY(indxOflastStrategy);
+                revealedAverages.add(new Point(delayX, avgY, new Color(164, 218, 148, 200).getRGB()));
+                indxOflastStrategy = Client.state.strategiesTime.size() - 1;
             }
         }
+        else if(TimeUnit.MICROSECONDS.toSeconds(FIRE.client.getMillisLeft()) == 0 && !addedLastPoint){
+                Strategy currStrategy = Client.state.strategiesTime.get(Client.state.strategies.size() - 1);
+                for (int id : currStrategy.strategies.keySet()) {
+                    if (id != Client.state.id) { // get oponents strategy
+                        if (currStrategy.delayed()) {
+                            continue;
+                        } else {
+                            revealedPoints.add(new Point(lastX, lastY.get(id), config.getColor(id).getRGB()));
+                            addedLastPoint = true;
+                        }
+                    }
+                }
+            }
     }
 
     private void drawContinuousAveragePayoffArea(Client a) {
+        if(revealedAverages.isEmpty())
+            return;
         a.noStroke();
         a.fill(164, 218, 148, 200);
         float payoffMin = config.payoffFunction.getMin();
@@ -273,6 +301,42 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         a.endShape(Client.CLOSE);
     }
 
+    private void calculateAverageY(int lastStrategyIndex){
+        //System.err.println("Calculating from: " + lastStrategyIndex + " to: " + Client.state.strategiesTime.size());
+        // for all time, draw flow payoff area for this player
+        float delayX;
+        if (Client.state.currentPercent < 1) {
+            delayX = width * (Client.state.currentPercent - ((float) config.infoDelay / config.length));
+        } else {
+            delayX = width;
+        }
+        if (delayX < 0) {
+            return;
+        }
+        float payoffMin = config.payoffFunction.getMin();
+        float payoffMax = config.payoffFunction.getMax();
+       
+        float y = 0;
+        int count = 0;
+        for (int i = lastStrategyIndex; i < Client.state.strategiesTime.size(); i++) {
+            Strategy s = Client.state.strategiesTime.get(i);
+            float percent = s.timestamp / (float) (1e9 * config.length);
+//            if (s.delayed()) {
+//                break;
+//            }
+           float payoff = config.payoffFunction.getPayoff(Client.state.id, percent, s.strategies, s.matchStrategies, config);
+           float scaledPayoff = Client.map(payoff + config.marginalCost, payoffMin, payoffMax, 0, 1);
+            y += scaledHeight * (1 - scaledPayoff) + scaledMargin;
+            count++;
+        }
+        if(count > 0){
+            avgY = (int) (y / count);
+        }
+        else{
+            avgY = 0;
+        }
+    }
+    
     private void drawContinuousPayoffArea(Client a) {
         // for all time, draw flow payoff area for this player
         float delayX;
