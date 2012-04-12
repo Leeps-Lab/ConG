@@ -178,11 +178,6 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         Map<Integer, Float> lastY = new HashMap<Integer, Float>();
         float delayX;
         
-        float payoffMin = config.payoffFunction.getMin();//added
-        float payoffMax = config.payoffFunction.getMax();//added
-        float scaledMarginalCost = Client.map(config.marginalCost, payoffMin, payoffMax, 0, 1);//added
-        float payoffFloor = scaledHeight * (1 - scaledMarginalCost) + scaledMargin;//added
-        
         if (Client.state.currentPercent < 1) {
             delayX = width * (Client.state.currentPercent - ((float) config.infoDelay / config.length));
         } else {
