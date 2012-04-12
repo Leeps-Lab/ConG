@@ -92,6 +92,8 @@ public class Config extends BaseConfig {
     public float initial0 = Float.NaN;
     public float initial1 = Float.NaN;
     public int matchID;
+    public String revealTimes;
+    public boolean revealAll;
     public boolean isCounterpart;
     public int playersInGroup;
     public int population, match;
