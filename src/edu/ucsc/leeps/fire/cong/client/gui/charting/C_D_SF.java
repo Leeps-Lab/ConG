@@ -55,6 +55,15 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
     public void clearAll() {
         revealedPoints = new HashMap<Integer, List<Point>>();
         revealedXs = new ArrayList<Float>();
+        revealTimes.clear();
+        if (!config.revealTimes.isEmpty()) {
+            String[] timeStrings = config.revealTimes.split(",");
+            revealTimes.add(0f);
+            for (int i = 0; i < timeStrings.length; i++) {
+                revealTimes.add(Float.parseFloat(timeStrings[i]));
+            }
+            revealTimes.add(1f);
+        }
     }
 
     @Override
@@ -215,8 +224,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                 a.ellipse(p.x, p.y, 7, 7);
             }
         }
-
-        if (revealTimes.size() > 0 && delayX / width >= revealTimes.peek()) {
+        if (!revealTimes.isEmpty() && delayX / width >= revealTimes.peek()) {
             Strategy sampledStrategy = Client.state.strategiesTime.get(0);
             for (Strategy s : Client.state.strategiesTime) {
                 float p = s.timestamp - Client.state.periodStartTime * 1000000f;
@@ -872,10 +880,14 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         }
         yMin = config.payoffFunction.getMin();
         yMax = config.payoffFunction.getMax();
-        String[] timeStrings = config.revealTimes.split(",");
-        for (int i = 0; i < timeStrings.length; i++) {
-            revealTimes.add(Float.parseFloat(timeStrings[i]));
+        if (!config.revealTimes.isEmpty()) {
+            revealTimes.clear();
+            String[] timeStrings = config.revealTimes.split(",");
+            revealTimes.add(0f);
+            for (int i = 0; i < timeStrings.length; i++) {
+                revealTimes.add(Float.parseFloat(timeStrings[i]));
+            }
+            revealTimes.add(1f);
         }
-        revealTimes.add(1f);
     }
 }
