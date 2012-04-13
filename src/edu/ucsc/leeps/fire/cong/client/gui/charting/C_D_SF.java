@@ -429,9 +429,6 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         int reveal = 0;
         float average = 0;
         int samples = 0;
-        if (Client.state.id == 1) {
-            System.err.println("BEGIN");
-        }
         float beginRevealedX = scaledWidth * ((revealedXs.get(0) - timeOffset) / (float) (1e9 * config.indefiniteEnd.displayLength));
         for (float x = beginRevealedX - 100; x <= width; x++) {
             if (payoffs.peek() != null && x >= payoffs.peek().x) {
@@ -439,9 +436,6 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             }
             float revealedX = scaledWidth * ((revealedXs.get(reveal) - timeOffset) / (float) (1e9 * config.indefiniteEnd.displayLength));
             if (x >= revealedX) {
-                if (Client.state.id == 1) {
-                    System.err.println(reveal + ": " + average + ", " + samples);
-                }
                 average /= samples;
                 float scaledPayoff = Client.map(average + config.marginalCost, payoffMin, payoffMax, 0, 1);
                 float y = scaledHeight * (1 - scaledPayoff) + scaledMargin;
@@ -459,9 +453,6 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                 average += currPayoff.y;
                 samples++;
             }
-        }
-        if (Client.state.id == 1) {
-            System.err.println("END\n");
         }
         float scaledMarginalCost = Client.map(config.marginalCost, payoffMin, payoffMax, 0, 1);
         float payoffFloor = scaledHeight * (1 - scaledMarginalCost) + scaledMargin;
