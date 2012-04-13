@@ -32,7 +32,7 @@ public class State {
     }
 
     public void startPeriod() {
-        periodStartTime = System.currentTimeMillis();
+        periodStartTime = System.nanoTime();
         subperiod = 0;
         currentPercent = 0;
         synchronized (strategiesTime) {

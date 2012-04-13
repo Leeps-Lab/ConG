@@ -59,8 +59,12 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         if (!config.revealTimes.isEmpty()) {
             String[] timeStrings = config.revealTimes.split(",");
             revealTimes.add(0f);
+            float time = 0;
             for (int i = 0; i < timeStrings.length; i++) {
-                revealTimes.add(Float.parseFloat(timeStrings[i]));
+                time += Float.parseFloat(timeStrings[i]);
+                if (time < config.length) {
+                    revealTimes.add(time / (float) config.length);
+                }
             }
             revealTimes.add(1f);
         }
@@ -106,8 +110,16 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             if (config.subperiods == 0) {
                 drawContinuousIndefiniteEndInfoDelayArea(a);
                 synchronized (Client.state.strategiesTime) {
-                    drawContinuousIndefiniteEndPayoffArea(a);
-                    drawContinuousIndefiniteEndStrategyLines(a);
+                    if (config.revealTimes.isEmpty() || (Client.state.currentPercent >= 1 && config.revealAll)) {
+                        drawContinuousIndefiniteEndPayoffArea(a);
+                        drawContinuousIndefiniteEndStrategyLines(a);
+                    }
+                    if (!config.revealTimes.isEmpty()) {
+                        if (Client.state.currentPercent < 1 || !config.revealAll) {
+                            drawContinuousIndefiniteEndAveragePayoffArea(a);
+                        }
+                        drawContinuousIndefiniteEndStrategyPoints(a);
+                    }
                 }
             } else {
                 drawSubperiodIndefiniteEndInfoDelayArea(a);
@@ -126,6 +138,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         // outline
         drawOutline(a);
         a.popMatrix();
+        updateRevealedPoints();
     }
 
     private void drawContinuousStrategyLines(Client a) {
@@ -224,28 +237,6 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                 a.ellipse(p.x, p.y, 7, 7);
             }
         }
-        if (!revealTimes.isEmpty() && delayX / width >= revealTimes.peek()) {
-            Strategy sampledStrategy = Client.state.strategiesTime.get(0);
-            for (Strategy s : Client.state.strategiesTime) {
-                float p = s.timestamp - Client.state.periodStartTime * 1000000f;
-                if (p >= revealTimes.peek() || s.delayed()) {
-                    break;
-                }
-                sampledStrategy = s;
-            }
-            for (int id : sampledStrategy.strategies.keySet()) {
-                if (id != Client.state.id) { // get opponents strategy
-                    if (!revealedPoints.containsKey(id)) {
-                        revealedPoints.put(id, new ArrayList<Point>());
-                    }
-                    float[] f = sampledStrategy.strategies.get(id);
-                    float y = scaledHeight * (1 - f[0]) + scaledMargin;
-                    revealedPoints.get(id).add(new Point(delayX, y));
-                }
-            }
-            revealedXs.add(delayX);
-            revealTimes.poll();
-        }
     }
 
     private void drawContinuousAveragePayoffArea(Client a) {
@@ -253,7 +244,6 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             return;
         }
         Queue<Point> payoffs = new LinkedList<Point>();
-        // for all time, draw flow payoff area for this player
         float delayX;
         if (Client.state.currentPercent < 1) {
             delayX = width * (Client.state.currentPercent - ((float) config.infoDelay / config.length));
@@ -320,6 +310,125 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             a.vertex(revealedXs.get(reveal - 1), payoffFloor);
         }
         a.endShape(Client.CLOSE);
+    }
+
+    private void drawContinuousIndefiniteEndStrategyPoints(Client a) {
+        if (Client.state.strategiesTime.isEmpty()) {
+            return;
+        }
+        // strategy lines, 1 per player in strategies, scaled from smin to smax
+        float lastT = config.length * Client.state.currentPercent * 1e9f;
+        float scaledWidth = width;
+        float timeOffset = 0;
+        scaledWidth *= config.indefiniteEnd.percentToDisplay;
+        if (lastT - config.indefiniteEnd.displayLength * 1e9 > 0) {
+            timeOffset = lastT - config.indefiniteEnd.displayLength * 1e9f;
+        }
+        a.stroke(0);
+        a.fill(0);
+        a.strokeWeight(2);
+        float lastX = 0;
+        Map<Integer, Float> lastY = new HashMap<Integer, Float>();
+        for (Strategy s : Client.state.strategiesTime) {
+            float x = scaledWidth * ((s.timestamp - timeOffset) / (float) (1e9 * config.indefiniteEnd.displayLength));
+            for (int id : s.strategies.keySet()) {
+                if (id != Client.state.id) {
+                    if (s.delayed()) {
+                        continue;
+                    }
+                }
+                float[] f = s.strategies.get(id);
+                float y = scaledHeight * (1 - f[0]) + scaledMargin;
+                if (Client.state.id == id && lastY.containsKey(id)) {
+                    a.stroke(config.getColor(id).getRGB());
+                    if (lastX >= 0 && x >= 0) {
+                        a.line(lastX, lastY.get(id), x, lastY.get(id));
+                    } else if (x >= 0) {
+                        a.line(0, lastY.get(id), x, lastY.get(id));
+                    }
+                    if (x >= 0) {
+                        a.line(x, lastY.get(id), x, y);
+                    }
+                }
+                lastY.put(id, y);
+            }
+            lastX = x;
+        }
+        float currX = scaledWidth;
+        if ((Client.state.currentPercent * config.length) < config.indefiniteEnd.displayLength) {
+            currX = scaledWidth * ((Client.state.currentPercent * config.length) / config.indefiniteEnd.displayLength);
+        }
+        // draw from my last played strategy to the current point
+        if (lastY != null && lastY.get(Client.state.id) != null && config.getColor(Client.state.id) != null && lastX >= 0) {
+            a.stroke(config.getColor(Client.state.id).getRGB());
+            a.line(lastX, lastY.get(Client.state.id), currX, lastY.get(Client.state.id));
+        }
+        if (revealedPoints == null) {
+            return;
+        }
+        // draw opponents strategy points
+        for (int id : revealedPoints.keySet()) {
+            for (Point p : revealedPoints.get(id)) {
+                float x = scaledWidth * ((p.x - timeOffset) / (float) (1e9 * config.indefiniteEnd.displayLength));
+                a.stroke(config.getColor(id).getRGB());
+                a.fill(config.getColor(id).getRGB());
+                if (x >= 0) {
+                    a.ellipse(x, p.y, 7, 7);
+                }
+            }
+        }
+    }
+
+    private void drawContinuousIndefiniteEndAveragePayoffArea(Client a) {
+        if (Client.state.strategiesTime.isEmpty() || revealedPoints == null || revealedPoints.isEmpty()) {
+            return;
+        }
+        Queue<Point> payoffs = new LinkedList<Point>();
+        // strategy lines, 1 per player in strategies, scaled from smin to smax
+        float lastT = config.length * Client.state.currentPercent * 1e9f;
+        float scaledWidth = width * config.indefiniteEnd.percentToDisplay;
+        float timeOffset = 0;
+        if (lastT - config.indefiniteEnd.displayLength * 1e9 > 0) {
+            timeOffset = lastT - config.indefiniteEnd.displayLength * 1e9f;
+        }
+        float lastX = 0;
+        Strategy lastStrategy = null;
+        for (Strategy s : Client.state.strategiesTime) {
+            float x = scaledWidth * ((s.timestamp - timeOffset) / (float) (1e9 * config.indefiniteEnd.displayLength));
+            if (s.delayed()) {
+                continue;
+            }
+            float payoff = config.payoffFunction.getPayoff(Client.state.id, 0, s.strategies, s.matchStrategies, config);
+            if (lastX != x) {
+                payoffs.add(new Point(lastX, payoff));
+            }
+            lastX = x;
+            lastStrategy = s;
+        }
+        if (lastStrategy != null) {
+            float currX = scaledWidth;
+            if ((Client.state.currentPercent * config.length) < config.indefiniteEnd.displayLength) {
+                currX = scaledWidth * ((Client.state.currentPercent * config.length) / config.indefiniteEnd.displayLength);
+            }
+            float delayX = currX - scaledWidth * (config.infoDelay / (float) config.indefiniteEnd.displayLength);
+            if (Client.state.currentPercent >= 1) {
+                delayX = currX;
+            }
+            if (delayX < 0) {
+                delayX = 0;
+            }
+            float payoff = config.payoffFunction.getPayoff(Client.state.id, 0, lastStrategy.strategies, lastStrategy.matchStrategies, config);
+            payoffs.add(new Point(delayX, payoff));
+        }
+        float payoffMin = config.payoffFunction.getMin();
+        float payoffMax = config.payoffFunction.getMax();
+        a.noStroke();
+        a.fill(164, 218, 148, 200);
+        for (Point p : payoffs) {
+            float scaledPayoff = Client.map(p.y + config.marginalCost, payoffMin, payoffMax, 0, 1);
+            float y = scaledHeight * (1 - scaledPayoff) + scaledMargin;
+            a.ellipse(p.x, y, 5, 5);
+        }
     }
 
     private void drawContinuousPayoffArea(Client a) {
@@ -575,7 +684,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             if (s.delayed()) {
                 continue;
             }
-            float payoff = config.payoffFunction.getPayoff(Client.state.id, s.timestamp / (float) config.subperiods, s.strategies, s.matchStrategies, config);
+            float payoff = config.payoffFunction.getPayoff(Client.state.id, 0, s.strategies, s.matchStrategies, config);
             float scaledPayoff = Client.map(payoff + config.marginalCost, payoffMin, payoffMax, 0, 1);
             float y = scaledHeight * (1 - scaledPayoff) + scaledMargin;
             if (lastX != x) {
@@ -860,6 +969,42 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         }
     }
 
+    private void updateRevealedPoints() {
+        float currX = width * Client.state.currentPercent;
+        float delayX;
+        if (Client.state.currentPercent < 1) {
+            delayX = width * (Client.state.currentPercent - ((float) config.infoDelay / config.length));
+        } else {
+            delayX = currX;
+        }
+        if (!revealTimes.isEmpty() && delayX / width >= revealTimes.peek()) {
+            Strategy sampledStrategy = Client.state.strategiesTime.get(0);
+            for (Strategy s : Client.state.strategiesTime) {
+                float p = s.timestamp - Client.state.periodStartTime * 1e6f;
+                if (p >= revealTimes.peek() || s.delayed()) {
+                    break;
+                }
+                sampledStrategy = s;
+            }
+            for (int id : sampledStrategy.strategies.keySet()) {
+                if (id != Client.state.id) { // get opponents strategy
+                    if (!revealedPoints.containsKey(id)) {
+                        revealedPoints.put(id, new ArrayList<Point>());
+                    }
+                    float[] f = sampledStrategy.strategies.get(id);
+                    float y = scaledHeight * (1 - f[0]) + scaledMargin;
+                    float x = delayX;
+                    if (config.indefiniteEnd != null) {
+                        x = System.nanoTime() - Client.state.periodStartTime - config.infoDelay * 1e9f;
+                    }
+                    revealedPoints.get(id).add(new Point(x, y));
+                }
+            }
+            revealedXs.add(delayX);
+            revealTimes.poll();
+        }
+    }
+
     public void configChanged(Config config) {
         this.config = config;
         switch (config.selector) {
@@ -880,14 +1025,5 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         }
         yMin = config.payoffFunction.getMin();
         yMax = config.payoffFunction.getMax();
-        if (!config.revealTimes.isEmpty()) {
-            revealTimes.clear();
-            String[] timeStrings = config.revealTimes.split(",");
-            revealTimes.add(0f);
-            for (int i = 0; i < timeStrings.length; i++) {
-                revealTimes.add(Float.parseFloat(timeStrings[i]));
-            }
-            revealTimes.add(1f);
-        }
     }
 }
