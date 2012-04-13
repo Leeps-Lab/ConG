@@ -316,8 +316,9 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         if (Client.state.strategiesTime.isEmpty()) {
             return;
         }
+        float currentPercent = Client.state.currentPercent >= 1 ? 1 : (System.nanoTime() - Client.state.periodStartTime) / (config.length * 1e9f);
         // strategy lines, 1 per player in strategies, scaled from smin to smax
-        float lastT = config.length * Client.state.currentPercent * 1e9f;
+        float lastT = config.length * currentPercent * 1e9f;
         float scaledWidth = width;
         float timeOffset = 0;
         scaledWidth *= config.indefiniteEnd.percentToDisplay;
@@ -355,8 +356,8 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
             lastX = x;
         }
         float currX = scaledWidth;
-        if ((Client.state.currentPercent * config.length) < config.indefiniteEnd.displayLength) {
-            currX = scaledWidth * ((Client.state.currentPercent * config.length) / config.indefiniteEnd.displayLength);
+        if ((currentPercent * config.length) < config.indefiniteEnd.displayLength) {
+            currX = scaledWidth * ((currentPercent * config.length) / config.indefiniteEnd.displayLength);
         }
         // draw from my last played strategy to the current point
         if (lastY != null && lastY.get(Client.state.id) != null && config.getColor(Client.state.id) != null) {
@@ -380,16 +381,28 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
     }
 
     private void drawContinuousIndefiniteEndAveragePayoffArea(Client a) {
-        if (Client.state.strategiesTime.isEmpty() || revealedPoints == null || revealedPoints.isEmpty()) {
+        if (Client.state.strategiesTime.isEmpty() || revealedPoints == null || revealedPoints.isEmpty() || revealedXs.isEmpty()) {
             return;
         }
         Queue<Point> payoffs = new LinkedList<Point>();
         // strategy lines, 1 per player in strategies, scaled from smin to smax
-        float lastT = config.length * Client.state.currentPercent * 1e9f;
+        float currentPercent = (System.nanoTime() - Client.state.periodStartTime) / (config.length * 1e9f);
+        float lastT = config.length * currentPercent * 1e9f;
         float scaledWidth = width * config.indefiniteEnd.percentToDisplay;
         float timeOffset = 0;
         if (lastT - config.indefiniteEnd.displayLength * 1e9 > 0) {
             timeOffset = lastT - config.indefiniteEnd.displayLength * 1e9f;
+        }
+        float currX = scaledWidth;
+        if ((currentPercent * config.length) < config.indefiniteEnd.displayLength) {
+            currX = scaledWidth * ((currentPercent * config.length) / config.indefiniteEnd.displayLength);
+        }
+        float delayX = currX - scaledWidth * (config.infoDelay / (float) config.indefiniteEnd.displayLength);
+        if (currentPercent >= 1) {
+            delayX = currX;
+        }
+        if (delayX < 0) {
+            delayX = 0;
         }
         float lastX = 0;
         Strategy lastStrategy = null;
@@ -399,76 +412,60 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                 continue;
             }
             float payoff = config.payoffFunction.getPayoff(Client.state.id, 0, s.strategies, s.matchStrategies, config);
-            if (lastX != x && lastX >= 0) {
-                payoffs.add(new Point(lastX, payoff));
-            }
+            payoffs.add(new Point(lastX, payoff));
             lastX = x;
             lastStrategy = s;
         }
         if (lastStrategy != null) {
-            float currX = scaledWidth;
-            if ((Client.state.currentPercent * config.length) < config.indefiniteEnd.displayLength) {
-                currX = scaledWidth * ((Client.state.currentPercent * config.length) / config.indefiniteEnd.displayLength);
-            }
-            float delayX = currX - scaledWidth * (config.infoDelay / (float) config.indefiniteEnd.displayLength);
-            if (Client.state.currentPercent >= 1) {
-                delayX = currX;
-            }
-            if (delayX < 0) {
-                delayX = 0;
-            }
             float payoff = config.payoffFunction.getPayoff(Client.state.id, 0, lastStrategy.strategies, lastStrategy.matchStrategies, config);
             payoffs.add(new Point(delayX, payoff));
-        }
-        
-        float delayX = width;
-        if (Client.state.currentPercent < 1) {
-            delayX = width * (Client.state.currentPercent - ((float) config.infoDelay / config.length));
-        }
-        if (delayX < 0) {
-            delayX = 0;
         }
         float payoffMin = config.payoffFunction.getMin();
         float payoffMax = config.payoffFunction.getMax();
         a.noStroke();
         a.fill(164, 218, 148, 200);
-        float scaledMarginalCost = Client.map(config.marginalCost, payoffMin, payoffMax, 0, 1);
-        float payoffFloor = scaledHeight * (1 - scaledMarginalCost) + scaledMargin;
-        //a.beginShape();
-        a.ellipse(0, payoffFloor, 5, 5);
+        List<Point> revealedAveragePayoffs = new ArrayList<Point>();
         Point currPayoff = payoffs.poll();
         int reveal = 0;
         float average = 0;
         int samples = 0;
-        float lastRevealedX = 0;
-        for (int x = 0; x <= width; x++) {
-            if (x > delayX) {
-                break;
-            }
+        float beginRevealedX = scaledWidth * ((revealedXs.get(0) - timeOffset) / (float) (1e9 * config.indefiniteEnd.displayLength));
+        for (float x = beginRevealedX - 100; x <= width; x++) {
             if (payoffs.peek() != null && x >= payoffs.peek().x) {
                 currPayoff = payoffs.poll();
             }
-            float revealedX = reveal >= revealedXs.size() ? 0 : scaledWidth * ((revealedXs.get(reveal) - timeOffset) / (float) (1e9 * config.indefiniteEnd.displayLength));
+            float revealedX = scaledWidth * ((revealedXs.get(reveal) - timeOffset) / (float) (1e9 * config.indefiniteEnd.displayLength));
             if (x >= revealedX) {
                 average /= samples;
                 float scaledPayoff = Client.map(average + config.marginalCost, payoffMin, payoffMax, 0, 1);
                 float y = scaledHeight * (1 - scaledPayoff) + scaledMargin;
-                a.ellipse(lastRevealedX, y, 5, 5);
-                a.ellipse(revealedX, y, 5, 5);
+                if (revealedX >= 0) {
+                    revealedAveragePayoffs.add(new Point(revealedX, y));
+                }
                 average = 0;
                 samples = 0;
                 reveal++;
+                if (reveal >= revealedXs.size()) {
+                    break;
+                }
             }
             if (currPayoff != null) {
                 average += currPayoff.y;
                 samples++;
             }
-            lastRevealedX = revealedX;
         }
-        if (reveal > 0) {
-            a.ellipse(lastRevealedX, payoffFloor, 5, 5);
+        float scaledMarginalCost = Client.map(config.marginalCost, payoffMin, payoffMax, 0, 1);
+        float payoffFloor = scaledHeight * (1 - scaledMarginalCost) + scaledMargin;
+        a.beginShape();
+        a.vertex(0, payoffFloor);
+        lastX = 0;
+        for (Point p : revealedAveragePayoffs) {
+            a.vertex(lastX, p.y);
+            a.vertex(p.x, p.y);
+            lastX = p.x;
         }
-        //a.endShape(Client.CLOSE);
+        a.vertex(lastX, payoffFloor);
+        a.endShape(Client.CLOSE);
     }
 
     private void drawContinuousPayoffArea(Client a) {

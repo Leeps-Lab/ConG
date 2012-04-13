@@ -9,7 +9,6 @@ import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.QWERTYPayoffFunction;
 import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction;
-import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction.PayoffScriptInterface;
 import fullscreen.FullScreen;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
@@ -204,11 +203,11 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp) {
-        updater.queue.add(new StrategyUpdateEvent(whoChanged, strategies, null, timestamp));
+        updater.queue.add(new StrategyUpdateEvent(whoChanged, strategies, null, System.nanoTime() - Client.state.periodStartTime));
     }
 
     public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies, long timestamp) {
-        updater.queue.add(new StrategyUpdateEvent(whoChanged, null, matchStrategies, timestamp));
+        updater.queue.add(new StrategyUpdateEvent(whoChanged, null, matchStrategies, System.nanoTime() - Client.state.periodStartTime));
     }
 
     public void endSubperiod(
