@@ -2,6 +2,7 @@ package edu.ucsc.leeps.fire.cong.client;
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
+import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class State {
     public float[] target;
     public StrategyChanger strategyChanger;
     public long periodStartTime;
+    public float totalPoints, periodPoints;
 
     public State(StrategyChanger changer) {
         this.strategyChanger = changer;
@@ -41,10 +43,27 @@ public class State {
         strategies.clear();
         matchStrategies.clear();
         setMyStrategy(FIRE.client.getConfig().initialStrategy);
+        updatePoints();
     }
 
     public void endPeriod() {
         currentPercent = 1f;
+        updatePoints();
+    }
+
+    public void updatePoints() {
+        totalPoints = FIRE.client.getTotalPoints();
+        if (Client.state.currentPercent >= 1) {
+            periodPoints = FIRE.client.getPeriodPoints();
+        } else {
+            try {
+                synchronized (Client.state.strategiesTime) {
+                    periodPoints = PayoffUtils.getTotalPayoff(
+                            Client.state.id, Client.state.currentPercent, Client.state.strategiesTime, FIRE.client.getConfig());
+                }
+            } catch (NullPointerException ex) {
+            }
+        }
     }
 
     public void setMyStrategy(float[] strategy) {

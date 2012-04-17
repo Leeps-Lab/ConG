@@ -4,7 +4,6 @@ import edu.ucsc.leeps.fire.config.Configurable;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
 import edu.ucsc.leeps.fire.cong.server.SumPayoffFunction;
 
 /**
@@ -15,15 +14,13 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
 
     private Config config;
     private int secondsLeft;
-    private float totalPoints, periodPoints, multiplier;
+    private float multiplier;
     private int lineNumber;
 
     public PeriodInfo(Sprite parent, int x, int y, Client embed) {
         super(parent, x, y, (int) embed.textWidth("Current Points: 000"), (int) (embed.textAscent() + embed.textDescent()));
         secondsLeft = 0;
         FIRE.client.addConfigListener(this);
-        totalPoints = 0;
-        periodPoints = 0;
         multiplier = 1;
     }
 
@@ -83,8 +80,8 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
         String totalPointsString = "";
         String periodPointsString = "";
         String multiplierString = "";
-        totalPointsString = String.format(config.totalPointsString + " %.2f", totalPoints);
-        periodPointsString = String.format(config.periodPointsString + " %.2f", periodPoints);
+        totalPointsString = String.format(config.totalPointsString + " %.2f", Client.state.totalPoints);
+        periodPointsString = String.format(config.periodPointsString + " %.2f", Client.state.periodPoints);
         applet.text(totalPointsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
         applet.text(periodPointsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
         if (FIRE.client.getConfig().showPGMultiplier) {
@@ -101,29 +98,10 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
         this.secondsLeft = secondsLeft;
     }
 
-    public void update() {
-        totalPoints = FIRE.client.getTotalPoints();
-        if (Client.state.currentPercent >= 1) {
-            periodPoints = FIRE.client.getPeriodPoints();
-        } else {
-            try {
-                synchronized (Client.state.strategiesTime) {
-                    periodPoints = PayoffUtils.getTotalPayoff(
-                            Client.state.id, Client.state.currentPercent, Client.state.strategiesTime, config);
-                }
-            } catch (NullPointerException ex) {
-            }
-        }
-    }
-
     public void startPeriod() {
         if (FIRE.client.getConfig().payoffFunction instanceof SumPayoffFunction) { //payoff function dependent
             multiplier = ((SumPayoffFunction) FIRE.client.getConfig().payoffFunction).A;
             multiplier /= Client.state.strategies.size();
         }
-    }
-
-    public void endPeriod() {
-        update();
     }
 }

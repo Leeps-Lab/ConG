@@ -189,7 +189,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             pChart.updateLines();
             sChart.updateLines();
         }
-        periodInfo.endPeriod();
         System.err.println("Flushing updates: " + updater.queue.size());
         updater.queue.clear();
     }
@@ -377,8 +376,8 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                 }
             }
         }
-        if (FIRE.client.isRunningPeriod()) {
-            periodInfo.update();
+        if (FIRE.client.isRunningPeriod() && Float.isNaN(FIRE.client.getConfig().revealLambda)) {
+            Client.state.updatePoints();
         }
 
         if (selector != null) {

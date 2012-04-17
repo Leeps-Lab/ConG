@@ -8,6 +8,7 @@ import edu.ucsc.leeps.fire.cong.server.*;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  *
@@ -92,6 +93,7 @@ public class Config extends BaseConfig {
     public float initial0 = Float.NaN;
     public float initial1 = Float.NaN;
     public int matchID;
+    public float revealLambda = Float.NaN;
     public String revealTimes;
     public boolean revealAll;
     public boolean isCounterpart;
@@ -215,7 +217,26 @@ public class Config extends BaseConfig {
         }
         return paramMap.get(key);
     }
-    
+
+    public void generateRevealedPoints(Random random) {
+        if (!Float.isNaN(revealLambda)) {
+            revealTimes = "\"";
+            int time = 0;
+            do {
+                revealTimes += time + ",";
+                double L = Math.exp(-revealLambda);
+                int k = 0;
+                double p = 1;
+                do {
+                    k++;
+                    p = p * random.nextFloat();
+                } while (p > L);
+                time += k - 1;
+            } while (time < length);
+            revealTimes += length + "\"";
+        }
+    }
+
     public Color getColor(int id) {
         if (chatroom) {
             return currColors.get(id);
@@ -226,7 +247,7 @@ public class Config extends BaseConfig {
         return colors[1];
     }
     public static String[] aliases = new String[]{
-       "Green", "Red", "Blue", "Orange", "Purple", "Gray", "Aqua", "Yellow"
+        "Green", "Red", "Blue", "Orange", "Purple", "Gray", "Aqua", "Yellow"
     };
     public static Color[] colors = new Color[]{
         new Color(0x1FCB1A), // green

@@ -26,7 +26,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
     private Map<Integer, String> aliases;
     private Map<Integer, Color> colors;
     private int secondsLeft;
-    
+
     public Server() {
         clients = new HashMap<Integer, ClientInterface>();
         strategyChangeEvents = new LinkedBlockingQueue<StrategyChangeEvent>();
@@ -44,15 +44,8 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
 
     public void configurePeriod() {
 
-        for (Config config : FIRE.server.getDefinedConfigs()) {
-            System.err.println(config.subject);
-            // start agents
-        }
-
         Map<Integer, ClientInterface> members = new HashMap<Integer, ClientInterface>();
         members.putAll(clients);
-
-        // add agents to members
 
         Config config = FIRE.server.getConfig();
         if (config.indefiniteEnd != null) {
@@ -70,6 +63,11 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
                 FIRE.server.getConfig(id).length = config.length;
             }
         }
+
+        for (int id : members.keySet()) {
+            FIRE.server.getConfig(id).generateRevealedPoints(FIRE.server.getRandom());
+        }
+
         population = new Population();
         aliases = new HashMap<Integer, String>();
         colors = new HashMap<Integer, Color>();

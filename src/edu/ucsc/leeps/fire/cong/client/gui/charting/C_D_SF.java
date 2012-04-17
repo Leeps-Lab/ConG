@@ -55,19 +55,6 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
     public void clearAll() {
         revealedPoints = new HashMap<Integer, List<Point>>();
         revealedXs = new ArrayList<Float>();
-        revealTimes.clear();
-        if (!config.revealTimes.isEmpty()) {
-            String[] timeStrings = config.revealTimes.split(",");
-            revealTimes.add(0f);
-            float time = 0;
-            for (int i = 0; i < timeStrings.length; i++) {
-                time += Float.parseFloat(timeStrings[i]);
-                if (time < config.length) {
-                    revealTimes.add(time / (float) config.length);
-                }
-            }
-            revealTimes.add(1f);
-        }
     }
 
     @Override
@@ -1012,7 +999,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         } else {
             delayX = currX;
         }
-        if (!revealTimes.isEmpty() && delayX / width >= revealTimes.peek()) {
+        if (FIRE.client.isRunningPeriod() && !revealTimes.isEmpty() && delayX / width >= revealTimes.peek()) {
             Strategy sampledStrategy = Client.state.strategiesTime.get(0);
             for (Strategy s : Client.state.strategiesTime) {
                 float p = s.timestamp - Client.state.periodStartTime * 1e6f;
@@ -1033,6 +1020,7 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
                         x = System.nanoTime() - Client.state.periodStartTime - config.infoDelay * 1e9f;
                     }
                     revealedPoints.get(id).add(new Point(x, y));
+                    Client.state.updatePoints();
                 }
             }
             revealedXs.add(x);
@@ -1060,5 +1048,16 @@ public class C_D_SF extends Sprite implements Configurable<Config> {
         }
         yMin = config.payoffFunction.getMin();
         yMax = config.payoffFunction.getMax();
+        revealTimes.clear();
+        if (!config.revealTimes.isEmpty()) {
+            String[] timeStrings = config.revealTimes.replace("\"", "").split(",");
+            float time = 0;
+            for (int i = 0; i < timeStrings.length; i++) {
+                time = Float.parseFloat(timeStrings[i]);
+                if (time < config.length) {
+                    revealTimes.add(time / (float) config.length);
+                }
+            }
+        }
     }
 }
