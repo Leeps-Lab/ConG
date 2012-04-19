@@ -202,11 +202,15 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
     }
 
     public void setStrategies(int whoChanged, Map<Integer, float[]> strategies, long timestamp) {
-        updater.queue.add(new StrategyUpdateEvent(whoChanged, strategies, null, System.nanoTime() - Client.state.periodStartTime));
+        if (FIRE.client.isRunningPeriod()) {
+            updater.queue.add(new StrategyUpdateEvent(whoChanged, strategies, null, System.nanoTime() - Client.state.periodStartTime));
+        }
     }
 
     public void setMatchStrategies(int whoChanged, Map<Integer, float[]> matchStrategies, long timestamp) {
-        updater.queue.add(new StrategyUpdateEvent(whoChanged, null, matchStrategies, System.nanoTime() - Client.state.periodStartTime));
+        if (FIRE.client.isRunningPeriod()) {
+            updater.queue.add(new StrategyUpdateEvent(whoChanged, null, matchStrategies, System.nanoTime() - Client.state.periodStartTime));
+        }
     }
 
     public void endSubperiod(
@@ -363,8 +367,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         }
 
         if (FIRE.client.isRunningPeriod()) {
-            long length = FIRE.client.getConfig().length * 1000l;
-            state.currentPercent = (float) (length - FIRE.client.getMillisLeft()) / (float) length;
+            float length = FIRE.client.getConfig().length * 1e9f;
+            float elapsed = System.nanoTime() - Client.state.periodStartTime;
+            state.currentPercent = elapsed / length;
 
             if (FIRE.client.getConfig().subperiods == 0) {
                 if (!(FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction)) {
