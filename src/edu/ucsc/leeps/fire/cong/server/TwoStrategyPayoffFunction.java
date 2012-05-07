@@ -46,6 +46,9 @@ public class TwoStrategyPayoffFunction implements PayoffFunction {
             Aa = AaStart + (percent * (AaEnd - AaStart));
         }
         float A, B, a, b;
+        if (!popStrategies.containsKey(id)) {
+            return 0;
+        }
         A = popStrategies.get(id)[0];
         B = 1 - A;
         a = PayoffUtils.getAverageStrategy(id, matchPopStrategies)[0];
