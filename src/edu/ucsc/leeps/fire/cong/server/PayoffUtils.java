@@ -25,13 +25,15 @@ public class PayoffUtils {
             return new float[]{0};
         }
         for (int match : strategies.keySet()) {
+            float[] s = strategies.get(match);
             if (average == null) {
-                average = new float[strategies.get(match).length];
+                average = new float[s.length];
             }
             if (!(config.excludeSelf && id == match)) {
-                float[] s = strategies.get(match);
                 for (int i = 0; i < average.length; i++) {
-                    average[i] += s[i];
+                    if (i < s.length) {
+                        average[i] += s[i];
+                    }
                 }
             }
         }
