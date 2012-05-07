@@ -94,7 +94,7 @@ public class Config extends BaseConfig {
     public float initial1 = Float.NaN;
     public int matchID;
     public float revealLambda = Float.NaN;
-    public String revealTimes;
+    public String revealTimes = "";
     public boolean revealAll;
     public boolean isCounterpart;
     public int playersInGroup;
