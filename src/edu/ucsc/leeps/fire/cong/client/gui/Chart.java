@@ -44,8 +44,7 @@ public class Chart extends Sprite implements Configurable<Config> {
 
     public enum Mode {
 
-        Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy,
-    };
+        Payoff, TwoStrategy, RStrategy, PStrategy, SStrategy,};
     private Mode mode;
 
     public Chart(Sprite parent, int x, int y, int width, int height, ThreeStrategySelector simplex, Mode mode) {
@@ -340,42 +339,40 @@ public class Chart extends Sprite implements Configurable<Config> {
         if (!visible) {
             return;
         }
-        if (percent <= 1f) {
-            if (mode == Mode.Payoff) {
-                if (config.subperiods != 0) {
-                    yourPayoff.addPayoffPoint(percent, Client.state.subperiodPayoff);
-                } else {
-                    yourPayoff.addPayoffPoint(percent, PayoffUtils.getPayoff());
-                }
-                if (FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction) { //payoff function dependent
-                    PricingPayoffFunction pf = (PricingPayoffFunction) FIRE.client.getConfig().payoffFunction;
-                    Map<Integer, float[]> currentPrices = Client.state.strategies;
-                    for (int id : currentPrices.keySet()) {
-                        if (!prices.containsKey(id)) {
-                            initializePriceLine(id);
-                        }
-                        Line priceLine = prices.get(id);
-                        priceLine.addPayoffPoint(percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
+        if (mode == Mode.Payoff) {
+            if (config.subperiods != 0) {
+                yourPayoff.addPayoffPoint(percent, Client.state.subperiodPayoff);
+            } else {
+                yourPayoff.addPayoffPoint(percent, PayoffUtils.getPayoff());
+            }
+            if (FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction) { //payoff function dependent
+                PricingPayoffFunction pf = (PricingPayoffFunction) FIRE.client.getConfig().payoffFunction;
+                Map<Integer, float[]> currentPrices = Client.state.strategies;
+                for (int id : currentPrices.keySet()) {
+                    if (!prices.containsKey(id)) {
+                        initializePriceLine(id);
                     }
-                } else {
-                    matchPayoff.addPayoffPoint(percent, PayoffUtils.getMatchPayoff());
+                    Line priceLine = prices.get(id);
+                    priceLine.addPayoffPoint(percent, pf.getMax() * currentPrices.get(id)[0] - pf.getMin());
                 }
             } else {
-                float[] you = Client.state.getMyStrategy();
-                float[] match = PayoffUtils.getAverageStrategy(Client.state.id, Client.state.matchStrategies);
-                if (mode == Mode.TwoStrategy) {
-                    yourStrategy.addStrategyPoint(percent, you[0]);
-                    matchStrategy.addStrategyPoint(percent, match[0]);
-                } else if (mode == Mode.RStrategy) {
-                    yourR.addStrategyPoint(percent, you[0]);
-                    matchR.addStrategyPoint(percent, match[0]);
-                } else if (mode == Mode.PStrategy) {
-                    yourP.addStrategyPoint(percent, you[1]);
-                    matchP.addStrategyPoint(percent, match[1]);
-                } else if (mode == Mode.SStrategy) {
-                    yourS.addStrategyPoint(percent, you[2]);
-                    matchS.addStrategyPoint(percent, match[2]);
-                }
+                matchPayoff.addPayoffPoint(percent, PayoffUtils.getMatchPayoff());
+            }
+        } else {
+            float[] you = Client.state.getMyStrategy();
+            float[] match = PayoffUtils.getAverageStrategy(Client.state.id, Client.state.matchStrategies);
+            if (mode == Mode.TwoStrategy) {
+                yourStrategy.addStrategyPoint(percent, you[0]);
+                matchStrategy.addStrategyPoint(percent, match[0]);
+            } else if (mode == Mode.RStrategy) {
+                yourR.addStrategyPoint(percent, you[0]);
+                matchR.addStrategyPoint(percent, match[0]);
+            } else if (mode == Mode.PStrategy) {
+                yourP.addStrategyPoint(percent, you[1]);
+                matchP.addStrategyPoint(percent, match[1]);
+            } else if (mode == Mode.SStrategy) {
+                yourS.addStrategyPoint(percent, you[2]);
+                matchS.addStrategyPoint(percent, match[2]);
             }
         }
     }
