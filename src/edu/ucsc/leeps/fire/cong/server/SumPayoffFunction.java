@@ -11,6 +11,7 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
 
     public float A, B, C, D, smin, smax;
     public Type type;
+    public int numStrategies = 1;
 
     public enum Type {
 
@@ -34,20 +35,23 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
 
     @Override
     public int getNumStrategies() {
-        return 1;
+        return numStrategies;
     }
 
     /*
-     * proportional: (A * s / sum ) - C * s + D
-     * linear: (A - B * sum) * s - C * s + D
-     * public goods: 100 * ((A * sum) + (1 - s))
+     * proportional: (A * s / sum ) - C * s + D linear: (A - B * sum) * s - C *
+     * s + D public goods: 100 * ((A * sum) + (1 - s))
      */
     @Override
     public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies, Config config) {
         float sum = 0;
         for (int i : popStrategies.keySet()) {
             if (i != id) {
-                sum += smin + popStrategies.get(i)[0] * (smax - smin);
+                float s = popStrategies.get(i)[0];
+                if (numStrategies == 2 && popStrategies.get(i)[1] == 0) {
+                    s = 0;
+                }
+                sum += smin + s * (smax - smin);
             }
         }
         float s = smin + (popStrategies.get(id)[0] * (smax - smin));
@@ -61,7 +65,11 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
                 u = ((A - B * sum) * s - C * s) + D;
                 break;
             case public_goods:
-                u = (smax - s) + (A / popStrategies.size()) * sum;
+                if (numStrategies == 2 && popStrategies.get(id)[1] == 0) {
+                    u = 0;
+                } else {
+                    u = (smax - s) + (A / popStrategies.size()) * sum + C;
+                }
                 break;
         }
         return u;

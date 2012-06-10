@@ -18,12 +18,13 @@ import java.awt.event.MouseListener;
  * @author rlou
  */
 public class BubblesSelector extends Sprite implements Configurable<Config>, Selector, MouseListener, KeyListener {
-
+    
     private boolean enabled;
     private Slider slider;
     private Config config;
     private float[] subperiodStrategy;
-
+    private float inStrategy;
+    
     public BubblesSelector(Sprite parent, int x, int y, int width, int height,
             Client applet) {
         super(parent, x, y, width, height);
@@ -37,17 +38,17 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         applet.addKeyListener(this);
         subperiodStrategy = new float[1];
     }
-
+    
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
-
+    
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         slider.setVisible(visible);
     }
-
+    
     @Override
     public void draw(Client a) {
         if (!visible || config == null) {
@@ -56,7 +57,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         slider.sliderStart = 0;
         slider.sliderEnd = width;
         slider.length = width;
-
+        
         if (Client.state.getMyStrategy() != null) {
             slider.setStratValue(Client.state.getMyStrategy()[0]);
         }
@@ -66,25 +67,29 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         if (config.subperiods != 0 && Client.state.target != null) {
             slider.setStratValue(Client.state.target[0]);
         }
-
+        
         if (enabled && !config.trajectory && slider.isGhostGrabbed()) {
             float mouseX = a.mouseX - origin.x;
             slider.moveGhost(mouseX);
             setTarget(slider.getGhostValue());
         }
-
+        
         a.pushMatrix();
         try {
             a.translate(origin.x, origin.y);
-
+            
             if (config.potential) {
                 drawPotentialPayoffs(a);
             }
-
+            
+            if (config.payoffFunction.getNumStrategies() == 2) {
+                drawInOutButtons(a);
+            }
+            
             drawAxis(a);
-
+            
             slider.draw(a);
-
+            
             int i = 1;
             for (int id : Client.state.strategies.keySet()) {
                 Color color;
@@ -112,7 +117,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         }
         a.popMatrix();
     }
-
+    
     private void drawPotentialPayoffs(Client a) {
         float[] s = {0};
         float max = config.payoffFunction.getMax();
@@ -124,12 +129,36 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
             a.point(x, height * (1 - y));
         }
     }
-
+    
+    private void drawInOutButtons(Client a) {
+        a.stroke(0, 0, 0, 255);
+        a.rectMode(Client.CORNERS);
+        a.strokeWeight(3);
+        a.fill(255, 255, 255, 255);
+        a.rect(width - 100, -5, width, -30);
+        a.rect(width - 205, -5, width - 105, -30);
+        a.fill(0, 0, 0, 100);
+        if (Client.state.getMyStrategy() != null) {
+            if (Client.state.getMyStrategy()[1] == 0) {
+                a.rect(width - 100, -5, width, -30);
+            } else {
+                a.rect(width - 205, -5, width - 105, -30);
+            }
+        }
+        a.fill(0, 0, 0, 255);
+        a.textAlign(Client.CENTER, Client.CENTER);
+        float in_w = a.textWidth(config.inString);
+        float out_w = a.textWidth(config.outString);
+        float h = a.textAscent() + a.textDescent();
+        a.text(config.outString, width - 50 - out_w / 2, -25 + h / 2);
+        a.text(config.inString, width - 150 - in_w / 2, -25 + h / 2);
+    }
+    
     private void drawPlannedStrategy(Client a) {
         a.stroke(0, 0, 0, 20);
         a.line(width * Client.state.target[0], 0, width * Client.state.target[0], height);
     }
-
+    
     private void drawStrategy(Client applet, Color color, int id) {
         if (Client.state.strategiesTime.size() < 1) {
             return;
@@ -183,21 +212,21 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
             drawDownArrow(applet, color, x);
         }
     }
-
+    
     private void drawUpArrow(Client applet, Color color, float x) {
         applet.strokeWeight(3f);
         applet.line(x, -22, x, -10);
         applet.noStroke();
         applet.triangle(x - 5, -20, x, -30, x + 5, -20);
     }
-
+    
     private void drawDownArrow(Client applet, Color color, float x) {
         applet.strokeWeight(3f);
         applet.line(x, height + 10, x, height + 22);
         applet.noStroke();
         applet.triangle(x - 5, height + 20, x, height + 30, x + 5, height + 20);
     }
-
+    
     private void drawAxis(Client applet) {
         float min, max;
         min = config.payoffFunction.getMin();
@@ -207,7 +236,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         applet.stroke(0);
         applet.strokeWeight(2);
         applet.rect(0, 0, width, height);
-
+        
         applet.textAlign(Client.CENTER, Client.CENTER);
         applet.fill(255);
         applet.noStroke();
@@ -242,26 +271,29 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
             applet.text(label, Math.round(width), Math.round(height + 20));
         }
     }
-
+    
     public void configChanged(Config config) {
         this.config = config;
         if (config.selector == Config.StrategySelector.bubbles) {
             setVisible(true);
+            if (config.payoffFunction.getNumStrategies() == 2) {
+                inStrategy = config.initial1;
+            }
         } else {
             setVisible(false);
         }
     }
-
+    
     public void startPrePeriod() {
     }
-
+    
     public void startPeriod() {
         if (Client.state.getMyStrategy() != null) {
             slider.setStratValue(Client.state.getMyStrategy()[0]);
             slider.setGhostValue(slider.getStratValue());
         }
     }
-
+    
     private void setTarget(float newTarget) {
         if (config.trajectory) {
             float current = Client.state.getMyStrategy()[0];
@@ -276,16 +308,31 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
             Client.state.target[0] = newTarget;
         }
     }
-
+    
     public void mouseClicked(MouseEvent e) {
     }
-
+    
     public void mousePressed(MouseEvent e) {
         if (enabled) {
-            slider.grabGhost();
+            boolean button = false;
+            if (config.payoffFunction.getNumStrategies() == 2) {
+                float x = e.getX() - origin.x;
+                float y = e.getY() - origin.y;
+                if (x >= width - 100 && x <= width && y >= -30 && y <= -5) {
+                    Client.state.target[1] = 0;
+                    button = true;
+                }
+                if (x >= width - 205 && x <= width - 105 && y >= -30 && y <= -5) {
+                    Client.state.target[1] = 1;
+                    button = true;
+                }
+            }
+            if (!button) {
+                slider.grabGhost();
+            }
         }
     }
-
+    
     public void mouseReleased(MouseEvent e) {
         if (enabled) {
             if (slider.isGhostGrabbed()) {
@@ -293,16 +340,16 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
             }
         }
     }
-
+    
     public void mouseEntered(MouseEvent e) {
     }
-
+    
     public void mouseExited(MouseEvent e) {
     }
-
+    
     public void keyTyped(KeyEvent e) {
     }
-
+    
     public void keyPressed(KeyEvent e) {
         if (!visible || !enabled) {
             return;
@@ -334,7 +381,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
             setTarget(newTarget);
         }
     }
-
+    
     public void keyReleased(KeyEvent e) {
         if (!visible || !enabled) {
             return;
@@ -343,7 +390,7 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
             setTarget(Client.state.getMyStrategy()[0]);
         }
     }
-
+    
     public void endSubperiod(int subperiod) {
         subperiodStrategy[0] = Client.state.getMyStrategy()[0];
     }

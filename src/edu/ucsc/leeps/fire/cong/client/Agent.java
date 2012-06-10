@@ -39,7 +39,7 @@ public class Agent extends Thread implements Serializable {
             Config config = FIRE.client.getConfig();
             if (!paused && FIRE.client.isRunningPeriod() && Client.state != null && Client.state.target != null && config != null) {
                 if (function != null) {
-                    Client.state.setTarget(function.act(config), config);
+                    //Client.state.setTarget(function.act(config), config);
                 } else if (config.agentSource != null) {
                     configure(config);
                 } else {
@@ -87,7 +87,7 @@ public class Agent extends Thread implements Serializable {
             } else {
                 float maxPayoff = Float.NEGATIVE_INFINITY;
                 float maxStrategy = 0;
-                float[] strategy = new float[]{maxStrategy};
+                float[] strategy = new float[]{maxStrategy, 0};
                 for (float s = 0; s <= 1; s += 0.01) {
                     strategy[0] = s;
                     float payoff = PayoffUtils.getPayoff(strategy);
@@ -108,7 +108,7 @@ public class Agent extends Thread implements Serializable {
                 }
             }
             if (newTarget >= 0 && newTarget <= 1) {
-                Client.state.setTarget(new float[]{newTarget}, config);
+                //Client.state.setTarget(new float[]{newTarget}, config);
             }
         } else if (config.payoffFunction.getNumStrategies() == 3) {
             float maxPayoff = Float.NEGATIVE_INFINITY;
@@ -136,7 +136,7 @@ public class Agent extends Thread implements Serializable {
                     && newTarget[1] >= 0 && newTarget[1] <= 1
                     && newTarget[2] >= 0 && newTarget[2] <= 1
                     && Math.abs(1 - (newTarget[0] + newTarget[1] + newTarget[2])) <= Float.MIN_NORMAL) {
-                Client.state.setTarget(newTarget, config);
+                //Client.state.setTarget(newTarget, config);
             }
         }
     }

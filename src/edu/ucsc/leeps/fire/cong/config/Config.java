@@ -75,6 +75,8 @@ public class Config extends BaseConfig {
     public String totalPointsString = "Previous Points:";
     public String params;
     public String agentSource;
+    public String inString = "In";
+    public String outString = "Out";
     public static final Class matrix2x2 = TwoStrategyPayoffFunction.class;
     public static final Class matrix3x3 = ThreeStrategyPayoffFunction.class;
     public static final Class qwerty = QWERTYPayoffFunction.class;

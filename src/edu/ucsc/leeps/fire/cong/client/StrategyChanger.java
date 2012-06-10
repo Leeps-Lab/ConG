@@ -33,7 +33,6 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         } else if (config.payoffFunction.getNumStrategies() == 3) {
             size = 3;
         }
-        deltaStrategy = new float[size];
     }
 
     private void update() {
@@ -46,6 +45,9 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
         }
         if (current.length == 1) {
             tickDelta /= 2f;
+        }
+        if (deltaStrategy == null || deltaStrategy.length != current.length) {
+            deltaStrategy = new float[current.length];
         }
         if (!Float.isNaN(config.grid)) {
             for (int i = 0; i < Client.state.target.length; i++) {
@@ -117,7 +119,7 @@ public class StrategyChanger extends Thread implements Configurable<Config>, Run
                     update();
                 } catch (Exception ex) {
                     System.err.println("Unhandled exception updating strategy");
-                    System.err.println(ex);
+                    ex.printStackTrace();
                 }
             }
 
