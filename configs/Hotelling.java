@@ -1,7 +1,10 @@
 
-import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction.PayoffScriptInterface;
+import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import java.util.*;
+import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction.PayoffScriptInterface;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class Hotelling implements PayoffScriptInterface {
 
@@ -52,5 +55,17 @@ public class Hotelling implements PayoffScriptInterface {
         }
         assert shared >= 1;
         return config.get("Alpha") * 100 * (u / shared);
+    }
+    
+    public void draw(Client a) {
+        
+    }
+
+    public float getMax() {
+        return 100;
+    }
+
+    public float getMin() {
+        return 0;
     }
 }

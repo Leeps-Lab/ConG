@@ -23,7 +23,6 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
     private Slider slider;
     private Config config;
     private float[] subperiodStrategy;
-    private float inStrategy;
     
     public BubblesSelector(Sprite parent, int x, int y, int width, int height,
             Client applet) {
@@ -276,9 +275,6 @@ public class BubblesSelector extends Sprite implements Configurable<Config>, Sel
         this.config = config;
         if (config.selector == Config.StrategySelector.bubbles) {
             setVisible(true);
-            if (config.payoffFunction.getNumStrategies() == 2) {
-                inStrategy = config.initial1;
-            }
         } else {
             setVisible(false);
         }
