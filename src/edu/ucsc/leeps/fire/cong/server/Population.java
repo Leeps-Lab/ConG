@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  * @author jpettit
  */
 public class Population implements Serializable {
-
+    
     private Map<Integer, ClientInterface> members;
     private long periodStartTime;
     private Set<Tuple> groups;
@@ -30,14 +30,14 @@ public class Population implements Serializable {
     private Map<Integer, StrategyUpdateProcessor> strategyUpdateProcessors;
     private MessageEvent mEvent = new MessageEvent();
     private final Object logLock = new Object();
-
+    
     public Population() {
         groups = new HashSet<Tuple>();
         groupMap = new HashMap<Integer, Tuple>();
         subperiodPayoffs = new HashMap<Integer, Float>();
         strategyUpdateProcessors = new HashMap<Integer, StrategyUpdateProcessor>();
     }
-
+    
     public void configure(Map<Integer, ClientInterface> members, Map<Integer, String> aliases, Map<Integer, Color> colors) {
         this.members = members;
         for (int member : members.keySet()) {
@@ -81,24 +81,29 @@ public class Population implements Serializable {
             }
         }
     }
-
+    
     public void setPeriodStartTime() {
         periodStartTime = System.nanoTime();
         for (Tuple group : groups) {
-            group.evalTime = periodStartTime;
+            if (FIRE.server.getConfig().subperiods == 0) {
+                group.lastEvalTime = periodStartTime;
+            } else {
+                group.lastEvalTime = 0;
+            }
             group.update(-1, periodStartTime);
         }
     }
+    
     public void strategyChanged(int whoChanged, float[] newStrategy, float[] targetStrategy) {
         groupMap.get(whoChanged).update(whoChanged, newStrategy, targetStrategy);
     }
-
+    
     public void evaluate(long timestamp) {
         for (Tuple group : groups) {
             group.evaluate(timestamp);
         }
     }
-
+    
     public void endSubperiod(int subperiod) {
         if (FIRE.server.getConfig().subperiodRematch) {
             shuffleGroups();
@@ -115,13 +120,13 @@ public class Population implements Serializable {
             tuple.endSubperiod(subperiod);
         }
     }
-
+    
     public void endPeriod() {
         for (Tuple tuple : groups) {
             tuple.endPeriod();
         }
     }
-
+    
     public void logTick(int subperiod, int secondsLeft) {
         synchronized (logLock) {
             // Log the tick information
@@ -162,24 +167,24 @@ public class Population implements Serializable {
             }
         }
     }
-
+    
     private class Tuple {
-
+        
         public int population;
         public int world;
         public boolean discovered;
         public int pathDist;
         public Set<Integer> members;
-        public long evalTime;
+        public long lastEvalTime;
         public Map<Integer, float[]> strategies;
         public Map<Integer, float[]> targets;
         public Map<Integer, float[]> realizedStrategies;
         public Tuple match;
-
+        
         public Tuple() {
             this(groups.size());
         }
-
+        
         public Tuple(int population) {
             this.population = population;
             groups.add(this);
@@ -188,7 +193,7 @@ public class Population implements Serializable {
             targets = new HashMap<Integer, float[]>();
             realizedStrategies = new HashMap<Integer, float[]>();
         }
-
+        
         public void update(int whoChanged, float[] strategy, float[] target) {
             long timestamp = System.nanoTime();
             if (FIRE.server.getConfig().subperiods == 0) {
@@ -201,7 +206,7 @@ public class Population implements Serializable {
             targets.put(whoChanged, target);
             update(whoChanged, timestamp);
         }
-
+        
         public void update(int whoChanged, long timestamp) {
             if (FIRE.server.getConfig().subperiods == 0) {
                 for (int member : members) {
@@ -220,43 +225,68 @@ public class Population implements Serializable {
                 }
             }
         }
-
-        public void evaluate(long timestamp) {
-            float percent = (timestamp - periodStartTime) / (FIRE.server.getConfig().length * 1000000000f);
-            float percentElapsed = (timestamp - evalTime) / (FIRE.server.getConfig().length * 1000000000f);
-            if (percentElapsed > 0.01) {
-                evaluate(percent, percentElapsed);
-                evalTime = timestamp;
-            }
-        }
-
-        public void evaluate(float percent, float percentElapsed) {
+        
+        public void evaluate(long t2) {
+            long t1 = lastEvalTime;
             for (int member : members) {
                 Config config = FIRE.server.getConfig(member);
+                final boolean continuousTime = config.subperiods == 0;
+                final boolean definiteEnd = config.indefiniteEnd == null;
+                final boolean probPayoffs = config.probPayoffs;
+                final boolean homotopy = false;
                 PayoffFunction u = config.payoffFunction;
-                float flowPayoff;
-                if (config.probPayoffs) {
-                    flowPayoff = u.getPayoff(
-                            member, percent,
-                            realizedStrategies, match.realizedStrategies,
-                            config);
+                
+                Map<Integer, float[]> s1, s2;
+                if (!probPayoffs) {
+                    s1 = strategies;
+                    s2 = match.strategies;
                 } else {
-                    flowPayoff = u.getPayoff(
-                            member, percent,
-                            strategies, match.strategies,
+                    s1 = realizedStrategies;
+                    s2 = match.realizedStrategies;
+                }
+                
+                double payoff = 0;
+                if (!homotopy) {
+                    float flowPayoff = u.getPayoff(
+                            member, -1,
+                            s1, s2,
                             config);
+                    double delta_t;
+                    if (continuousTime) {
+                        delta_t = (t2 - t1) / 1e9;
+                    } else {
+                        delta_t = (t2 - t1);
+                    }
+                    double T;
+                    if (definiteEnd) {
+                        if (continuousTime) {
+                            T = config.length;
+                        } else {
+                            T = config.subperiods;
+                        }
+                    } else {
+                        T = config.indefiniteEnd.expectedLength;
+                    }
+                    if (!continuousTime) {
+                        subperiodPayoffs.put(member, flowPayoff);
+                    }
+                    payoff = flowPayoff * delta_t / T;
+                } else {
+                    double samples = (t2 - t1) / 1000000.0;
+                    for (long i = t1; i < t2; i += 1000000) {
+                        payoff += u.getPayoff(
+                                member, i - periodStartTime,
+                                s1, s2,
+                                config);
+                    }
+                    payoff /= samples;
                 }
-                subperiodPayoffs.put(member, flowPayoff);
-                if (config.indefiniteEnd == null) {
-                    flowPayoff *= percentElapsed;
-                } else if (config.subperiods == 0) {
-                    float secondsElapsed = config.length * percentElapsed;
-                    flowPayoff *= secondsElapsed;
-                }
-                FIRE.server.addToPeriodPoints(member, flowPayoff);
+                
+                FIRE.server.addToPeriodPoints(member, (float) payoff);
             }
+            lastEvalTime = t2;
         }
-
+        
         public void realizeStrategies() {
             realizedStrategies.clear();
             for (int member : members) {
@@ -273,17 +303,15 @@ public class Population implements Serializable {
                 realizedStrategies.put(member, a);
             }
         }
-
+        
         public void evaluateSubperiod(final int subperiod) {
-            float percentElapsed = 1f / FIRE.server.getConfig().subperiods;
-            float percent = subperiod * percentElapsed;
-            evaluate(percent, percentElapsed);
+            evaluate(subperiod);
         }
-
+        
         public void endSubperiod(final int subperiod) {
             for (final int member : members) {
                 new Thread() {
-
+                    
                     @Override
                     public void run() {
                         Config config = FIRE.server.getConfig(member);
@@ -303,15 +331,17 @@ public class Population implements Serializable {
             }
             update(-1, subperiod);
         }
-
+        
         public void endPeriod() {
-            evaluate(System.nanoTime());
+            if (FIRE.server.getConfig().subperiods == 0) {
+                evaluate(System.nanoTime());
+            }
             for (StrategyUpdateProcessor updater : strategyUpdateProcessors.values()) {
                 updater.endPeriod();
             }
         }
     }
-
+    
     public void setupGroups() {
         groups.clear();
         groupMap.clear();
@@ -329,8 +359,8 @@ public class Population implements Serializable {
     }
 
     /*
-     * Constructs a single tuple comprising all subjects
-     * Tuple is linked to itself
+     * Constructs a single tuple comprising all subjects Tuple is linked to
+     * itself
      */
     private void setupSinglePopGroups() {
         Tuple group = new Tuple();
@@ -346,7 +376,7 @@ public class Population implements Serializable {
             config.playersInGroup = members.size();
         }
     }
-
+    
     private void setupAssignedGroups() {
         Map<Integer, Tuple> populations = new HashMap<Integer, Tuple>();
         for (int member : members.keySet()) {
@@ -390,7 +420,7 @@ public class Population implements Serializable {
             assignedMatches.add(group.match);
         }
     }
-
+    
     private void setupRandomGroups() {
         Config config = FIRE.server.getConfig();
         ArrayList<Integer> randomMembers = new ArrayList<Integer>();
@@ -456,7 +486,7 @@ public class Population implements Serializable {
             }
         }
     }
-
+    
     private void setInitialStrategies() {
         for (int client : members.keySet()) {
             Config config = FIRE.server.getConfig(client);
@@ -509,7 +539,7 @@ public class Population implements Serializable {
             group.update(-1, periodStartTime);
         }
     }
-
+    
     private void setInitiative() {
         for (Tuple group : groups) {
             List<Integer> l = new ArrayList<Integer>();
@@ -527,7 +557,7 @@ public class Population implements Serializable {
             }
         }
     }
-
+    
     private void shuffleGroups() {
         ArrayList<Tuple> randomGroups = new ArrayList<Tuple>();
         for (Tuple tuple : groups) {
@@ -566,7 +596,7 @@ public class Population implements Serializable {
         }
         // does setWorlds() need to be called after a shuffle?
     }
-
+    
     public void newMessage(int secondsLeft, String message, String html, int senderID, String alias) {
         Tuple group = groupMap.get(senderID);
         for (int id : group.members) {
@@ -581,14 +611,14 @@ public class Population implements Serializable {
         mEvent.text = message;
         FIRE.server.commit(mEvent);
     }
-
+    
     private class StrategyUpdateEvent {
-
+        
         public int changedId;
         public Map<Integer, float[]> strategies;
         public Map<Integer, float[]> matchStrategies;
         public long timestamp;
-
+        
         public StrategyUpdateEvent(int changedId, Map<Integer, float[]> strategies, Map<Integer, float[]> matchStrategies, long timestamp) {
             this.changedId = changedId;
             this.strategies = strategies;
@@ -596,28 +626,28 @@ public class Population implements Serializable {
             this.timestamp = timestamp;
         }
     }
-
+    
     private class StrategyUpdateProcessor extends Thread {
-
+        
         private ClientInterface client;
         private LinkedBlockingDeque<StrategyUpdateEvent> queue;
         private long dropped = 0;
-
+        
         public StrategyUpdateProcessor(ClientInterface client) {
             this.client = client;
             this.queue = new LinkedBlockingDeque<StrategyUpdateEvent>();
             this.start();
         }
-
+        
         public synchronized void add(StrategyUpdateEvent event) {
             queue.addLast(event);
         }
-
+        
         public void endPeriod() {
             System.err.println(String.format("WARNING: dropped %s updates", dropped));
             dropped = 0;
         }
-
+        
         @Override
         public void run() {
             while (true) {
