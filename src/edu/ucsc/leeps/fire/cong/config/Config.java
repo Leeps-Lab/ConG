@@ -104,6 +104,7 @@ public class Config extends BaseConfig {
     public int marginalCost;
     public int[] initiatives;
     public boolean showPGMultiplier;
+    public String contributionsString;
     public Map<String, Float> paramMap;
     public Agent agent;
 

@@ -80,6 +80,7 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
         String totalPointsString = "";
         String periodPointsString = "";
         String multiplierString = "";
+        String contributionsString = "";
         totalPointsString = String.format(config.totalPointsString + " %.2f", Client.state.totalPoints);
         periodPointsString = String.format(config.periodPointsString + " %.2f", Client.state.periodPoints);
         applet.text(totalPointsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
@@ -88,6 +89,10 @@ public class PeriodInfo extends Sprite implements Configurable<Config> {
             multiplierString = String.format("Multipler: %.2f", multiplier);
             applet.fill(0);
             applet.text(multiplierString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
+            float contributions = ((SumPayoffFunction) FIRE.client.getConfig().payoffFunction).getContributions(Client.state.strategies);
+            contributionsString = String.format("%s: %.2f", FIRE.client.getConfig().contributionsString, contributions);
+            applet.fill(0);
+            applet.text(contributionsString, (int) origin.x, (int) (origin.y + lineNumber++ * textHeight));
         }
         if (config.subperiods != 0 && FIRE.client.isRunningPeriod()) {
             drawSubperiodTicker(applet);

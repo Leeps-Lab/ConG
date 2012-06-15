@@ -75,6 +75,18 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
         return u;
     }
 
+    public float getContributions(Map<Integer, float[]> popStrategies) {
+        float sum = 0;
+        for (int i : popStrategies.keySet()) {
+            float s = popStrategies.get(i)[0];
+            if (numStrategies == 2 && popStrategies.get(i)[1] == 0) {
+                s = 0;
+            }
+            sum += smin + s * (smax - smin);
+        }
+        return sum;
+    }
+
     @Override
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
         float[] summary = new float[12];
