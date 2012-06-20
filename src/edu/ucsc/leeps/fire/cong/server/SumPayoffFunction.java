@@ -45,13 +45,9 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
     @Override
     public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies, Config config) {
         float sum = 0;
-        float n = 0;
         for (int i : popStrategies.keySet()) {
             float s = popStrategies.get(i)[0];
             boolean outOfGame = numStrategies == 2 && popStrategies.get(i)[1] == 0;
-            if (!outOfGame) {
-                n++;
-            }
             if (i != id && !outOfGame) {
                 sum += smin + s * (smax - smin);
             }
@@ -59,6 +55,7 @@ public class SumPayoffFunction extends TwoStrategyPayoffFunction {
         float s = smin + (popStrategies.get(id)[0] * (smax - smin));
         sum += s;
         float u = 0;
+        float n = popStrategies.size();
         switch (type) {
             case proportional:
                 u = (A * s / sum) - C * s + D;
