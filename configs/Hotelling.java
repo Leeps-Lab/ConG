@@ -1,6 +1,7 @@
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
+import edu.ucsc.leeps.fire.cong.client.gui.PeriodInfo;
 import edu.ucsc.leeps.fire.cong.client.gui.Slider;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
@@ -21,8 +22,10 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
     private Slider slider;
     private Config config;
     private float[] subperiodStrategy;
+    private PeriodInfo periodInfo;
     private boolean setup = false;
     private float width, height;
+    private float scale = 0.65f;
 
     public Hotelling() {
         if (FIRE.client != null) {
@@ -82,13 +85,15 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
     }
 
     public void draw(Client a) {
+        width = a.width * scale;
+        height = a.height * scale;
         
-        width = 0.8f * a.width;
-        height = 0.8f * a.height;
+        periodInfo = new PeriodInfo(null, (int)width - 20, (int)height - 20, a);
+        
 
         if (!setup && Client.state != null && Client.state.getMyStrategy() != null) {
             slider = new Slider(a, Slider.Alignment.Horizontal,
-                    0, a.width, a.height, Color.black, "", 1f);
+                    0, a.width * scale, a.height * scale, Color.black, "", 1f);
             slider.setShowStrategyLabel(false);
             slider.hideGhost();
             slider.setOutline(true);
@@ -101,8 +106,8 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         }
 
         slider.sliderStart = 0;
-        slider.sliderEnd = a.width;
-        slider.length = a.width;
+        slider.sliderEnd = a.width * scale;
+        slider.length = a.width * scale;
 
         if (Client.state.getMyStrategy() != null) {
             slider.setStratValue(Client.state.getMyStrategy()[0]);
@@ -123,7 +128,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         a.pushMatrix();
         try {
             
-            a.translate(0, 0);
+            a.translate(150, 100);
             
             if (config.potential) {
                 drawPotentialPayoffs(a);
@@ -162,6 +167,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         } catch (NullPointerException ex) {
             ex.printStackTrace();
         }
+        periodInfo.draw(a);
         a.popMatrix();
     }
 
@@ -177,11 +183,11 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         float[] s = {0};
         float max = config.payoffFunction.getMax();
         a.stroke(50);
-        for (float x = 0; x < a.width; x++) {
-            s[0] = x / a.width;
+        for (float x = 0; x < a.width * scale; x++) {
+            s[0] = x / a.width * scale;
             float u = PayoffUtils.getPayoff(s);
             float y = u / max;
-            a.point(x, a.height * (1 - y));
+            a.point(x, a.height * scale * (1 - y));
         }
     }
 
@@ -190,14 +196,14 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         a.rectMode(Client.CORNERS);
         a.strokeWeight(3);
         a.fill(255, 255, 255, 255);
-        a.rect(a.width - 100, -5, a.width, -30);
-        a.rect(a.width - 205, -5, a.width - 105, -30);
+        a.rect(a.width * scale - 100, -5, a.width * scale, -30);
+        a.rect(a.width * scale - 205, -5, a.width * scale - 105, -30);
         a.fill(0, 0, 0, 100);
         if (Client.state.getMyStrategy() != null) {
             if (Client.state.getMyStrategy()[1] == 0) {
-                a.rect(a.width - 100, -5, a.width, -30);
+                a.rect(a.width * scale - 100, -5, a.width * scale, -30);
             } else {
-                a.rect(a.width - 205, -5, a.width - 105, -30);
+                a.rect(a.width * scale - 205, -5, a.width * scale - 105, -30);
             }
         }
         a.fill(0, 0, 0, 255);
@@ -205,15 +211,15 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         float in_w = a.textWidth(config.inString);
         float out_w = a.textWidth(config.outString);
         float h = a.textAscent() + a.textDescent();
-        a.text(config.outString, a.width - 50 - out_w / 2, -25 + h / 2);
-        a.text(config.inString, a.width - 150 - in_w / 2, -25 + h / 2);
+        a.text(config.outString, a.width * scale - 50 - out_w / 2, -25 + h / 2);
+        a.text(config.inString, a.width * scale - 150 - in_w / 2, -25 + h / 2);
     }
 
     private void drawPlannedStrategy(Client a) {
         a.stroke(0, 0, 0, 20);
-        a.line(a.width * Client.state.target[0], 0, a.width * Client.state.target[0], a.height);
+        a.line(a.width * scale * Client.state.target[0], 0, a.width * scale * Client.state.target[0], a.height * scale);
     }
-
+    
     private void drawStrategy(Client applet, Color color, int id) {
         if (Client.state.strategiesTime.size() < 1) {
             return;
@@ -235,10 +241,10 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
             strategy = Client.state.strategies.get(id);
             payoff = PayoffUtils.getPayoff(id, strategy);
         }
-        x = applet.width * strategy[0];
-        y = applet.height * (1 - (payoff - min) / (max - min));
-        if (y > applet.height) {
-            y = applet.height;
+        x = applet.width * scale * strategy[0];
+        y = applet.height * scale * (1 - (payoff - min) / (max - min));
+        if (y > applet.height * scale) {
+            y = applet.height * scale;
         } else if (y < 0) {
             y = 0;
         }
@@ -246,7 +252,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         applet.fill(color.getRed(), color.getGreen(), color.getBlue());
         if (id != FIRE.client.getID() && config.subperiods == 0 || Client.state.subperiod != 0) {
             applet.strokeWeight(3);
-            applet.line(x, applet.height - 5, x, applet.height + 5);
+            applet.line(x, applet.height * scale - 5, x, applet.height * scale + 5);
         }
         if (config.subperiods == 0 || Client.state.subperiod != 0) {
             applet.strokeWeight(1);
@@ -277,9 +283,9 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
 
     private void drawDownArrow(Client applet, Color color, float x) {
         applet.strokeWeight(3f);
-        applet.line(x, applet.height + 10, x, applet.height + 22);
+        applet.line(x, applet.height * scale + 10, x, applet.height * scale + 22);
         applet.noStroke();
-        applet.triangle(x - 5, applet.height + 20, x, applet.height + 30, x + 5, applet.height + 20);
+        applet.triangle(x - 5, applet.height * scale + 20, x, applet.height * scale + 30, x + 5, applet.height * scale + 20);
     }
 
     private void drawAxis(Client applet) {
@@ -290,24 +296,24 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         applet.noFill();
         applet.stroke(0);
         applet.strokeWeight(2);
-        applet.rect(0, 0, applet.width, applet.height);
+        applet.rect(0, 0, applet.width * scale, applet.height * scale);
 
         applet.textAlign(Client.CENTER, Client.CENTER);
         applet.fill(255);
         applet.noStroke();
-        applet.rect(-40, 0, 38, applet.height);
-        applet.rect(0, applet.height + 2, applet.width, 40);
+        applet.rect(-40, 0, 38, applet.height * scale);
+        applet.rect(0, applet.height * scale + 2, applet.width * scale, 40);
         String maxPayoffLabel = String.format("%.1f", max);
-        float labelX = 10 + applet.width + 1.1f * applet.textWidth(maxPayoffLabel) / 2f;
+        float labelX = 10 + applet.width * scale + 1.1f * applet.textWidth(maxPayoffLabel) / 2f;
         for (float y = 0.0f; y <= 1.01f; y += 0.1f) {
             applet.noFill();
             applet.stroke(100, 100, 100);
             applet.strokeWeight(2);
             float x0, y0, x1, y1;
             x0 = 0;
-            y0 = y * applet.height;
-            x1 = applet.width + 10;
-            y1 = y * applet.height;
+            y0 = y * applet.height * scale;
+            x1 = applet.width * scale + 10;
+            y1 = y * applet.height * scale;
             applet.stroke(100, 100, 100, 50);
             applet.line(x0, y0, x1, y1);
             float payoff = (1 - y) * (max - min) + min;
@@ -321,9 +327,9 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         if (config.payoffFunction instanceof SumPayoffFunction && config.showSMinMax) { //payoff function dependent
             SumPayoffFunction pf = (SumPayoffFunction) config.payoffFunction;
             String label = String.format("%.1f", pf.smin);
-            applet.text(label, Math.round(0), Math.round(applet.height + 20));
+            applet.text(label, Math.round(0), Math.round(applet.height * scale + 20));
             label = String.format("%.1f", pf.smax);
-            applet.text(label, Math.round(applet.width), Math.round(applet.height + 20));
+            applet.text(label, Math.round(applet.width * scale), Math.round(applet.height * scale + 20));
         }
     }
 
@@ -342,7 +348,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         }
     }
     
-        public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(MouseEvent e) {
     }
 
     public void mousePressed(MouseEvent e) {
