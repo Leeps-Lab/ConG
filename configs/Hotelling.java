@@ -27,7 +27,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
     private float width, height;
     private float scale = 0.7f;
     private boolean firstDraw = false;
-
+    
     public Hotelling() {
         if (FIRE.client != null) {
             config = FIRE.client.getConfig();
@@ -38,8 +38,8 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
     
     public void setup(Client a, int width, int height)
     {
+        periodInfo = new PeriodInfo(null, width, height, a);    
         periodInfo.startPeriod();
-        periodInfo = new PeriodInfo(null, width, height, a);
     }
 
     public float getPayoff(
@@ -94,14 +94,13 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
     public void draw(Client a) {
         if (firstDraw == false)
         {
-            setup(a, 70, -20);
+            setup(a, 300, 200);
             firstDraw = true;
         }
         
         width = a.width * scale;
         height = a.height * scale;
              
-
         if (!setup && Client.state != null && Client.state.getMyStrategy() != null) {
             slider = new Slider(a, Slider.Alignment.Horizontal,
                     0, a.width * scale, a.height * scale, Color.black, "", 1f);
@@ -138,8 +137,11 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
 
         a.pushMatrix();
         try {
-            
-            a.translate(150, 100);
+            a.text("Width: " + a.width +
+                   "\nHeight: " + a.height +
+                   "\nScreenWidth: " + a.screenWidth +
+                   "\nScreenHeight " + a.screenHeight, 200, 60);
+            a.translate(125, 100);
             
             if (config.potential) {
                 drawPotentialPayoffs(a);
@@ -150,7 +152,6 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
             }
 
             drawAxis(a);
-            a.text("HEY YOU GUYS", 70, -20);
             periodInfo.draw(a);
             slider.draw(a);
 
