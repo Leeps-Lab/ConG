@@ -27,7 +27,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
     private float width, height;
     private float scale = 0.7f;
     private boolean firstDraw = false;
-    
+
     public Hotelling() {
         if (FIRE.client != null) {
             config = FIRE.client.getConfig();
@@ -35,10 +35,9 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
             config = FIRE.server.getConfig();
         }
     }
-    
-    public void setup(Client a, int width, int height)
-    {
-        periodInfo = new PeriodInfo(null, width, height, a);    
+
+    public void setup(Client a, int width, int height) {
+        periodInfo = new PeriodInfo(null, 0, 0, a);
         periodInfo.startPeriod();
     }
 
@@ -91,16 +90,66 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         return config.get("Alpha") * 100 * (u / shared);
     }
 
+    private void drawPeriodInfo(Client a) {
+        if (config == null) {
+            return;
+        }
+        String s;
+        if (config.indefiniteEnd == null) {
+            if (config.subperiods != 0) {
+                s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
+            } else {
+                s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000);
+            }
+        } else {
+            if (config.subperiods != 0) {
+                if (Client.state.subperiod < config.subperiods) {
+                    s = String.format("Subperiod: %d", Client.state.subperiod + 1);
+                } else {
+                    s = String.format("Subperiod: %d", Client.state.subperiod);
+                }
+            } else {
+                s = String.format("Seconds Elapsed: %.0f", ((config.length * 1000) - FIRE.client.getMillisLeft()) / 1000f);
+            }
+        }
+        int x = 0;
+        int y = 0;
+        a.fill(0);
+        a.textAlign(Client.LEFT);
+        int lineNumber = 0;
+        float textHeight = a.textAscent() + a.textDescent();
+        a.text(s, x, (int) (y + lineNumber++ * textHeight));
+        String totalPointsString = "";
+        String periodPointsString = "";
+        String multiplierString = "";
+        String contributionsString = "";
+        totalPointsString = String.format(config.totalPointsString + " %.2f", Client.state.totalPoints);
+        periodPointsString = String.format(config.periodPointsString + " %.2f", Client.state.periodPoints);
+        a.text(totalPointsString, (int) x, (int) (y + lineNumber++ * textHeight));
+        a.text(periodPointsString, (int) x, (int) (y + lineNumber++ * textHeight));
+        if (FIRE.client.getConfig().showPGMultiplier) {
+            multiplierString = String.format("Multipler: %.2f", config.get("Alpha"));
+            a.fill(0);
+            a.text(multiplierString, (int) x, (int) (y + lineNumber++ * textHeight));
+            float contributions = ((SumPayoffFunction) FIRE.client.getConfig().payoffFunction).getContributions(Client.state.strategies);
+            contributionsString = String.format("%s: %.2f", FIRE.client.getConfig().contributionsString, contributions);
+            a.fill(0);
+            a.text(contributionsString, (int) x, (int) (y + lineNumber++ * textHeight));
+        }
+        if (config.subperiods != 0 && FIRE.client.isRunningPeriod()) {
+            //drawSubperiodTicker(applet);
+        }
+    }
+
     public void draw(Client a) {
-        if (firstDraw == false)
-        {
+        if (firstDraw == false) {
             setup(a, 300, 200);
             firstDraw = true;
         }
-        
+
         width = a.width * scale;
         height = a.height * scale;
-             
+
         if (!setup && Client.state != null && Client.state.getMyStrategy() != null) {
             slider = new Slider(a, Slider.Alignment.Horizontal,
                     0, a.width * scale, a.height * scale, Color.black, "", 1f);
@@ -135,14 +184,16 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
             setTarget(slider.getGhostValue());
         }
 
+        drawPeriodInfo(a);
+
         a.pushMatrix();
         try {
-            a.text("Width: " + a.width +
-                   "\nHeight: " + a.height +
-                   "\nScreenWidth: " + a.screenWidth +
-                   "\nScreenHeight " + a.screenHeight, 200, 60);
+            a.text("Width: " + a.width
+                    + "\nHeight: " + a.height
+                    + "\nScreenWidth: " + a.screenWidth
+                    + "\nScreenHeight " + a.screenHeight, 200, 60);
             a.translate(125, 100);
-            
+
             if (config.potential) {
                 drawPotentialPayoffs(a);
             }
@@ -152,7 +203,6 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
             }
 
             drawAxis(a);
-            periodInfo.draw(a);
             slider.draw(a);
 
             int i = 1;
@@ -180,9 +230,9 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         } catch (NullPointerException ex) {
             ex.printStackTrace();
         }
-        
+
         a.popMatrix();
-        
+
     }
 
     public float getMax() {
@@ -233,7 +283,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         a.stroke(0, 0, 0, 20);
         a.line(a.width * scale * Client.state.target[0], 0, a.width * scale * Client.state.target[0], a.height * scale);
     }
-    
+
     private void drawStrategy(Client applet, Color color, int id) {
         if (Client.state.strategiesTime.size() < 1) {
             return;
@@ -361,7 +411,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
             Client.state.target[0] = newTarget;
         }
     }
-    
+
     public void mouseClicked(MouseEvent e) {
     }
 
