@@ -25,7 +25,8 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
     private PeriodInfo periodInfo;
     private boolean setup = false;
     private float width, height;
-    private float scale = 0.65f;
+    private float scale = 0.7f;
+    private boolean firstDraw = false;
 
     public Hotelling() {
         if (FIRE.client != null) {
@@ -33,6 +34,12 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         } else if (FIRE.server != null) {
             config = FIRE.server.getConfig();
         }
+    }
+    
+    public void setup(Client a, int width, int height)
+    {
+        periodInfo.startPeriod();
+        periodInfo = new PeriodInfo(null, width, height, a);
     }
 
     public float getPayoff(
@@ -85,11 +92,15 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
     }
 
     public void draw(Client a) {
+        if (firstDraw == false)
+        {
+            setup(a, 70, -20);
+            firstDraw = true;
+        }
+        
         width = a.width * scale;
         height = a.height * scale;
-        
-        periodInfo = new PeriodInfo(null, (int)width - 20, (int)height - 20, a);
-        
+             
 
         if (!setup && Client.state != null && Client.state.getMyStrategy() != null) {
             slider = new Slider(a, Slider.Alignment.Horizontal,
@@ -139,7 +150,8 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
             }
 
             drawAxis(a);
-
+            a.text("HEY YOU GUYS", 70, -20);
+            periodInfo.draw(a);
             slider.draw(a);
 
             int i = 1;
@@ -167,8 +179,9 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         } catch (NullPointerException ex) {
             ex.printStackTrace();
         }
-        periodInfo.draw(a);
+        
         a.popMatrix();
+        
     }
 
     public float getMax() {
