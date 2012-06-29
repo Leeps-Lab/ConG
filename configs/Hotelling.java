@@ -36,8 +36,8 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         }
     }
 
-    public void setup(Client a, int width, int height) {
-        periodInfo = new PeriodInfo(null, 0, 0, a);
+    public void setup(Client a, int x, int y) {
+        periodInfo = new PeriodInfo(null, x, y, a);
         periodInfo.startPeriod();
     }
 
@@ -90,30 +90,35 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         return config.get("Alpha") * 100 * (u / shared);
     }
 
-    private void drawPeriodInfo(Client a) {
+    private void drawPeriodInfo(Client a, int x, int y) {
         if (config == null) {
             return;
         }
         String s;
+        
+        // This condition possibly not needed for this function
         if (config.indefiniteEnd == null) {
             if (config.subperiods != 0) {
                 s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
+                //System.err.println("###config.subperiods != 0 -> " + s);
             } else {
                 s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000);
+                //System.err.println("else (config.subperiods != 0) -> " + s);
             }
         } else {
             if (config.subperiods != 0) {
                 if (Client.state.subperiod < config.subperiods) {
                     s = String.format("Subperiod: %d", Client.state.subperiod + 1);
+                    //System.err.println("###Client.state.subperiod < config.subperiods -> " + s);
                 } else {
                     s = String.format("Subperiod: %d", Client.state.subperiod);
+                    //System.err.println("else (Client.state.subperiod < config.subperiods) -> " + s);
                 }
             } else {
                 s = String.format("Seconds Elapsed: %.0f", ((config.length * 1000) - FIRE.client.getMillisLeft()) / 1000f);
             }
         }
-        int x = 0;
-        int y = 0;
+        
         a.fill(0);
         a.textAlign(Client.LEFT);
         int lineNumber = 0;
@@ -142,8 +147,9 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
     }
 
     public void draw(Client a) {
+        int xPInfo = 140, yPInfo = 15;
         if (firstDraw == false) {
-            setup(a, 300, 200);
+            setup(a, xPInfo, yPInfo);
             firstDraw = true;
         }
 
@@ -184,14 +190,18 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
             setTarget(slider.getGhostValue());
         }
 
-        drawPeriodInfo(a);
+        drawPeriodInfo(a, xPInfo, yPInfo);
 
         a.pushMatrix();
         try {
+            /***Debug Stuff
+             * 
             a.text("Width: " + a.width
                     + "\nHeight: " + a.height
                     + "\nScreenWidth: " + a.screenWidth
                     + "\nScreenHeight " + a.screenHeight, 200, 60);
+            */
+            
             a.translate(125, 100);
 
             if (config.potential) {
