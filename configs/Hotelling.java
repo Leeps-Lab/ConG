@@ -94,31 +94,16 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         if (config == null) {
             return;
         }
+        
         String s;
-        
-        // This condition possibly not needed for this function
-        if (config.indefiniteEnd == null) {
-            if (config.subperiods != 0) {
-                s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
-                //System.err.println("###config.subperiods != 0 -> " + s);
-            } else {
-                s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000);
-                //System.err.println("else (config.subperiods != 0) -> " + s);
-            }
+        if (config.subperiods != 0) {
+            s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
+            //System.err.println("###config.subperiods != 0 -> " + s);
         } else {
-            if (config.subperiods != 0) {
-                if (Client.state.subperiod < config.subperiods) {
-                    s = String.format("Subperiod: %d", Client.state.subperiod + 1);
-                    //System.err.println("###Client.state.subperiod < config.subperiods -> " + s);
-                } else {
-                    s = String.format("Subperiod: %d", Client.state.subperiod);
-                    //System.err.println("else (Client.state.subperiod < config.subperiods) -> " + s);
-                }
-            } else {
-                s = String.format("Seconds Elapsed: %.0f", ((config.length * 1000) - FIRE.client.getMillisLeft()) / 1000f);
-            }
+            s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000);
+            //System.err.println("else (config.subperiods != 0) -> " + s);
         }
-        
+
         a.fill(0);
         a.textAlign(Client.LEFT);
         int lineNumber = 0;
