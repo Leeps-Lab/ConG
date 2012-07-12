@@ -360,17 +360,25 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
             textSize(14);
             text(s, Math.round(width / 2 - textWidth(s) / 2), Math.round(height / 2));
             return;
-        } else if (FIRE.client.getConfig().payoffFunction instanceof ScriptedPayoffFunction) {
-            ScriptedPayoffFunction payoffFunction = (ScriptedPayoffFunction) FIRE.client.getConfig().payoffFunction;
-            payoffFunction.draw(this);
-            return;
         }
 
         if (FIRE.client.isRunningPeriod()) {
             float length = FIRE.client.getConfig().length * 1e9f;
             float elapsed = System.nanoTime() - Client.state.periodStartTime;
             state.currentPercent = elapsed / length;
+            if (Float.isNaN(FIRE.client.getConfig().revealLambda)) {
+                Client.state.updatePoints();
+            }
+        }
 
+
+        if (FIRE.client.getConfig().payoffFunction instanceof ScriptedPayoffFunction) {
+            ScriptedPayoffFunction payoffFunction = (ScriptedPayoffFunction) FIRE.client.getConfig().payoffFunction;
+            payoffFunction.draw(this);
+            return;
+        }
+
+        if (FIRE.client.isRunningPeriod()) {
             if (FIRE.client.getConfig().subperiods == 0) {
                 if (!(FIRE.client.getConfig().payoffFunction instanceof PricingPayoffFunction)) {
                     payoffChart.updateLines();
@@ -380,9 +388,6 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
                     sChart.updateLines();
                 }
             }
-        }
-        if (FIRE.client.isRunningPeriod() && Float.isNaN(FIRE.client.getConfig().revealLambda)) {
-            Client.state.updatePoints();
         }
 
         if (selector != null) {

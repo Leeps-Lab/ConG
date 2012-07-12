@@ -47,7 +47,10 @@ public class WeakestLink implements PayoffScriptInterface, MouseListener, KeyLis
             Config config) {
         float smin = 1;
         float smax = 10;
-        float A = config.get("Alpha");
+        //float A = config.get("Alpha");
+        float a1 = 0.5f;
+        float a2 = 2.0f;
+        float A = Client.lerp(a1, a2, percent);
         float min = Float.MAX_VALUE;
         for (int i : popStrategies.keySet()) {
             float s = popStrategies.get(i)[0];
@@ -58,7 +61,7 @@ public class WeakestLink implements PayoffScriptInterface, MouseListener, KeyLis
         float s = popStrategies.get(id)[0];
         min = Client.map(min, 0, 1, smin, smax);
         s = Client.map(s, 0, 1, smin, smax);
-        return s - A * (s - min);
+        return Math.max(0, s - A * (s - min));
     }
 
     private void drawPeriodInfo(Client a, int x, int y) {
