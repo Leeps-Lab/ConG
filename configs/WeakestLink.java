@@ -106,6 +106,10 @@ public class WeakestLink implements PayoffScriptInterface, MouseListener, KeyLis
         periodPointsString = String.format(config.periodPointsString + " %.2f", Client.state.periodPoints);
         a.text(totalPointsString, (int) x, (int) (y + lineNumber++ * textHeight));
         a.text(periodPointsString, (int) x, (int) (y + lineNumber++ * textHeight));
+        float a1 = 0.5f;
+        float a2 = 2.0f;
+        float A = Client.lerp(a1, a2, Client.state.currentPercent);
+        a.text(String.format("Alpha: %.2f", A), (int) x, (int) (y + lineNumber++ * textHeight));
         if (FIRE.client.getConfig().showPGMultiplier) {
             multiplierString = String.format("Multipler: %.2f", config.get("Alpha"));
             a.fill(0);
