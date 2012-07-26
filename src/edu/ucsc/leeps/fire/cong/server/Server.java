@@ -131,7 +131,7 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
             public void run() {
                 if (subperiod < FIRE.server.getConfig().subperiods) {
                     population.endSubperiod(subperiod);
-                    int secondsLeft = FIRE.server.getConfig().length - (subperiod * (int) (millisPerSubperiod / 1000));
+                    int secondsLeft = Math.round(FIRE.server.getConfig().length - (subperiod * (millisPerSubperiod / 1000f)));
                     population.logTick(subperiod, secondsLeft);
                     subperiod++;
                 }
