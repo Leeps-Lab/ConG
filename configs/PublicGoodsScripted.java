@@ -1,3 +1,8 @@
+/*
+ * Hotelling.java
+ * If you want to create an experiment that acts similarly to Hotelling, use
+ * this code as an example.
+ */
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
@@ -16,19 +21,22 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class PublicGoods implements PayoffScriptInterface, MouseListener, KeyListener {
+public class PublicGoodsScripted implements PayoffScriptInterface, MouseListener, KeyListener {
 
+    // Variables for setting up and drawing the graph, obtain info
     private boolean enabled = true;
     private Slider slider;
     private Config config;
     private float[] subperiodStrategy;
     private PeriodInfo periodInfo;
+    // Variables for drawing the dimensions of the graphs
     private boolean setup = false;
     private float width, height;
-    private float scale = 0.7f;
+    private float scale = 0.7f;     // Scales the size of the graph
     private boolean firstDraw = false;
 
-    public PublicGoods() {
+    // Constructor
+    public PublicGoodsScripted() {
         if (FIRE.client != null) {
             config = FIRE.client.getConfig();
         } else if (FIRE.server != null) {
@@ -36,6 +44,7 @@ public class PublicGoods implements PayoffScriptInterface, MouseListener, KeyLis
         }
     }
 
+    // Sets up the periodInfo object to get periodInfo information
     public void setup(Client a, int x, int y) {
         periodInfo = new PeriodInfo(null, x, y, a);
         periodInfo.startPeriod();
@@ -51,6 +60,8 @@ public class PublicGoods implements PayoffScriptInterface, MouseListener, KeyLis
         float smax = 100;
         float A = config.get("Alpha");
         float sum = 0;
+        
+        // Payoff for public goods
         for (int i : popStrategies.keySet()) {
             float s = popStrategies.get(i)[0];
             if (i != id) {
@@ -63,29 +74,26 @@ public class PublicGoods implements PayoffScriptInterface, MouseListener, KeyLis
         return (smax - s) + (A / n) * sum;
     }
 
+    // Draws info related to the periods such as score and time left
     private void drawPeriodInfo(Client a, int x, int y) {
         if (config == null) {
             return;
         }
+        // The period info text drawn above the graph
         String s;
 
-        // This condition possibly not needed for this function
         if (config.indefiniteEnd == null) {
             if (config.subperiods != 0) {
                 s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
-                //System.err.println("###config.subperiods != 0 -> " + s);
             } else {
-                s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000);
-                //System.err.println("else (config.subperiods != 0) -> " + s);
+                s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000f);
             }
         } else {
             if (config.subperiods != 0) {
                 if (Client.state.subperiod < config.subperiods) {
                     s = String.format("Subperiod: %d", Client.state.subperiod + 1);
-                    //System.err.println("###Client.state.subperiod < config.subperiods -> " + s);
                 } else {
                     s = String.format("Subperiod: %d", Client.state.subperiod);
-                    //System.err.println("else (Client.state.subperiod < config.subperiods) -> " + s);
                 }
             } else {
                 s = String.format("Seconds Elapsed: %.0f", ((config.length * 1000) - FIRE.client.getMillisLeft()) / 1000f);
@@ -120,12 +128,17 @@ public class PublicGoods implements PayoffScriptInterface, MouseListener, KeyLis
     }
 
     public void draw(Client a) {
+        // xPInfo and yPInfo are x,y coords for the period info drawing
         int xPInfo = 140, yPInfo = 15;
+        
+        // One the first iteration of draw, create periodInfo object and start
+        // the period
         if (firstDraw == false) {
             setup(a, xPInfo, yPInfo);
             firstDraw = true;
         }
 
+        // Gets the width and height from the Client and multiplies by scale
         width = a.width * scale;
         height = a.height * scale;
 
@@ -174,6 +187,9 @@ public class PublicGoods implements PayoffScriptInterface, MouseListener, KeyLis
              * "\nScreenWidth: " + a.screenWidth + "\nScreenHeight " +
              * a.screenHeight, 200, 60);
              */
+            
+            
+            // OpenGL translate
             a.translate(125, 100);
 
             if (config.potential) {
@@ -217,6 +233,8 @@ public class PublicGoods implements PayoffScriptInterface, MouseListener, KeyLis
 
     }
 
+    // getMax and getMin are the min, max values of the graph
+    // Use values appropriate to your experiment
     public float getMax() {
         return 300;
     }
@@ -238,7 +256,7 @@ public class PublicGoods implements PayoffScriptInterface, MouseListener, KeyLis
     }
 
     private void drawInOutButtons(Client a) {
-        a.stroke(0, 0, 0, 255);
+        a.stroke(0, 0, 0, 255);         // RGBA
         a.rectMode(Client.CORNERS);
         a.strokeWeight(3);
         a.fill(255, 255, 255, 255);

@@ -1,3 +1,8 @@
+/*
+ * Hotelling.java
+ * If you want to create an experiment that acts similarly to Hotelling, use
+ * this code as an example.
+ */
 
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
@@ -16,19 +21,22 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListener {
+public class HotellingScripted implements PayoffScriptInterface, MouseListener, KeyListener {
 
+    // Variables for setting up and drawing the graph, obtain info
     private boolean enabled = true;
+    private boolean setup = false;
     private Slider slider;
     private Config config;
     private float[] subperiodStrategy;
     private PeriodInfo periodInfo;
-    private boolean setup = false;
+    // Variables for drawing the dimensions of the graphs
     private float width, height;
-    private float scale = 0.7f;
+    private float scale = 0.7f;     // Scales the size of the graph
     private boolean firstDraw = false;
 
-    public Hotelling() {
+    // Constructor
+    public HotellingScripted() {
         if (FIRE.client != null) {
             config = FIRE.client.getConfig();
         } else if (FIRE.server != null) {
@@ -36,6 +44,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         }
     }
 
+    // Sets up the periodInfo object to get periodInfo information
     public void setup(Client a, int x, int y) {
         periodInfo = new PeriodInfo(null, x, y, a);
         periodInfo.startPeriod();
@@ -47,6 +56,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
             Map<Integer, float[]> popStrategies,
             Map<Integer, float[]> matchPopStrategies,
             Config config) {
+        
         if (popStrategies.size() < 2) { // if only 1 person is playing, they get zero
             return 0;
         }
@@ -56,21 +66,26 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
             sorted.add(s[0]);
         }
 
+        // Assigns the strategy at the client ID to s
         float s = popStrategies.get(id)[0];
+
         SortedSet<Float> leftSide = sorted.headSet(s);
         SortedSet<Float> rightSide = sorted.tailSet(s);
         rightSide.remove(s); // remove s from right side because tailSet is inclusive
+
+        // This code affects slider location, payoff function
         float left, right;
         if (leftSide.isEmpty()) {
             left = 0;
         } else {
-            left = leftSide.last();
+            left = leftSide.last();     // left = highest element of this set
         }
         if (rightSide.isEmpty()) {
             right = 1f;
         } else {
-            right = rightSide.first();
+            right = rightSide.first();  // right = lowest element of this set
         }
+
         float u;
         if (left == 0) {
             u = s + 0.5f * (right - s);
@@ -86,45 +101,68 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
                 shared++;
             }
         }
-        assert shared >= 1;
+        assert shared >= 1;     // shared must >= 1 for experiment to make sense
+        
+        // Payoff function for Hotelling
         return config.get("Alpha") * 100 * (u / shared);
     }
 
+    // Draws info related to the periods such as score and time left
     private void drawPeriodInfo(Client a, int x, int y) {
         if (config == null) {
             return;
         }
-        
+        // The period info text drawn above the graph
         String s;
+
         if (config.subperiods != 0) {
             s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
-            //System.err.println("###config.subperiods != 0 -> " + s);
+        }
+
+        if (config.indefiniteEnd == null) {
+            if (config.subperiods != 0) {
+                s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
+            } else {
+                s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000f);
+            }
+
         } else {
-            s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000);
-            //System.err.println("else (config.subperiods != 0) -> " + s);
+            s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000f);
+
+            if (config.subperiods != 0) {
+                if (Client.state.subperiod < config.subperiods) {
+                    s = String.format("Subperiod: %d", Client.state.subperiod + 1);
+                } else {
+                    s = String.format("Subperiod: %d", Client.state.subperiod);
+                }
+            } else {
+                s = String.format("Seconds Elapsed: %.0f", ((config.length * 1000) - FIRE.client.getMillisLeft()) / 1000f);
+            }
+
         }
 
         a.fill(0);
         a.textAlign(Client.LEFT);
         int lineNumber = 0;
         float textHeight = a.textAscent() + a.textDescent();
-        a.text(s, x, (int) (y + lineNumber++ * textHeight));
+        a.text(s, x, (y + lineNumber++ * textHeight));
         String totalPointsString = "";
         String periodPointsString = "";
         String multiplierString = "";
         String contributionsString = "";
         totalPointsString = String.format(config.totalPointsString + " %.2f", Client.state.totalPoints);
         periodPointsString = String.format(config.periodPointsString + " %.2f", Client.state.periodPoints);
-        a.text(totalPointsString, (int) x, (int) (y + lineNumber++ * textHeight));
-        a.text(periodPointsString, (int) x, (int) (y + lineNumber++ * textHeight));
+        a.text(totalPointsString, x, (y + lineNumber++ * textHeight));
+        a.text(periodPointsString, x, (y + lineNumber++ * textHeight));
+        
         if (FIRE.client.getConfig().showPGMultiplier) {
             multiplierString = String.format("Multipler: %.2f", config.get("Alpha"));
             a.fill(0);
-            a.text(multiplierString, (int) x, (int) (y + lineNumber++ * textHeight));
+            a.text(multiplierString, x, (y + lineNumber++ * textHeight));
             float contributions = ((SumPayoffFunction) FIRE.client.getConfig().payoffFunction).getContributions(Client.state.strategies);
             contributionsString = String.format("%s: %.2f", FIRE.client.getConfig().contributionsString, contributions);
             a.fill(0);
-            a.text(contributionsString, (int) x, (int) (y + lineNumber++ * textHeight));
+            a.text(contributionsString, x, (y + lineNumber++ * textHeight));
         }
         if (config.subperiods != 0 && FIRE.client.isRunningPeriod()) {
             //drawSubperiodTicker(applet);
@@ -132,12 +170,17 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
     }
 
     public void draw(Client a) {
+        //xPInfo and yPInfo are x,y coords for the period info drawing
         int xPInfo = 140, yPInfo = 15;
+
+        // On the first iteration of draw, create periodInfo object and start
+        // the period
         if (firstDraw == false) {
             setup(a, xPInfo, yPInfo);
             firstDraw = true;
         }
 
+        // Gets the width and height from the Client and multiplies by scale
         width = a.width * scale;
         height = a.height * scale;
 
@@ -170,7 +213,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         }
 
         if (enabled && !config.trajectory && slider.isGhostGrabbed()) {
-            float mouseX = a.mouseX;
+            float mouseX = a.mouseX * scale;
             slider.moveGhost(mouseX);
             setTarget(slider.getGhostValue());
         }
@@ -179,14 +222,15 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
 
         a.pushMatrix();
         try {
-            /***Debug Stuff
-             * 
-            a.text("Width: " + a.width
-                    + "\nHeight: " + a.height
-                    + "\nScreenWidth: " + a.screenWidth
-                    + "\nScreenHeight " + a.screenHeight, 200, 60);
-            */
+            /**
+             * *Debug Stuff
+             *
+             * a.text("Width: " + a.width + "\nHeight: " + a.height +
+             * "\nScreenWidth: " + a.screenWidth + "\nScreenHeight " +
+             * a.screenHeight, 200, 60);
+             **/
             
+            // OpenGL translate
             a.translate(125, 100);
 
             if (config.potential) {
@@ -230,6 +274,8 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
 
     }
 
+    // getMax and getMin are the min, max values of the graph
+    // Use values appropriate to your experiment
     public float getMax() {
         return 100;
     }
@@ -242,22 +288,23 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         float[] s = {0};
         float max = config.payoffFunction.getMax();
         a.stroke(50);
-        for (float x = 0; x < a.width * scale; x++) {
-            s[0] = x / a.width * scale;
+        for (float x = 0; x < a.width; x++) {
+            s[0] = x / a.width;
             float u = PayoffUtils.getPayoff(s);
             float y = u / max;
-            a.point(x, a.height * scale * (1 - y));
+            a.point(x * scale, ((a.height * (1 - y))) * scale);
         }
     }
 
     private void drawInOutButtons(Client a) {
-        a.stroke(0, 0, 0, 255);
+        a.stroke(0, 0, 0, 255);     // RGBA
         a.rectMode(Client.CORNERS);
         a.strokeWeight(3);
         a.fill(255, 255, 255, 255);
-        a.rect(a.width * scale - 100, -5, a.width * scale, -30);
+        a.rect(a.width * scale - 100, -5, a.width * scale, - 30);
         a.rect(a.width * scale - 205, -5, a.width * scale - 105, -30);
         a.fill(0, 0, 0, 100);
+        
         if (Client.state.getMyStrategy() != null) {
             if (Client.state.getMyStrategy()[1] == 0) {
                 a.rect(a.width * scale - 100, -5, a.width * scale, -30);
@@ -364,6 +411,7 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         applet.rect(0, applet.height * scale + 2, applet.width * scale, 40);
         String maxPayoffLabel = String.format("%.1f", max);
         float labelX = 10 + applet.width * scale + 1.1f * applet.textWidth(maxPayoffLabel) / 2f;
+        
         for (float y = 0.0f; y <= 1.01f; y += 0.1f) {
             applet.noFill();
             applet.stroke(100, 100, 100);
@@ -414,8 +462,8 @@ public class Hotelling implements PayoffScriptInterface, MouseListener, KeyListe
         if (enabled) {
             boolean button = false;
             if (config.payoffFunction.getNumStrategies() == 2) {
-                float x = e.getX();
-                float y = e.getY();
+                float x = e.getX() * scale;
+                float y = e.getY() * scale;
                 if (x >= width - 100 && x <= width && y >= -30 && y <= -5) {
                     Client.state.target[1] = 0;
                     button = true;
