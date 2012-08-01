@@ -242,6 +242,7 @@ public class ScriptTest extends javax.swing.JFrame {
 
     private void reloadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_reloadButtonActionPerformed
         ScriptedPayoffFunction p1 = new ScriptedPayoffFunction();
+        /*
         List<Diagnostic<? extends JavaFileObject>> errs = p1.setScript(scriptEditor.getText());
         if (!errs.isEmpty()) {
             for (Diagnostic<? extends JavaFileObject> d : errs) {
@@ -249,6 +250,8 @@ public class ScriptTest extends javax.swing.JFrame {
             }
             return;
         }
+        * 
+        */
         SumPayoffFunction p2 = new SumPayoffFunction();
         p2.type = SumPayoffFunction.Type.linear;
         System.err.println("payoff = " + p1.getPayoff(1, 0, strategyTableModel.strategies, strategyTableModel.strategies, null));

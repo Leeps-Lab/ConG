@@ -265,4 +265,9 @@ public class Config extends BaseConfig {
     // assigned by the server in configurePeriod
     public Map<Integer, String> currAliases;
     public Map<Integer, Color> currColors;
+
+    @Override
+    public void test() throws ConfigException {
+        payoffFunction.configure(this);
+    }
 }

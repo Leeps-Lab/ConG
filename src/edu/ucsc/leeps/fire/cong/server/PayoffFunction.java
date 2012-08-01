@@ -1,5 +1,6 @@
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.config.BaseConfig;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import java.io.Serializable;
 import java.util.Map;
@@ -34,5 +35,5 @@ public interface PayoffFunction extends Serializable {
             Map<Integer, float[]> popStrategies,
             Map<Integer, float[]> matchPopStrategies);
 
-    public void configure(Config config);
+    public void configure(Config config) throws BaseConfig.ConfigException;
 }

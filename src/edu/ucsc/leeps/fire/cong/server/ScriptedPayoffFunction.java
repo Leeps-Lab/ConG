@@ -1,16 +1,16 @@
 package edu.ucsc.leeps.fire.cong.server;
 
 import compiler.CharSequenceCompiler;
+import compiler.CharSequenceCompilerException;
+import edu.ucsc.leeps.fire.config.BaseConfig;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.logging.Dialogs;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,14 +61,26 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
 
     public float getPayoff(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies, Config config) {
         if (function == null) {
-            configure(config);
+            try {
+                configure(config);
+            } catch (BaseConfig.ConfigException ex) {
+                return Float.NaN;
+            }
         }
         return function.getPayoff(id, percent, popStrategies, matchPopStrategies, config);
     }
-    
+
     public void draw(Client a) {
         if (function != null) {
-            function.draw(a);
+            try {
+                function.draw(a);
+            } catch (Exception ex) {
+                Writer writer = new StringWriter();
+                PrintWriter printWriter = new PrintWriter(writer);
+                ex.printStackTrace(printWriter);
+                String exString = writer.toString();
+                a.text(exString, 20, 30);
+            }
         }
     }
 
@@ -80,13 +92,12 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         return null;
     }
 
-    public void configure(Config config) {
+    public void configure(Config config) throws BaseConfig.ConfigException {
         if (scriptText == null) {
             File baseDir = new File(FIRE.server.getConfigSource()).getParentFile();
             File scriptFile = new File(baseDir, source);
             if (!scriptFile.exists()) {
-                Dialogs.popUpErr("Error: Payoff script referenced in config does not exist.\n" + scriptFile.getAbsolutePath());
-                return;
+                throw new BaseConfig.ConfigException("Cannot find payoff script file %s", scriptFile.getAbsolutePath());
             }
             scriptText = "";
             try {
@@ -97,7 +108,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
                     c = reader.read();
                 }
             } catch (IOException ex) {
-                Dialogs.popUpErr("Error reading payoff script.", ex);
+                throw new BaseConfig.ConfigException("Error reading payoff script");
             }
         }
         CharSequenceCompiler<PayoffScriptInterface> compiler = new CharSequenceCompiler<PayoffScriptInterface>(
@@ -107,29 +118,31 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         Pattern classNamePattern = Pattern.compile("public class (.*?) implements PayoffScriptInterface");
         Matcher m = classNamePattern.matcher(scriptText);
         if (!m.find() || m.groupCount() != 1) {
-            Dialogs.popUpErr("Failed to find class name");
-            return;
+            throw new BaseConfig.ConfigException("Error compiling payoff script: Failed to find class name");
         }
         try {
             clazz = compiler.compile(m.group(1), scriptText, errs, new Class<?>[]{PayoffScriptInterface.class});
-        } catch (Exception ex) {
-            Dialogs.popUpErr(ex);
+        } catch (CharSequenceCompilerException ex) {
+            final Writer result = new StringWriter();
+            for (Diagnostic d : errs.getDiagnostics()) {
+                try {
+                    result.append(String.format("Line %d\nCol %d\n%s", d.getLineNumber(), d.getColumnNumber(), d.getMessage(null)));
+                } catch (IOException ignore) {
+                }
+            }
+            throw new BaseConfig.ConfigException("Error compiling payoff script:\n%s", result.toString());
+        } catch (ClassCastException ex) {
+            throw new BaseConfig.ConfigException("Error compiling payoff script:\n%s", ex.toString());
         }
         if (clazz != null) {
             try {
                 function = clazz.newInstance();
-            } catch (InstantiationException ex1) {
-                Dialogs.popUpErr(ex1);
-            } catch (IllegalAccessException ex2) {
-                Dialogs.popUpErr(ex2);
+            } catch (InstantiationException ex) {
+                throw new BaseConfig.ConfigException("Error compiling payoff script:\n%s", ex.toString());
+            } catch (IllegalAccessException ex) {
+                throw new BaseConfig.ConfigException("Error compiling payoff script:\n%s", ex.toString());
             }
         }
-    }
-
-    public List<Diagnostic<? extends JavaFileObject>> setScript(String scriptText) {
-        this.scriptText = scriptText;
-        configure(null);
-        return errs.getDiagnostics();
     }
 
     public static interface PayoffScriptInterface {
@@ -139,7 +152,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         public float getMin();
 
         public float getMax();
-        
+
         public void draw(Client a);
     }
 }

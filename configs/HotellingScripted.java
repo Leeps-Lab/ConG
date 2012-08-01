@@ -56,7 +56,7 @@ public class HotellingScripted implements PayoffScriptInterface, MouseListener, 
             Map<Integer, float[]> popStrategies,
             Map<Integer, float[]> matchPopStrategies,
             Config config) {
-        
+
         if (popStrategies.size() < 2) { // if only 1 person is playing, they get zero
             return 0;
         }
@@ -102,7 +102,7 @@ public class HotellingScripted implements PayoffScriptInterface, MouseListener, 
             }
         }
         assert shared >= 1;     // shared must >= 1 for experiment to make sense
-        
+
         // Payoff function for Hotelling
         return config.get("Alpha") * 100 * (u / shared);
     }
@@ -113,48 +113,38 @@ public class HotellingScripted implements PayoffScriptInterface, MouseListener, 
             return;
         }
         // The period info text drawn above the graph
-        String s;
-
-        if (config.subperiods != 0) {
-            s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
-        }
-
-        if (config.indefiniteEnd == null) {
-            if (config.subperiods != 0) {
-                s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
-            } else {
-                s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000f);
-            }
-
-        } else {
-            s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000f);
-
-            if (config.subperiods != 0) {
-                if (Client.state.subperiod < config.subperiods) {
-                    s = String.format("Subperiod: %d", Client.state.subperiod + 1);
-                } else {
-                    s = String.format("Subperiod: %d", Client.state.subperiod);
-                }
-            } else {
-                s = String.format("Seconds Elapsed: %.0f", ((config.length * 1000) - FIRE.client.getMillisLeft()) / 1000f);
-            }
-
-        }
-
         a.fill(0);
         a.textAlign(Client.LEFT);
         int lineNumber = 0;
         float textHeight = a.textAscent() + a.textDescent();
-        a.text(s, x, (y + lineNumber++ * textHeight));
         String totalPointsString = "";
         String periodPointsString = "";
         String multiplierString = "";
         String contributionsString = "";
+        String timeInfoString = "";
+        if (config.indefiniteEnd == null) {
+            if (config.subperiods != 0) {
+                timeInfoString = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
+            } else {
+                timeInfoString = String.format("Seconds Left: %.0f", FIRE.client.getMillisLeft() / 1000f);
+            }
+        } else {
+            if (config.subperiods != 0) {
+                if (Client.state.subperiod < config.subperiods) {
+                    timeInfoString = String.format("Subperiod: %d", Client.state.subperiod + 1);
+                } else {
+                    timeInfoString = String.format("Subperiod: %d", Client.state.subperiod);
+                }
+            } else {
+                timeInfoString = String.format("Seconds Elapsed: %.0f", ((config.length * 1000) - FIRE.client.getMillisLeft()) / 1000f);
+            }
+        }
         totalPointsString = String.format(config.totalPointsString + " %.2f", Client.state.totalPoints);
         periodPointsString = String.format(config.periodPointsString + " %.2f", Client.state.periodPoints);
+        a.text(timeInfoString, x, (y + lineNumber++ * textHeight));
         a.text(totalPointsString, x, (y + lineNumber++ * textHeight));
         a.text(periodPointsString, x, (y + lineNumber++ * textHeight));
-        
+
         if (FIRE.client.getConfig().showPGMultiplier) {
             multiplierString = String.format("Multipler: %.2f", config.get("Alpha"));
             a.fill(0);
@@ -171,7 +161,7 @@ public class HotellingScripted implements PayoffScriptInterface, MouseListener, 
 
     public void draw(Client a) {
         //xPInfo and yPInfo are x,y coords for the period info drawing
-        int xPInfo = 140, yPInfo = 15;
+        int xPInfo = 140, yPInfo = 30;
 
         // On the first iteration of draw, create periodInfo object and start
         // the period
@@ -228,8 +218,8 @@ public class HotellingScripted implements PayoffScriptInterface, MouseListener, 
              * a.text("Width: " + a.width + "\nHeight: " + a.height +
              * "\nScreenWidth: " + a.screenWidth + "\nScreenHeight " +
              * a.screenHeight, 200, 60);
-             **/
-            
+             *
+             */
             // OpenGL translate
             a.translate(125, 100);
 
@@ -304,7 +294,7 @@ public class HotellingScripted implements PayoffScriptInterface, MouseListener, 
         a.rect(a.width * scale - 100, -5, a.width * scale, - 30);
         a.rect(a.width * scale - 205, -5, a.width * scale - 105, -30);
         a.fill(0, 0, 0, 100);
-        
+
         if (Client.state.getMyStrategy() != null) {
             if (Client.state.getMyStrategy()[1] == 0) {
                 a.rect(a.width * scale - 100, -5, a.width * scale, -30);
@@ -411,7 +401,7 @@ public class HotellingScripted implements PayoffScriptInterface, MouseListener, 
         applet.rect(0, applet.height * scale + 2, applet.width * scale, 40);
         String maxPayoffLabel = String.format("%.1f", max);
         float labelX = 10 + applet.width * scale + 1.1f * applet.textWidth(maxPayoffLabel) / 2f;
-        
+
         for (float y = 0.0f; y <= 1.01f; y += 0.1f) {
             applet.noFill();
             applet.stroke(100, 100, 100);

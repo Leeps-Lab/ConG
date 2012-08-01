@@ -1,10 +1,12 @@
 package edu.ucsc.leeps.fire.cong.server;
 
+import edu.ucsc.leeps.fire.config.BaseConfig;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.ClientInterface;
 import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.logging.MessageEvent;
 import edu.ucsc.leeps.fire.cong.logging.TickEvent;
+import edu.ucsc.leeps.fire.logging.Dialogs;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -74,10 +76,14 @@ public class Population implements Serializable {
             Config config = FIRE.server.getConfig(id);
             config.currAliases = aliases;
             config.currColors = colors;
-            config.payoffFunction.configure(config);
-            config.agent.configure(config);
-            if (config.counterpartPayoffFunction != null) {
-                config.counterpartPayoffFunction.configure(config);
+            try {
+                config.payoffFunction.configure(config);
+                config.agent.configure(config);
+                if (config.counterpartPayoffFunction != null) {
+                    config.counterpartPayoffFunction.configure(config);
+                }
+            } catch (BaseConfig.ConfigException ex) {
+                Dialogs.popUpAndExit(ex);
             }
         }
     }
