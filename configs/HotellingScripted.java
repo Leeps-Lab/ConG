@@ -1,5 +1,5 @@
 /*
- * Hotelling.java
+ * HotellingScripted.java
  * If you want to create an experiment that acts similarly to Hotelling, use
  * this code as an example.
  */

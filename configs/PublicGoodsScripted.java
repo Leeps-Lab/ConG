@@ -1,6 +1,6 @@
 /*
- * Hotelling.java
- * If you want to create an experiment that acts similarly to Hotelling, use
+ * PublicGoodsScripted.java
+ * If you want to create an experiment that acts similarly to Public Goods, use
  * this code as an example.
  */
 
@@ -86,7 +86,7 @@ public class PublicGoodsScripted implements PayoffScriptInterface, MouseListener
             if (config.subperiods != 0) {
                 s = String.format("Subperiods Left: %d", config.subperiods - Client.state.subperiod);
             } else {
-                s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000f);
+                s = String.format("Seconds Left: %d", FIRE.client.getMillisLeft() / 1000);
             }
         } else {
             if (config.subperiods != 0) {
