@@ -9,10 +9,14 @@ modification, are permitted provided that the following conditions are met:
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
    and/or other materials provided with the distribution.
-3. Use of either the source code or binary form to obtain results used in an
-   academic publication must include a citation of the following article:
-   Pettit et al., "Continuous Game Experiments." Working Paper, 2012.
+3. Use of the source code either directly or in binary form to obtain results
+   reported in an academic publication must include an up to date citation of
+	 the following article:
+   Pettit, J., D. Friedman, C. Kephart and R. Oprea,
+	 "Continuous Game Experiments."
+	 This article is currently a 2012 UCSC Working Paper.
 
+DISCLAIMER:
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
