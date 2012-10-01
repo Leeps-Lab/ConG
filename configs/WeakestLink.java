@@ -243,7 +243,7 @@ public class WeakestLink implements PayoffScriptInterface, MouseListener, KeyLis
         float max = config.payoffFunction.getMax();
         a.stroke(50);
         for (float x = 0; x < a.width * scale; x++) {
-            s[0] = x / a.width * scale;
+            s[0] = x / (a.width * scale);
             float u = PayoffUtils.getPayoff(s);
             float y = u / max;
             a.point(x, a.height * scale * (1 - y));
