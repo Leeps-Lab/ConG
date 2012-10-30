@@ -1,12 +1,11 @@
+
 /**
- * Copyright (c) 2012, University of California
- * All rights reserved.
- * 
+ * Copyright (c) 2012, University of California All rights reserved.
+ *
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
- **/
-
-
+ *
+ */
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.client.gui.PeriodInfo;
@@ -240,13 +239,19 @@ public class WeakestLink implements PayoffScriptInterface, MouseListener, KeyLis
 
     private void drawPotentialPayoffs(Client a) {
         float[] s = {0};
+        float min = config.payoffFunction.getMin();
         float max = config.payoffFunction.getMax();
         a.stroke(50);
         for (float x = 0; x < a.width * scale; x++) {
             s[0] = x / (a.width * scale);
-            float u = PayoffUtils.getPayoff(s);
-            float y = u / max;
-            a.point(x, a.height * scale * (1 - y));
+            float payoff = PayoffUtils.getPayoff(s);
+            float y = a.height * scale * (1 - (payoff - min) / (max - min));
+            if (y > a.height * scale) {
+                y = a.height * scale;
+            } else if (y < 0) {
+                y = 0;
+            }
+            a.point(x, y);
         }
     }
 
