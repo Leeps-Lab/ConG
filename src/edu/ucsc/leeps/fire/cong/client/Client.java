@@ -629,51 +629,31 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         } catch (URISyntaxException ex) {
             ex.printStackTrace();
         }
-        if (System.getProperty("os.arch").equals("amd64")) {
-            addDir(new File(new File(path, "lib"), "64-bit").getAbsolutePath());
-            addDir(new File("lib", "64-bit").getAbsolutePath());
-        } else {
-            addDir(new File(new File(path, "lib"), "32-bit").getAbsolutePath());
-            String tmpDir = System.getProperty("java.io.tmpdir");
-            List<JarEntry> entries = new LinkedList<JarEntry>();
-            for (String pathItem : System.getProperty("java.class.path").split(":")) {
-                if (pathItem.contains("jar")) {
-                    try {
-                        JarFile jar = new JarFile(pathItem);
-                        JarInputStream jarInputStream = new JarInputStream(new FileInputStream(pathItem));
-                        JarEntry entry = jarInputStream.getNextJarEntry();
-                        while (entry != null) {
-                            if (entry.getName().endsWith("so")
-                                    || entry.getName().endsWith("dll")
-                                    || entry.getName().endsWith("jnilib")
-                                    || entry.getName().endsWith("dynlib")) {
-                                entries.add(entry);
-                            }
-                            entry = jarInputStream.getNextJarEntry();
-                        }
-                        for (JarEntry toExtract : entries) {
-                            File tmpFile = new File(tmpDir, toExtract.getName());
-                            OutputStream out = new FileOutputStream(tmpFile);
-                            InputStream in = jar.getInputStream(toExtract);
-                            byte[] buffer = new byte[4096];
-                            while (true) {
-                                int nBytes = in.read(buffer);
-                                if (nBytes <= 0) {
-                                    break;
-                                }
-                                out.write(buffer, 0, nBytes);
-                            }
-                            out.flush();
-                            out.close();
-                            in.close();
-                        }
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                    break;
-                }
+        String libDir = null;
+        if (System.getProperty("os.name").contains("Win")) {
+            if (System.getProperty("os.arch").contains("64")) {
+                libDir = "win-64-bit";
+            } else {
+                libDir = "win-32-bit";
             }
-            addDir(tmpDir);
+        } else if (System.getProperty("os.name").contains("Mac")) {
+            if (System.getProperty("os.arch").contains("64")) {
+                libDir = "mac-64-bit";
+            } else {
+                libDir = "mac-ppc-bit";
+            }
+        } else if (System.getProperty("os.name").contains("Linux")) {
+            if (System.getProperty("os.arch").contains("64")) {
+                libDir = "linux-64-bit";
+            } else {
+                libDir = "linux-32-bit";
+            }
+        }
+        if (libDir != null) {
+            addDir(new File(new File(path, "lib"), libDir).getAbsolutePath());
+            addDir(new File("lib", libDir).getAbsolutePath());
+        } else {
+            // error
         }
     }
 
