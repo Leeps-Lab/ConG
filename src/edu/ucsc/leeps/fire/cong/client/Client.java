@@ -139,11 +139,13 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         } else if (qwerty.visible) {
             selector = qwerty;
             strategyChanger.selector = qwerty;
-        } else if (bubbles.visible) {
+        } else {
             selector = bubbles;
             strategyChanger.selector = bubbles;
         }
-        strategyChanger.selector.startPrePeriod();
+        if (strategyChanger.selector != null) {
+            strategyChanger.selector.startPrePeriod();
+        }
         payoffChart.clearAll();
         strategyChart.clearAll();
         rChart.clearAll();

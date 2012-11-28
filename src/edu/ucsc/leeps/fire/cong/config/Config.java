@@ -47,7 +47,7 @@ public class Config extends BaseConfig {
     public boolean excludeSelf;
     public int subperiods;
     public boolean mixed;
-    public StrategySelector selector;
+    public StrategySelector selector = StrategySelector.bubbles;
     public MatrixDisplayType matrixDisplay;
     public Line yourPayoff, matchPayoff;
     public Line yourStrategy, matchStrategy;
