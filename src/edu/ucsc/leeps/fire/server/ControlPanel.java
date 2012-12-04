@@ -417,7 +417,7 @@ public class ControlPanel extends javax.swing.JPanel {
                         try {
                             controller.configurator.setConfigFile(file);
                         } catch (IOException ex) {
-                            return "Could not open selected config for reading.";
+                            return "Error reading config file.";
                         }
                         try {
                             controller.loadConfig(controller.configurator);
@@ -443,9 +443,11 @@ public class ControlPanel extends javax.swing.JPanel {
                                 configLoadIndicator.setString("Error Loading Config");
                             }
                         } catch (ExecutionException ex) {
-                            configLoadIndicator.setString("No Config Loaded");
+                            Dialogs.popUpErr(ex);
+                            configLoadIndicator.setString("Error Loading Config");
                         } catch (InterruptedException ex) {
-                            configLoadIndicator.setString("No Config Loaded");
+                            Dialogs.popUpErr(ex);
+                            configLoadIndicator.setString("Error Loading Config");
                         }
                         configLoadIndicator.setIndeterminate(false);
                     }
