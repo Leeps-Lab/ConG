@@ -8,6 +8,7 @@
 
 package compiler;
 
+import com.sun.tools.javac.api.JavacTool;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -90,15 +91,9 @@ public class CharSequenceCompiler<T> {
      * @param options
      *           The compiler options (such as "-target" "1.5"). See the usage
      *           for javac
-     * @throws IllegalStateException
-     *            if the Java compiler cannot be loaded.
      */
     public CharSequenceCompiler(ClassLoader loader, Iterable<String> options) {
-        compiler = ToolProvider.getSystemJavaCompiler();
-        if (compiler == null) {
-            throw new IllegalStateException("Cannot find the system Java compiler. "
-                    + "Check that your class path includes tools.jar");
-        }
+        compiler = new JavacTool();
         classLoader = new ClassLoaderImpl(loader);
         diagnostics = new DiagnosticCollector<JavaFileObject>();
         final JavaFileManager fileManager = compiler.getStandardFileManager(diagnostics,

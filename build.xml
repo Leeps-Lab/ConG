@@ -137,7 +137,11 @@
         <delete file="dist/README.TXT"/>
         <delete dir="dist/lib"/>
 
-        <copydir src="lib" dest="dist/lib"/>
+        <copy todir="dist/lib">
+            <fileset dir="lib">
+                <include name="*-bit/*"/>
+            </fileset>
+        </copy>
 
     </target>
 
