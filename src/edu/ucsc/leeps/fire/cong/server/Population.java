@@ -524,9 +524,15 @@ public class Population implements Serializable {
             } else if (config.payoffFunction.getNumStrategies() <= 2) {
                 s = new float[1];
                 if (config.mixed) {
-                    float costRange = config.payoffFunction.getMax() - config.marginalCost;
+                    float costRange = config.payoffFunction.getMax() - config.marginalCost - config.payoffFunction.getMin();
                     float totalRange = config.payoffFunction.getMax() - config.payoffFunction.getMin();
                     s[0] = (FIRE.server.getRandom().nextFloat() * costRange + config.marginalCost) / totalRange;
+                    if (s[0] < 0) {
+                        s[0] = 0;
+                    }
+                    if (s[0] > 1) {
+                        s[0] = 1;
+                    }
                 } else {
                     s[0] = FIRE.server.getRandom().nextBoolean() ? 1 : 0;
                 }
