@@ -210,7 +210,7 @@ public class Config extends BaseConfig {
     public float get(String key) {
         if (paramMap == null) {
             paramMap = new HashMap<String, Float>();
-            for (String mapping : params.split(",")) {
+            for (String mapping : params.split(";")) {
                 String[] pair = mapping.split("=");
                 if (pair.length != 2) {
                     System.err.println("Invalid param mapping: " + mapping);
