@@ -5,7 +5,6 @@
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
  **/
-
 package edu.ucsc.leeps.fire.config;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -173,48 +172,24 @@ public class Configurator<ConfigType extends BaseConfig> {
 
     public void setConfigFile(File configFile) throws IOException {
         this.configSource = configFile.getAbsolutePath();
-        String[] delimiters = {",", ";", "|", ":"};
-        Map<String, Integer> fieldCount = new HashMap<String, Integer>();
-        for (int i = 0; i < delimiters.length; i++) {
-            BufferedReader reader = new BufferedReader(new FileReader(configFile));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                int count = 0;
-                if (line.contains(delimiters[i])) {
-                    count = line.split(delimiters[i]).length;
-                }
-                if (!fieldCount.containsKey(delimiters[i])) {
-                    fieldCount.put(delimiters[i], 0);
-                }
-                fieldCount.put(delimiters[i], fieldCount.get(delimiters[i]) + count);
-            }
-        }
-        String delimiter = null;
-        for (int i = 0; i < delimiters.length; i++) {
-            if (delimiter == null || fieldCount.get(delimiters[i]) > fieldCount.get(delimiter)) {
-                delimiter = delimiters[i];
-            }
-        }
-        for (int i = 0; i < delimiters.length; i++) {
-            ConfigStore curr = null;
-            CSVReader reader = new CSVReader(new FileReader(configFile), delimiter.charAt(0));
-            String[] line;
-            while ((line = reader.readNext()) != null) {
-                if (curr == null || line[0].contains("SUBJECTS")) {
-                    if (line[0].contains("SUBJECTS")) {
-                        line = reader.readNext();
-                        subjectStore = new ConfigStore();
-                        curr = subjectStore;
-                    } else {
-                        defaultStore = new ConfigStore();
-                        curr = defaultStore;
-                    }
-                    curr.keys = line;
-                    curr.rows = new LinkedList<String[]>();
+        ConfigStore curr = null;
+        CSVReader reader = new CSVReader(new FileReader(configFile), ',');
+        String[] line;
+        while ((line = reader.readNext()) != null) {
+            if (curr == null || line[0].contains("SUBJECTS")) {
+                if (line[0].contains("SUBJECTS")) {
                     line = reader.readNext();
+                    subjectStore = new ConfigStore();
+                    curr = subjectStore;
+                } else {
+                    defaultStore = new ConfigStore();
+                    curr = defaultStore;
                 }
-                curr.rows.add(line);
+                curr.keys = line;
+                curr.rows = new LinkedList<String[]>();
+                line = reader.readNext();
             }
+            curr.rows.add(line);
         }
     }
 

@@ -5,7 +5,6 @@
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
  **/
-
 package edu.ucsc.leeps.fire.logging;
 
 import edu.ucsc.leeps.fire.reflection.ObjectMapper;
@@ -82,7 +81,12 @@ public class Logger {
             try {
                 SimpleDateFormat formatter = new SimpleDateFormat("MM.dd.yyyy.hh:mm.a");
                 String className = event.getClass().getSimpleName();
-                String fileName = className.replace("Event", "s." + formatter.format(Calendar.getInstance().getTime()) + ".csv").replace(":", ".");
+                String fileName;
+                if (className.contains("Event")) {
+                    fileName = className.replace("Event", "s." + formatter.format(Calendar.getInstance().getTime()) + ".csv").replace(":", ".");
+                } else {
+                    fileName = (className + "s." + formatter.format(Calendar.getInstance().getTime()) + ".csv").replace(":", ".");
+                }
                 if (!logs.containsKey(className)) {
                     File logFile = new File(fileName);
                     BufferedWriter writer = new BufferedWriter(new FileWriter(logFile));

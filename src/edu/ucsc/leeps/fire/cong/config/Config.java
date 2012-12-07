@@ -5,7 +5,6 @@
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
  **/
-
 package edu.ucsc.leeps.fire.cong.config;
 
 import edu.ucsc.leeps.fire.config.BaseConfig;
@@ -26,8 +25,7 @@ public class Config extends BaseConfig {
 
     public enum StrategySelector {
 
-        heatmap2d, simplex, bubbles, strip, pure, qwerty,
-    }
+        heatmap2d, simplex, bubbles, strip, pure, qwerty,}
 
     public enum MatrixDisplayType {
 
@@ -208,25 +206,10 @@ public class Config extends BaseConfig {
     }
 
     public float get(String key) {
-        if (paramMap == null) {
-            paramMap = new HashMap<String, Float>();
-            for (String mapping : params.split(";")) {
-                String[] pair = mapping.split("=");
-                if (pair.length != 2) {
-                    System.err.println("Invalid param mapping: " + mapping);
-                    continue;
-                }
-                String k = pair[0];
-                float v;
-                try {
-                    v = Float.parseFloat(pair[1]);
-                } catch (NumberFormatException ex) {
-                    v = Float.NaN;
-                }
-                paramMap.put(k, v);
-            }
+        if (paramMap.containsKey(key)) {
+            return paramMap.get(key);
         }
-        return paramMap.get(key);
+        return Float.NaN;
     }
 
     public void generateRevealedPoints(Random random) {

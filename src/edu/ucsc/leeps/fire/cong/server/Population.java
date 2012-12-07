@@ -5,7 +5,6 @@
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
  **/
-
 package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.config.BaseConfig;
@@ -15,6 +14,7 @@ import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.cong.logging.MessageEvent;
 import edu.ucsc.leeps.fire.cong.logging.TickEvent;
 import edu.ucsc.leeps.fire.logging.Dialogs;
+import edu.ucsc.leeps.fire.logging.LogEvent;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -141,43 +141,42 @@ public class Population implements Serializable {
         }
     }
 
-    public void logTick(int subperiod, int secondsLeft) {
+    public void logTick(int subperiod, int millisLeft) {
         synchronized (logLock) {
-            // Log the tick information
-            String period = FIRE.server.getConfig().period;
-            float length = FIRE.server.getConfig().length;
-            float percent = (float) (length * secondsLeft) / (float) length;
-            for (int member : members.keySet()) {
-                TickEvent tick = new TickEvent();
-                tick.period = period;
-                tick.subject = member;
-                tick.config = FIRE.server.getConfig(member);
-                tick.subperiod = subperiod;
-                tick.secondsLeft = secondsLeft;
-                Tuple tuple = groupMap.get(member);
-                tick.population = tuple.population;
-                tick.world = tuple.world;
-                tick.strategy = tuple.strategies.get(member);
-                tick.target = tuple.targets.get(member);
-                tick.match = tuple.match.population;
-                if (tick.config.subperiods != 0 && tick.config.probPayoffs) {
-                    tick.payoff = tick.config.payoffFunction.getPayoff(
-                            member, percent,
-                            tuple.realizedStrategies, tuple.match.realizedStrategies,
-                            tick.config);
-                    tick.realizedStrategy = tuple.realizedStrategies.get(member);
-                    tick.realizedPopStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.realizedStrategies, tuple.match.realizedStrategies);
-                    tick.realizedMatchStrategy = tick.config.payoffFunction.getMatchStrategySummary(member, percent, tuple.realizedStrategies, tuple.match.realizedStrategies);
+            LogEvent event = null;
+            for (int subject : members.keySet()) {
+                Config config = FIRE.server.getConfig(subject);
+                if (config.payoffFunction instanceof ScriptedPayoffFunction) {
+                    ScriptedPayoffFunction pf = (ScriptedPayoffFunction) config.payoffFunction;
+                    try {
+                        event = pf.getLogEventClass(config).newInstance();
+                    } catch (InstantiationException ex) {
+                        Dialogs.popUpErr(ex);
+                    } catch (IllegalAccessException ex) {
+                        Dialogs.popUpErr(ex);
+                    }
                 } else {
-                    tick.payoff = tick.config.payoffFunction.getPayoff(
-                            member, percent,
-                            tuple.strategies, tuple.match.strategies,
-                            tick.config);
+                    // Log the tick information
+                    event = new TickEvent();
                 }
-                // get summary statistics from payoff function
-                tick.popStrategy = tick.config.payoffFunction.getPopStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
-                tick.matchStrategy = tick.config.payoffFunction.getMatchStrategySummary(member, percent, tuple.strategies, tuple.match.strategies);
-                FIRE.server.commit(tick);
+                String period = FIRE.server.getConfig().period;
+                Tuple tuple = groupMap.get(subject);
+                int group = tuple.population;
+                int matchGroup = tuple.match.population;
+                Map<Integer, float[]> strategies = tuple.strategies;
+                Map<Integer, float[]> matchStrategies = tuple.match.strategies;
+                Map<Integer, float[]> realizedStrategies = tuple.realizedStrategies;
+                Map<Integer, float[]> realizedMatchStrategies = tuple.match.realizedStrategies;
+                Map<Integer, float[]> targets = tuple.targets;
+                event.log(
+                        period, subject,
+                        subperiod, millisLeft,
+                        group, matchGroup,
+                        strategies, matchStrategies,
+                        realizedStrategies, realizedMatchStrategies,
+                        targets,
+                        config);
+                FIRE.server.commit(event);
             }
         }
     }
@@ -674,6 +673,7 @@ public class Population implements Serializable {
 
         public void endPeriod() {
             System.err.println(String.format("WARNING: dropped %s updates", dropped));
+            queue.clear();
             dropped = 0;
         }
 

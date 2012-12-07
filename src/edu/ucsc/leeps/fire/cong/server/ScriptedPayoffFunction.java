@@ -5,7 +5,6 @@
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
  **/
-
 package edu.ucsc.leeps.fire.cong.server;
 
 import compiler.CharSequenceCompiler;
@@ -14,11 +13,9 @@ import edu.ucsc.leeps.fire.config.BaseConfig;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.client.Client;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.logging.Dialogs;
+import edu.ucsc.leeps.fire.logging.LogEvent;
 import java.io.*;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -92,6 +89,17 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         }
     }
 
+    public Class<? extends LogEvent> getLogEventClass(Config config) {
+        if (function == null) {
+            try {
+                configure(config);
+            } catch (BaseConfig.ConfigException ex) {
+                return null;
+            }
+        }
+        return function.getLogEventClass();
+    }
+
     public float[] getPopStrategySummary(int id, float percent, Map<Integer, float[]> popStrategies, Map<Integer, float[]> matchPopStrategies) {
         return null;
     }
@@ -162,5 +170,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         public float getMax();
 
         public void draw(Client a);
+
+        public Class<? extends LogEvent> getLogEventClass();
     }
 }

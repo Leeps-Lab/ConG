@@ -5,7 +5,6 @@
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
  **/
-
 package edu.ucsc.leeps.fire.reflection;
 
 import edu.ucsc.leeps.fire.config.Configurator.ConfigStore;
@@ -14,9 +13,11 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -144,7 +145,27 @@ public class ObjectMapper {
                 } catch (InstantiationException ex) {
                     throw new ObjectMapException(row, String.format("Error loading column %s. Code: InstantiationException", keys[i]));
                 } catch (NoSuchFieldException ex) {
-                    throw new ObjectMapException(row, String.format("No field named %s", keys[i]));
+                    try {
+                        String key = keys[i];
+                        float value = Float.parseFloat(values[i]);
+                        try {
+                            Field f = object.getClass().getField("paramMap");
+                            Map<String, Float> paramMap = (Map<String, Float>) f.get(object);
+                            if (paramMap == null) {
+                                paramMap = new HashMap<String, Float>();
+                                f.set(object, paramMap);
+                            }
+                            paramMap.put(key, value);
+                        } catch (NoSuchFieldException ex2) {
+                            throw new ObjectMapException(row, String.format("No field named %s", keys[i]));
+                        } catch (IllegalAccessException ex2) {
+                            throw new ObjectMapException(row, String.format("Error loading column %s. Code: IllegalAccessException", keys[i]));
+                        } catch (IllegalArgumentException ex2) {
+                            throw new ObjectMapException(row, String.format("Error loading column %s. Code: IllegalArgumentException", keys[i]));
+                        }
+                    } catch (NumberFormatException numFormatEx) {
+                        throw numFormatEx;
+                    }
                 } catch (SecurityException ex) {
                     throw new ObjectMapException(row, String.format("Error loading column %s. Code: SecurityException", keys[i]));
                 }

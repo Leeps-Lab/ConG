@@ -10,7 +10,7 @@ package edu.ucsc.leeps.fire.cong.logging;
 
 import edu.ucsc.leeps.fire.logging.LogEvent;
 
-public class StrategyChangeEvent implements LogEvent {
+public class StrategyChangeEvent {
 
     public long timestamp;
     public int id;
@@ -22,9 +22,5 @@ public class StrategyChangeEvent implements LogEvent {
         this.id = id;
         this.newStrategy = newStrategy;
         this.targetStrategy = targetStrategy;
-    }
-
-    public String getDelimiter() {
-        return ",";
     }
 }

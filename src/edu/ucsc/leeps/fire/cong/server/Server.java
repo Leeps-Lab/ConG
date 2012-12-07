@@ -5,7 +5,6 @@
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
  **/
-
 package edu.ucsc.leeps.fire.cong.server;
 
 import edu.ucsc.leeps.fire.FIREServerInterface;
@@ -114,15 +113,12 @@ public class Server implements ServerInterface, FIREServerInterface<ClientInterf
         // stop agents
     }
 
-    public void tick(int secondsLeft) {
-        this.secondsLeft = secondsLeft;
+    public void tick(int millisLeft) {
+        this.secondsLeft = millisLeft / 1000;
         if (FIRE.server.getConfig().subperiods == 0) {
-            population.logTick(0, secondsLeft);
+            population.logTick(0, millisLeft);
             population.evaluate(System.nanoTime());
         }
-    }
-
-    public void quickTick(int millisLeft) {
     }
 
     private void configureSubperiods() {

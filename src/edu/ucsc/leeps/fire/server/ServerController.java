@@ -17,7 +17,6 @@ import edu.ucsc.leeps.fire.logging.LogEvent;
 import edu.ucsc.leeps.fire.logging.Logger;
 import edu.ucsc.leeps.fire.networking.NetworkUtil;
 import edu.ucsc.leeps.fire.reflection.ClassFinder;
-import edu.ucsc.leeps.fire.reflection.ObjectMapper;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.*;
@@ -38,7 +37,7 @@ public final class ServerController<ServerInterfaceType, ClientInterfaceType, Co
     protected Map<Integer, LocalClient> clients;
     protected Logger logger;
     private Timer eventTimer;
-    private TimerTask tickTask, quickTickTask, endTask;
+    private TimerTask tickTask, endTask;
     private static final int quickTicksPerSecond = 10;
     private long periodStartTime, periodEndTime;
     private ControlPanel controlPanel;
@@ -221,25 +220,13 @@ public final class ServerController<ServerInterfaceType, ClientInterfaceType, Co
                 long timestamp = System.currentTimeMillis();
                 long elapsedTime = timestamp - periodStartTime;
                 int millisLeft = (int) ((getConfig().length * 1000) - elapsedTime);
-                int secondsLeft = millisLeft / 1000;
-                server.tick(secondsLeft);
-            }
-        };
-        eventTimer.scheduleAtFixedRate(tickTask, 0, 1000);
-        quickTickTask = new TimerTask() {
-
-            @Override
-            public void run() {
-                long timestamp = System.currentTimeMillis();
-                long elapsedTime = timestamp - periodStartTime;
-                int millisLeft = (int) ((getConfig().length * 1000) - elapsedTime);
-                server.quickTick(millisLeft);
+                server.tick(millisLeft);
                 for (LocalClient client : clients.values()) {
                     client.controller.tick(millisLeft);
                 }
             }
         };
-        eventTimer.scheduleAtFixedRate(quickTickTask, 0, 1000 / quickTicksPerSecond);
+        eventTimer.scheduleAtFixedRate(tickTask, 0, 1000 / quickTicksPerSecond);
         if (getConfig().length > 0) {
             periodEndTime = periodStartTime + (getConfig().length * 1000);
             endTask = new TimerTask() {

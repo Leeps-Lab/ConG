@@ -51,21 +51,11 @@ public interface FIREServerInterface<ClientInterfaceType, ConfigType extends Bas
     public void endPeriod();
 
     /**
-     *
-     *Creates a tick event once per second to ensure that the subjects' time
-     * remaining is synchronized. This ensures that the periods end at the same
-     * time for all subjects.
-     *
-     * @param secondsLeft The number of seconds left in the period.
-     */
-    public void tick(int secondsLeft);
-
-    /**
-     * Creates a quick tick event once every 1/10 of a second (100 milliseconds).
+     * Creates a tick event once every 1/10 of a second (100 milliseconds).
      * This ensures all clients are synchronized.
      *
      * @param millisLeft Number of milliseconds left in the period.
      */
      
-    public void quickTick(int millisLeft);
+    public void tick(int millisLeft);
 }
