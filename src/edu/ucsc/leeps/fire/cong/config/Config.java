@@ -13,7 +13,6 @@ import edu.ucsc.leeps.fire.cong.client.Agent;
 import edu.ucsc.leeps.fire.cong.client.gui.Line;
 import edu.ucsc.leeps.fire.cong.server.*;
 import java.awt.Color;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 

@@ -5,7 +5,6 @@
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
  **/
-
 package edu.ucsc.leeps.fire.cong.client.gui;
 
 import edu.ucsc.leeps.fire.config.Configurable;
@@ -55,12 +54,11 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
             return;
         }
     }
-    
+
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
         firmButtons.setVisible(visible);
-        
     }
 
     @Override
@@ -95,22 +93,22 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
         float tableHeight = rows * cellHeight;
         applet.pushMatrix();
         applet.translate(size / 2f - tableWidth / 2f, size / 4 - tableHeight / 2);
-        
+
         int ownSame = QWERTYPayoffFunction.getInSame(Client.state.id, Client.state.getMyStrategy(), Client.state.strategies);
         int ownDiff = QWERTYPayoffFunction.getNotInSame(Client.state.id, Client.state.getMyStrategy(), Client.state.strategies);
         int matchSame = QWERTYPayoffFunction.getInSame(Client.state.id, Client.state.getMyStrategy(), Client.state.matchStrategies);
         int matchDiff = QWERTYPayoffFunction.getNotInSame(Client.state.id, Client.state.getMyStrategy(), Client.state.matchStrategies);
-        
+
         for (int platform = 0; platform <= 1; platform++) {
             applet.translate(0, platform * size / 2);
-            
+
             //Selection box location
-             if (firmButtons.getSelection() == platform) {
+            if (firmButtons.getSelection() == platform) {
                 applet.fill(200);
                 applet.rect(0 - textWidth * 1.5f, -5 - 2.5f * textHeight, size, size / 2);
                 applet.fill(0);
             }
-            
+
             for (int col = 1; col <= cols; col++) {
                 applet.line(col * cellWidth, 0, col * cellWidth, cellHeight * rows);
             }
@@ -195,7 +193,7 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
             setVisible(false);
         }
     }
-    
+
     public void startPrePeriod() {
     }
 
@@ -209,18 +207,21 @@ public class QWERTYStrategySelector extends Sprite implements Configurable<Confi
 
     public void endSubperiod(int subperiod) {
     }
-    
+
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-            if (firmButtons.getSelection() != 0 && firmButtons.isEnabled()) {
-                firmButtons.setSelection(0);
-            }
-        } else if (e.getKeyCode() == KeyEvent.VK_DOWN && firmButtons.isEnabled()) {
-            if (firmButtons.getSelection() != 1) {
-                firmButtons.setSelection(1);
+        if (visible) {
+            if (e.getKeyCode() == KeyEvent.VK_UP) {
+                if (firmButtons.getSelection() != 0 && firmButtons.isEnabled()) {
+                    firmButtons.setSelection(0);
+                }
+            } else if (e.getKeyCode() == KeyEvent.VK_DOWN && firmButtons.isEnabled()) {
+                if (firmButtons.getSelection() != 1) {
+                    firmButtons.setSelection(1);
+                }
             }
         }
     }
+
     public void keyTyped(KeyEvent e) {
     }
 
