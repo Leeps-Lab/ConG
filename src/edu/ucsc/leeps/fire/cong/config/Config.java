@@ -110,6 +110,7 @@ public class Config extends BaseConfig {
     public int[] initiatives;
     public boolean showPGMultiplier;
     public String contributionsString;
+    public int agentRefreshMillis = 100;
     public Map<String, Float> paramMap;
     public Agent agent;
 
@@ -210,7 +211,7 @@ public class Config extends BaseConfig {
         }
         return Float.NaN;
     }
-
+    
     public void generateRevealedPoints(Random random) {
         if (!Float.isNaN(revealLambda)) {
             revealTimes = "\"";

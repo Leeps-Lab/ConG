@@ -47,7 +47,7 @@ public class Agent extends Thread implements Serializable {
             Config config = FIRE.client.getConfig();
             if (!paused && FIRE.client.isRunningPeriod() && Client.state != null && Client.state.target != null && config != null) {
                 if (function != null) {
-                    //Client.state.setTarget(function.act(config), config);
+                    Client.state.setTarget(function.act(config), config);
                 } else if (config.agentSource != null) {
                     configure(config);
                 } else {
@@ -55,7 +55,7 @@ public class Agent extends Thread implements Serializable {
                 }
             }
             try {
-                Thread.sleep(100);
+                Thread.sleep(config.agentRefreshMillis);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
