@@ -1,10 +1,10 @@
 /**
- * Copyright (c) 2012, University of California
- * All rights reserved.
- * 
+ * Copyright (c) 2012, University of California All rights reserved.
+ *
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
- **/
+ *
+ */
 package edu.ucsc.leeps.fire.cong.server;
 
 import compiler.CharSequenceCompiler;
@@ -16,6 +16,7 @@ import edu.ucsc.leeps.fire.cong.config.Config;
 import edu.ucsc.leeps.fire.logging.LogEvent;
 import java.io.*;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,6 +35,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
     public float min, max;
     public int strategies;
     private String scriptText;
+    private transient static final Map<String, Class<PayoffScriptInterface>> codeCache = new HashMap<String, Class<PayoffScriptInterface>>();
     private transient PayoffScriptInterface function;
     private transient DiagnosticCollector<JavaFileObject> errs;
 
@@ -109,6 +111,14 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
     }
 
     public void configure(Config config) throws BaseConfig.ConfigException {
+        if (codeCache.containsKey(scriptText)) {
+            try {
+                function = codeCache.get(scriptText).newInstance();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            return;
+        }
         if (scriptText == null) {
             File baseDir = new File(FIRE.server.getConfigSource()).getParentFile();
             File scriptFile = new File(baseDir, source);
@@ -153,6 +163,7 @@ public class ScriptedPayoffFunction implements PayoffFunction, Serializable {
         if (clazz != null) {
             try {
                 function = clazz.newInstance();
+                codeCache.put(scriptText, clazz);
             } catch (InstantiationException ex) {
                 throw new BaseConfig.ConfigException("Error compiling payoff script:\n%s", ex.toString());
             } catch (IllegalAccessException ex) {

@@ -11,14 +11,14 @@ import compiler.CharSequenceCompiler;
 import compiler.CharSequenceCompilerException;
 import edu.ucsc.leeps.fire.cong.FIRE;
 import edu.ucsc.leeps.fire.cong.config.Config;
-import edu.ucsc.leeps.fire.cong.server.PayoffUtils;
-import edu.ucsc.leeps.fire.cong.server.PricingPayoffFunction;
 import edu.ucsc.leeps.fire.logging.Dialogs;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.tools.DiagnosticCollector;
@@ -33,6 +33,7 @@ public class Agent extends Thread implements Serializable {
     public transient volatile boolean running;
     public transient volatile boolean paused;
     public String agentText;
+    private transient static final Map<String, Class<AgentScriptInterface>> codeCache = new HashMap<String, Class<AgentScriptInterface>>();
     private transient AgentScriptInterface function;
 
     public Agent() {
@@ -67,6 +68,16 @@ public class Agent extends Thread implements Serializable {
         DiagnosticCollector<JavaFileObject> errs = null;
         if (config.agentSource == null) {
             return errs;
+        }
+        if (agentText != null) {
+            if (codeCache.containsKey(agentText)) {
+                try {
+                    function = codeCache.get(agentText).newInstance();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                return errs;
+            }
         }
         if (agentText == null) {
             File baseDir = new File(FIRE.server.getConfigSource()).getParentFile();
@@ -108,6 +119,7 @@ public class Agent extends Thread implements Serializable {
         if (clazz != null) {
             try {
                 function = clazz.newInstance();
+                codeCache.put(agentText, clazz);
             } catch (InstantiationException ex1) {
                 Dialogs.popUpErr(ex1);
             } catch (IllegalAccessException ex2) {
