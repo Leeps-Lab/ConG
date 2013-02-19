@@ -112,6 +112,7 @@ public class Config extends BaseConfig {
     public String contributionsString;
     public int agentRefreshMillis = 100;
     public Map<String, Float> paramMap;
+    public Map<String, Float[]> paramArrayMap;
     public Agent agent;
 
     public Config() {
@@ -210,6 +211,13 @@ public class Config extends BaseConfig {
             return paramMap.get(key);
         }
         return Float.NaN;
+    }
+    
+    public Float[] getArray(String key) {
+        if (paramArrayMap.containsKey(key)) {
+            return paramArrayMap.get(key);
+        }
+        return null;
     }
     
     public void generateRevealedPoints(Random random) {

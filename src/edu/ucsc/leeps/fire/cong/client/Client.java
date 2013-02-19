@@ -20,7 +20,6 @@ import edu.ucsc.leeps.fire.cong.server.ScriptedPayoffFunction;
 import fullscreen.FullScreen;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
@@ -101,8 +100,9 @@ public class Client extends PApplet implements ClientInterface, FIREClientInterf
         frame.setVisible(true);
         loop();
         debug = ALLOW_DEBUG;
-        if (ALLOW_DEBUG) {
+        if (FIRE.client.getName().toLowerCase().contains("robo")) {
             agent.start();
+            noLoop();
         }
         updater = new StrategyUpdater();
         updater.start();

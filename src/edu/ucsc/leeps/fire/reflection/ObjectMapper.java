@@ -1,10 +1,10 @@
 /**
- * Copyright (c) 2012, University of California
- * All rights reserved.
- * 
+ * Copyright (c) 2012, University of California All rights reserved.
+ *
  * Redistribution and use is governed by the LICENSE.txt file included with this
  * source code and available at http://leeps.ucsc.edu/cong/wiki/license
- **/
+ *
+ */
 package edu.ucsc.leeps.fire.reflection;
 
 import edu.ucsc.leeps.fire.config.Configurator.ConfigStore;
@@ -147,21 +147,46 @@ public class ObjectMapper {
                 } catch (NoSuchFieldException ex) {
                     try {
                         String key = keys[i];
-                        float value = Float.parseFloat(values[i]);
-                        try {
-                            Field f = object.getClass().getField("paramMap");
-                            Map<String, Float> paramMap = (Map<String, Float>) f.get(object);
-                            if (paramMap == null) {
-                                paramMap = new HashMap<String, Float>();
-                                f.set(object, paramMap);
+                        if (key.contains("Array")) {
+                            String[] vvalues = values[i].split(";");
+                            Float[] array = new Float[vvalues.length];
+                            for (int j = 0; j < vvalues.length; j++) {
+                                float value = Float.parseFloat(vvalues[j]);
+                                array[j] = value;
                             }
-                            paramMap.put(key, value);
-                        } catch (NoSuchFieldException ex2) {
-                            throw new ObjectMapException(row, String.format("No field named %s", keys[i]));
-                        } catch (IllegalAccessException ex2) {
-                            throw new ObjectMapException(row, String.format("Error loading column %s. Code: IllegalAccessException", keys[i]));
-                        } catch (IllegalArgumentException ex2) {
-                            throw new ObjectMapException(row, String.format("Error loading column %s. Code: IllegalArgumentException", keys[i]));
+                            try {
+                                Field f = object.getClass().getField("paramArrayMap");
+                                Map<String, Float[]> paramArrayMap = (Map<String, Float[]>) f.get(object);
+                                if (paramArrayMap == null) {
+                                    paramArrayMap = new HashMap<String, Float[]>();
+                                    f.set(object, paramArrayMap);
+                                }
+                                paramArrayMap.put(key, array);
+                            } catch (NoSuchFieldException ex2) {
+                                throw new ObjectMapException(row, String.format("No field named %s", keys[i]));
+                            } catch (IllegalAccessException ex2) {
+                                throw new ObjectMapException(row, String.format("Error loading column %s. Code: IllegalAccessException", keys[i]));
+                            } catch (IllegalArgumentException ex2) {
+                                throw new ObjectMapException(row, String.format("Error loading column %s. Code: IllegalArgumentException", keys[i]));
+                            }
+
+                        } else {
+                            float value = Float.parseFloat(values[i]);
+                            try {
+                                Field f = object.getClass().getField("paramMap");
+                                Map<String, Float> paramMap = (Map<String, Float>) f.get(object);
+                                if (paramMap == null) {
+                                    paramMap = new HashMap<String, Float>();
+                                    f.set(object, paramMap);
+                                }
+                                paramMap.put(key, value);
+                            } catch (NoSuchFieldException ex2) {
+                                throw new ObjectMapException(row, String.format("No field named %s", keys[i]));
+                            } catch (IllegalAccessException ex2) {
+                                throw new ObjectMapException(row, String.format("Error loading column %s. Code: IllegalAccessException", keys[i]));
+                            } catch (IllegalArgumentException ex2) {
+                                throw new ObjectMapException(row, String.format("Error loading column %s. Code: IllegalArgumentException", keys[i]));
+                            }
                         }
                     } catch (NumberFormatException numFormatEx) {
                         throw numFormatEx;
