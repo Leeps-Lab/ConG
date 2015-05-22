@@ -49,6 +49,7 @@ public class TickEvent implements LogEvent {
         this.subperiod = subperiod;
         this.millisLeft = millisLeft;
         this.group = group;
+        this.match = matchGroup;
         this.strategy = strategies.get(subject);
         this.target = targets.get(subject);
         if (config.subperiods != 0 && config.probPayoffs) {
