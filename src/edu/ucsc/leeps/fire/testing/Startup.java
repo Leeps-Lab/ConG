@@ -33,7 +33,7 @@ public class Startup {
             List<Process> children = new LinkedList<Process>();
             Process server = start("server", libPath, classPath, className + ".server.Server");
             children.add(server);
-            Thread.sleep(500);
+            Thread.sleep(1000);
             for (int i = 0; i < clients; i++) {
                 Process client = start("client_" + (i + 1), libPath, classPath, className + ".client.Client");
                 children.add(client);
