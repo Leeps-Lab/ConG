@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  
+  
+
+  
+
+
+  <head>
+    <title>
+      cournot_bubbles_graph.PNG on Bubbles – Attachment
+     – ConG - Continuous Games: Open Source Software for Experimental Economics
+    </title>
+      <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+      <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!--[if IE]><script type="text/javascript">
+      if (/^#__msie303:/.test(window.location.hash))
+        window.location.replace(window.location.hash.replace(/^#__msie303:/, '#'));
+    </script><![endif]-->
+        <link rel="search" href="/cong/search" />
+        <link rel="help" href="/cong/wiki/TracGuide" />
+        <link rel="alternate" href="/cong/raw-attachment/wiki/Bubbles/cournot_bubbles_graph.PNG" type="image/png; charset=utf-8" title="Original Format" />
+        <link rel="up" href="/cong/wiki/Bubbles" title="Bubbles" />
+        <link rel="start" href="/cong/wiki" />
+        <link rel="stylesheet" href="/cong/chrome/common/css/trac.css" type="text/css" /><link rel="stylesheet" href="/cong/chrome/common/css/code.css" type="text/css" />
+        <link rel="shortcut icon" href="/cong/chrome/common/trac.ico" type="image/x-icon" />
+        <link rel="icon" href="/cong/chrome/common/trac.ico" type="image/x-icon" />
+      <link type="application/opensearchdescription+xml" rel="search" href="/cong/search/opensearch" title="Search ConG - Continuous Games: Open Source Software for Experimental Economics" />
+      <script type="text/javascript" charset="utf-8" src="/cong/chrome/common/js/jquery.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/cong/chrome/common/js/babel.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/cong/chrome/common/js/messages/en_US.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/cong/chrome/common/js/trac.js"></script>
+      <script type="text/javascript" charset="utf-8" src="/cong/chrome/common/js/search.js"></script>
+      <script type="text/javascript" src="/cong/chrome/common/js/folding.js"></script>
+      <script type="text/javascript">
+        jQuery(document).ready(function($) {
+          $('#preview table.code').enableCollapsibleColumns($('#preview table.code thead th.content'));
+        });
+      </script>
+		<script type="text/javascript">
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-34827677-1']);
+			_gaq.push(['_trackPageview']);
+			(function() {
+				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+			})();
+		</script>
+  </head>
+  <body>
+    <div id="banner">
+      <div id="header">
+        <a id="logo" href="http://leeps.ucsc.edu/"><img src="/static/images/leeps_logo.png" alt="LEEPS Logo" /></a>
+      </div>
+      <form id="search" action="/cong/search" method="get">
+        <div>
+          <label for="proj-search">Search:</label>
+          <input type="text" id="proj-search" name="q" size="18" value="" />
+          <input type="submit" value="Search" />
+        </div>
+      </form>
+      <div id="metanav" class="nav">
+    <ul>
+      <li class="first">logged in as admin</li><li><a href="/cong/logout">Logout</a></li><li><a href="/cong/prefs">Preferences</a></li><li><a href="/cong/wiki/TracGuide">Help/Guide</a></li><li class="last"><a href="/cong/about">About Trac</a></li>
+    </ul>
+  </div>
+    </div>
+    <div id="mainnav" class="nav">
+    <ul>
+      <li class="first active"><a href="/cong/wiki">Wiki</a></li><li><a href="/cong/timeline">Timeline</a></li><li><a href="/cong/roadmap">Roadmap</a></li><li><a href="/cong/browser">Browse Source</a></li><li><a href="/cong/report">View Tickets</a></li><li><a href="/cong/newticket">New Ticket</a></li><li><a href="/cong/search">Search</a></li><li class="last"><a href="/cong/admin" title="Administration">Admin</a></li>
+    </ul>
+  </div>
+    <div id="main">
+      <div id="ctxtnav" class="nav">
+        <h2>Context Navigation</h2>
+        <ul>
+          <li class="last first"><a href="/cong/wiki/Bubbles">Back to Bubbles</a></li>
+        </ul>
+        <hr />
+      </div>
+    <div id="content" class="attachment">
+        <h1><a href="/cong/wiki/Bubbles">Bubbles</a>: cournot_bubbles_graph.PNG</h1>
+        <table id="info" summary="Description">
+          <tbody>
+            <tr>
+              <th scope="col">File cournot_bubbles_graph.PNG,
+                <span title="98819 bytes">96.5 KB</span>
+                (added by admin, <a class="timeline" href="/cong/timeline?from=2014-01-17T02%3A45%3A16Z&amp;precision=second" title="See timeline at Jan 17, 2014, 2:45:16 AM">4 years ago</a>)</th>
+            </tr>
+            <tr>
+              <td class="message searchable">
+                
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="preview" class="searchable">
+          
+  <div class="image-file"><img src="/cong/raw-attachment/wiki/Bubbles/cournot_bubbles_graph.PNG" alt="cournot_bubbles_graph.PNG" /></div>
+
+        </div>
+          <div class="buttons">
+            <form method="get" action="">
+              <div id="delete">
+                <input type="hidden" name="action" value="delete" />
+                <input type="submit" value="Delete attachment" />
+              </div>
+            </form>
+          </div>
+    </div>
+    <div id="altlinks">
+      <h3>Download in other formats:</h3>
+      <ul>
+        <li class="last first">
+          <a rel="nofollow" href="/cong/raw-attachment/wiki/Bubbles/cournot_bubbles_graph.PNG">Original Format</a>
+        </li>
+      </ul>
+    </div>
+    </div>
+    <div id="footer" lang="en" xml:lang="en"><hr />
+      <a id="tracpowered" href="http://trac.edgewall.org/"><img src="/cong/chrome/common/trac_logo_mini.png" height="30" width="107" alt="Trac Powered" /></a>
+      <p class="left">Powered by <a href="/cong/about"><strong>Trac 1.0.1</strong></a><br />
+        By <a href="http://www.edgewall.org/">Edgewall Software</a>.</p>
+      <p class="right">Visit the Trac open source project at<br /><a href="http://trac.edgewall.org/">http://trac.edgewall.org/</a></p>
+    </div>
+  </body>
+</html>
