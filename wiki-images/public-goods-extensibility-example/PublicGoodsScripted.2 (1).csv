@@ -1,0 +1,5 @@
+period,paid,length,subperiods,percentChangePerSecond,groupSize,payoffFunction,source,min,max,strategies,Alpha,mixed,selector,potential,name
+1,TRUE,60,0,NaN,4,script,PublicGoodsScripted.java,0,140,1,0.9,TRUE,bubbles,TRUE,dsf
+2,TRUE,60,0,0.1,4,script,PublicGoodsScripted.java,0,140,1,0.5,TRUE,bubbles,FALSE,sadf
+3,TRUE,300,100,NaN,4,script,PublicGoodsScripted.java,0,140,1,0.5,TRUE,bubbles,TRUE,sadf
+4,TRUE,60,4,NaN,4,script,PublicGoodsScripted.java,0,140,1,0.5,TRUE,bubbles,FALSE,sdf
